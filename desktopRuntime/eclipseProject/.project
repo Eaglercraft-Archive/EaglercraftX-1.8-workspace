@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>eclipseProject</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>src_lwjgl_java</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC../src/lwjgl/java</locationURI>
+		</link>
+		<link>
+			<name>src_main_java</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC../src/main/java</locationURI>
+		</link>
+	</linkedResources>
+</projectDescription>
