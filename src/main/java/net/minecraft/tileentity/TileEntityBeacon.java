@@ -1,10 +1,8 @@
 package net.minecraft.tileentity;
 
+import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
-
-import com.google.common.collect.Lists;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStainedGlass;
 import net.minecraft.block.BlockStainedGlassPane;
@@ -23,6 +21,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.stats.AchievementList;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ITickable;
 
@@ -84,6 +85,31 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
 	}
 
 	private void addEffectsToPlayers() {
+		if (this.isComplete && this.levels > 0 && !this.worldObj.isRemote && this.primaryEffect > 0) {
+			double d0 = (double) (this.levels * 10 + 10);
+			byte b0 = 0;
+			if (this.levels >= 4 && this.primaryEffect == this.secondaryEffect) {
+				b0 = 1;
+			}
+
+			int i = this.pos.getX();
+			int j = this.pos.getY();
+			int k = this.pos.getZ();
+			AxisAlignedBB axisalignedbb = (new AxisAlignedBB((double) i, (double) j, (double) k, (double) (i + 1),
+					(double) (j + 1), (double) (k + 1))).expand(d0, d0, d0).addCoord(0.0D,
+							(double) this.worldObj.getHeight(), 0.0D);
+			List<EntityPlayer> list = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class, axisalignedbb);
+
+			for (EntityPlayer entityplayer : list) {
+				entityplayer.addPotionEffect(new PotionEffect(this.primaryEffect, 180, b0, true, true));
+			}
+
+			if (this.levels >= 4 && this.primaryEffect != this.secondaryEffect && this.secondaryEffect > 0) {
+				for (EntityPlayer entityplayer1 : list) {
+					entityplayer1.addPotionEffect(new PotionEffect(this.secondaryEffect, 180, 0, true, true));
+				}
+			}
+		}
 
 	}
 
@@ -164,6 +190,14 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
 
 			if (this.levels == 0) {
 				this.isComplete = false;
+			}
+		}
+
+		if (!this.worldObj.isRemote && this.levels == 4 && i < this.levels) {
+			for (EntityPlayer entityplayer : this.worldObj.getEntitiesWithinAABB(EntityPlayer.class,
+					(new AxisAlignedBB((double) j, (double) k, (double) l, (double) j, (double) (k - 4), (double) l))
+							.expand(10.0D, 5.0D, 10.0D))) {
+				entityplayer.triggerAchievement(AchievementList.fullBeacon);
 			}
 		}
 

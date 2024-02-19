@@ -1,11 +1,14 @@
 package net.minecraft.entity.passive;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
+import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityOwnable;
+import net.minecraft.entity.ai.EntityAISit;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
@@ -31,6 +34,8 @@ import net.minecraft.world.World;
  */
 public abstract class EntityTameable extends EntityAnimal implements IEntityOwnable {
 
+	protected EntityAISit aiSit = new EntityAISit(this);
+
 	public EntityTameable(World worldIn) {
 		super(worldIn);
 		this.setupTamedAI();
@@ -48,10 +53,18 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
 	 */
 	public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
-		if (this.getOwnerId() == null) {
-			nbttagcompound.setString("OwnerUUID", "");
+		if (worldObj.isRemote && !SingleplayerServerController.isClientInEaglerSingleplayerOrLAN()) {
+			if (this.getOwnerId() == null) {
+				nbttagcompound.setString("OwnerUUID", "");
+			} else {
+				nbttagcompound.setString("OwnerUUID", this.getOwnerId());
+			}
 		} else {
-			nbttagcompound.setString("OwnerUUID", this.getOwnerId());
+			if (this.getOwnerId() == null) {
+				nbttagcompound.setString("Owner", "");
+			} else {
+				nbttagcompound.setString("Owner", this.getOwnerId());
+			}
 		}
 
 		nbttagcompound.setBoolean("Sitting", this.isSitting());
@@ -63,11 +76,23 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
 	 */
 	public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
-		String s = nbttagcompound.getString("OwnerUUID");
+		String s = "";
+		if (worldObj.isRemote && !SingleplayerServerController.isClientInEaglerSingleplayerOrLAN()) {
+			if (nbttagcompound.hasKey("OwnerUUID", 8)) {
+				s = nbttagcompound.getString("OwnerUUID");
+			}
+		} else {
+			if (nbttagcompound.hasKey("Owner", 8)) {
+				s = nbttagcompound.getString("Owner");
+			}
+		}
+
 		if (s.length() > 0) {
 			this.setOwnerId(s);
 			this.setTamed(true);
 		}
+
+		this.aiSit.setSitting(nbttagcompound.getBoolean("Sitting"));
 		this.setSitting(nbttagcompound.getBoolean("Sitting"));
 	}
 
@@ -158,6 +183,13 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
 		return entityIn == this.getOwner();
 	}
 
+	/**+
+	 * Returns the AITask responsible of the sit logic
+	 */
+	public EntityAISit getAISit() {
+		return this.aiSit;
+	}
+
 	public boolean shouldAttackEntity(EntityLivingBase parEntityLivingBase, EntityLivingBase parEntityLivingBase2) {
 		return true;
 	}
@@ -186,5 +218,17 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
 		}
 
 		return super.isOnSameTeam(entitylivingbase);
+	}
+
+	/**+
+	 * Called when the mob's health reaches 0.
+	 */
+	public void onDeath(DamageSource damagesource) {
+		if (!this.worldObj.isRemote && this.worldObj.getGameRules().getBoolean("showDeathMessages")
+				&& this.hasCustomName() && this.getOwner() instanceof EntityPlayerMP) {
+			((EntityPlayerMP) this.getOwner()).addChatMessage(this.getCombatTracker().getDeathMessage());
+		}
+
+		super.onDeath(damagesource);
 	}
 }

@@ -137,5 +137,16 @@ public class ContainerMerchant extends Container {
 		super.onContainerClosed(entityplayer);
 		this.theMerchant.setCustomer((EntityPlayer) null);
 		super.onContainerClosed(entityplayer);
+		if (!this.theWorld.isRemote) {
+			ItemStack itemstack = this.merchantInventory.removeStackFromSlot(0);
+			if (itemstack != null) {
+				entityplayer.dropPlayerItemWithRandomChoice(itemstack, false);
+			}
+
+			itemstack = this.merchantInventory.removeStackFromSlot(1);
+			if (itemstack != null) {
+				entityplayer.dropPlayerItemWithRandomChoice(itemstack, false);
+			}
+		}
 	}
 }

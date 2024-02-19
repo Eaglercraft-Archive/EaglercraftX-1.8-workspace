@@ -6,6 +6,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -90,6 +91,23 @@ public class BlockMushroom extends BlockBush implements IGrowable {
 		}
 	}
 
+	public boolean generateBigMushroom(World worldIn, BlockPos pos, IBlockState state, EaglercraftRandom rand) {
+		worldIn.setBlockToAir(pos);
+		WorldGenBigMushroom worldgenbigmushroom = null;
+		if (this == Blocks.brown_mushroom) {
+			worldgenbigmushroom = new WorldGenBigMushroom(Blocks.brown_mushroom_block);
+		} else if (this == Blocks.red_mushroom) {
+			worldgenbigmushroom = new WorldGenBigMushroom(Blocks.red_mushroom_block);
+		}
+
+		if (worldgenbigmushroom != null && worldgenbigmushroom.generate(worldIn, rand, pos)) {
+			return true;
+		} else {
+			worldIn.setBlockState(pos, state, 3);
+			return false;
+		}
+	}
+
 	/**+
 	 * Whether this IGrowable can grow
 	 */
@@ -99,5 +117,9 @@ public class BlockMushroom extends BlockBush implements IGrowable {
 
 	public boolean canUseBonemeal(World var1, EaglercraftRandom random, BlockPos var3, IBlockState var4) {
 		return (double) random.nextFloat() < 0.4D;
+	}
+
+	public void grow(World world, EaglercraftRandom random, BlockPos blockpos, IBlockState iblockstate) {
+		this.generateBigMushroom(world, blockpos, iblockstate, random);
 	}
 }

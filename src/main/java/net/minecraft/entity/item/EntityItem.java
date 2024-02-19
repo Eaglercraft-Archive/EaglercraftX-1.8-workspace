@@ -8,8 +8,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.stats.AchievementList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -111,6 +113,10 @@ public class EntityItem extends Entity {
 					this.motionZ = (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
 					this.playSound("random.fizz", 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
 				}
+
+				if (!this.worldObj.isRemote) {
+					this.searchForOtherItemsNearby();
+				}
 			}
 
 			float f = 0.98F;
@@ -132,6 +138,9 @@ public class EntityItem extends Entity {
 			}
 
 			this.handleWaterMovement();
+			if (!this.worldObj.isRemote && this.age >= 6000) {
+				this.setDead();
+			}
 
 		}
 	}
@@ -304,7 +313,51 @@ public class EntityItem extends Entity {
 	 * Called by a player entity when they collide with an entity
 	 */
 	public void onCollideWithPlayer(EntityPlayer entityplayer) {
+		if (!this.worldObj.isRemote) {
+			ItemStack itemstack = this.getEntityItem();
+			int i = itemstack.stackSize;
+			if (this.delayBeforeCanPickup == 0
+					&& (this.owner == null || 6000 - this.age <= 200 || this.owner.equals(entityplayer.getName()))
+					&& entityplayer.inventory.addItemStackToInventory(itemstack)) {
+				if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log)) {
+					entityplayer.triggerAchievement(AchievementList.mineWood);
+				}
 
+				if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log2)) {
+					entityplayer.triggerAchievement(AchievementList.mineWood);
+				}
+
+				if (itemstack.getItem() == Items.leather) {
+					entityplayer.triggerAchievement(AchievementList.killCow);
+				}
+
+				if (itemstack.getItem() == Items.diamond) {
+					entityplayer.triggerAchievement(AchievementList.diamonds);
+				}
+
+				if (itemstack.getItem() == Items.blaze_rod) {
+					entityplayer.triggerAchievement(AchievementList.blazeRod);
+				}
+
+				if (itemstack.getItem() == Items.diamond && this.getThrower() != null) {
+					EntityPlayer entityplayer1 = this.worldObj.getPlayerEntityByName(this.getThrower());
+					if (entityplayer1 != null && entityplayer1 != entityplayer) {
+						entityplayer1.triggerAchievement(AchievementList.diamondsToYou);
+					}
+				}
+
+				if (!this.isSilent()) {
+					this.worldObj.playSoundAtEntity(entityplayer, "random.pop", 0.2F,
+							((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+				}
+
+				entityplayer.onItemPickup(this, i);
+				if (itemstack.stackSize <= 0) {
+					this.setDead();
+				}
+			}
+
+		}
 	}
 
 	/**+
@@ -322,6 +375,18 @@ public class EntityItem extends Entity {
 	 */
 	public boolean canAttackWithItem() {
 		return false;
+	}
+
+	/**+
+	 * Teleports the entity to another dimension. Params: Dimension
+	 * number to teleport to
+	 */
+	public void travelToDimension(int i) {
+		super.travelToDimension(i);
+		if (!this.worldObj.isRemote) {
+			this.searchForOtherItemsNearby();
+		}
+
 	}
 
 	/**+

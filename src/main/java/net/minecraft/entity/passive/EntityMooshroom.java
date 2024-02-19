@@ -1,6 +1,7 @@
 package net.minecraft.entity.passive;
 
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -59,6 +60,25 @@ public class EntityMooshroom extends EntityCow {
 			this.setDead();
 			this.worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.posX,
 					this.posY + (double) (this.height / 2.0F), this.posZ, 0.0D, 0.0D, 0.0D, new int[0]);
+			if (!this.worldObj.isRemote) {
+				EntityCow entitycow = new EntityCow(this.worldObj);
+				entitycow.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
+				entitycow.setHealth(this.getHealth());
+				entitycow.renderYawOffset = this.renderYawOffset;
+				if (this.hasCustomName()) {
+					entitycow.setCustomNameTag(this.getCustomNameTag());
+				}
+
+				this.worldObj.spawnEntityInWorld(entitycow);
+
+				for (int i = 0; i < 5; ++i) {
+					this.worldObj.spawnEntityInWorld(new EntityItem(this.worldObj, this.posX,
+							this.posY + (double) this.height, this.posZ, new ItemStack(Blocks.red_mushroom)));
+				}
+
+				itemstack.damageItem(1, entityplayer);
+				this.playSound("mob.sheep.shear", 1.0F, 1.0F);
+			}
 
 			return true;
 		} else {

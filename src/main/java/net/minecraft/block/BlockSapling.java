@@ -9,11 +9,21 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.feature.WorldGenBigTree;
+import net.minecraft.world.gen.feature.WorldGenCanopyTree;
+import net.minecraft.world.gen.feature.WorldGenForest;
+import net.minecraft.world.gen.feature.WorldGenMegaJungle;
+import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
+import net.minecraft.world.gen.feature.WorldGenSavannaTree;
+import net.minecraft.world.gen.feature.WorldGenTaiga2;
+import net.minecraft.world.gen.feature.WorldGenTrees;
+import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -61,6 +71,113 @@ public class BlockSapling extends BlockBush implements IGrowable {
 	}
 
 	public void updateTick(World world, BlockPos blockpos, IBlockState iblockstate, EaglercraftRandom random) {
+		if (!world.isRemote) {
+			super.updateTick(world, blockpos, iblockstate, random);
+			if (world.getLightFromNeighbors(blockpos.up()) >= 9 && random.nextInt(7) == 0) {
+				this.grow(world, blockpos, iblockstate, random);
+			}
+		}
+	}
+
+	public void grow(World worldIn, BlockPos pos, IBlockState state, EaglercraftRandom rand) {
+		if (((Integer) state.getValue(STAGE)).intValue() == 0) {
+			worldIn.setBlockState(pos, state.cycleProperty(STAGE), 4);
+		} else {
+			this.generateTree(worldIn, pos, state, rand);
+		}
+
+	}
+
+	public void generateTree(World worldIn, BlockPos pos, IBlockState state, EaglercraftRandom rand) {
+		Object object = rand.nextInt(10) == 0 ? new WorldGenBigTree(true) : new WorldGenTrees(true);
+		int i = 0;
+		int j = 0;
+		boolean flag = false;
+		switch ((BlockPlanks.EnumType) state.getValue(TYPE)) {
+		case SPRUCE:
+			label114: for (i = 0; i >= -1; --i) {
+				for (j = 0; j >= -1; --j) {
+					if (this.func_181624_a(worldIn, pos, i, j, BlockPlanks.EnumType.SPRUCE)) {
+						object = new WorldGenMegaPineTree(false, rand.nextBoolean());
+						flag = true;
+						break label114;
+					}
+				}
+			}
+
+			if (!flag) {
+				j = 0;
+				i = 0;
+				object = new WorldGenTaiga2(true);
+			}
+			break;
+		case BIRCH:
+			object = new WorldGenForest(true, false);
+			break;
+		case JUNGLE:
+			IBlockState iblockstate = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT,
+					BlockPlanks.EnumType.JUNGLE);
+			IBlockState iblockstate1 = Blocks.leaves.getDefaultState()
+					.withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE)
+					.withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+
+			label269: for (i = 0; i >= -1; --i) {
+				for (j = 0; j >= -1; --j) {
+					if (this.func_181624_a(worldIn, pos, i, j, BlockPlanks.EnumType.JUNGLE)) {
+						object = new WorldGenMegaJungle(true, 10, 20, iblockstate, iblockstate1);
+						flag = true;
+						break label269;
+					}
+				}
+			}
+
+			if (!flag) {
+				j = 0;
+				i = 0;
+				object = new WorldGenTrees(true, 4 + rand.nextInt(7), iblockstate, iblockstate1, false);
+			}
+			break;
+		case ACACIA:
+			object = new WorldGenSavannaTree(true);
+			break;
+		case DARK_OAK:
+			label390: for (i = 0; i >= -1; --i) {
+				for (j = 0; j >= -1; --j) {
+					if (this.func_181624_a(worldIn, pos, i, j, BlockPlanks.EnumType.DARK_OAK)) {
+						object = new WorldGenCanopyTree(true);
+						flag = true;
+						break label390;
+					}
+				}
+			}
+
+			if (!flag) {
+				return;
+			}
+		case OAK:
+		}
+
+		IBlockState iblockstate2 = Blocks.air.getDefaultState();
+		if (flag) {
+			worldIn.setBlockState(pos.add(i, 0, j), iblockstate2, 4);
+			worldIn.setBlockState(pos.add(i + 1, 0, j), iblockstate2, 4);
+			worldIn.setBlockState(pos.add(i, 0, j + 1), iblockstate2, 4);
+			worldIn.setBlockState(pos.add(i + 1, 0, j + 1), iblockstate2, 4);
+		} else {
+			worldIn.setBlockState(pos, iblockstate2, 4);
+		}
+
+		if (!((WorldGenerator) object).generate(worldIn, rand, pos.add(i, 0, j))) {
+			if (flag) {
+				worldIn.setBlockState(pos.add(i, 0, j), state, 4);
+				worldIn.setBlockState(pos.add(i + 1, 0, j), state, 4);
+				worldIn.setBlockState(pos.add(i, 0, j + 1), state, 4);
+				worldIn.setBlockState(pos.add(i + 1, 0, j + 1), state, 4);
+			} else {
+				worldIn.setBlockState(pos, state, 4);
+			}
+		}
+
 	}
 
 	private boolean func_181624_a(World parWorld, BlockPos parBlockPos, int parInt1, int parInt2,
@@ -110,6 +227,10 @@ public class BlockSapling extends BlockBush implements IGrowable {
 
 	public boolean canUseBonemeal(World world, EaglercraftRandom var2, BlockPos var3, IBlockState var4) {
 		return (double) world.rand.nextFloat() < 0.45D;
+	}
+
+	public void grow(World world, EaglercraftRandom random, BlockPos blockpos, IBlockState iblockstate) {
+		this.grow(world, blockpos, iblockstate, random);
 	}
 
 	/**+

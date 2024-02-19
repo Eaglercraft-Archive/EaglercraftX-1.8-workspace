@@ -10,6 +10,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
@@ -54,7 +55,15 @@ public class ItemRecord extends Item {
 		IBlockState iblockstate = world.getBlockState(blockpos);
 		if (iblockstate.getBlock() == Blocks.jukebox
 				&& !((Boolean) iblockstate.getValue(BlockJukebox.HAS_RECORD)).booleanValue()) {
-			return true;
+			if (world.isRemote) {
+				return true;
+			} else {
+				((BlockJukebox) Blocks.jukebox).insertRecord(world, blockpos, iblockstate, itemstack);
+				world.playAuxSFXAtEntity((EntityPlayer) null, 1005, blockpos, Item.getIdFromItem(this));
+				--itemstack.stackSize;
+				entityplayer.triggerAchievement(StatList.field_181740_X);
+				return true;
+			}
 		} else {
 			return false;
 		}

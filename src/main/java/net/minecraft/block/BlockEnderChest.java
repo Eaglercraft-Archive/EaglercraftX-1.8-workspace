@@ -11,8 +11,10 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityEnderChest;
 import net.minecraft.util.BlockPos;
@@ -109,7 +111,22 @@ public class BlockEnderChest extends BlockContainer {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
-		return true;
+		InventoryEnderChest inventoryenderchest = entityplayer.getInventoryEnderChest();
+		TileEntity tileentity = world.getTileEntity(blockpos);
+		if (inventoryenderchest != null && tileentity instanceof TileEntityEnderChest) {
+			if (world.getBlockState(blockpos.up()).getBlock().isNormalCube()) {
+				return true;
+			} else if (world.isRemote) {
+				return true;
+			} else {
+				inventoryenderchest.setChestTileEntity((TileEntityEnderChest) tileentity);
+				entityplayer.displayGUIChest(inventoryenderchest);
+				entityplayer.triggerAchievement(StatList.field_181738_V);
+				return true;
+			}
+		} else {
+			return true;
+		}
 	}
 
 	/**+

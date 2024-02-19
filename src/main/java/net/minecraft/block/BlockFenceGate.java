@@ -145,6 +145,30 @@ public class BlockFenceGate extends BlockDirectional {
 		return true;
 	}
 
+	/**+
+	 * Called when a neighboring block changes.
+	 */
+	public void onNeighborBlockChange(World world, BlockPos blockpos, IBlockState iblockstate, Block block) {
+		if (!world.isRemote) {
+			boolean flag = world.isBlockPowered(blockpos);
+			if (flag || block.canProvidePower()) {
+				if (flag && !((Boolean) iblockstate.getValue(OPEN)).booleanValue()
+						&& !((Boolean) iblockstate.getValue(POWERED)).booleanValue()) {
+					world.setBlockState(blockpos, iblockstate.withProperty(OPEN, Boolean.valueOf(true))
+							.withProperty(POWERED, Boolean.valueOf(true)), 2);
+					world.playAuxSFXAtEntity((EntityPlayer) null, 1003, blockpos, 0);
+				} else if (!flag && ((Boolean) iblockstate.getValue(OPEN)).booleanValue()
+						&& ((Boolean) iblockstate.getValue(POWERED)).booleanValue()) {
+					world.setBlockState(blockpos, iblockstate.withProperty(OPEN, Boolean.valueOf(false))
+							.withProperty(POWERED, Boolean.valueOf(false)), 2);
+					world.playAuxSFXAtEntity((EntityPlayer) null, 1006, blockpos, 0);
+				} else if (flag != ((Boolean) iblockstate.getValue(POWERED)).booleanValue()) {
+					world.setBlockState(blockpos, iblockstate.withProperty(POWERED, Boolean.valueOf(flag)), 2);
+				}
+			}
+		}
+	}
+
 	public boolean shouldSideBeRendered(IBlockAccess var1, BlockPos var2, EnumFacing var3) {
 		return true;
 	}

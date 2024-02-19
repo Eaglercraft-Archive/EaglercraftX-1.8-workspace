@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderEnd;
@@ -99,4 +100,24 @@ public class EntityEnderCrystal extends Entity {
 		return true;
 	}
 
+	/**+
+	 * Called when the entity is attacked.
+	 */
+	public boolean attackEntityFrom(DamageSource damagesource, float var2) {
+		if (this.isEntityInvulnerable(damagesource)) {
+			return false;
+		} else {
+			if (!this.isDead && !this.worldObj.isRemote) {
+				this.health = 0;
+				if (this.health <= 0) {
+					this.setDead();
+					if (!this.worldObj.isRemote) {
+						this.worldObj.createExplosion((Entity) null, this.posX, this.posY, this.posZ, 6.0F, true);
+					}
+				}
+			}
+
+			return true;
+		}
+	}
 }

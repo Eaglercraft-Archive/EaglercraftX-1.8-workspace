@@ -1,13 +1,12 @@
 package net.minecraft.network.play.server;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
-
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.Property;
+import java.io.IOException;
+import java.util.List;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
@@ -39,6 +38,28 @@ public class S38PacketPlayerListItem implements Packet<INetHandlerPlayClient> {
 	private final List<S38PacketPlayerListItem.AddPlayerData> players = Lists.newArrayList();
 
 	public S38PacketPlayerListItem() {
+	}
+
+	public S38PacketPlayerListItem(S38PacketPlayerListItem.Action actionIn, EntityPlayerMP... players) {
+		this.action = actionIn;
+
+		for (EntityPlayerMP entityplayermp : players) {
+			this.players.add(new S38PacketPlayerListItem.AddPlayerData(entityplayermp.getGameProfile(),
+					entityplayermp.ping, entityplayermp.theItemInWorldManager.getGameType(),
+					entityplayermp.getTabListDisplayName()));
+		}
+
+	}
+
+	public S38PacketPlayerListItem(S38PacketPlayerListItem.Action actionIn, Iterable<EntityPlayerMP> players) {
+		this.action = actionIn;
+
+		for (EntityPlayerMP entityplayermp : players) {
+			this.players.add(new S38PacketPlayerListItem.AddPlayerData(entityplayermp.getGameProfile(),
+					entityplayermp.ping, entityplayermp.theItemInWorldManager.getGameType(),
+					entityplayermp.getTabListDisplayName()));
+		}
+
 	}
 
 	/**+
@@ -105,7 +126,59 @@ public class S38PacketPlayerListItem implements Packet<INetHandlerPlayClient> {
 	 * Writes the raw packet data to the data stream.
 	 */
 	public void writePacketData(PacketBuffer parPacketBuffer) throws IOException {
-		// server only
+		parPacketBuffer.writeEnumValue(this.action);
+		parPacketBuffer.writeVarIntToBuffer(this.players.size());
+
+		for (S38PacketPlayerListItem.AddPlayerData s38packetplayerlistitem$addplayerdata : this.players) {
+			switch (this.action) {
+			case ADD_PLAYER:
+				parPacketBuffer.writeUuid(s38packetplayerlistitem$addplayerdata.getProfile().getId());
+				parPacketBuffer.writeString(s38packetplayerlistitem$addplayerdata.getProfile().getName());
+				parPacketBuffer
+						.writeVarIntToBuffer(s38packetplayerlistitem$addplayerdata.getProfile().getProperties().size());
+
+				for (Property property : s38packetplayerlistitem$addplayerdata.getProfile().getProperties().values()) {
+					parPacketBuffer.writeString(property.getName());
+					parPacketBuffer.writeString(property.getValue());
+					if (property.hasSignature()) {
+						parPacketBuffer.writeBoolean(true);
+						parPacketBuffer.writeString(property.getSignature());
+					} else {
+						parPacketBuffer.writeBoolean(false);
+					}
+				}
+
+				parPacketBuffer.writeVarIntToBuffer(s38packetplayerlistitem$addplayerdata.getGameMode().getID());
+				parPacketBuffer.writeVarIntToBuffer(s38packetplayerlistitem$addplayerdata.getPing());
+				if (s38packetplayerlistitem$addplayerdata.getDisplayName() == null) {
+					parPacketBuffer.writeBoolean(false);
+				} else {
+					parPacketBuffer.writeBoolean(true);
+					parPacketBuffer.writeChatComponent(s38packetplayerlistitem$addplayerdata.getDisplayName());
+				}
+				break;
+			case UPDATE_GAME_MODE:
+				parPacketBuffer.writeUuid(s38packetplayerlistitem$addplayerdata.getProfile().getId());
+				parPacketBuffer.writeVarIntToBuffer(s38packetplayerlistitem$addplayerdata.getGameMode().getID());
+				break;
+			case UPDATE_LATENCY:
+				parPacketBuffer.writeUuid(s38packetplayerlistitem$addplayerdata.getProfile().getId());
+				parPacketBuffer.writeVarIntToBuffer(s38packetplayerlistitem$addplayerdata.getPing());
+				break;
+			case UPDATE_DISPLAY_NAME:
+				parPacketBuffer.writeUuid(s38packetplayerlistitem$addplayerdata.getProfile().getId());
+				if (s38packetplayerlistitem$addplayerdata.getDisplayName() == null) {
+					parPacketBuffer.writeBoolean(false);
+				} else {
+					parPacketBuffer.writeBoolean(true);
+					parPacketBuffer.writeChatComponent(s38packetplayerlistitem$addplayerdata.getDisplayName());
+				}
+				break;
+			case REMOVE_PLAYER:
+				parPacketBuffer.writeUuid(s38packetplayerlistitem$addplayerdata.getProfile().getId());
+			}
+		}
+
 	}
 
 	/**+

@@ -1,17 +1,24 @@
 package net.minecraft.entity.boss;
 
-import java.util.List;
-
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-
+import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIArrowAttack;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,7 +27,9 @@ import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.stats.AchievementList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
@@ -73,6 +82,15 @@ public class EntityWither extends EntityMob implements IBossDisplayData, IRanged
 		this.setHealth(this.getMaxHealth());
 		this.setSize(0.9F, 3.5F);
 		this.isImmuneToFire = true;
+		((PathNavigateGround) this.getNavigator()).setCanSwim(true);
+		this.tasks.addTask(0, new EntityAISwimming(this));
+		this.tasks.addTask(2, new EntityAIArrowAttack(this, 1.0D, 40, 20.0F));
+		this.tasks.addTask(5, new EntityAIWander(this, 1.0D));
+		this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+		this.tasks.addTask(7, new EntityAILookIdle(this));
+		this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
+		this.targetTasks.addTask(2,
+				new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, false, attackEntitySelector));
 		this.experienceValue = 50;
 	}
 
@@ -130,6 +148,27 @@ public class EntityWither extends EntityMob implements IBossDisplayData, IRanged
 	 */
 	public void onLivingUpdate() {
 		this.motionY *= 0.6000000238418579D;
+		if (!this.worldObj.isRemote && this.getWatchedTargetId(0) > 0) {
+			Entity entity = this.worldObj.getEntityByID(this.getWatchedTargetId(0));
+			if (entity != null) {
+				if (this.posY < entity.posY || !this.isArmored() && this.posY < entity.posY + 5.0D) {
+					if (this.motionY < 0.0D) {
+						this.motionY = 0.0D;
+					}
+
+					this.motionY += (0.5D - this.motionY) * 0.6000000238418579D;
+				}
+
+				double d0 = entity.posX - this.posX;
+				double d1 = entity.posZ - this.posZ;
+				double d3 = d0 * d0 + d1 * d1;
+				if (d3 > 9.0D) {
+					double d5 = (double) MathHelper.sqrt_double(d3);
+					this.motionX += (d0 / d5 * 0.5D - this.motionX) * 0.6000000238418579D;
+					this.motionZ += (d1 / d5 * 0.5D - this.motionZ) * 0.6000000238418579D;
+				}
+			}
+		}
 
 		if (this.motionX * this.motionX + this.motionZ * this.motionZ > 0.05000000074505806D) {
 			this.rotationYaw = (float) MathHelper.func_181159_b(this.motionZ, this.motionX) * 57.295776F - 90.0F;
@@ -459,6 +498,13 @@ public class EntityWither extends EntityMob implements IBossDisplayData, IRanged
 		EntityItem entityitem = this.dropItem(Items.nether_star, 1);
 		if (entityitem != null) {
 			entityitem.setNoDespawn();
+		}
+
+		if (!this.worldObj.isRemote) {
+			for (EntityPlayer entityplayer : this.worldObj.getEntitiesWithinAABB(EntityPlayer.class,
+					this.getEntityBoundingBox().expand(50.0D, 100.0D, 50.0D))) {
+				entityplayer.triggerAchievement(AchievementList.killWither);
+			}
 		}
 
 	}

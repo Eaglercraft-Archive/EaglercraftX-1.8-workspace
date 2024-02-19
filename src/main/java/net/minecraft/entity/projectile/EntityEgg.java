@@ -1,6 +1,7 @@
 package net.minecraft.entity.projectile;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.DamageSource;
@@ -50,12 +51,30 @@ public class EntityEgg extends EntityThrowable {
 					0.0F);
 		}
 
+		if (!this.worldObj.isRemote && this.rand.nextInt(8) == 0) {
+			byte b0 = 1;
+			if (this.rand.nextInt(32) == 0) {
+				b0 = 4;
+			}
+
+			for (int i = 0; i < b0; ++i) {
+				EntityChicken entitychicken = new EntityChicken(this.worldObj);
+				entitychicken.setGrowingAge(-24000);
+				entitychicken.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
+				this.worldObj.spawnEntityInWorld(entitychicken);
+			}
+		}
+
 		double d0 = 0.08D;
 
 		for (int j = 0; j < 8; ++j) {
 			this.worldObj.spawnParticle(EnumParticleTypes.ITEM_CRACK, this.posX, this.posY, this.posZ,
 					((double) this.rand.nextFloat() - 0.5D) * 0.08D, ((double) this.rand.nextFloat() - 0.5D) * 0.08D,
 					((double) this.rand.nextFloat() - 0.5D) * 0.08D, new int[] { Item.getIdFromItem(Items.egg) });
+		}
+
+		if (!this.worldObj.isRemote) {
+			this.setDead();
 		}
 
 	}

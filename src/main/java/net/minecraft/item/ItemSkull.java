@@ -1,19 +1,21 @@
 package net.minecraft.item;
 
+import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
-import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSkull;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
@@ -70,6 +72,43 @@ public class ItemSkull extends Item {
 			} else if (!Blocks.skull.canPlaceBlockAt(world, blockpos)) {
 				return false;
 			} else {
+				if (!world.isRemote) {
+					world.setBlockState(blockpos,
+							Blocks.skull.getDefaultState().withProperty(BlockSkull.FACING, enumfacing), 3);
+					int i = 0;
+					if (enumfacing == EnumFacing.UP) {
+						i = MathHelper.floor_double((double) (entityplayer.rotationYaw * 16.0F / 360.0F) + 0.5D) & 15;
+					}
+
+					TileEntity tileentity = world.getTileEntity(blockpos);
+					if (tileentity instanceof TileEntitySkull) {
+						TileEntitySkull tileentityskull = (TileEntitySkull) tileentity;
+						if (itemstack.getMetadata() == 3) {
+							GameProfile gameprofile = null;
+							if (itemstack.hasTagCompound()) {
+								NBTTagCompound nbttagcompound = itemstack.getTagCompound();
+								if (nbttagcompound.hasKey("SkullOwner", 10)) {
+									gameprofile = NBTUtil
+											.readGameProfileFromNBT(nbttagcompound.getCompoundTag("SkullOwner"));
+								} else if (nbttagcompound.hasKey("SkullOwner", 8)
+										&& nbttagcompound.getString("SkullOwner").length() > 0) {
+									gameprofile = new GameProfile((EaglercraftUUID) null,
+											nbttagcompound.getString("SkullOwner"));
+								}
+							}
+
+							tileentityskull.setPlayerProfile(gameprofile);
+						} else {
+							tileentityskull.setType(itemstack.getMetadata());
+						}
+
+						tileentityskull.setSkullRotation(i);
+						Blocks.skull.checkWitherSpawn(world, blockpos, tileentityskull);
+					}
+
+					--itemstack.stackSize;
+				}
+
 				return true;
 			}
 		}

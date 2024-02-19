@@ -2,6 +2,7 @@ package net.minecraft.entity.passive;
 
 import com.google.common.base.Predicate;
 
+import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -9,6 +10,14 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIFollowParent;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIMate;
+import net.minecraft.entity.ai.EntityAIPanic;
+import net.minecraft.entity.ai.EntityAIRunAroundLikeCrazy;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
@@ -22,6 +31,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
@@ -102,6 +112,15 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 		this.setSize(1.4F, 1.6F);
 		this.isImmuneToFire = false;
 		this.setChested(false);
+		((PathNavigateGround) this.getNavigator()).setAvoidsWater(true);
+		this.tasks.addTask(0, new EntityAISwimming(this));
+		this.tasks.addTask(1, new EntityAIPanic(this, 1.2D));
+		this.tasks.addTask(1, new EntityAIRunAroundLikeCrazy(this, 1.2D));
+		this.tasks.addTask(2, new EntityAIMate(this, 1.0D));
+		this.tasks.addTask(4, new EntityAIFollowParent(this, 1.0D));
+		this.tasks.addTask(6, new EntityAIWander(this, 0.7D));
+		this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+		this.tasks.addTask(8, new EntityAILookIdle(this));
 		this.initHorseChest();
 	}
 
@@ -351,7 +370,10 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 	}
 
 	public void dropChests() {
-
+		if (!this.worldObj.isRemote && this.isChested()) {
+			this.dropItem(Item.getItemFromBlock(Blocks.chest), 1);
+			this.setChested(false);
+		}
 	}
 
 	private void func_110266_cB() {
@@ -420,6 +442,12 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 	 * horse's inventory.
 	 */
 	private void updateHorseSlots() {
+		if (!this.worldObj.isRemote) {
+			this.setHorseSaddled(this.horseChest.getStackInSlot(0) != null);
+			if (this.canWearArmor()) {
+				this.setHorseArmorStack(this.horseChest.getStackInSlot(1));
+			}
+		}
 
 	}
 
@@ -662,6 +690,11 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 	}
 
 	public void openGUI(EntityPlayer playerEntity) {
+		if (!this.worldObj.isRemote && (this.riddenByEntity == null || this.riddenByEntity == playerEntity)
+				&& this.isTame()) {
+			this.horseChest.setCustomName(this.getName());
+			playerEntity.displayGUIHorse(this, this.horseChest);
+		}
 
 	}
 
@@ -812,6 +845,9 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 		player.rotationPitch = this.rotationPitch;
 		this.setEatingHaystack(false);
 		this.setRearing(false);
+		if (!this.worldObj.isRemote) {
+			player.mountEntity(this);
+		}
 
 	}
 
@@ -868,6 +904,17 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 	}
 
 	/**+
+	 * Called when the mob's health reaches 0.
+	 */
+	public void onDeath(DamageSource damagesource) {
+		super.onDeath(damagesource);
+		if (!this.worldObj.isRemote) {
+			this.dropChestItems();
+		}
+
+	}
+
+	/**+
 	 * Called frequently so the entity can update its state every
 	 * tick as required. For example, zombies and skeletons use this
 	 * to react to sunlight and start to burn.
@@ -878,6 +925,32 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 		}
 
 		super.onLivingUpdate();
+		if (!this.worldObj.isRemote) {
+			if (this.rand.nextInt(900) == 0 && this.deathTime == 0) {
+				this.heal(1.0F);
+			}
+
+			if (!this.isEatingHaystack() && this.riddenByEntity == null && this.rand.nextInt(300) == 0
+					&& this.worldObj
+							.getBlockState(new BlockPos(MathHelper.floor_double(this.posX),
+									MathHelper.floor_double(this.posY) - 1, MathHelper.floor_double(this.posZ)))
+							.getBlock() == Blocks.grass) {
+				this.setEatingHaystack(true);
+			}
+
+			if (this.isEatingHaystack() && ++this.eatingHaystackCounter > 50) {
+				this.eatingHaystackCounter = 0;
+				this.setEatingHaystack(false);
+			}
+
+			if (this.isBreeding() && !this.isAdultHorse() && !this.isEatingHaystack()) {
+				EntityHorse entityhorse = this.getClosestHorse(this, 16.0D);
+				if (entityhorse != null && this.getDistanceSqToEntity(entityhorse) > 4.0D) {
+					this.navigator.getPathToEntityLiving(entityhorse);
+				}
+			}
+		}
+
 	}
 
 	/**+
@@ -885,7 +958,7 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 	 */
 	public void onUpdate() {
 		super.onUpdate();
-		if (this.dataWatcher.hasObjectChanged()) {
+		if (this.worldObj.isRemote && this.dataWatcher.hasObjectChanged()) {
 			this.dataWatcher.func_111144_e();
 			this.resetTexturePrefix();
 		}
@@ -893,6 +966,11 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 		if (this.openMouthCounter > 0 && ++this.openMouthCounter > 30) {
 			this.openMouthCounter = 0;
 			this.setHorseWatchableBoolean(128, false);
+		}
+
+		if (!this.worldObj.isRemote && this.jumpRearingCounter > 0 && ++this.jumpRearingCounter > 20) {
+			this.jumpRearingCounter = 0;
+			this.setRearing(false);
 		}
 
 		if (this.field_110278_bp > 0 && ++this.field_110278_bp > 8) {
@@ -951,6 +1029,10 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 	}
 
 	private void openHorseMouth() {
+		if (!this.worldObj.isRemote) {
+			this.openMouthCounter = 1;
+			this.setHorseWatchableBoolean(128, true);
+		}
 
 	}
 
@@ -980,6 +1062,10 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 	}
 
 	private void makeHorseRear() {
+		if (!this.worldObj.isRemote) {
+			this.jumpRearingCounter = 1;
+			this.setRearing(true);
+		}
 
 	}
 
@@ -998,7 +1084,15 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 	}
 
 	private void dropItemsInChest(Entity entityIn, AnimalChest animalChestIn) {
+		if (animalChestIn != null && !this.worldObj.isRemote) {
+			for (int i = 0; i < animalChestIn.getSizeInventory(); ++i) {
+				ItemStack itemstack = animalChestIn.getStackInSlot(i);
+				if (itemstack != null) {
+					this.entityDropItem(itemstack, 0.0F);
+				}
+			}
 
+		}
 	}
 
 	public boolean setTamedBy(EntityPlayer player) {
@@ -1051,6 +1145,11 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 
 			this.stepHeight = 1.0F;
 			this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1F;
+			if (!this.worldObj.isRemote) {
+				this.setAIMoveSpeed(
+						(float) this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue());
+				super.moveEntityWithHeading(f, f1);
+			}
 
 			if (this.onGround) {
 				this.jumpPower = 0.0F;
@@ -1088,7 +1187,11 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 		nbttagcompound.setInteger("Variant", this.getHorseVariant());
 		nbttagcompound.setInteger("Temper", this.getTemper());
 		nbttagcompound.setBoolean("Tame", this.isTame());
-		nbttagcompound.setString("OwnerUUID", this.getOwnerId());
+		if (worldObj.isRemote && !SingleplayerServerController.isClientInEaglerSingleplayerOrLAN()) {
+			nbttagcompound.setString("OwnerUUID", this.getOwnerId());
+		} else {
+			nbttagcompound.setString("Owner", this.getOwnerId());
+		}
 		if (this.isChested()) {
 			NBTTagList nbttaglist = new NBTTagList();
 
@@ -1129,7 +1232,17 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 		this.setHorseVariant(nbttagcompound.getInteger("Variant"));
 		this.setTemper(nbttagcompound.getInteger("Temper"));
 		this.setHorseTamed(nbttagcompound.getBoolean("Tame"));
-		String s = nbttagcompound.getString("OwnerUUID");
+		String s = "";
+		if (worldObj.isRemote && !SingleplayerServerController.isClientInEaglerSingleplayerOrLAN()) {
+			if (nbttagcompound.hasKey("OwnerUUID", 8)) {
+				s = nbttagcompound.getString("OwnerUUID");
+			}
+		} else {
+			if (nbttagcompound.hasKey("Owner", 8)) {
+				s = nbttagcompound.getString("Owner");
+			}
+		}
+
 		if (s.length() > 0) {
 			this.setOwnerId(s);
 		}

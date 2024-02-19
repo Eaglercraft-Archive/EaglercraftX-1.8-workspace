@@ -1,7 +1,9 @@
 package net.minecraft.entity.projectile;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
@@ -45,6 +47,19 @@ public class EntityLargeFireball extends EntityFireball {
 	 * Called when this EntityFireball hits a block or entity.
 	 */
 	protected void onImpact(MovingObjectPosition movingobjectposition) {
+		if (!this.worldObj.isRemote) {
+			if (movingobjectposition.entityHit != null) {
+				movingobjectposition.entityHit
+						.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 6.0F);
+				this.applyEnchantments(this.shootingEntity, movingobjectposition.entityHit);
+			}
+
+			boolean flag = this.worldObj.getGameRules().getBoolean("mobGriefing");
+			this.worldObj.newExplosion((Entity) null, this.posX, this.posY, this.posZ, (float) this.explosionPower,
+					flag, flag);
+			this.setDead();
+		}
+
 	}
 
 	/**+

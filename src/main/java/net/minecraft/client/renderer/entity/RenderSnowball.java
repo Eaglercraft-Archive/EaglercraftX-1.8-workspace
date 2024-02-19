@@ -1,6 +1,8 @@
 package net.minecraft.client.renderer.entity;
 
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DynamicLightManager;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.texture.EmissiveItems;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
@@ -55,9 +57,18 @@ public class RenderSnowball<T extends Entity> extends Render<T> {
 		GlStateManager.rotate(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
 		GlStateManager.rotate(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
 		this.bindTexture(TextureMap.locationBlocksTexture);
-		this.field_177083_e.func_181564_a(this.func_177082_d(entity), ItemCameraTransforms.TransformType.GROUND);
+		ItemStack itm = this.func_177082_d(entity);
+		this.field_177083_e.func_181564_a(itm, ItemCameraTransforms.TransformType.GROUND);
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.popMatrix();
+		if (DynamicLightManager.isRenderingLights()) {
+			float[] emission = EmissiveItems.getItemEmission(itm);
+			if (emission != null) {
+				float mag = 0.1f;
+				DynamicLightManager.renderDynamicLight("entity_" + entity.getEntityId() + "_item_throw", d0, d1, d2,
+						emission[0] * mag, emission[1] * mag, emission[2] * mag, false);
+			}
+		}
 		super.doRender(entity, d0, d1, d2, f, f1);
 	}
 

@@ -214,7 +214,9 @@ public class Potion {
 		} else if (this.id == hunger.id && entityLivingBaseIn instanceof EntityPlayer) {
 			((EntityPlayer) entityLivingBaseIn).addExhaustion(0.025F * (float) (parInt1 + 1));
 		} else if (this.id == saturation.id && entityLivingBaseIn instanceof EntityPlayer) {
-			// multiplayer only
+			if (!entityLivingBaseIn.worldObj.isRemote) {
+				((EntityPlayer) entityLivingBaseIn).getFoodStats().addStats(parInt1 + 1, 1.0F);
+			}
 		} else if ((this.id != heal.id || entityLivingBaseIn.isEntityUndead())
 				&& (this.id != harm.id || !entityLivingBaseIn.isEntityUndead())) {
 			if (this.id == harm.id && !entityLivingBaseIn.isEntityUndead()

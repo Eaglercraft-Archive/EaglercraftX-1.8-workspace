@@ -2,7 +2,6 @@ package net.minecraft.inventory;
 
 import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,6 +10,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
@@ -142,7 +142,75 @@ public class ContainerEnchantment extends Container {
 	public void onCraftMatrixChanged(IInventory iinventory) {
 		if (iinventory == this.tableInventory) {
 			ItemStack itemstack = iinventory.getStackInSlot(0);
-			if (!(itemstack != null && itemstack.isItemEnchantable())) {
+			if (itemstack != null && itemstack.isItemEnchantable()) {
+				if (!this.worldPointer.isRemote) {
+					int l = 0;
+
+					for (int j = -1; j <= 1; ++j) {
+						for (int k = -1; k <= 1; ++k) {
+							if ((j != 0 || k != 0) && this.worldPointer.isAirBlock(this.position.add(k, 0, j))
+									&& this.worldPointer.isAirBlock(this.position.add(k, 1, j))) {
+								if (this.worldPointer.getBlockState(this.position.add(k * 2, 0, j * 2))
+										.getBlock() == Blocks.bookshelf) {
+									++l;
+								}
+
+								if (this.worldPointer.getBlockState(this.position.add(k * 2, 1, j * 2))
+										.getBlock() == Blocks.bookshelf) {
+									++l;
+								}
+
+								if (k != 0 && j != 0) {
+									if (this.worldPointer.getBlockState(this.position.add(k * 2, 0, j))
+											.getBlock() == Blocks.bookshelf) {
+										++l;
+									}
+
+									if (this.worldPointer.getBlockState(this.position.add(k * 2, 1, j))
+											.getBlock() == Blocks.bookshelf) {
+										++l;
+									}
+
+									if (this.worldPointer.getBlockState(this.position.add(k, 0, j * 2))
+											.getBlock() == Blocks.bookshelf) {
+										++l;
+									}
+
+									if (this.worldPointer.getBlockState(this.position.add(k, 1, j * 2))
+											.getBlock() == Blocks.bookshelf) {
+										++l;
+									}
+								}
+							}
+						}
+					}
+
+					this.rand.setSeed((long) this.xpSeed);
+
+					for (int i1 = 0; i1 < 3; ++i1) {
+						this.enchantLevels[i1] = EnchantmentHelper.calcItemStackEnchantability(this.rand, i1, l,
+								itemstack);
+						this.field_178151_h[i1] = -1;
+						if (this.enchantLevels[i1] < i1 + 1) {
+							this.enchantLevels[i1] = 0;
+						}
+					}
+
+					for (int j1 = 0; j1 < 3; ++j1) {
+						if (this.enchantLevels[j1] > 0) {
+							List list = this.func_178148_a(itemstack, j1, this.enchantLevels[j1]);
+							if (list != null && !list.isEmpty()) {
+								EnchantmentData enchantmentdata = (EnchantmentData) list
+										.get(this.rand.nextInt(list.size()));
+								this.field_178151_h[j1] = enchantmentdata.enchantmentobj.effectId
+										| enchantmentdata.enchantmentLevel << 8;
+							}
+						}
+					}
+
+					this.detectAndSendChanges();
+				}
+			} else {
 				for (int i = 0; i < 3; ++i) {
 					this.enchantLevels[i] = 0;
 					this.field_178151_h[i] = -1;
@@ -165,6 +233,38 @@ public class ContainerEnchantment extends Container {
 		} else if (this.enchantLevels[i] > 0 && itemstack != null
 				&& (entityplayer.experienceLevel >= j && entityplayer.experienceLevel >= this.enchantLevels[i]
 						|| entityplayer.capabilities.isCreativeMode)) {
+			if (!this.worldPointer.isRemote) {
+				List list = this.func_178148_a(itemstack, i, this.enchantLevels[i]);
+				boolean flag = itemstack.getItem() == Items.book;
+				if (list != null) {
+					entityplayer.removeExperienceLevel(j);
+					if (flag) {
+						itemstack.setItem(Items.enchanted_book);
+					}
+
+					for (int k = 0; k < list.size(); ++k) {
+						EnchantmentData enchantmentdata = (EnchantmentData) list.get(k);
+						if (flag) {
+							Items.enchanted_book.addEnchantment(itemstack, enchantmentdata);
+						} else {
+							itemstack.addEnchantment(enchantmentdata.enchantmentobj, enchantmentdata.enchantmentLevel);
+						}
+					}
+
+					if (!entityplayer.capabilities.isCreativeMode) {
+						itemstack1.stackSize -= j;
+						if (itemstack1.stackSize <= 0) {
+							this.tableInventory.setInventorySlotContents(1, (ItemStack) null);
+						}
+					}
+
+					entityplayer.triggerAchievement(StatList.field_181739_W);
+					this.tableInventory.markDirty();
+					this.xpSeed = entityplayer.getXPSeed();
+					this.onCraftMatrixChanged(this.tableInventory);
+				}
+			}
+
 			return true;
 		} else {
 			return false;
@@ -184,6 +284,22 @@ public class ContainerEnchantment extends Container {
 	public int getLapisAmount() {
 		ItemStack itemstack = this.tableInventory.getStackInSlot(1);
 		return itemstack == null ? 0 : itemstack.stackSize;
+	}
+
+	/**+
+	 * Called when the container is closed.
+	 */
+	public void onContainerClosed(EntityPlayer entityplayer) {
+		super.onContainerClosed(entityplayer);
+		if (!this.worldPointer.isRemote) {
+			for (int i = 0; i < this.tableInventory.getSizeInventory(); ++i) {
+				ItemStack itemstack = this.tableInventory.removeStackFromSlot(i);
+				if (itemstack != null) {
+					entityplayer.dropPlayerItemWithRandomChoice(itemstack, false);
+				}
+			}
+
+		}
 	}
 
 	public boolean canInteractWith(EntityPlayer entityplayer) {

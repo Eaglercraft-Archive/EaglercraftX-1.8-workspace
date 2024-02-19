@@ -87,6 +87,16 @@ public class BlockEndPortal extends BlockContainer {
 		return 0;
 	}
 
+	/**+
+	 * Called When an Entity Collided with the Block
+	 */
+	public void onEntityCollidedWithBlock(World world, BlockPos var2, IBlockState var3, Entity entity) {
+		if (entity.ridingEntity == null && entity.riddenByEntity == null && !world.isRemote) {
+			entity.travelToDimension(1);
+		}
+
+	}
+
 	public void randomDisplayTick(World world, BlockPos blockpos, IBlockState var3, EaglercraftRandom random) {
 		double d0 = (double) ((float) blockpos.getX() + random.nextFloat());
 		double d1 = (double) ((float) blockpos.getY() + 0.8F);

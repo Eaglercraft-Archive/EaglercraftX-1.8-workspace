@@ -1,15 +1,18 @@
 package net.minecraft.item;
 
 import java.util.List;
-
+import net.minecraft.block.BlockStandingSign;
+import net.minecraft.block.BlockWallSign;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
@@ -57,7 +60,25 @@ public class ItemBanner extends ItemBlock {
 				return false;
 			} else if (!Blocks.standing_banner.canPlaceBlockAt(world, blockpos)) {
 				return false;
+			} else if (world.isRemote) {
+				return true;
 			} else {
+				if (enumfacing == EnumFacing.UP) {
+					int i = MathHelper
+							.floor_double((double) ((entityplayer.rotationYaw + 180.0F) * 16.0F / 360.0F) + 0.5D) & 15;
+					world.setBlockState(blockpos, Blocks.standing_banner.getDefaultState()
+							.withProperty(BlockStandingSign.ROTATION, Integer.valueOf(i)), 3);
+				} else {
+					world.setBlockState(blockpos,
+							Blocks.wall_banner.getDefaultState().withProperty(BlockWallSign.FACING, enumfacing), 3);
+				}
+
+				--itemstack.stackSize;
+				TileEntity tileentity = world.getTileEntity(blockpos);
+				if (tileentity instanceof TileEntityBanner) {
+					((TileEntityBanner) tileentity).setItemValues(itemstack);
+				}
+
 				return true;
 			}
 		}

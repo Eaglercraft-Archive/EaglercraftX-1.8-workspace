@@ -6,8 +6,11 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
@@ -65,6 +68,19 @@ public class BlockTNT extends Block {
 	}
 
 	/**+
+	 * Called when this Block is destroyed by an Explosion
+	 */
+	public void onBlockDestroyedByExplosion(World world, BlockPos blockpos, Explosion explosion) {
+		if (!world.isRemote) {
+			EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(world, (double) ((float) blockpos.getX() + 0.5F),
+					(double) blockpos.getY(), (double) ((float) blockpos.getZ() + 0.5F),
+					explosion.getExplosivePlacedBy());
+			entitytntprimed.fuse = world.rand.nextInt(entitytntprimed.fuse / 4) + entitytntprimed.fuse / 8;
+			world.spawnEntityInWorld(entitytntprimed);
+		}
+	}
+
+	/**+
 	 * Called when a player destroys this Block
 	 */
 	public void onBlockDestroyedByPlayer(World world, BlockPos blockpos, IBlockState iblockstate) {
@@ -72,7 +88,14 @@ public class BlockTNT extends Block {
 	}
 
 	public void explode(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase igniter) {
-
+		if (!worldIn.isRemote) {
+			if (((Boolean) state.getValue(EXPLODE)).booleanValue()) {
+				EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(worldIn, (double) ((float) pos.getX() + 0.5F),
+						(double) pos.getY(), (double) ((float) pos.getZ() + 0.5F), igniter);
+				worldIn.spawnEntityInWorld(entitytntprimed);
+				worldIn.playSoundAtEntity(entitytntprimed, "game.tnt.primed", 1.0F, 1.0F);
+			}
+		}
 	}
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState iblockstate, EntityPlayer entityplayer,
@@ -93,6 +116,24 @@ public class BlockTNT extends Block {
 		}
 
 		return super.onBlockActivated(world, blockpos, iblockstate, entityplayer, enumfacing, f, f1, f2);
+	}
+
+	/**+
+	 * Called When an Entity Collided with the Block
+	 */
+	public void onEntityCollidedWithBlock(World world, BlockPos blockpos, IBlockState var3, Entity entity) {
+		if (!world.isRemote && entity instanceof EntityArrow) {
+			EntityArrow entityarrow = (EntityArrow) entity;
+			if (entityarrow.isBurning()) {
+				this.explode(world, blockpos,
+						world.getBlockState(blockpos).withProperty(EXPLODE, Boolean.valueOf(true)),
+						entityarrow.shootingEntity instanceof EntityLivingBase
+								? (EntityLivingBase) entityarrow.shootingEntity
+								: null);
+				world.setBlockToAir(blockpos);
+			}
+		}
+
 	}
 
 	/**+

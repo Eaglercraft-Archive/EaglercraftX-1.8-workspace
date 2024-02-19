@@ -43,6 +43,10 @@ public class EntityMinecartEmpty extends EntityMinecart {
 		} else if (this.riddenByEntity != null && this.riddenByEntity != entityplayer) {
 			return false;
 		} else {
+			if (!this.worldObj.isRemote) {
+				entityplayer.mountEntity(this);
+			}
+
 			return true;
 		}
 	}

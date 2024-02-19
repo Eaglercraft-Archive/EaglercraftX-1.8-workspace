@@ -61,6 +61,18 @@ public class ItemMap extends ItemMapBase {
 	public MapData getMapData(ItemStack stack, World worldIn) {
 		String s = "map_" + stack.getMetadata();
 		MapData mapdata = (MapData) worldIn.loadItemData(MapData.class, s);
+		if (mapdata == null && !worldIn.isRemote) {
+			stack.setItemDamage(worldIn.getUniqueDataId("map"));
+			s = "map_" + stack.getMetadata();
+			mapdata = new MapData(s);
+			mapdata.scale = 3;
+			mapdata.calculateMapCenter((double) worldIn.getWorldInfo().getSpawnX(),
+					(double) worldIn.getWorldInfo().getSpawnZ(), mapdata.scale);
+			mapdata.dimension = (byte) worldIn.provider.getDimensionId();
+			mapdata.markDirty();
+			worldIn.setItemData(s, mapdata);
+		}
+
 		return mapdata;
 	}
 
@@ -193,6 +205,26 @@ public class ItemMap extends ItemMapBase {
 						}
 					}
 				}
+			}
+
+		}
+	}
+
+	/**+
+	 * Called each tick as long the item is on a player inventory.
+	 * Uses by maps to check if is on a player hand and update it's
+	 * contents.
+	 */
+	public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+		if (!worldIn.isRemote) {
+			MapData mapdata = this.getMapData(stack, worldIn);
+			if (entityIn instanceof EntityPlayer) {
+				EntityPlayer entityplayer = (EntityPlayer) entityIn;
+				mapdata.updateVisiblePlayers(entityplayer, stack);
+			}
+
+			if (isSelected) {
+				this.updateMapData(worldIn, entityIn, mapdata);
 			}
 
 		}

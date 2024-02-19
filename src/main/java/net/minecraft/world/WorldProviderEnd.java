@@ -3,6 +3,10 @@ package net.minecraft.world;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManagerHell;
+import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderEnd;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -29,8 +33,17 @@ public class WorldProviderEnd extends WorldProvider {
 	 * creates a new world chunk manager for WorldProvider
 	 */
 	public void registerWorldChunkManager() {
+		this.worldChunkMgr = new WorldChunkManagerHell(BiomeGenBase.sky, 0.0F);
 		this.dimensionId = 1;
 		this.hasNoSky = true;
+	}
+
+	/**+
+	 * Returns a new chunk provider which generates chunks for this
+	 * world
+	 */
+	public IChunkProvider createChunkGenerator() {
+		return new ChunkProviderEnd(this.worldObj, this.worldObj.getSeed());
 	}
 
 	/**+

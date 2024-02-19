@@ -68,6 +68,10 @@ public class ItemDye extends Item {
 			EnumDyeColor enumdyecolor = EnumDyeColor.byDyeDamage(itemstack.getMetadata());
 			if (enumdyecolor == EnumDyeColor.WHITE) {
 				if (applyBonemeal(itemstack, world, blockpos)) {
+					if (!world.isRemote) {
+						world.playAuxSFX(2005, blockpos, 0);
+					}
+
 					return true;
 				}
 			} else if (enumdyecolor == EnumDyeColor.BROWN) {
@@ -104,7 +108,15 @@ public class ItemDye extends Item {
 		IBlockState iblockstate = worldIn.getBlockState(target);
 		if (iblockstate.getBlock() instanceof IGrowable) {
 			IGrowable igrowable = (IGrowable) iblockstate.getBlock();
-			if (igrowable.canGrow(worldIn, target, iblockstate, true)) {
+			if (igrowable.canGrow(worldIn, target, iblockstate, worldIn.isRemote)) {
+				if (!worldIn.isRemote) {
+					if (igrowable.canUseBonemeal(worldIn, worldIn.rand, target, iblockstate)) {
+						igrowable.grow(worldIn, worldIn.rand, target, iblockstate);
+					}
+
+					--stack.stackSize;
+				}
+
 				return true;
 			}
 		}

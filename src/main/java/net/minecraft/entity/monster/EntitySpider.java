@@ -1,13 +1,25 @@
 package net.minecraft.entity.monster;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILeapAtTarget;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathNavigateClimber;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
@@ -39,6 +51,16 @@ public class EntitySpider extends EntityMob {
 	public EntitySpider(World worldIn) {
 		super(worldIn);
 		this.setSize(1.4F, 0.9F);
+		this.tasks.addTask(1, new EntityAISwimming(this));
+		this.tasks.addTask(3, new EntityAILeapAtTarget(this, 0.4F));
+		this.tasks.addTask(4, new EntitySpider.AISpiderAttack(this, EntityPlayer.class));
+		this.tasks.addTask(4, new EntitySpider.AISpiderAttack(this, EntityIronGolem.class));
+		this.tasks.addTask(5, new EntityAIWander(this, 0.8D));
+		this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+		this.tasks.addTask(6, new EntityAILookIdle(this));
+		this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
+		this.targetTasks.addTask(2, new EntitySpider.AISpiderTarget(this, EntityPlayer.class));
+		this.targetTasks.addTask(3, new EntitySpider.AISpiderTarget(this, EntityIronGolem.class));
 	}
 
 	/**+
@@ -49,9 +71,27 @@ public class EntitySpider extends EntityMob {
 		return (double) (this.height * 0.5F);
 	}
 
+	/**+
+	 * Returns new PathNavigateGround instance
+	 */
+	protected PathNavigate getNewNavigator(World world) {
+		return new PathNavigateClimber(this, world);
+	}
+
 	protected void entityInit() {
 		super.entityInit();
 		this.dataWatcher.addObject(16, new Byte((byte) 0));
+	}
+
+	/**+
+	 * Called to update the entity's position/logic.
+	 */
+	public void onUpdate() {
+		super.onUpdate();
+		if (!this.worldObj.isRemote) {
+			this.setBesideClimbableBlock(this.isCollidedHorizontally);
+		}
+
 	}
 
 	protected void applyEntityAttributes() {
@@ -185,6 +225,37 @@ public class EntitySpider extends EntityMob {
 
 	public float getEyeHeight() {
 		return 0.65F;
+	}
+
+	static class AISpiderAttack extends EntityAIAttackOnCollide {
+		public AISpiderAttack(EntitySpider parEntitySpider, Class<? extends Entity> targetClass) {
+			super(parEntitySpider, targetClass, 1.0D, true);
+		}
+
+		public boolean continueExecuting() {
+			float f = this.attacker.getBrightness(1.0F);
+			if (f >= 0.5F && this.attacker.getRNG().nextInt(100) == 0) {
+				this.attacker.setAttackTarget((EntityLivingBase) null);
+				return false;
+			} else {
+				return super.continueExecuting();
+			}
+		}
+
+		protected double func_179512_a(EntityLivingBase entitylivingbase) {
+			return (double) (4.0F + entitylivingbase.width);
+		}
+	}
+
+	static class AISpiderTarget<T extends EntityLivingBase> extends EntityAINearestAttackableTarget {
+		public AISpiderTarget(EntitySpider parEntitySpider, Class<T> classTarget) {
+			super(parEntitySpider, classTarget, true);
+		}
+
+		public boolean shouldExecute() {
+			float f = this.taskOwner.getBrightness(1.0F);
+			return f >= 0.5F ? false : super.shouldExecute();
+		}
 	}
 
 	public static class GroupData implements IEntityLivingData {

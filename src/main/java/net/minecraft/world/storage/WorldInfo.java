@@ -1,9 +1,9 @@
 package net.minecraft.world.storage;
 
 import java.util.concurrent.Callable;
-
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
@@ -276,7 +276,7 @@ public class WorldInfo {
 		nbt.setLong("Time", this.totalTime);
 		nbt.setLong("DayTime", this.worldTime);
 		nbt.setLong("SizeOnDisk", this.sizeOnDisk);
-		// nbt.setLong("LastPlayed", MinecraftServer.getCurrentTimeMillis());
+		nbt.setLong("LastPlayed", MinecraftServer.getCurrentTimeMillis());
 		nbt.setString("LevelName", this.levelName);
 		nbt.setInteger("version", this.saveVersion);
 		nbt.setInteger("clearWeatherTime", this.cleanWeatherTime);

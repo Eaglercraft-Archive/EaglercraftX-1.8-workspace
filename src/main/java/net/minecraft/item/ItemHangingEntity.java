@@ -53,6 +53,9 @@ public class ItemHangingEntity extends Item {
 			} else {
 				EntityHanging entityhanging = this.createEntity(world, blockpos1, enumfacing);
 				if (entityhanging != null && entityhanging.onValidSurface()) {
+					if (!world.isRemote) {
+						world.spawnEntityInWorld(entityhanging);
+					}
 					--itemstack.stackSize;
 				}
 

@@ -8,6 +8,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityNote;
 import net.minecraft.util.BlockPos;
@@ -65,7 +66,29 @@ public class BlockNote extends BlockContainer {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
-		return true;
+		if (world.isRemote) {
+			return true;
+		} else {
+			TileEntity tileentity = world.getTileEntity(blockpos);
+			if (tileentity instanceof TileEntityNote) {
+				TileEntityNote tileentitynote = (TileEntityNote) tileentity;
+				tileentitynote.changePitch();
+				tileentitynote.triggerNote(world, blockpos);
+				entityplayer.triggerAchievement(StatList.field_181735_S);
+			}
+
+			return true;
+		}
+	}
+
+	public void onBlockClicked(World world, BlockPos blockpos, EntityPlayer entityplayer) {
+		if (!world.isRemote) {
+			TileEntity tileentity = world.getTileEntity(blockpos);
+			if (tileentity instanceof TileEntityNote) {
+				((TileEntityNote) tileentity).triggerNote(world, blockpos);
+				entityplayer.triggerAchievement(StatList.field_181734_R);
+			}
+		}
 	}
 
 	/**+

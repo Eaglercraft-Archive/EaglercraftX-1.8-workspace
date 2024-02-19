@@ -1,14 +1,19 @@
 package net.minecraft.entity.item;
 
+import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -110,6 +115,42 @@ public class EntityBoat extends Entity {
 	 */
 	public double getMountedYOffset() {
 		return -0.3D;
+	}
+
+	/**+
+	 * Called when the entity is attacked.
+	 */
+	public boolean attackEntityFrom(DamageSource damagesource, float f) {
+		if (this.isEntityInvulnerable(damagesource)) {
+			return false;
+		} else if (!this.worldObj.isRemote && !this.isDead) {
+			if (this.riddenByEntity != null && this.riddenByEntity == damagesource.getEntity()
+					&& damagesource instanceof EntityDamageSourceIndirect) {
+				return false;
+			} else {
+				this.setForwardDirection(-this.getForwardDirection());
+				this.setTimeSinceHit(10);
+				this.setDamageTaken(this.getDamageTaken() + f * 10.0F);
+				this.setBeenAttacked();
+				boolean flag = damagesource.getEntity() instanceof EntityPlayer
+						&& ((EntityPlayer) damagesource.getEntity()).capabilities.isCreativeMode;
+				if (flag || this.getDamageTaken() > 40.0F) {
+					if (this.riddenByEntity != null) {
+						this.riddenByEntity.mountEntity(this);
+					}
+
+					if (!flag && this.worldObj.getGameRules().getBoolean("doEntityDrops")) {
+						this.dropItemWithOffset(Items.boat, 1, 0.0F);
+					}
+
+					this.setDead();
+				}
+
+				return true;
+			}
+		} else {
+			return true;
+		}
 	}
 
 	/**+
@@ -235,7 +276,7 @@ public class EntityBoat extends Entity {
 			}
 		}
 
-		if (this.isBoatEmpty) {
+		if (this.worldObj.isRemote && this.isBoatEmpty) {
 			if (this.boatPosRotationIncrements > 0) {
 				double d12 = this.posX + (this.boatX - this.posX) / (double) this.boatPosRotationIncrements;
 				double d16 = this.posY + (this.boatY - this.posY) / (double) this.boatPosRotationIncrements;
@@ -329,7 +370,20 @@ public class EntityBoat extends Entity {
 			}
 
 			this.moveEntity(this.motionX, this.motionY, this.motionZ);
-			if (!(this.isCollidedHorizontally && d9 > 0.2975D)) {
+			if (this.isCollidedHorizontally && d9 > 0.2975D) {
+				if (!this.worldObj.isRemote && !this.isDead) {
+					this.setDead();
+					if (this.worldObj.getGameRules().getBoolean("doEntityDrops")) {
+						for (int i1 = 0; i1 < 3; ++i1) {
+							this.dropItemWithOffset(Item.getItemFromBlock(Blocks.planks), 1, 0.0F);
+						}
+
+						for (int j1 = 0; j1 < 2; ++j1) {
+							this.dropItemWithOffset(Items.stick, 1, 0.0F);
+						}
+					}
+				}
+			} else {
 				this.motionX *= 0.9900000095367432D;
 				this.motionY *= 0.949999988079071D;
 				this.motionZ *= 0.9900000095367432D;
@@ -354,6 +408,23 @@ public class EntityBoat extends Entity {
 
 			this.rotationYaw = (float) ((double) this.rotationYaw + d23);
 			this.setRotation(this.rotationYaw, this.rotationPitch);
+			if (!this.worldObj.isRemote) {
+				List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this,
+						this.getEntityBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
+				if (list != null && !list.isEmpty()) {
+					for (int j2 = 0; j2 < list.size(); ++j2) {
+						Entity entity = (Entity) list.get(j2);
+						if (entity != this.riddenByEntity && entity.canBePushed() && entity instanceof EntityBoat) {
+							entity.applyEntityCollision(this);
+						}
+					}
+				}
+
+				if (this.riddenByEntity != null && this.riddenByEntity.isDead) {
+					this.riddenByEntity = null;
+				}
+
+			}
 		}
 	}
 
@@ -384,13 +455,35 @@ public class EntityBoat extends Entity {
 	 * First layer of player interaction
 	 */
 	public boolean interactFirst(EntityPlayer entityplayer) {
-		return true;
+		if (this.riddenByEntity != null && this.riddenByEntity instanceof EntityPlayer
+				&& this.riddenByEntity != entityplayer) {
+			return true;
+		} else {
+			if (!this.worldObj.isRemote) {
+				entityplayer.mountEntity(this);
+			}
+
+			return true;
+		}
 	}
 
 	protected void updateFallState(double d0, boolean flag, Block var4, BlockPos var5) {
 		if (flag) {
 			if (this.fallDistance > 3.0F) {
 				this.fall(this.fallDistance, 1.0F);
+				if (!this.worldObj.isRemote && !this.isDead) {
+					this.setDead();
+					if (this.worldObj.getGameRules().getBoolean("doEntityDrops")) {
+						for (int i = 0; i < 3; ++i) {
+							this.dropItemWithOffset(Item.getItemFromBlock(Blocks.planks), 1, 0.0F);
+						}
+
+						for (int j = 0; j < 2; ++j) {
+							this.dropItemWithOffset(Items.stick, 1, 0.0F);
+						}
+					}
+				}
+
 				this.fallDistance = 0.0F;
 			}
 		} else if (this.worldObj.getBlockState((new BlockPos(this)).down()).getBlock().getMaterial() != Material.water

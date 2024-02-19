@@ -9,8 +9,11 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -187,5 +190,18 @@ public abstract class BlockSlab extends Block {
 		public String getName() {
 			return this.name;
 		}
+	}
+
+	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
+			EnumFacing var5, float var6, float var7, float var8) {
+		if (!world.isRemote && MinecraftServer.getServer().worldServers[0].getWorldInfo().getGameRulesInstance()
+				.getBoolean("clickToSit") && entityplayer.getHeldItem() == null) {
+			EntityArrow arrow = new EntityArrow(world, blockpos.getX() + 0.5D, blockpos.getY(), blockpos.getZ() + 0.5D);
+			arrow.isChair = true;
+			world.spawnEntityInWorld(arrow);
+			entityplayer.mountEntity(arrow);
+			return true;
+		}
+		return super.onBlockActivated(world, blockpos, var3, entityplayer, var5, var6, var7, var8);
 	}
 }

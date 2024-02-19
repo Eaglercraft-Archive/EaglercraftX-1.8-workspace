@@ -86,6 +86,9 @@ public class ItemBow extends Item {
 			}
 
 			playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
+			if (!worldIn.isRemote) {
+				worldIn.spawnEntityInWorld(entityarrow);
+			}
 		}
 
 	}

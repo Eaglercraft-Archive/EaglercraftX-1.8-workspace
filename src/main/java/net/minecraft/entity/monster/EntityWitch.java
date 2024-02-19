@@ -1,15 +1,27 @@
 package net.minecraft.entity.monster;
 
+import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIArrowAttack;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
@@ -50,6 +62,13 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob {
 	public EntityWitch(World worldIn) {
 		super(worldIn);
 		this.setSize(0.6F, 1.95F);
+		this.tasks.addTask(1, new EntityAISwimming(this));
+		this.tasks.addTask(2, new EntityAIArrowAttack(this, 1.0D, 60, 10.0F));
+		this.tasks.addTask(2, new EntityAIWander(this, 1.0D));
+		this.tasks.addTask(3, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+		this.tasks.addTask(3, new EntityAILookIdle(this));
+		this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
+		this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
 	}
 
 	protected void entityInit() {
@@ -96,6 +115,68 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob {
 		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(26.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.25D);
+	}
+
+	/**+
+	 * Called frequently so the entity can update its state every
+	 * tick as required. For example, zombies and skeletons use this
+	 * to react to sunlight and start to burn.
+	 */
+	public void onLivingUpdate() {
+		if (!this.worldObj.isRemote) {
+			if (this.getAggressive()) {
+				if (this.witchAttackTimer-- <= 0) {
+					this.setAggressive(false);
+					ItemStack itemstack = this.getHeldItem();
+					this.setCurrentItemOrArmor(0, (ItemStack) null);
+					if (itemstack != null && itemstack.getItem() == Items.potionitem) {
+						List<PotionEffect> list = Items.potionitem.getEffects(itemstack);
+						if (list != null) {
+							for (PotionEffect potioneffect : list) {
+								this.addPotionEffect(new PotionEffect(potioneffect));
+							}
+						}
+					}
+
+					this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(MODIFIER);
+				}
+			} else {
+				short short1 = -1;
+				if (this.rand.nextFloat() < 0.15F && this.isInsideOfMaterial(Material.water)
+						&& !this.isPotionActive(Potion.waterBreathing)) {
+					short1 = 8237;
+				} else if (this.rand.nextFloat() < 0.15F && this.isBurning()
+						&& !this.isPotionActive(Potion.fireResistance)) {
+					short1 = 16307;
+				} else if (this.rand.nextFloat() < 0.05F && this.getHealth() < this.getMaxHealth()) {
+					short1 = 16341;
+				} else if (this.rand.nextFloat() < 0.25F && this.getAttackTarget() != null
+						&& !this.isPotionActive(Potion.moveSpeed)
+						&& this.getAttackTarget().getDistanceSqToEntity(this) > 121.0D) {
+					short1 = 16274;
+				} else if (this.rand.nextFloat() < 0.25F && this.getAttackTarget() != null
+						&& !this.isPotionActive(Potion.moveSpeed)
+						&& this.getAttackTarget().getDistanceSqToEntity(this) > 121.0D) {
+					short1 = 16274;
+				}
+
+				if (short1 > -1) {
+					this.setCurrentItemOrArmor(0, new ItemStack(Items.potionitem, 1, short1));
+					this.witchAttackTimer = this.getHeldItem().getMaxItemUseDuration();
+					this.setAggressive(true);
+					IAttributeInstance iattributeinstance = this
+							.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+					iattributeinstance.removeModifier(MODIFIER);
+					iattributeinstance.applyModifier(MODIFIER);
+				}
+			}
+
+			if (this.rand.nextFloat() < 7.5E-4F) {
+				this.worldObj.setEntityState(this, (byte) 15);
+			}
+		}
+
+		super.onLivingUpdate();
 	}
 
 	public void handleStatusUpdate(byte b0) {

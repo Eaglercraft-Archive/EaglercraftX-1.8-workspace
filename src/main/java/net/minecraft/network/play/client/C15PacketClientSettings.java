@@ -1,7 +1,6 @@
 package net.minecraft.network.play.client;
 
 import java.io.IOException;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
@@ -89,5 +88,9 @@ public class C15PacketClientSettings implements Packet<INetHandlerPlayServer> {
 
 	public int getModelPartFlags() {
 		return this.modelPartFlags;
+	}
+
+	public int getViewDistance() {
+		return this.view;
 	}
 }

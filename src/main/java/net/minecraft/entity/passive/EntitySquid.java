@@ -2,6 +2,7 @@ package net.minecraft.entity.passive;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
@@ -50,6 +51,7 @@ public class EntitySquid extends EntityWaterMob {
 		this.setSize(0.95F, 0.95F);
 		this.rand.setSeed((long) (1 + this.getEntityId()));
 		this.rotationVelocity = 1.0F / (this.rand.nextFloat() + 1.0F) * 0.2F;
+		this.tasks.addTask(0, new EntitySquid.AIMoveRandom(this));
 	}
 
 	protected void applyEntityAttributes() {
@@ -136,7 +138,16 @@ public class EntitySquid extends EntityWaterMob {
 		this.lastTentacleAngle = this.tentacleAngle;
 		this.squidRotation += this.rotationVelocity;
 		if ((double) this.squidRotation > 6.283185307179586D) {
-			this.squidRotation = 6.2831855F;
+			if (this.worldObj.isRemote) {
+				this.squidRotation = 6.2831855F;
+			} else {
+				this.squidRotation = (float) ((double) this.squidRotation - 6.283185307179586D);
+				if (this.rand.nextInt(10) == 0) {
+					this.rotationVelocity = 1.0F / (this.rand.nextFloat() + 1.0F) * 0.2F;
+				}
+
+				this.worldObj.setEntityState(this, (byte) 19);
+			}
 		}
 
 		if (this.inWater) {
@@ -155,6 +166,12 @@ public class EntitySquid extends EntityWaterMob {
 				this.field_70871_bB *= 0.99F;
 			}
 
+			if (!this.worldObj.isRemote) {
+				this.motionX = (double) (this.randomMotionVecX * this.randomMotionSpeed);
+				this.motionY = (double) (this.randomMotionVecY * this.randomMotionSpeed);
+				this.motionZ = (double) (this.randomMotionVecZ * this.randomMotionSpeed);
+			}
+
 			float f1 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
 			this.renderYawOffset += (-((float) MathHelper.func_181159_b(this.motionX, this.motionZ)) * 180.0F
 					/ 3.1415927F - this.renderYawOffset) * 0.1F;
@@ -164,6 +181,13 @@ public class EntitySquid extends EntityWaterMob {
 					- this.squidPitch) * 0.1F;
 		} else {
 			this.tentacleAngle = MathHelper.abs(MathHelper.sin(this.squidRotation)) * 3.1415927F * 0.25F;
+			if (!this.worldObj.isRemote) {
+				this.motionX = 0.0D;
+				this.motionY -= 0.08D;
+				this.motionY *= 0.9800000190734863D;
+				this.motionZ = 0.0D;
+			}
+
 			this.squidPitch = (float) ((double) this.squidPitch + (double) (-90.0F - this.squidPitch) * 0.02D);
 		}
 
@@ -204,4 +228,29 @@ public class EntitySquid extends EntityWaterMob {
 		return this.randomMotionVecX != 0.0F || this.randomMotionVecY != 0.0F || this.randomMotionVecZ != 0.0F;
 	}
 
+	static class AIMoveRandom extends EntityAIBase {
+		private EntitySquid squid;
+
+		public AIMoveRandom(EntitySquid parEntitySquid) {
+			this.squid = parEntitySquid;
+		}
+
+		public boolean shouldExecute() {
+			return true;
+		}
+
+		public void updateTask() {
+			int i = this.squid.getAge();
+			if (i > 100) {
+				this.squid.func_175568_b(0.0F, 0.0F, 0.0F);
+			} else if (this.squid.getRNG().nextInt(50) == 0 || !this.squid.inWater || !this.squid.func_175567_n()) {
+				float f = this.squid.getRNG().nextFloat() * 3.1415927F * 2.0F;
+				float f1 = MathHelper.cos(f) * 0.2F;
+				float f2 = -0.1F + this.squid.getRNG().nextFloat() * 0.2F;
+				float f3 = MathHelper.sin(f) * 0.2F;
+				this.squid.func_175568_b(f1, f2, f3);
+			}
+
+		}
+	}
 }

@@ -2,10 +2,11 @@ package net.minecraft.network.play.client;
 
 import java.io.IOException;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
+import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
+import net.minecraft.world.WorldServer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -58,4 +59,7 @@ public class C18PacketSpectate implements Packet<INetHandlerPlayServer> {
 		inethandlerplayserver.handleSpectate(this);
 	}
 
+	public Entity getEntity(WorldServer worldIn) {
+		return worldIn.getEntityFromUuid(this.id);
+	}
 }

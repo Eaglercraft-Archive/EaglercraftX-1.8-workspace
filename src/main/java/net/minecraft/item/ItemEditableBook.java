@@ -3,9 +3,12 @@ package net.minecraft.item;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Slot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ChatComponentProcessor;
 import net.minecraft.util.ChatComponentText;
@@ -95,6 +98,10 @@ public class ItemEditableBook extends Item {
 	 * button is pressed. Args: itemStack, world, entityPlayer
 	 */
 	public ItemStack onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityplayer) {
+		if (!world.isRemote) {
+			this.resolveContents(itemstack, entityplayer);
+		}
+
 		entityplayer.displayGUIBook(itemstack);
 		entityplayer.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
 		return itemstack;
@@ -123,6 +130,13 @@ public class ItemEditableBook extends Item {
 					}
 
 					nbttagcompound.setTag("pages", nbttaglist);
+					if (player instanceof EntityPlayerMP && player.getCurrentEquippedItem() == stack) {
+						Slot slot = player.openContainer.getSlotFromInventory(player.inventory,
+								player.inventory.currentItem);
+						((EntityPlayerMP) player).playerNetServerHandler
+								.sendPacket(new S2FPacketSetSlot(0, slot.slotNumber, stack));
+					}
+
 				}
 			}
 		}

@@ -1,11 +1,13 @@
 package net.minecraft.entity.monster;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
@@ -57,6 +59,11 @@ public class EntityPigZombie extends EntityZombie {
 			this.angerTargetUUID = entitylivingbase.getUniqueID();
 		}
 
+	}
+
+	protected void applyEntityAI() {
+		this.targetTasks.addTask(1, new EntityPigZombie.AIHurtByAggressor(this));
+		this.targetTasks.addTask(2, new EntityPigZombie.AITargetAggressor(this));
 	}
 
 	protected void applyEntityAttributes() {
@@ -261,4 +268,27 @@ public class EntityPigZombie extends EntityZombie {
 		return ientitylivingdata;
 	}
 
+	static class AIHurtByAggressor extends EntityAIHurtByTarget {
+		public AIHurtByAggressor(EntityPigZombie parEntityPigZombie) {
+			super(parEntityPigZombie, true, new Class[0]);
+		}
+
+		protected void setEntityAttackTarget(EntityCreature entitycreature, EntityLivingBase entitylivingbase) {
+			super.setEntityAttackTarget(entitycreature, entitylivingbase);
+			if (entitycreature instanceof EntityPigZombie) {
+				((EntityPigZombie) entitycreature).becomeAngryAt(entitylivingbase);
+			}
+
+		}
+	}
+
+	static class AITargetAggressor extends EntityAINearestAttackableTarget<EntityPlayer> {
+		public AITargetAggressor(EntityPigZombie parEntityPigZombie) {
+			super(parEntityPigZombie, EntityPlayer.class, true);
+		}
+
+		public boolean shouldExecute() {
+			return ((EntityPigZombie) this.taskOwner).isAngry() && super.shouldExecute();
+		}
+	}
 }

@@ -186,7 +186,19 @@ public class BlockLever extends Block {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState iblockstate, EntityPlayer var4,
 			EnumFacing var5, float var6, float var7, float var8) {
-		return true;
+		if (world.isRemote) {
+			return true;
+		} else {
+			iblockstate = iblockstate.cycleProperty(POWERED);
+			world.setBlockState(blockpos, iblockstate, 3);
+			world.playSoundEffect((double) blockpos.getX() + 0.5D, (double) blockpos.getY() + 0.5D,
+					(double) blockpos.getZ() + 0.5D, "random.click", 0.3F,
+					((Boolean) iblockstate.getValue(POWERED)).booleanValue() ? 0.6F : 0.5F);
+			world.notifyNeighborsOfStateChange(blockpos, this);
+			EnumFacing enumfacing = ((BlockLever.EnumOrientation) iblockstate.getValue(FACING)).getFacing();
+			world.notifyNeighborsOfStateChange(blockpos.offset(enumfacing.getOpposite()), this);
+			return true;
+		}
 	}
 
 	public void breakBlock(World world, BlockPos blockpos, IBlockState iblockstate) {

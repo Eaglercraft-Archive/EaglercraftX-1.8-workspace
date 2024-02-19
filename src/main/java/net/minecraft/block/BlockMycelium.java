@@ -56,6 +56,30 @@ public class BlockMycelium extends Block {
 		return iblockstate.withProperty(SNOWY, Boolean.valueOf(block == Blocks.snow || block == Blocks.snow_layer));
 	}
 
+	public void updateTick(World world, BlockPos blockpos, IBlockState var3, EaglercraftRandom random) {
+		if (!world.isRemote) {
+			if (world.getLightFromNeighbors(blockpos.up()) < 4
+					&& world.getBlockState(blockpos.up()).getBlock().getLightOpacity() > 2) {
+				world.setBlockState(blockpos,
+						Blocks.dirt.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT));
+			} else {
+				if (world.getLightFromNeighbors(blockpos.up()) >= 9) {
+					for (int i = 0; i < 4; ++i) {
+						BlockPos blockpos1 = blockpos.add(random.nextInt(3) - 1, random.nextInt(5) - 3,
+								random.nextInt(3) - 1);
+						IBlockState iblockstate = world.getBlockState(blockpos1);
+						Block block = world.getBlockState(blockpos1.up()).getBlock();
+						if (iblockstate.getBlock() == Blocks.dirt
+								&& iblockstate.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT
+								&& world.getLightFromNeighbors(blockpos1.up()) >= 4 && block.getLightOpacity() <= 2) {
+							world.setBlockState(blockpos1, this.getDefaultState());
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public void randomDisplayTick(World world, BlockPos blockpos, IBlockState iblockstate, EaglercraftRandom random) {
 		super.randomDisplayTick(world, blockpos, iblockstate, random);
 		if (random.nextInt(10) == 0) {

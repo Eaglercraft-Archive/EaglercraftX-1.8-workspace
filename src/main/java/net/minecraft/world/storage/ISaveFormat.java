@@ -59,7 +59,7 @@ public interface ISaveFormat {
 	 * Renames the world by storing the new name in level.dat. It
 	 * does *not* rename the directory containing the world data.
 	 */
-	void renameWorld(String var1, String var2);
+	boolean renameWorld(String var1, String var2);
 
 	boolean func_154334_a(String var1);
 

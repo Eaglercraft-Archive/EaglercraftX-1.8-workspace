@@ -9,6 +9,7 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.monster.EntitySilverfish;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -78,6 +79,20 @@ public class BlockSilverfish extends Block {
 		default:
 			return new ItemStack(Blocks.stone);
 		}
+	}
+
+	/**+
+	 * Spawns this Block's drops into the World as EntityItems.
+	 */
+	public void dropBlockAsItemWithChance(World world, BlockPos blockpos, IBlockState var3, float var4, int var5) {
+		if (!world.isRemote && world.getGameRules().getBoolean("doTileDrops")) {
+			EntitySilverfish entitysilverfish = new EntitySilverfish(world);
+			entitysilverfish.setLocationAndAngles((double) blockpos.getX() + 0.5D, (double) blockpos.getY(),
+					(double) blockpos.getZ() + 0.5D, 0.0F, 0.0F);
+			world.spawnEntityInWorld(entitysilverfish);
+			entitysilverfish.spawnExplosionParticle();
+		}
+
 	}
 
 	public int getDamageValue(World world, BlockPos blockpos) {

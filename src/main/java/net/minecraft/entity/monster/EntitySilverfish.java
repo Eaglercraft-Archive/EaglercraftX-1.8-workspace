@@ -1,12 +1,24 @@
 package net.minecraft.entity.monster;
 
+import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSilverfish;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 /**+
@@ -30,10 +42,17 @@ import net.minecraft.world.World;
  * 
  */
 public class EntitySilverfish extends EntityMob {
+	private EntitySilverfish.AISummonSilverfish summonSilverfish;
 
 	public EntitySilverfish(World worldIn) {
 		super(worldIn);
 		this.setSize(0.4F, 0.3F);
+		this.tasks.addTask(1, new EntityAISwimming(this));
+		this.tasks.addTask(3, this.summonSilverfish = new EntitySilverfish.AISummonSilverfish(this));
+		this.tasks.addTask(4, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
+		this.tasks.addTask(5, new EntitySilverfish.AIHideInStone(this));
+		this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[0]));
+		this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
 	}
 
 	/**+
@@ -82,6 +101,21 @@ public class EntitySilverfish extends EntityMob {
 	 */
 	protected String getDeathSound() {
 		return "mob.silverfish.kill";
+	}
+
+	/**+
+	 * Called when the entity is attacked.
+	 */
+	public boolean attackEntityFrom(DamageSource damagesource, float f) {
+		if (this.isEntityInvulnerable(damagesource)) {
+			return false;
+		} else {
+			if (damagesource instanceof EntityDamageSource || damagesource == DamageSource.magic) {
+				this.summonSilverfish.func_179462_f();
+			}
+
+			return super.attackEntityFrom(damagesource, f);
+		}
 	}
 
 	protected void playStepSound(BlockPos var1, Block var2) {
@@ -133,4 +167,113 @@ public class EntitySilverfish extends EntityMob {
 		return EnumCreatureAttribute.ARTHROPOD;
 	}
 
+	static class AIHideInStone extends EntityAIWander {
+		private final EntitySilverfish field_179485_a;
+		private EnumFacing facing;
+		private boolean field_179484_c;
+
+		public AIHideInStone(EntitySilverfish parEntitySilverfish) {
+			super(parEntitySilverfish, 1.0D, 10);
+			this.field_179485_a = parEntitySilverfish;
+			this.setMutexBits(1);
+		}
+
+		public boolean shouldExecute() {
+			if (this.field_179485_a.getAttackTarget() != null) {
+				return false;
+			} else if (!this.field_179485_a.getNavigator().noPath()) {
+				return false;
+			} else {
+				EaglercraftRandom random = this.field_179485_a.getRNG();
+				if (random.nextInt(10) == 0) {
+					this.facing = EnumFacing.random(random);
+					BlockPos blockpos = (new BlockPos(this.field_179485_a.posX, this.field_179485_a.posY + 0.5D,
+							this.field_179485_a.posZ)).offset(this.facing);
+					IBlockState iblockstate = this.field_179485_a.worldObj.getBlockState(blockpos);
+					if (BlockSilverfish.canContainSilverfish(iblockstate)) {
+						this.field_179484_c = true;
+						return true;
+					}
+				}
+
+				this.field_179484_c = false;
+				return super.shouldExecute();
+			}
+		}
+
+		public boolean continueExecuting() {
+			return this.field_179484_c ? false : super.continueExecuting();
+		}
+
+		public void startExecuting() {
+			if (!this.field_179484_c) {
+				super.startExecuting();
+			} else {
+				World world = this.field_179485_a.worldObj;
+				BlockPos blockpos = (new BlockPos(this.field_179485_a.posX, this.field_179485_a.posY + 0.5D,
+						this.field_179485_a.posZ)).offset(this.facing);
+				IBlockState iblockstate = world.getBlockState(blockpos);
+				if (BlockSilverfish.canContainSilverfish(iblockstate)) {
+					world.setBlockState(blockpos, Blocks.monster_egg.getDefaultState().withProperty(
+							BlockSilverfish.VARIANT, BlockSilverfish.EnumType.forModelBlock(iblockstate)), 3);
+					this.field_179485_a.spawnExplosionParticle();
+					this.field_179485_a.setDead();
+				}
+
+			}
+		}
+	}
+
+	static class AISummonSilverfish extends EntityAIBase {
+		private EntitySilverfish silverfish;
+		private int field_179463_b;
+
+		public AISummonSilverfish(EntitySilverfish parEntitySilverfish) {
+			this.silverfish = parEntitySilverfish;
+		}
+
+		public void func_179462_f() {
+			if (this.field_179463_b == 0) {
+				this.field_179463_b = 20;
+			}
+
+		}
+
+		public boolean shouldExecute() {
+			return this.field_179463_b > 0;
+		}
+
+		public void updateTask() {
+			--this.field_179463_b;
+			if (this.field_179463_b <= 0) {
+				World world = this.silverfish.worldObj;
+				EaglercraftRandom random = this.silverfish.getRNG();
+				BlockPos blockpos = new BlockPos(this.silverfish);
+
+				for (int i = 0; i <= 5 && i >= -5; i = i <= 0 ? 1 - i : 0 - i) {
+					for (int j = 0; j <= 10 && j >= -10; j = j <= 0 ? 1 - j : 0 - j) {
+						for (int k = 0; k <= 10 && k >= -10; k = k <= 0 ? 1 - k : 0 - k) {
+							BlockPos blockpos1 = blockpos.add(j, i, k);
+							IBlockState iblockstate = world.getBlockState(blockpos1);
+							if (iblockstate.getBlock() == Blocks.monster_egg) {
+								if (world.getGameRules().getBoolean("mobGriefing")) {
+									world.destroyBlock(blockpos1, true);
+								} else {
+									world.setBlockState(blockpos1,
+											((BlockSilverfish.EnumType) iblockstate.getValue(BlockSilverfish.VARIANT))
+													.getModelBlock(),
+											3);
+								}
+
+								if (random.nextBoolean()) {
+									return;
+								}
+							}
+						}
+					}
+				}
+			}
+
+		}
+	}
 }

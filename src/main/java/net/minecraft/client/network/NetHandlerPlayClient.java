@@ -16,6 +16,8 @@ import net.lax1dude.eaglercraft.v1_8.netty.Unpooled;
 import net.lax1dude.eaglercraft.v1_8.profile.ServerSkinCache;
 import net.lax1dude.eaglercraft.v1_8.profile.SkinPackets;
 import net.lax1dude.eaglercraft.v1_8.socket.EaglercraftNetworkManager;
+import net.lax1dude.eaglercraft.v1_8.sp.lan.LANClientNetworkManager;
+import net.lax1dude.eaglercraft.v1_8.sp.socket.ClientIntegratedServerNetworkManager;
 import net.lax1dude.eaglercraft.v1_8.update.UpdateService;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
@@ -239,6 +241,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	private final Map<EaglercraftUUID, NetworkPlayerInfo> playerInfoMap = Maps.newHashMap();
 	public int currentServerMaxPlayers = 20;
 	private boolean field_147308_k = false;
+	private boolean isIntegratedServer = false;
 	/**+
 	 * Just an ordinary random number generator, used to randomize
 	 * audio pitch of item/orb pickup and randomize both
@@ -254,6 +257,8 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 		this.netManager = parNetworkManager;
 		this.profile = parGameProfile;
 		this.skinCache = new ServerSkinCache(parNetworkManager, mcIn.getTextureManager());
+		this.isIntegratedServer = (parNetworkManager instanceof ClientIntegratedServerNetworkManager)
+				|| (parNetworkManager instanceof LANClientNetworkManager);
 	}
 
 	/**+
@@ -1768,5 +1773,9 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
 	public GameProfile getGameProfile() {
 		return this.profile;
+	}
+
+	public boolean isClientInEaglerSingleplayerOrLAN() {
+		return isIntegratedServer;
 	}
 }

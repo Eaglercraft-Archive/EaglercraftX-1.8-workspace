@@ -1,9 +1,8 @@
 package net.minecraft.network.login.client;
 
+import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import java.io.IOException;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
-import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginServer;
@@ -65,5 +64,9 @@ public class C00PacketLoginStart implements Packet<INetHandlerLoginServer> {
 
 	public GameProfile getProfile() {
 		return this.profile;
+	}
+
+	public byte[] getSkin() {
+		return this.skin;
 	}
 }

@@ -54,6 +54,22 @@ public class BlockCommandBlock extends BlockContainer {
 		return new TileEntityCommandBlock();
 	}
 
+	/**+
+	 * Called when a neighboring block changes.
+	 */
+	public void onNeighborBlockChange(World world, BlockPos blockpos, IBlockState iblockstate, Block var4) {
+		if (!world.isRemote) {
+			boolean flag = world.isBlockPowered(blockpos);
+			boolean flag1 = ((Boolean) iblockstate.getValue(TRIGGERED)).booleanValue();
+			if (flag && !flag1) {
+				world.setBlockState(blockpos, iblockstate.withProperty(TRIGGERED, Boolean.valueOf(true)), 4);
+				world.scheduleUpdate(blockpos, this, this.tickRate(world));
+			} else if (!flag && flag1) {
+				world.setBlockState(blockpos, iblockstate.withProperty(TRIGGERED, Boolean.valueOf(false)), 4);
+			}
+		}
+	}
+
 	public void updateTick(World world, BlockPos blockpos, IBlockState var3, EaglercraftRandom var4) {
 		TileEntity tileentity = world.getTileEntity(blockpos);
 		if (tileentity instanceof TileEntityCommandBlock) {
@@ -102,6 +118,9 @@ public class BlockCommandBlock extends BlockContainer {
 				commandblocklogic.setName(itemstack.getDisplayName());
 			}
 
+			if (!world.isRemote) {
+				commandblocklogic.setTrackOutput(world.getGameRules().getBoolean("sendCommandFeedback"));
+			}
 		}
 	}
 

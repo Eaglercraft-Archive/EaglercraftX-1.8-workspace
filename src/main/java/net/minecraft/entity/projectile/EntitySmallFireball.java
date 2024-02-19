@@ -1,6 +1,9 @@
 package net.minecraft.entity.projectile;
 
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
@@ -46,6 +49,32 @@ public class EntitySmallFireball extends EntityFireball {
 	 * Called when this EntityFireball hits a block or entity.
 	 */
 	protected void onImpact(MovingObjectPosition movingobjectposition) {
+		if (!this.worldObj.isRemote) {
+			if (movingobjectposition.entityHit != null) {
+				boolean flag = movingobjectposition.entityHit
+						.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F);
+				if (flag) {
+					this.applyEnchantments(this.shootingEntity, movingobjectposition.entityHit);
+					if (!movingobjectposition.entityHit.isImmuneToFire()) {
+						movingobjectposition.entityHit.setFire(5);
+					}
+				}
+			} else {
+				boolean flag1 = true;
+				if (this.shootingEntity != null && this.shootingEntity instanceof EntityLiving) {
+					flag1 = this.worldObj.getGameRules().getBoolean("mobGriefing");
+				}
+
+				if (flag1) {
+					BlockPos blockpos = movingobjectposition.getBlockPos().offset(movingobjectposition.sideHit);
+					if (this.worldObj.isAirBlock(blockpos)) {
+						this.worldObj.setBlockState(blockpos, Blocks.fire.getDefaultState());
+					}
+				}
+			}
+
+			this.setDead();
+		}
 
 	}
 

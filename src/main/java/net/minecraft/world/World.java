@@ -1,5 +1,9 @@
 package net.minecraft.world;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -10,11 +14,9 @@ import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import java.util.Set;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-import java.util.concurrent.Callable;
+import net.lax1dude.eaglercraft.v1_8.HString;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.concurrent.Callable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHopper;
@@ -34,6 +36,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -46,10 +49,13 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
+import net.minecraft.village.VillageCollection;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
@@ -128,6 +134,7 @@ public abstract class World implements IBlockAccess {
 	protected WorldInfo worldInfo;
 	protected boolean findingSpawnPoint;
 	protected MapStorage mapStorage;
+	protected VillageCollection villageCollectionObj;
 	public final Profiler theProfiler;
 	private final Calendar theCalendar = EagRuntime.getLocaleCalendar();
 	protected Scoreboard worldScoreboard = new Scoreboard();
@@ -141,12 +148,10 @@ public abstract class World implements IBlockAccess {
 	private boolean processingLoadedTiles;
 	private final WorldBorder worldBorder;
 	int[] lightUpdateBlockList;
+	public final boolean isRemote;
 
 	protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn,
 			boolean client) {
-		if (!client) {
-			throw new IllegalStateException("Singleplayer is unavailable because all of it's code was deleted");
-		}
 		this.ambientTickCountdown = this.rand.nextInt(12000);
 		this.spawnHostileMobs = true;
 		this.spawnPeacefulMobs = true;
@@ -156,6 +161,7 @@ public abstract class World implements IBlockAccess {
 		this.worldInfo = info;
 		this.provider = providerIn;
 		this.worldBorder = providerIn.getWorldBorder();
+		this.isRemote = client;
 	}
 
 	public World init() {
@@ -167,20 +173,25 @@ public abstract class World implements IBlockAccess {
 			Chunk chunk = this.getChunkFromBlockCoords(pos);
 
 			try {
-				return chunk.getBiome(pos);
+				return chunk.getBiome(pos, this.provider.getWorldChunkManager());
 			} catch (Throwable throwable) {
 				CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting biome");
 				CrashReportCategory crashreportcategory = crashreport.makeCategory("Coordinates of biome request");
 				crashreportcategory.addCrashSectionCallable("Location", new Callable<String>() {
 					public String call() throws Exception {
-						return CrashReportCategory.getCoordinateInfo(pos);
+						return CrashReportCategory
+								.getCoordinateInfo(new net.minecraft.util.BlockPos(pos.getX(), pos.getY(), pos.getZ()));
 					}
 				});
 				throw new ReportedException(crashreport);
 			}
 		} else {
-			return BiomeGenBase.plains;
+			return this.provider.getWorldChunkManager().getBiomeGenerator(pos, BiomeGenBase.plains);
 		}
+	}
+
+	public WorldChunkManager getWorldChunkManager() {
+		return this.provider.getWorldChunkManager();
 	}
 
 	protected abstract IChunkProvider createChunkProvider();
@@ -250,6 +261,14 @@ public abstract class World implements IBlockAccess {
 		return this.isAreaLoaded(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ(), allowEmpty);
 	}
 
+	public boolean isAreaLoaded(StructureBoundingBox box) {
+		return this.isAreaLoaded(box, true);
+	}
+
+	public boolean isAreaLoaded(StructureBoundingBox box, boolean allowEmpty) {
+		return this.isAreaLoaded(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, allowEmpty);
+	}
+
 	private boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty) {
 		if (yEnd >= 0 && yStart < 256) {
 			xStart = xStart >> 4;
@@ -294,6 +313,8 @@ public abstract class World implements IBlockAccess {
 	public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
 		if (!this.isValid(pos)) {
 			return false;
+		} else if (!this.isRemote && this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) {
+			return false;
 		} else {
 			Chunk chunk = this.getChunkFromBlockCoords(pos);
 			Block block = newState.getBlock();
@@ -309,8 +330,15 @@ public abstract class World implements IBlockAccess {
 					this.theProfiler.endSection();
 				}
 
-				if ((flags & 2) != 0 && ((flags & 4) == 0) && chunk.isPopulated()) {
+				if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && chunk.isPopulated()) {
 					this.markBlockForUpdate(pos);
+				}
+
+				if (!this.isRemote && (flags & 1) != 0) {
+					this.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
+					if (block.hasComparatorInputOverride()) {
+						this.updateComparatorOutputLevel(pos, block);
+					}
 				}
 
 				return true;
@@ -357,7 +385,10 @@ public abstract class World implements IBlockAccess {
 	}
 
 	public void notifyNeighborsRespectDebug(BlockPos pos, Block blockType) {
-		this.notifyNeighborsOfStateChange(pos, blockType);
+		if (this.worldInfo.getTerrainType() != WorldType.DEBUG_WORLD) {
+			this.notifyNeighborsOfStateChange(pos, blockType);
+		}
+
 	}
 
 	/**+
@@ -428,7 +459,29 @@ public abstract class World implements IBlockAccess {
 	}
 
 	public void notifyBlockOfStateChange(BlockPos pos, final Block blockIn) {
+		if (!this.isRemote) {
+			IBlockState iblockstate = this.getBlockState(pos);
 
+			try {
+				iblockstate.getBlock().onNeighborBlockChange(this, pos, iblockstate, blockIn);
+			} catch (Throwable throwable) {
+				CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
+				CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
+				crashreportcategory.addCrashSectionCallable("Source block type", new Callable<String>() {
+					public String call() throws Exception {
+						try {
+							return HString.format("ID #%d (%s // %s)",
+									new Object[] { Integer.valueOf(Block.getIdFromBlock(blockIn)),
+											blockIn.getUnlocalizedName(), blockIn.getClass().getCanonicalName() });
+						} catch (Throwable var2) {
+							return "ID #" + Block.getIdFromBlock(blockIn);
+						}
+					}
+				});
+				CrashReportCategory.addBlockInfo(crashreportcategory, pos, iblockstate);
+				throw new ReportedException(crashreport);
+			}
+		}
 	}
 
 	public boolean isBlockTickPending(BlockPos pos, Block blockType) {
@@ -2017,6 +2070,64 @@ public abstract class World implements IBlockAccess {
 	 * Updates all weather states.
 	 */
 	protected void updateWeather() {
+		if (!this.provider.getHasNoSky()) {
+			if (!this.isRemote) {
+				int i = this.worldInfo.getCleanWeatherTime();
+				if (i > 0) {
+					--i;
+					this.worldInfo.setCleanWeatherTime(i);
+					this.worldInfo.setThunderTime(this.worldInfo.isThundering() ? 1 : 2);
+					this.worldInfo.setRainTime(this.worldInfo.isRaining() ? 1 : 2);
+				}
+
+				int j = this.worldInfo.getThunderTime();
+				if (j <= 0) {
+					if (this.worldInfo.isThundering()) {
+						this.worldInfo.setThunderTime((this.rand.nextInt(12000) / 2) + 3600);
+					} else {
+						this.worldInfo.setThunderTime((this.rand.nextInt(168000) + 12000) * 2);
+					}
+				} else {
+					--j;
+					this.worldInfo.setThunderTime(j);
+					if (j <= 0) {
+						this.worldInfo.setThundering(!this.worldInfo.isThundering());
+					}
+				}
+
+				this.prevThunderingStrength = this.thunderingStrength;
+				if (this.worldInfo.isThundering()) {
+					this.thunderingStrength = (float) ((double) this.thunderingStrength + 0.01D);
+				} else {
+					this.thunderingStrength = (float) ((double) this.thunderingStrength - 0.01D);
+				}
+
+				this.thunderingStrength = MathHelper.clamp_float(this.thunderingStrength, 0.0F, 1.0F);
+				int k = this.worldInfo.getRainTime();
+				if (k <= 0) {
+					if (this.worldInfo.isRaining()) {
+						this.worldInfo.setRainTime((this.rand.nextInt(12000) + 12000) / 2);
+					} else {
+						this.worldInfo.setRainTime((this.rand.nextInt(168000) + 12000) * 2);
+					}
+				} else {
+					--k;
+					this.worldInfo.setRainTime(k);
+					if (k <= 0) {
+						this.worldInfo.setRaining(!this.worldInfo.isRaining());
+					}
+				}
+
+				this.prevRainingStrength = this.rainingStrength;
+				if (this.worldInfo.isRaining()) {
+					this.rainingStrength = (float) ((double) this.rainingStrength + 0.01D);
+				} else {
+					this.rainingStrength = (float) ((double) this.rainingStrength - 0.01D);
+				}
+
+				this.rainingStrength = MathHelper.clamp_float(this.rainingStrength, 0.0F, 1.0F);
+			}
+		}
 	}
 
 	protected void setActivePlayerChunksAndCheckLight() {
@@ -2057,6 +2168,30 @@ public abstract class World implements IBlockAccess {
 	protected abstract int getRenderDistanceChunks();
 
 	protected void playMoodSoundAndCheckLight(int chunkIn, int parInt2, Chunk parChunk) {
+		this.theProfiler.endStartSection("moodSound");
+		if (this.ambientTickCountdown == 0 && !this.isRemote) {
+			this.updateLCG = this.updateLCG * 3 + 1013904223;
+			int i = this.updateLCG >> 2;
+			int j = i & 15;
+			int k = i >> 8 & 15;
+			int l = i >> 16 & 255;
+			BlockPos blockpos = new BlockPos(j, l, k);
+			Block block = parChunk.getBlock(blockpos);
+			j = j + chunkIn;
+			k = k + parInt2;
+			if (block.getMaterial() == Material.air && this.getLight(blockpos) <= this.rand.nextInt(8)
+					&& this.getLightFor(EnumSkyBlock.SKY, blockpos) <= 0) {
+				EntityPlayer entityplayer = this.getClosestPlayer((double) j + 0.5D, (double) l + 0.5D,
+						(double) k + 0.5D, 8.0D);
+				if (entityplayer != null
+						&& entityplayer.getDistanceSq((double) j + 0.5D, (double) l + 0.5D, (double) k + 0.5D) > 4.0D) {
+					this.playSoundEffect((double) j + 0.5D, (double) l + 0.5D, (double) k + 0.5D, "ambient.cave.cave",
+							0.7F, 0.8F + this.rand.nextFloat() * 0.2F);
+					this.ambientTickCountdown = this.rand.nextInt(12000) + 6000;
+				}
+			}
+		}
+
 		this.theProfiler.endStartSection("checkLight");
 		parChunk.enqueueRelightChecks();
 	}
@@ -2311,6 +2446,10 @@ public abstract class World implements IBlockAccess {
 		return null;
 	}
 
+	public List<NextTickListEntry> func_175712_a(StructureBoundingBox structureBB, boolean parFlag) {
+		return null;
+	}
+
 	/**+
 	 * Will get all entities within the specified AABB excluding the
 	 * one passed into it. Args: entityToExclude, aabb
@@ -2358,7 +2497,7 @@ public abstract class World implements IBlockAccess {
 	public <T extends Entity> List<T> getPlayers(Class<? extends T> playerType, Predicate<? super T> filter) {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (EntityPlayer entity : this.playerEntities) {
+		for (Entity entity : this.playerEntities) {
 			if (playerType.isAssignableFrom(entity.getClass()) && filter.apply((T) entity)) {
 				arraylist.add(entity);
 			}
@@ -2971,7 +3110,7 @@ public abstract class World implements IBlockAccess {
 	 */
 	public Calendar getCurrentDate() {
 		if (this.getTotalWorldTime() % 600L == 0L) {
-			this.theCalendar.setTimeInMillis(System.currentTimeMillis());
+			this.theCalendar.setTimeInMillis(MinecraftServer.getCurrentTimeMillis());
 		}
 
 		return this.theCalendar;
@@ -3039,6 +3178,10 @@ public abstract class World implements IBlockAccess {
 		return this.findingSpawnPoint;
 	}
 
+	public VillageCollection getVillageCollection() {
+		return this.villageCollectionObj;
+	}
+
 	public WorldBorder getWorldBorder() {
 		return this.worldBorder;
 	}
@@ -3047,6 +3190,9 @@ public abstract class World implements IBlockAccess {
 	 * Returns true if the chunk is located near the spawn point
 	 */
 	public boolean isSpawnChunk(int x, int z) {
+		if (!MinecraftServer.getServer().worldServers[0].getWorldInfo().getGameRulesInstance()
+				.getBoolean("loadSpawnChunks"))
+			return false;
 		BlockPos blockpos = this.getSpawnPoint();
 		int i = x * 16 + 8 - blockpos.getX();
 		int j = z * 16 + 8 - blockpos.getZ();

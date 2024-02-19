@@ -1,14 +1,22 @@
 package net.minecraft.entity.passive;
 
+import com.google.common.collect.Maps;
 import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-
-import com.google.common.collect.Maps;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIEatGrass;
+import net.minecraft.entity.ai.EntityAIFollowParent;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIMate;
+import net.minecraft.entity.ai.EntityAIPanic;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAITempt;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -19,6 +27,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyInstance;
@@ -57,6 +66,7 @@ public class EntitySheep extends EntityAnimal {
 	}, 2, 1);
 	private static final Map<EnumDyeColor, float[]> DYE_TO_RGB = Maps.newEnumMap(EnumDyeColor.class);
 	private int sheepTimer;
+	private EntityAIEatGrass entityAIEatGrass = new EntityAIEatGrass(this);
 
 	public static float[] func_175513_a(EnumDyeColor dyeColor) {
 		return (float[]) DYE_TO_RGB.get(dyeColor);
@@ -65,8 +75,23 @@ public class EntitySheep extends EntityAnimal {
 	public EntitySheep(World worldIn) {
 		super(worldIn);
 		this.setSize(0.9F, 1.3F);
+		((PathNavigateGround) this.getNavigator()).setAvoidsWater(true);
+		this.tasks.addTask(0, new EntityAISwimming(this));
+		this.tasks.addTask(1, new EntityAIPanic(this, 1.25D));
+		this.tasks.addTask(2, new EntityAIMate(this, 1.0D));
+		this.tasks.addTask(3, new EntityAITempt(this, 1.1D, Items.wheat, false));
+		this.tasks.addTask(4, new EntityAIFollowParent(this, 1.1D));
+		this.tasks.addTask(5, this.entityAIEatGrass);
+		this.tasks.addTask(6, new EntityAIWander(this, 1.0D));
+		this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+		this.tasks.addTask(8, new EntityAILookIdle(this));
 		this.inventoryCrafting.setInventorySlotContents(0, new ItemStack(Items.dye, 1, 0));
 		this.inventoryCrafting.setInventorySlotContents(1, new ItemStack(Items.dye, 1, 0));
+	}
+
+	protected void updateAITasks() {
+		this.sheepTimer = this.entityAIEatGrass.getEatingGrassTimer();
+		super.updateAITasks();
 	}
 
 	/**+
@@ -75,7 +100,10 @@ public class EntitySheep extends EntityAnimal {
 	 * to react to sunlight and start to burn.
 	 */
 	public void onLivingUpdate() {
-		this.sheepTimer = Math.max(0, this.sheepTimer - 1);
+		if (this.worldObj.isRemote) {
+			this.sheepTimer = Math.max(0, this.sheepTimer - 1);
+		}
+
 		super.onLivingUpdate();
 	}
 
@@ -147,6 +175,20 @@ public class EntitySheep extends EntityAnimal {
 	public boolean interact(EntityPlayer entityplayer) {
 		ItemStack itemstack = entityplayer.inventory.getCurrentItem();
 		if (itemstack != null && itemstack.getItem() == Items.shears && !this.getSheared() && !this.isChild()) {
+			if (!this.worldObj.isRemote) {
+				this.setSheared(true);
+				int i = 1 + this.rand.nextInt(3);
+
+				for (int j = 0; j < i; ++j) {
+					EntityItem entityitem = this.entityDropItem(
+							new ItemStack(Item.getItemFromBlock(Blocks.wool), 1, this.getFleeceColor().getMetadata()),
+							1.0F);
+					entityitem.motionY += (double) (this.rand.nextFloat() * 0.05F);
+					entityitem.motionX += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
+					entityitem.motionZ += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
+				}
+			}
+
 			itemstack.damageItem(1, entityplayer);
 			this.playSound("mob.sheep.shear", 1.0F, 1.0F);
 		}

@@ -1,32 +1,33 @@
 package net.minecraft.command;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import net.minecraft.client.Minecraft;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
@@ -80,6 +81,14 @@ public class PlayerSelector {
 	private static final Set<String> WORLD_BINDING_ARGS = Sets
 			.newHashSet(new String[] { "x", "y", "z", "dx", "dy", "dz", "rm", "r" });
 
+	/**+
+	 * Returns the one player that matches the given at-token.
+	 * Returns null if more than one player matches.
+	 */
+	public static EntityPlayerMP matchOnePlayer(ICommandSender sender, String token) {
+		return (EntityPlayerMP) matchOneEntity(sender, token, EntityPlayerMP.class);
+	}
+
 	public static <T extends Entity> T matchOneEntity(ICommandSender sender, String token,
 			Class<? extends T> targetClass) {
 		List list = matchEntities(sender, token, targetClass);
@@ -93,11 +102,11 @@ public class PlayerSelector {
 		} else {
 			ArrayList arraylist = Lists.newArrayList();
 
-			for (Entity entity : (List<Entity>) list) {
+			for (Entity entity : (ArrayList<Entity>) list) {
 				arraylist.add(entity.getDisplayName());
 			}
 
-			return IChatComponent.join(arraylist);
+			return CommandBase.join(arraylist);
 		}
 	}
 
@@ -114,7 +123,7 @@ public class PlayerSelector {
 				List list = getWorlds(sender, map);
 				ArrayList arraylist = Lists.newArrayList();
 
-				for (World world : (List<World>) list) {
+				for (World world : (ArrayList<World>) list) {
 					if (world != null) {
 						ArrayList arraylist1 = Lists.newArrayList();
 						arraylist1.addAll(func_179663_a(map, s));
@@ -147,10 +156,7 @@ public class PlayerSelector {
 		if (func_179665_h(argumentMap)) {
 			arraylist.add(sender.getEntityWorld());
 		} else {
-			Minecraft mc = Minecraft.getMinecraft();
-			if (mc.theWorld != null) {
-				arraylist.add(mc.thePlayer);
-			}
+			Collections.addAll(arraylist, MinecraftServer.getServer().worldServers);
 		}
 
 		return arraylist;
@@ -173,12 +179,11 @@ public class PlayerSelector {
 
 	private static List<Predicate<Entity>> func_179663_a(Map<String, String> parMap, String parString1) {
 		ArrayList arraylist = Lists.newArrayList();
-		String ss = func_179651_b(parMap, "type");
-		final boolean flag = ss != null && ss.startsWith("!");
+		String s = func_179651_b(parMap, "type");
+		final boolean flag = s != null && s.startsWith("!");
 		if (flag) {
-			ss = ss.substring(1);
+			s = s.substring(1);
 		}
-		final String s = ss;
 
 		boolean flag1 = !parString1.equals("e");
 		boolean flag2 = parString1.equals("r") && s != null;
@@ -191,9 +196,10 @@ public class PlayerSelector {
 				});
 			}
 		} else {
+			final String ss = s;
 			arraylist.add(new Predicate<Entity>() {
 				public boolean apply(Entity entity) {
-					return EntityList.isStringEntityName(entity, s) != flag;
+					return EntityList.isStringEntityName(entity, ss) != flag;
 				}
 			});
 		}
@@ -208,7 +214,13 @@ public class PlayerSelector {
 		if (i > -1 || j > -1) {
 			arraylist.add(new Predicate<Entity>() {
 				public boolean apply(Entity entity) {
-					return false;
+					if (!(entity instanceof EntityPlayerMP)) {
+						return false;
+					} else {
+						EntityPlayerMP entityplayermp = (EntityPlayerMP) entity;
+						return (i <= -1 || entityplayermp.experienceLevel >= i)
+								&& (j <= -1 || entityplayermp.experienceLevel <= j);
+					}
 				}
 			});
 		}
@@ -222,7 +234,12 @@ public class PlayerSelector {
 		if (i != WorldSettings.GameType.NOT_SET.getID()) {
 			arraylist.add(new Predicate<Entity>() {
 				public boolean apply(Entity entity) {
-					return false;
+					if (!(entity instanceof EntityPlayerMP)) {
+						return false;
+					} else {
+						EntityPlayerMP entityplayermp = (EntityPlayerMP) entity;
+						return entityplayermp.theItemInWorldManager.getGameType().getID() == i;
+					}
 				}
 			});
 		}
@@ -232,14 +249,14 @@ public class PlayerSelector {
 
 	private static List<Predicate<Entity>> func_179659_d(Map<String, String> parMap) {
 		ArrayList arraylist = Lists.newArrayList();
-		String ss = func_179651_b(parMap, "team");
-		final boolean flag = ss != null && ss.startsWith("!");
+		String s = func_179651_b(parMap, "team");
+		final boolean flag = s != null && s.startsWith("!");
 		if (flag) {
-			ss = ss.substring(1);
+			s = s.substring(1);
 		}
-		final String s = ss;
 
 		if (s != null) {
+			final String ss = s;
 			arraylist.add(new Predicate<Entity>() {
 				public boolean apply(Entity entity) {
 					if (!(entity instanceof EntityLivingBase)) {
@@ -248,7 +265,7 @@ public class PlayerSelector {
 						EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
 						Team team = entitylivingbase.getTeam();
 						String s1 = team == null ? "" : team.getRegisteredName();
-						return s1.equals(s) != flag;
+						return s1.equals(ss) != flag;
 					}
 				}
 			});
@@ -259,13 +276,13 @@ public class PlayerSelector {
 
 	private static List<Predicate<Entity>> func_179657_e(Map<String, String> parMap) {
 		ArrayList arraylist = Lists.newArrayList();
-		final Map<String, Integer> map = func_96560_a(parMap);
+		final Map map = func_96560_a(parMap);
 		if (map != null && map.size() > 0) {
 			arraylist.add(new Predicate<Entity>() {
 				public boolean apply(Entity entity) {
-					Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
+					Scoreboard scoreboard = MinecraftServer.getServer().worldServerForDimension(0).getScoreboard();
 
-					for (Entry entry : map.entrySet()) {
+					for (Entry entry : (Set<Entry>) map.entrySet()) {
 						String s = (String) entry.getKey();
 						boolean flag = false;
 						if (s.endsWith("_min") && s.length() > 4) {
@@ -278,7 +295,8 @@ public class PlayerSelector {
 							return false;
 						}
 
-						String s1 = entity instanceof EntityPlayer ? entity.getName() : entity.getUniqueID().toString();
+						String s1 = entity instanceof EntityPlayerMP ? entity.getName()
+								: entity.getUniqueID().toString();
 						if (!scoreboard.entityHasObjective(s1, scoreobjective)) {
 							return false;
 						}
@@ -304,17 +322,17 @@ public class PlayerSelector {
 
 	private static List<Predicate<Entity>> func_179647_f(Map<String, String> parMap) {
 		ArrayList arraylist = Lists.newArrayList();
-		String ss = func_179651_b(parMap, "name");
-		final boolean flag = ss != null && ss.startsWith("!");
+		String s = func_179651_b(parMap, "name");
+		final boolean flag = s != null && s.startsWith("!");
 		if (flag) {
-			ss = ss.substring(1);
+			s = s.substring(1);
 		}
-		final String s = ss;
 
 		if (s != null) {
+			final String ss = s;
 			arraylist.add(new Predicate<Entity>() {
 				public boolean apply(Entity entity) {
-					return entity.getName().equals(s) != flag;
+					return entity.getName().equals(ss) != flag;
 				}
 			});
 		}
@@ -450,7 +468,7 @@ public class PlayerSelector {
 		Entity entity = parICommandSender.getCommandSenderEntity();
 		if (entity != null && parClass1.isAssignableFrom(entity.getClass()) && i == 1
 				&& ((List) parList).contains(entity) && !"r".equals(parString1)) {
-			parList = (List<T>) Lists.newArrayList(new Entity[] { entity });
+			parList = (List<T>) Lists.newArrayList(entity);
 		}
 
 		if (i != 0) {
@@ -591,5 +609,4 @@ public class PlayerSelector {
 			return hashmap;
 		}
 	}
-
 }

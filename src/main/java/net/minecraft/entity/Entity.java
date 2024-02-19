@@ -15,7 +15,10 @@ import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockWall;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.state.pattern.BlockPattern;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.command.CommandResultStats;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -23,6 +26,7 @@ import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -31,6 +35,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
@@ -45,6 +50,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -66,7 +72,7 @@ import net.minecraft.world.World;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-public abstract class Entity {
+public abstract class Entity implements ICommandSender {
 	private static final AxisAlignedBB ZERO_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
 	private static int nextEntityID;
 	private int entityId;
@@ -140,6 +146,7 @@ public abstract class Entity {
 	protected EnumFacing field_181018_ap;
 	private boolean invulnerable;
 	protected EaglercraftUUID entityUniqueID;
+	private final CommandResultStats cmdResultStats;
 
 	public int getEntityId() {
 		return this.entityId;
@@ -167,6 +174,7 @@ public abstract class Entity {
 		this.fireResistance = 1;
 		this.firstUpdate = true;
 		this.entityUniqueID = MathHelper.getRandomUuid(this.rand);
+		this.cmdResultStats = new CommandResultStats();
 		this.worldObj = worldIn;
 		this.setPosition(0.0D, 0.0D, 0.0D);
 		if (worldIn != null) {
@@ -237,6 +245,9 @@ public abstract class Entity {
 							this.getEntityBoundingBox().minZ, this.getEntityBoundingBox().minX + (double) this.width,
 							this.getEntityBoundingBox().minY + (double) this.height,
 							this.getEntityBoundingBox().minZ + (double) this.width));
+			if (this.width > f2 && !this.firstUpdate && !this.worldObj.isRemote) {
+				this.moveEntity((double) (f2 - this.width), 0.0D, (double) (f2 - this.width));
+			}
 		}
 
 	}
@@ -301,10 +312,62 @@ public abstract class Entity {
 		this.prevPosZ = this.posZ;
 		this.prevRotationPitch = this.rotationPitch;
 		this.prevRotationYaw = this.rotationYaw;
+		if (!this.worldObj.isRemote && this.worldObj instanceof WorldServer) {
+			this.worldObj.theProfiler.startSection("portal");
+			MinecraftServer minecraftserver = ((WorldServer) this.worldObj).getMinecraftServer();
+			int i = this.getMaxInPortalTime();
+			if (this.inPortal) {
+				if (minecraftserver.getAllowNether()) {
+					if (this.ridingEntity == null && this.portalCounter++ >= i) {
+						this.portalCounter = i;
+						this.timeUntilPortal = this.getPortalCooldown();
+						byte b0;
+						if (this.worldObj.provider.getDimensionId() == -1) {
+							b0 = 0;
+						} else {
+							b0 = -1;
+						}
+
+						this.travelToDimension(b0);
+					}
+
+					this.inPortal = false;
+				}
+			} else {
+				if (this.portalCounter > 0) {
+					this.portalCounter -= 4;
+				}
+
+				if (this.portalCounter < 0) {
+					this.portalCounter = 0;
+				}
+			}
+
+			if (this.timeUntilPortal > 0) {
+				--this.timeUntilPortal;
+			}
+
+			this.worldObj.theProfiler.endSection();
+		}
 
 		this.spawnRunningParticles();
 		this.handleWaterMovement();
-		this.fire = 0;
+		if (this.worldObj.isRemote) {
+			this.fire = 0;
+		} else if (this.fire > 0) {
+			if (this.isImmuneToFire) {
+				this.fire -= 4;
+				if (this.fire < 0) {
+					this.fire = 0;
+				}
+			} else {
+				if (this.fire % 20 == 0) {
+					this.attackEntityFrom(DamageSource.onFire, 1.0F);
+				}
+
+				--this.fire;
+			}
+		}
 
 		if (this.isInLava()) {
 			this.setOnFireFromLava();
@@ -313,6 +376,10 @@ public abstract class Entity {
 
 		if (this.posY < -64.0D) {
 			this.kill();
+		}
+
+		if (!this.worldObj.isRemote) {
+			this.setFlag(0, this.fire > 0);
 		}
 
 		this.firstUpdate = false;
@@ -1274,6 +1341,7 @@ public abstract class Entity {
 				tagCompund.setBoolean("CustomNameVisible", this.getAlwaysRenderNameTag());
 			}
 
+			this.cmdResultStats.writeStatsToNBT(tagCompund);
 			if (this.isSilent()) {
 				tagCompund.setBoolean("Silent", this.isSilent());
 			}
@@ -1346,6 +1414,7 @@ public abstract class Entity {
 			}
 
 			this.setAlwaysRenderNameTag(tagCompund.getBoolean("CustomNameVisible"));
+			this.cmdResultStats.readStatsFromNBT(tagCompund);
 			this.setSilent(tagCompund.getBoolean("Silent"));
 			this.readEntityFromNBT(tagCompund);
 			if (this.shouldSetPosAfterLoading()) {
@@ -1630,6 +1699,27 @@ public abstract class Entity {
 		if (this.timeUntilPortal > 0) {
 			this.timeUntilPortal = this.getPortalCooldown();
 		} else {
+			if (!this.worldObj.isRemote && !parBlockPos.equals(this.field_181016_an)) {
+				this.field_181016_an = parBlockPos;
+				BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.portal.func_181089_f(this.worldObj,
+						parBlockPos);
+				double d0 = blockpattern$patternhelper.getFinger().getAxis() == EnumFacing.Axis.X
+						? (double) blockpattern$patternhelper.func_181117_a().getZ()
+						: (double) blockpattern$patternhelper.func_181117_a().getX();
+				double d1 = blockpattern$patternhelper.getFinger().getAxis() == EnumFacing.Axis.X ? this.posZ
+						: this.posX;
+				d1 = Math.abs(MathHelper.func_181160_c(
+						d1 - (double) (blockpattern$patternhelper.getFinger().rotateY()
+								.getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE ? 1 : 0),
+						d0, d0 - (double) blockpattern$patternhelper.func_181118_d()));
+				double d2 = MathHelper.func_181160_c(this.posY - 1.0D,
+						(double) blockpattern$patternhelper.func_181117_a().getY(),
+						(double) (blockpattern$patternhelper.func_181117_a().getY()
+								- blockpattern$patternhelper.func_181119_e()));
+				this.field_181017_ao = new Vec3(d1, d2, 0.0D);
+				this.field_181018_ap = blockpattern$patternhelper.getFinger();
+			}
+
 			this.inPortal = true;
 		}
 	}
@@ -1681,7 +1771,7 @@ public abstract class Entity {
 	 * the fire effect on rendering.
 	 */
 	public boolean isBurning() {
-		boolean flag = this.worldObj != null;
+		boolean flag = this.worldObj != null && this.worldObj.isRemote;
 		return !this.isImmuneToFire && (this.fire > 0 || flag && this.getFlag(0));
 	}
 
@@ -1967,6 +2057,40 @@ public abstract class Entity {
 	 * number to teleport to
 	 */
 	public void travelToDimension(int i) {
+		if (!this.worldObj.isRemote && !this.isDead) {
+			this.worldObj.theProfiler.startSection("changeDimension");
+			MinecraftServer minecraftserver = MinecraftServer.getServer();
+			int j = this.dimension;
+			WorldServer worldserver = minecraftserver.worldServerForDimension(j);
+			WorldServer worldserver1 = minecraftserver.worldServerForDimension(i);
+			this.dimension = i;
+			if (j == 1 && i == 1) {
+				worldserver1 = minecraftserver.worldServerForDimension(0);
+				this.dimension = 0;
+			}
+
+			this.worldObj.removeEntity(this);
+			this.isDead = false;
+			this.worldObj.theProfiler.startSection("reposition");
+			minecraftserver.getConfigurationManager().transferEntityToWorld(this, j, worldserver, worldserver1);
+			this.worldObj.theProfiler.endStartSection("reloading");
+			Entity entity = EntityList.createEntityByName(EntityList.getEntityString(this), worldserver1);
+			if (entity != null) {
+				entity.copyDataFromOld(this);
+				if (j == 1 && i == 1) {
+					BlockPos blockpos = this.worldObj.getTopSolidOrLiquidBlock(worldserver1.getSpawnPoint());
+					entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
+				}
+
+				worldserver1.spawnEntityInWorld(entity);
+			}
+
+			this.isDead = true;
+			this.worldObj.theProfiler.endSection();
+			worldserver.resetUpdateEntityTick();
+			worldserver1.resetUpdateEntityTick();
+			this.worldObj.theProfiler.endSection();
+		}
 	}
 
 	/**+
@@ -2008,7 +2132,7 @@ public abstract class Entity {
 	public void addEntityCrashInfo(CrashReportCategory category) {
 		category.addCrashSectionCallable("Entity Type", new Callable<String>() {
 			public String call() throws Exception {
-				return EntityList.getEntityString(Entity.this) + " (" + Entity.this.getClass().getName() + ")";
+				return EntityList.getEntityString(Entity.this) + " (" + Entity.this.getClass().getCanonicalName() + ")";
 			}
 		});
 		category.addCrashSection("Entity ID", Integer.valueOf(this.entityId));
@@ -2017,12 +2141,12 @@ public abstract class Entity {
 				return Entity.this.getName();
 			}
 		});
-		category.addCrashSection("Entity\'s Exact location", HString.format("%.2f, %.2f, %.2f",
+		category.addCrashSection("Entity\'s Exact location", String.format("%.2f, %.2f, %.2f",
 				new Object[] { Double.valueOf(this.posX), Double.valueOf(this.posY), Double.valueOf(this.posZ) }));
 		category.addCrashSection("Entity\'s Block location",
 				CrashReportCategory.getCoordinateInfo((double) MathHelper.floor_double(this.posX),
 						(double) MathHelper.floor_double(this.posY), (double) MathHelper.floor_double(this.posZ)));
-		category.addCrashSection("Entity\'s Momentum", HString.format("%.2f, %.2f, %.2f", new Object[] {
+		category.addCrashSection("Entity\'s Momentum", String.format("%.2f, %.2f, %.2f", new Object[] {
 				Double.valueOf(this.motionX), Double.valueOf(this.motionY), Double.valueOf(this.motionZ) }));
 		category.addCrashSectionCallable("Entity\'s Rider", new Callable<String>() {
 			public String call() throws Exception {
@@ -2120,6 +2244,10 @@ public abstract class Entity {
 		return new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ChatComponentText(nbttagcompound.toString()));
 	}
 
+	public boolean isSpectatedByPlayer(EntityPlayerMP var1) {
+		return true;
+	}
+
 	public AxisAlignedBB getEntityBoundingBox() {
 		return this.boundingBox;
 	}
@@ -2199,6 +2327,18 @@ public abstract class Entity {
 	 */
 	public boolean sendCommandFeedback() {
 		return false;
+	}
+
+	public void setCommandStat(CommandResultStats.Type commandresultstats$type, int i) {
+		this.cmdResultStats.func_179672_a(this, commandresultstats$type, i);
+	}
+
+	public CommandResultStats getCommandStats() {
+		return this.cmdResultStats;
+	}
+
+	public void func_174817_o(Entity entityIn) {
+		this.cmdResultStats.func_179671_a(entityIn.getCommandStats());
 	}
 
 	public NBTTagCompound getNBTTagCompound() {

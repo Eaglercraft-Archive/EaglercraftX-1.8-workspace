@@ -2,6 +2,8 @@ package net.minecraft.entity;
 
 import net.minecraft.block.BlockFence;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -110,6 +112,35 @@ public class EntityLeashKnot extends EntityHanging {
 	 * First layer of player interaction
 	 */
 	public boolean interactFirst(EntityPlayer entityplayer) {
+		ItemStack itemstack = entityplayer.getHeldItem();
+		boolean flag = false;
+		if (itemstack != null && itemstack.getItem() == Items.lead && !this.worldObj.isRemote) {
+			double d0 = 7.0D;
+
+			for (EntityLiving entityliving : this.worldObj.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(
+					this.posX - d0, this.posY - d0, this.posZ - d0, this.posX + d0, this.posY + d0, this.posZ + d0))) {
+				if (entityliving.getLeashed() && entityliving.getLeashedToEntity() == entityplayer) {
+					entityliving.setLeashedToEntity(this, true);
+					flag = true;
+				}
+			}
+		}
+
+		if (!this.worldObj.isRemote && !flag) {
+			this.setDead();
+			if (entityplayer.capabilities.isCreativeMode) {
+				double d1 = 7.0D;
+
+				for (EntityLiving entityliving1 : this.worldObj.getEntitiesWithinAABB(EntityLiving.class,
+						new AxisAlignedBB(this.posX - d1, this.posY - d1, this.posZ - d1, this.posX + d1,
+								this.posY + d1, this.posZ + d1))) {
+					if (entityliving1.getLeashed() && entityliving1.getLeashedToEntity() == this) {
+						entityliving1.clearLeashed(true, false);
+					}
+				}
+			}
+		}
+
 		return true;
 	}
 

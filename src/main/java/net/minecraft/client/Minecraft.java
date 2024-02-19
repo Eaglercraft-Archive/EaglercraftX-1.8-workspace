@@ -306,7 +306,7 @@ public class Minecraft implements IThreadListener {
 
 	public Minecraft(GameConfiguration gameConfig) {
 		theMinecraft = this;
-		StringTranslate.doCLINIT();
+		StringTranslate.initClient();
 		this.launchedVersion = gameConfig.gameInfo.version;
 		this.mcDefaultResourcePack = new DefaultResourcePack();
 		this.session = gameConfig.userInfo.session;
@@ -2054,7 +2054,7 @@ public class Minecraft implements IThreadListener {
 	}
 
 	public ListenableFuture<Object> scheduleResourcesRefresh() {
-		return this.addScheduledTask(new Runnable() {
+		return this.addScheduledTaskFuture(new Runnable() {
 			public void run() {
 				Minecraft.this.loadingScreen.eaglerShow(I18n.format("resourcePack.load.refreshing"),
 						I18n.format("resourcePack.load.pleaseWait"));
@@ -2186,7 +2186,7 @@ public class Minecraft implements IThreadListener {
 		this.entityRenderer.loadEntityShader(viewingEntity);
 	}
 
-	public <V> ListenableFuture<V> addScheduledTask(Callable<V> callableToSchedule) {
+	public <V> ListenableFuture<V> addScheduledTaskFuture(Callable<V> callableToSchedule) {
 		Validate.notNull(callableToSchedule);
 		ListenableFutureTask listenablefuturetask = ListenableFutureTask.create(callableToSchedule);
 		synchronized (this.scheduledTasks) {
@@ -2195,9 +2195,13 @@ public class Minecraft implements IThreadListener {
 		}
 	}
 
-	public ListenableFuture<Object> addScheduledTask(Runnable runnableToSchedule) {
+	public ListenableFuture<Object> addScheduledTaskFuture(Runnable runnableToSchedule) {
 		Validate.notNull(runnableToSchedule);
-		return this.addScheduledTask(Executors.callable(runnableToSchedule));
+		return this.addScheduledTaskFuture(Executors.callable(runnableToSchedule));
+	}
+
+	public void addScheduledTask(Runnable runnableToSchedule) {
+		this.addScheduledTaskFuture(Executors.callable(runnableToSchedule));
 	}
 
 	public BlockRendererDispatcher getBlockRendererDispatcher() {

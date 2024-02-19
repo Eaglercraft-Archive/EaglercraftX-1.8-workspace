@@ -4,7 +4,7 @@ import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import net.lax1dude.eaglercraft.v1_8.profile.EaglerProfile;
-import net.lax1dude.eaglercraft.v1_8.sp.server.classes.net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.

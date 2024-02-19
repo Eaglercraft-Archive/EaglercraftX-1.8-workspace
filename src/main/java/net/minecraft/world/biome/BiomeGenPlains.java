@@ -1,10 +1,11 @@
 package net.minecraft.world.biome;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-
+import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -34,6 +35,9 @@ public class BiomeGenPlains extends BiomeGenBase {
 		this.setTemperatureRainfall(0.8F, 0.4F);
 		this.setHeight(height_LowPlains);
 		this.spawnableCreatureList.add(new BiomeGenBase.SpawnListEntry(EntityHorse.class, 5, 2, 6));
+		this.theBiomeDecorator.treesPerChunk = -999;
+		this.theBiomeDecorator.flowersPerChunk = 4;
+		this.theBiomeDecorator.grassPerChunk = 10;
 	}
 
 	public BlockFlower.EnumFlowerType pickRandomFlower(EaglercraftRandom random, BlockPos blockpos) {
@@ -59,6 +63,39 @@ public class BiomeGenPlains extends BiomeGenBase {
 		} else {
 			return BlockFlower.EnumFlowerType.DANDELION;
 		}
+	}
+
+	public void decorate(World world, EaglercraftRandom random, BlockPos blockpos) {
+		double d0 = GRASS_COLOR_NOISE.func_151601_a((double) (blockpos.getX() + 8) / 200.0D,
+				(double) (blockpos.getZ() + 8) / 200.0D);
+		if (d0 < -0.8D) {
+			this.theBiomeDecorator.flowersPerChunk = 15;
+			this.theBiomeDecorator.grassPerChunk = 5;
+		} else {
+			this.theBiomeDecorator.flowersPerChunk = 4;
+			this.theBiomeDecorator.grassPerChunk = 10;
+			DOUBLE_PLANT_GENERATOR.setPlantType(BlockDoublePlant.EnumPlantType.GRASS);
+
+			for (int i = 0; i < 7; ++i) {
+				int j = random.nextInt(16) + 8;
+				int k = random.nextInt(16) + 8;
+				int l = random.nextInt(world.getHeight(blockpos.add(j, 0, k)).getY() + 32);
+				DOUBLE_PLANT_GENERATOR.generate(world, random, blockpos.add(j, l, k));
+			}
+		}
+
+		if (this.field_150628_aC) {
+			DOUBLE_PLANT_GENERATOR.setPlantType(BlockDoublePlant.EnumPlantType.SUNFLOWER);
+
+			for (int i1 = 0; i1 < 10; ++i1) {
+				int j1 = random.nextInt(16) + 8;
+				int k1 = random.nextInt(16) + 8;
+				int l1 = random.nextInt(world.getHeight(blockpos.add(j1, 0, k1)).getY() + 32);
+				DOUBLE_PLANT_GENERATOR.generate(world, random, blockpos.add(j1, l1, k1));
+			}
+		}
+
+		super.decorate(world, random, blockpos);
 	}
 
 	protected BiomeGenBase createMutatedBiome(int i) {

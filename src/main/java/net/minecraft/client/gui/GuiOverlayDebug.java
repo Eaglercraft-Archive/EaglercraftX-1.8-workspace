@@ -399,7 +399,7 @@ public class GuiOverlayDebug extends Gui {
 									Float.valueOf(MathHelper.wrapAngleTo180_float(entity.rotationPitch)) }) });
 			if (this.mc.theWorld != null && this.mc.theWorld.isBlockLoaded(blockpos)) {
 				Chunk chunk = this.mc.theWorld.getChunkFromBlockCoords(blockpos);
-				arraylist.add("Biome: " + chunk.getBiome(blockpos).biomeName);
+				arraylist.add("Biome: " + chunk.getBiome(blockpos, null).biomeName);
 				arraylist.add("Light: " + chunk.getLightSubtracted(blockpos, 0) + " ("
 						+ chunk.getLightFor(EnumSkyBlock.SKY, blockpos) + " sky, "
 						+ chunk.getLightFor(EnumSkyBlock.BLOCK, blockpos) + " block)");

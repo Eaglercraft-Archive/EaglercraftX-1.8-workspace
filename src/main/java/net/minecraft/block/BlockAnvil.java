@@ -81,6 +81,14 @@ public class BlockAnvil extends BlockFalling {
 				.withProperty(FACING, enumfacing).withProperty(DAMAGE, Integer.valueOf(meta >> 2));
 	}
 
+	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
+			EnumFacing side, float hitX, float hitY, float hitZ) {
+		if (!worldIn.isRemote) {
+			playerIn.displayGui(new BlockAnvil.Anvil(worldIn, pos));
+		}
+		return true;
+	}
+
 	/**+
 	 * Gets the metadata of the item this Block can drop. This
 	 * method is called when the block gets destroyed. It returns
@@ -137,11 +145,6 @@ public class BlockAnvil extends BlockFalling {
 	public IBlockState getStateFromMeta(int meta) {
 		return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta & 3)).withProperty(DAMAGE,
 				Integer.valueOf((meta & 15) >> 2));
-	}
-
-	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-			EnumFacing side, float hitX, float hitY, float hitZ) {
-		return true;
 	}
 
 	/**+

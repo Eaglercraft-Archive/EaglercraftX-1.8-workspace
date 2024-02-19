@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.base.Predicate;
 
+import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
@@ -42,6 +43,7 @@ import net.minecraft.world.World;
  * 
  */
 public class BlockRailDetector extends BlockRailBase {
+
 	public static PropertyEnum<BlockRailBase.EnumRailDirection> SHAPE;
 	public static final PropertyBool POWERED = PropertyBool.create("powered");
 
@@ -77,6 +79,30 @@ public class BlockRailDetector extends BlockRailBase {
 	 */
 	public boolean canProvidePower() {
 		return true;
+	}
+
+	/**+
+	 * Called When an Entity Collided with the Block
+	 */
+	public void onEntityCollidedWithBlock(World world, BlockPos blockpos, IBlockState iblockstate, Entity var4) {
+		if (!world.isRemote) {
+			if (!((Boolean) iblockstate.getValue(POWERED)).booleanValue()) {
+				this.updatePoweredState(world, blockpos, iblockstate);
+			}
+		}
+	}
+
+	/**+
+	 * Called randomly when setTickRandomly is set to true (used by
+	 * e.g. crops to grow, etc.)
+	 */
+	public void randomTick(World var1, BlockPos var2, IBlockState var3, EaglercraftRandom var4) {
+	}
+
+	public void updateTick(World world, BlockPos blockpos, IBlockState iblockstate, EaglercraftRandom var4) {
+		if (!world.isRemote && ((Boolean) iblockstate.getValue(POWERED)).booleanValue()) {
+			this.updatePoweredState(world, blockpos, iblockstate);
+		}
 	}
 
 	public int getWeakPower(IBlockAccess var1, BlockPos var2, IBlockState iblockstate, EnumFacing var4) {

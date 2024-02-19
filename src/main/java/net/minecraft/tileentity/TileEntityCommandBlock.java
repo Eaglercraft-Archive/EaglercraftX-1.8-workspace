@@ -1,6 +1,7 @@
 package net.minecraft.tileentity;
 
 import net.lax1dude.eaglercraft.v1_8.netty.ByteBuf;
+import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -100,4 +101,7 @@ public class TileEntityCommandBlock extends TileEntity {
 		return this.commandBlockLogic;
 	}
 
+	public CommandResultStats getCommandResultStats() {
+		return this.commandBlockLogic.getCommandResultStats();
+	}
 }

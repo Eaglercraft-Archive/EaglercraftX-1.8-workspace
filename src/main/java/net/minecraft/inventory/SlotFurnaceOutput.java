@@ -1,9 +1,12 @@
 package net.minecraft.inventory;
 
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.stats.AchievementList;
+import net.minecraft.util.MathHelper;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -76,6 +79,28 @@ public class SlotFurnaceOutput extends Slot {
 	 */
 	protected void onCrafting(ItemStack stack) {
 		stack.onCrafting(this.thePlayer.worldObj, this.thePlayer, this.field_75228_b);
+		if (!this.thePlayer.worldObj.isRemote) {
+			int i = this.field_75228_b;
+			float f = FurnaceRecipes.instance().getSmeltingExperience(stack);
+			if (f == 0.0F) {
+				i = 0;
+			} else if (f < 1.0F) {
+				int j = MathHelper.floor_float((float) i * f);
+				if (j < MathHelper.ceiling_float_int((float) i * f)
+						&& Math.random() < (double) ((float) i * f - (float) j)) {
+					++j;
+				}
+
+				i = j;
+			}
+
+			while (i > 0) {
+				int k = EntityXPOrb.getXPSplit(i);
+				i -= k;
+				this.thePlayer.worldObj.spawnEntityInWorld(new EntityXPOrb(this.thePlayer.worldObj, this.thePlayer.posX,
+						this.thePlayer.posY + 0.5D, this.thePlayer.posZ + 0.5D, k));
+			}
+		}
 
 		this.field_75228_b = 0;
 		if (stack.getItem() == Items.iron_ingot) {

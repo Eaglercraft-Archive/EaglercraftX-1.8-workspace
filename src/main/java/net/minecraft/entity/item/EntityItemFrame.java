@@ -66,6 +66,11 @@ public class EntityItemFrame extends EntityHanging {
 		if (this.isEntityInvulnerable(damagesource)) {
 			return false;
 		} else if (!damagesource.isExplosion() && this.getDisplayedItem() != null) {
+			if (!this.worldObj.isRemote) {
+				this.dropItemOrSelf(damagesource.getEntity(), false);
+				this.setDisplayedItem((ItemStack) null);
+			}
+
 			return true;
 		} else {
 			return super.attackEntityFrom(damagesource, f);
@@ -219,6 +224,19 @@ public class EntityItemFrame extends EntityHanging {
 	 * First layer of player interaction
 	 */
 	public boolean interactFirst(EntityPlayer entityplayer) {
+		if (this.getDisplayedItem() == null) {
+			ItemStack itemstack = entityplayer.getHeldItem();
+			if (itemstack != null && !this.worldObj.isRemote) {
+				this.setDisplayedItem(itemstack);
+				if (!entityplayer.capabilities.isCreativeMode && --itemstack.stackSize <= 0) {
+					entityplayer.inventory.setInventorySlotContents(entityplayer.inventory.currentItem,
+							(ItemStack) null);
+				}
+			}
+		} else if (!this.worldObj.isRemote) {
+			this.setItemRotation(this.getRotation() + 1);
+		}
+
 		return true;
 	}
 

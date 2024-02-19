@@ -1,7 +1,5 @@
 package net.minecraft.entity;
 
-import org.apache.commons.lang3.Validate;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRedstoneDiode;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,6 +9,8 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+
+import org.apache.commons.lang3.Validate;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -108,7 +108,14 @@ public abstract class EntityHanging extends Entity {
 		this.prevPosX = this.posX;
 		this.prevPosY = this.posY;
 		this.prevPosZ = this.posZ;
-		this.tickCounter1++;
+		if (this.tickCounter1++ == 100 && !this.worldObj.isRemote) {
+			this.tickCounter1 = 0;
+			if (!this.isDead && !this.onValidSurface()) {
+				this.setDead();
+				this.onBroken((Entity) null);
+			}
+		}
+
 	}
 
 	/**+
@@ -167,10 +174,31 @@ public abstract class EntityHanging extends Entity {
 	}
 
 	/**+
+	 * Called when the entity is attacked.
+	 */
+	public boolean attackEntityFrom(DamageSource damagesource, float var2) {
+		if (this.isEntityInvulnerable(damagesource)) {
+			return false;
+		} else {
+			if (!this.isDead && !this.worldObj.isRemote) {
+				this.setDead();
+				this.setBeenAttacked();
+				this.onBroken(damagesource.getEntity());
+			}
+
+			return true;
+		}
+	}
+
+	/**+
 	 * Tries to moves the entity by the passed in displacement.
 	 * Args: x, y, z
 	 */
 	public void moveEntity(double d0, double d1, double d2) {
+		if (!this.worldObj.isRemote && !this.isDead && d0 * d0 + d1 * d1 + d2 * d2 > 0.0D) {
+			this.setDead();
+			this.onBroken((Entity) null);
+		}
 
 	}
 
@@ -178,6 +206,10 @@ public abstract class EntityHanging extends Entity {
 	 * Adds to the current velocity of the entity. Args: x, y, z
 	 */
 	public void addVelocity(double d0, double d1, double d2) {
+		if (!this.worldObj.isRemote && !this.isDead && d0 * d0 + d1 * d1 + d2 * d2 > 0.0D) {
+			this.setDead();
+			this.onBroken((Entity) null);
+		}
 
 	}
 

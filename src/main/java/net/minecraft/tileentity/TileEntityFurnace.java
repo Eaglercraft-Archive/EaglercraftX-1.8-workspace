@@ -1,6 +1,7 @@
 package net.minecraft.tileentity;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockFurnace;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -22,6 +23,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.MathHelper;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -219,9 +221,53 @@ public class TileEntityFurnace extends TileEntityLockable implements ITickable, 
 	 * Like the old updateEntity(), except more generic.
 	 */
 	public void update() {
+		boolean flag = this.isBurning();
+		boolean flag1 = false;
 		if (this.isBurning()) {
 			--this.furnaceBurnTime;
 		}
+
+		if (!this.worldObj.isRemote) {
+			if (this.isBurning() || this.furnaceItemStacks[1] != null && this.furnaceItemStacks[0] != null) {
+				if (!this.isBurning() && this.canSmelt()) {
+					this.currentItemBurnTime = this.furnaceBurnTime = getItemBurnTime(this.furnaceItemStacks[1]);
+					if (this.isBurning()) {
+						flag1 = true;
+						if (this.furnaceItemStacks[1] != null) {
+							--this.furnaceItemStacks[1].stackSize;
+							if (this.furnaceItemStacks[1].stackSize == 0) {
+								Item item = this.furnaceItemStacks[1].getItem().getContainerItem();
+								this.furnaceItemStacks[1] = item != null ? new ItemStack(item) : null;
+							}
+						}
+					}
+				}
+
+				if (this.isBurning() && this.canSmelt()) {
+					++this.cookTime;
+					if (this.cookTime == this.totalCookTime) {
+						this.cookTime = 0;
+						this.totalCookTime = this.getCookTime(this.furnaceItemStacks[0]);
+						this.smeltItem();
+						flag1 = true;
+					}
+				} else {
+					this.cookTime = 0;
+				}
+			} else if (!this.isBurning() && this.cookTime > 0) {
+				this.cookTime = MathHelper.clamp_int(this.cookTime - 2, 0, this.totalCookTime);
+			}
+
+			if (flag != this.isBurning()) {
+				flag1 = true;
+				BlockFurnace.setState(this.isBurning(), this.worldObj, this.pos);
+			}
+		}
+
+		if (flag1) {
+			this.markDirty();
+		}
+
 	}
 
 	public int getCookTime(ItemStack stack) {

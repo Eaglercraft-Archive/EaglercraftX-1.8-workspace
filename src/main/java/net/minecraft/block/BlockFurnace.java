@@ -14,6 +14,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.BlockPos;
@@ -59,6 +60,31 @@ public class BlockFurnace extends BlockContainer {
 		return Item.getItemFromBlock(Blocks.furnace);
 	}
 
+	public void onBlockAdded(World world, BlockPos blockpos, IBlockState iblockstate) {
+		this.setDefaultFacing(world, blockpos, iblockstate);
+	}
+
+	private void setDefaultFacing(World worldIn, BlockPos pos, IBlockState state) {
+		if (!worldIn.isRemote) {
+			Block block = worldIn.getBlockState(pos.north()).getBlock();
+			Block block1 = worldIn.getBlockState(pos.south()).getBlock();
+			Block block2 = worldIn.getBlockState(pos.west()).getBlock();
+			Block block3 = worldIn.getBlockState(pos.east()).getBlock();
+			EnumFacing enumfacing = (EnumFacing) state.getValue(FACING);
+			if (enumfacing == EnumFacing.NORTH && block.isFullBlock() && !block1.isFullBlock()) {
+				enumfacing = EnumFacing.SOUTH;
+			} else if (enumfacing == EnumFacing.SOUTH && block1.isFullBlock() && !block.isFullBlock()) {
+				enumfacing = EnumFacing.NORTH;
+			} else if (enumfacing == EnumFacing.WEST && block2.isFullBlock() && !block3.isFullBlock()) {
+				enumfacing = EnumFacing.EAST;
+			} else if (enumfacing == EnumFacing.EAST && block3.isFullBlock() && !block2.isFullBlock()) {
+				enumfacing = EnumFacing.WEST;
+			}
+
+			worldIn.setBlockState(pos, state.withProperty(FACING, enumfacing), 2);
+		}
+	}
+
 	public void randomDisplayTick(World world, BlockPos blockpos, IBlockState iblockstate, EaglercraftRandom random) {
 		if (this.isBurning) {
 			EnumFacing enumfacing = (EnumFacing) iblockstate.getValue(FACING);
@@ -90,7 +116,17 @@ public class BlockFurnace extends BlockContainer {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
-		return true;
+		if (world.isRemote) {
+			return true;
+		} else {
+			TileEntity tileentity = world.getTileEntity(blockpos);
+			if (tileentity instanceof TileEntityFurnace) {
+				entityplayer.displayGUIChest((TileEntityFurnace) tileentity);
+				entityplayer.triggerAchievement(StatList.field_181741_Y);
+			}
+
+			return true;
+		}
 	}
 
 	public static void setState(boolean active, World worldIn, BlockPos pos) {

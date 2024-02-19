@@ -4,6 +4,14 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIFollowParent;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIMate;
+import net.minecraft.entity.ai.EntityAIPanic;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAITempt;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -46,6 +54,14 @@ public class EntityChicken extends EntityAnimal {
 		super(worldIn);
 		this.setSize(0.4F, 0.7F);
 		this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;
+		this.tasks.addTask(0, new EntityAISwimming(this));
+		this.tasks.addTask(1, new EntityAIPanic(this, 1.4D));
+		this.tasks.addTask(2, new EntityAIMate(this, 1.0D));
+		this.tasks.addTask(3, new EntityAITempt(this, 1.0D, Items.wheat_seeds, false));
+		this.tasks.addTask(4, new EntityAIFollowParent(this, 1.1D));
+		this.tasks.addTask(5, new EntityAIWander(this, 1.0D));
+		this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+		this.tasks.addTask(7, new EntityAILookIdle(this));
 	}
 
 	public float getEyeHeight() {
@@ -79,6 +95,12 @@ public class EntityChicken extends EntityAnimal {
 		}
 
 		this.wingRotation += this.wingRotDelta * 2.0F;
+		if (!this.worldObj.isRemote && !this.isChild() && !this.isChickenJockey() && --this.timeUntilNextEgg <= 0) {
+			this.playSound("mob.chicken.plop", 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+			this.dropItem(Items.egg, 1);
+			this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;
+		}
+
 	}
 
 	public void fall(float var1, float var2) {

@@ -1,9 +1,10 @@
 package net.minecraft.item;
 
 import java.util.List;
-
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
 
 /**+
@@ -44,9 +45,20 @@ public class ItemAppleGold extends ItemFood {
 	}
 
 	protected void onFoodEaten(ItemStack itemstack, World world, EntityPlayer entityplayer) {
-		if (itemstack.getMetadata() == 0) {
+		if (!world.isRemote) {
+			entityplayer.addPotionEffect(new PotionEffect(Potion.absorption.id, 2400, 0));
+		}
+
+		if (itemstack.getMetadata() > 0) {
+			if (!world.isRemote) {
+				entityplayer.addPotionEffect(new PotionEffect(Potion.regeneration.id, 600, 4));
+				entityplayer.addPotionEffect(new PotionEffect(Potion.resistance.id, 6000, 0));
+				entityplayer.addPotionEffect(new PotionEffect(Potion.fireResistance.id, 6000, 0));
+			}
+		} else {
 			super.onFoodEaten(itemstack, world, entityplayer);
 		}
+
 	}
 
 	/**+

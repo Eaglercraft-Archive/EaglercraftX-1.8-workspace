@@ -59,6 +59,20 @@ public class ContainerBeacon extends Container {
 		return this.tileBeacon;
 	}
 
+	/**+
+	 * Called when the container is closed.
+	 */
+	public void onContainerClosed(EntityPlayer entityplayer) {
+		super.onContainerClosed(entityplayer);
+		if (entityplayer != null && !entityplayer.worldObj.isRemote) {
+			ItemStack itemstack = this.beaconSlot.decrStackSize(this.beaconSlot.getSlotStackLimit());
+			if (itemstack != null) {
+				entityplayer.dropPlayerItemWithRandomChoice(itemstack, false);
+			}
+
+		}
+	}
+
 	public boolean canInteractWith(EntityPlayer entityplayer) {
 		return this.tileBeacon.isUseableByPlayer(entityplayer);
 	}

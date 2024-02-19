@@ -1,15 +1,5 @@
 package net.minecraft.util;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.IllegalFormatException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -18,6 +8,16 @@ import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.IOUtils;
 import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.IllegalFormatException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -54,16 +54,27 @@ public class StringTranslate {
 	 * Is the private singleton instance of StringTranslate.
 	 */
 	private static StringTranslate instance = new StringTranslate();
+	static StringTranslate fallbackInstance = null;
 	private final Map<String, String> languageList = Maps.newHashMap();
 	private long lastUpdateTimeInMilliseconds;
 
-	public StringTranslate() {
-		this.lastUpdateTimeInMilliseconds = System.currentTimeMillis();
+	private StringTranslate() {
 	}
 
-	public static void doCLINIT() {
-		InputStream inputstream = EagRuntime.getResourceStream("/assets/minecraft/lang/en_US.lang");
-		for (String s : IOUtils.readLines(inputstream, Charsets.UTF_8)) {
+	public static void initClient() {
+		try (InputStream inputstream = EagRuntime.getResourceStream("/assets/minecraft/lang/en_US.lang")) {
+			initServer(IOUtils.readLines(inputstream, StandardCharsets.UTF_8));
+			fallbackInstance = new StringTranslate();
+			fallbackInstance.replaceWith(instance.languageList);
+			SingleplayerServerController.updateLocale(dump());
+		} catch (IOException e) {
+			EagRuntime.debugPrintStackTrace(e);
+		}
+	}
+
+	public static void initServer(List<String> strs) {
+		instance.languageList.clear();
+		for (String s : strs) {
 			if (!s.isEmpty() && s.charAt(0) != 35) {
 				String[] astring = (String[]) Iterables.toArray(equalSignSplitter.split(s), String.class);
 				if (astring != null && astring.length == 2) {
@@ -95,7 +106,6 @@ public class StringTranslate {
 		instance.languageList.clear();
 		instance.languageList.putAll(parMap);
 		instance.lastUpdateTimeInMilliseconds = System.currentTimeMillis();
-		SingleplayerServerController.updateLocale(dump());
 	}
 
 	/**+

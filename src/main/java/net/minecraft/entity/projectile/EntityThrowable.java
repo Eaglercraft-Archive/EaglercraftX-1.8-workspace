@@ -1,5 +1,7 @@
 package net.minecraft.entity.projectile;
 
+import java.util.List;
+import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -7,6 +9,7 @@ import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
@@ -14,6 +17,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -191,6 +195,35 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
 					movingobjectposition.hitVec.zCoord);
 		}
 
+		if (!this.worldObj.isRemote) {
+			Entity entity = null;
+			List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox()
+					.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+			double d0 = 0.0D;
+			EntityLivingBase entitylivingbase = this.getThrower();
+
+			for (int j = 0; j < list.size(); ++j) {
+				Entity entity1 = (Entity) list.get(j);
+				if (entity1.canBeCollidedWith() && (entity1 != entitylivingbase || this.ticksInAir >= 5)) {
+					float f = 0.3F;
+					AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().expand((double) f, (double) f,
+							(double) f);
+					MovingObjectPosition movingobjectposition1 = axisalignedbb.calculateIntercept(vec3, vec31);
+					if (movingobjectposition1 != null) {
+						double d1 = vec3.squareDistanceTo(movingobjectposition1.hitVec);
+						if (d1 < d0 || d0 == 0.0D) {
+							entity = entity1;
+							d0 = d1;
+						}
+					}
+				}
+			}
+
+			if (entity != null) {
+				movingobjectposition = new MovingObjectPosition(entity);
+			}
+		}
+
 		if (movingobjectposition != null) {
 			if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK
 					&& this.worldObj.getBlockState(movingobjectposition.getBlockPos()).getBlock() == Blocks.portal) {
@@ -304,6 +337,17 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
 	public EntityLivingBase getThrower() {
 		if (this.thrower == null && this.throwerName != null && this.throwerName.length() > 0) {
 			this.thrower = this.worldObj.getPlayerEntityByName(this.throwerName);
+			if (this.thrower == null && this.worldObj instanceof WorldServer) {
+				try {
+					Entity entity = ((WorldServer) this.worldObj)
+							.getEntityFromUuid(EaglercraftUUID.fromString(this.throwerName));
+					if (entity instanceof EntityLivingBase) {
+						this.thrower = (EntityLivingBase) entity;
+					}
+				} catch (Throwable var2) {
+					this.thrower = null;
+				}
+			}
 		}
 
 		return this.thrower;

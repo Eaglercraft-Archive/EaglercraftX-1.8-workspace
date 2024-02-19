@@ -1,8 +1,14 @@
 package net.minecraft.world.demo;
 
-import net.lax1dude.eaglercraft.v1_8.EaglercraftVersion;
+import net.minecraft.profiler.Profiler;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.WorldInfo;
+
+import net.lax1dude.eaglercraft.v1_8.EaglercraftVersion;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -24,8 +30,15 @@ import net.minecraft.world.WorldType;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-public class DemoWorldServer {
+public class DemoWorldServer extends WorldServer {
+
 	private static final long demoWorldSeed = EaglercraftVersion.demoWorldSeed;
 	public static final WorldSettings demoWorldSettings = (new WorldSettings(demoWorldSeed,
 			WorldSettings.GameType.SURVIVAL, true, false, WorldType.DEFAULT)).enableBonusChest();
+
+	public DemoWorldServer(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo worldInfoIn, int dimensionId,
+			Profiler profilerIn) {
+		super(server, saveHandlerIn, worldInfoIn, dimensionId, profilerIn);
+		this.worldInfo.populateFromWorldSettings(demoWorldSettings);
+	}
 }

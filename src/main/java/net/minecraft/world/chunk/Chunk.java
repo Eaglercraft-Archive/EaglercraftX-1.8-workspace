@@ -1,18 +1,16 @@
 package net.minecraft.world.chunk;
 
-import java.util.ArrayList;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Maps;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
+
 import java.util.concurrent.Callable;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Maps;
-
-import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
-import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
-import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
+import net.lax1dude.eaglercraft.v1_8.sp.server.EaglerMinecraftServer;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
@@ -32,7 +30,11 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
+import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -86,7 +88,7 @@ public class Chunk {
 		this.updateSkylightColumns = new boolean[256];
 		this.chunkTileEntityMap = Maps.newHashMap();
 		this.queuedLightChecks = 4096;
-		this.tileEntityPosQueue = new ArrayList();
+		this.tileEntityPosQueue = new LinkedList();
 		this.entityLists = (ClassInheritanceMultiMap[]) (new ClassInheritanceMultiMap[16]);
 		this.worldObj = worldIn;
 		this.xPosition = x;
@@ -243,6 +245,9 @@ public class Chunk {
 			}
 		}
 
+		if (!this.worldObj.isRemote) {
+			++EaglerMinecraftServer.counterLightUpdate;
+		}
 		this.isModified = true;
 	}
 
@@ -401,6 +406,9 @@ public class Chunk {
 				this.updateSkylightNeighborHeight(k, l, j2, k2);
 			}
 
+			if (!this.worldObj.isRemote) {
+				++EaglerMinecraftServer.counterLightUpdate;
+			}
 			this.isModified = true;
 		}
 	}
@@ -569,7 +577,9 @@ public class Chunk {
 
 			extendedblockstorage.set(i, j & 15, k, state);
 			if (block1 != block) {
-				if (block1 instanceof ITileEntityProvider) {
+				if (!this.worldObj.isRemote) {
+					block1.breakBlock(this.worldObj, pos, iblockstate);
+				} else if (block1 instanceof ITileEntityProvider) {
 					this.worldObj.removeTileEntity(pos);
 				}
 			}
@@ -601,6 +611,10 @@ public class Chunk {
 					if (tileentity != null) {
 						tileentity.updateContainingBlockInfo();
 					}
+				}
+
+				if (!this.worldObj.isRemote && block1 != block) {
+					block.onBlockAdded(this.worldObj, pos, state);
 				}
 
 				if (block instanceof ITileEntityProvider) {
@@ -990,7 +1004,7 @@ public class Chunk {
 
 	public void func_150804_b(boolean parFlag) {
 		if (this.isGapLightingUpdated && !this.worldObj.provider.getHasNoSky() && !parFlag) {
-			this.recheckGaps(true);
+			this.recheckGaps(this.worldObj.isRemote);
 		}
 
 		this.field_150815_m = true;
@@ -1120,10 +1134,16 @@ public class Chunk {
 
 	}
 
-	public BiomeGenBase getBiome(BlockPos pos) {
+	public BiomeGenBase getBiome(BlockPos pos, WorldChunkManager chunkManager) {
 		int i = pos.getX() & 15;
 		int j = pos.getZ() & 15;
 		int k = this.blockBiomeArray[j << 4 | i] & 255;
+		if (chunkManager != null && k == 255) {
+			BiomeGenBase biomegenbase = chunkManager.getBiomeGenerator(pos, BiomeGenBase.plains);
+			k = biomegenbase.biomeID;
+			this.blockBiomeArray[j << 4 | i] = (byte) (k & 255);
+		}
+
 		BiomeGenBase biomegenbase1 = BiomeGenBase.getBiome(k);
 		return biomegenbase1 == null ? BiomeGenBase.plains : biomegenbase1;
 	}

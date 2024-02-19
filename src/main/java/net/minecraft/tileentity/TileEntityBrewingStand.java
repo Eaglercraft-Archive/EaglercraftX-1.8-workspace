@@ -1,7 +1,9 @@
 package net.minecraft.tileentity;
 
+import java.util.Arrays;
 import java.util.List;
-
+import net.minecraft.block.BlockBrewingStand;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
@@ -101,6 +103,24 @@ public class TileEntityBrewingStand extends TileEntityLockable implements ITicka
 		} else if (this.canBrew()) {
 			this.brewTime = 400;
 			this.ingredientID = this.brewingItemStacks[3].getItem();
+		}
+
+		if (!this.worldObj.isRemote) {
+			boolean[] aboolean = this.func_174902_m();
+			if (!Arrays.equals(aboolean, this.filledSlots)) {
+				this.filledSlots = aboolean;
+				IBlockState iblockstate = this.worldObj.getBlockState(this.getPos());
+				if (!(iblockstate.getBlock() instanceof BlockBrewingStand)) {
+					return;
+				}
+
+				for (int i = 0; i < BlockBrewingStand.HAS_BOTTLE.length; ++i) {
+					iblockstate = iblockstate.withProperty(BlockBrewingStand.HAS_BOTTLE[i],
+							Boolean.valueOf(aboolean[i]));
+				}
+
+				this.worldObj.setBlockState(this.pos, iblockstate, 2);
+			}
 		}
 
 	}

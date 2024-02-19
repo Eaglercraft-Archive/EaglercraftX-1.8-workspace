@@ -78,7 +78,13 @@ public class ItemHoe extends Item {
 				(double) ((float) target.getZ() + 0.5F), newState.getBlock().stepSound.getStepSound(),
 				(newState.getBlock().stepSound.getVolume() + 1.0F) / 2.0F,
 				newState.getBlock().stepSound.getFrequency() * 0.8F);
-		return true;
+		if (worldIn.isRemote) {
+			return true;
+		} else {
+			worldIn.setBlockState(target, newState);
+			stack.damageItem(1, player);
+			return true;
+		}
 	}
 
 	/**+

@@ -44,6 +44,12 @@ public class GameRules {
 		this.addGameRule("randomTickSpeed", "3", GameRules.ValueType.NUMERICAL_VALUE);
 		this.addGameRule("sendCommandFeedback", "true", GameRules.ValueType.BOOLEAN_VALUE);
 		this.addGameRule("reducedDebugInfo", "false", GameRules.ValueType.BOOLEAN_VALUE);
+		this.addGameRule("loadSpawnChunks", "false", GameRules.ValueType.BOOLEAN_VALUE);
+		this.addGameRule("bedSpawnPoint", "true", GameRules.ValueType.BOOLEAN_VALUE);
+		this.addGameRule("clickToRide", "false", GameRules.ValueType.BOOLEAN_VALUE);
+		this.addGameRule("clickToSit", "true", GameRules.ValueType.BOOLEAN_VALUE);
+		this.addGameRule("colorCodes", "true", GameRules.ValueType.BOOLEAN_VALUE);
+		this.addGameRule("doSignEditing", "true", GameRules.ValueType.BOOLEAN_VALUE);
 	}
 
 	public void addGameRule(String key, String value, GameRules.ValueType type) {

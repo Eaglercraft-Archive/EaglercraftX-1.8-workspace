@@ -1,13 +1,17 @@
 package net.minecraft.item;
 
 import java.util.List;
-
+import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Rotations;
 import net.minecraft.world.World;
 
 /**+
@@ -64,11 +68,44 @@ public class ItemArmorStand extends Item {
 					if (list.size() > 0) {
 						return false;
 					} else {
+						if (!world.isRemote) {
+							world.setBlockToAir(blockpos1);
+							world.setBlockToAir(blockpos2);
+							EntityArmorStand entityarmorstand = new EntityArmorStand(world, d0 + 0.5D, d1, d2 + 0.5D);
+							float f = (float) MathHelper.floor_float(
+									(MathHelper.wrapAngleTo180_float(entityplayer.rotationYaw - 180.0F) + 22.5F)
+											/ 45.0F)
+									* 45.0F;
+							entityarmorstand.setLocationAndAngles(d0 + 0.5D, d1, d2 + 0.5D, f, 0.0F);
+							this.applyRandomRotations(entityarmorstand, world.rand);
+							NBTTagCompound nbttagcompound = itemstack.getTagCompound();
+							if (nbttagcompound != null && nbttagcompound.hasKey("EntityTag", 10)) {
+								NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+								entityarmorstand.writeToNBTOptional(nbttagcompound1);
+								nbttagcompound1.merge(nbttagcompound.getCompoundTag("EntityTag"));
+								entityarmorstand.readFromNBT(nbttagcompound1);
+							}
+
+							world.spawnEntityInWorld(entityarmorstand);
+						}
+
 						--itemstack.stackSize;
 						return true;
 					}
 				}
 			}
 		}
+	}
+
+	private void applyRandomRotations(EntityArmorStand armorStand, EaglercraftRandom rand) {
+		Rotations rotations = armorStand.getHeadRotation();
+		float f = rand.nextFloat() * 5.0F;
+		float f1 = rand.nextFloat() * 20.0F - 10.0F;
+		Rotations rotations1 = new Rotations(rotations.getX() + f, rotations.getY() + f1, rotations.getZ());
+		armorStand.setHeadRotation(rotations1);
+		rotations = armorStand.getBodyRotation();
+		f = rand.nextFloat() * 10.0F - 5.0F;
+		rotations1 = new Rotations(rotations.getX(), rotations.getY() + f, rotations.getZ());
+		armorStand.setBodyRotation(rotations1);
 	}
 }

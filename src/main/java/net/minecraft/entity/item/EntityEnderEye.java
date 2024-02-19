@@ -1,6 +1,8 @@
 package net.minecraft.entity.item;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
@@ -137,6 +139,25 @@ public class EntityEnderEye extends Entity {
 
 		this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;
 		this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;
+		if (!this.worldObj.isRemote) {
+			double d0 = this.targetX - this.posX;
+			double d1 = this.targetZ - this.posZ;
+			float f1 = (float) Math.sqrt(d0 * d0 + d1 * d1);
+			float f2 = (float) MathHelper.func_181159_b(d1, d0);
+			double d2 = (double) f + (double) (f1 - f) * 0.0025D;
+			if (f1 < 1.0F) {
+				d2 *= 0.8D;
+				this.motionY *= 0.8D;
+			}
+
+			this.motionX = Math.cos((double) f2) * d2;
+			this.motionZ = Math.sin((double) f2) * d2;
+			if (this.posY < this.targetY) {
+				this.motionY += (1.0D - this.motionY) * 0.014999999664723873D;
+			} else {
+				this.motionY += (-1.0D - this.motionY) * 0.014999999664723873D;
+			}
+		}
 
 		float f3 = 0.25F;
 		if (this.isInWater()) {
@@ -151,6 +172,20 @@ public class EntityEnderEye extends Entity {
 					this.posY - this.motionY * (double) f3 - 0.5D,
 					this.posZ - this.motionZ * (double) f3 + this.rand.nextDouble() * 0.6D - 0.3D, this.motionX,
 					this.motionY, this.motionZ, new int[0]);
+		}
+
+		if (!this.worldObj.isRemote) {
+			this.setPosition(this.posX, this.posY, this.posZ);
+			++this.despawnTimer;
+			if (this.despawnTimer > 80 && !this.worldObj.isRemote) {
+				this.setDead();
+				if (this.shatterOrDrop) {
+					this.worldObj.spawnEntityInWorld(new EntityItem(this.worldObj, this.posX, this.posY, this.posZ,
+							new ItemStack(Items.ender_eye)));
+				} else {
+					this.worldObj.playAuxSFX(2003, new BlockPos(this), 0);
+				}
+			}
 		}
 
 	}

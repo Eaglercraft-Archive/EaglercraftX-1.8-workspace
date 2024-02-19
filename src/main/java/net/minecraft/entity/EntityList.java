@@ -106,6 +106,8 @@ public class EntityList {
 	private static final Map<Integer, Class<? extends Entity>> idToClassMapping = Maps.newHashMap();
 	private static final Map<Integer, EntityConstructor<? extends Entity>> idToConstructorMapping = Maps.newHashMap();
 	private static final Map<Class<? extends Entity>, Integer> classToIDMapping = Maps.newHashMap();
+	private static final Map<Class<? extends Entity>, EntityConstructor<? extends Entity>> classToConstructorMapping = Maps
+			.newHashMap();
 	private static final Map<String, Integer> stringToIDMapping = Maps.newHashMap();
 	public static final Map<Integer, EntityList.EntityEggInfo> entityEggs = Maps.newLinkedHashMap();
 
@@ -130,6 +132,7 @@ public class EntityList {
 			idToClassMapping.put(Integer.valueOf(id), entityClass);
 			idToConstructorMapping.put(Integer.valueOf(id), entityConstructor);
 			classToIDMapping.put(entityClass, Integer.valueOf(id));
+			classToConstructorMapping.put(entityClass, entityConstructor);
 			stringToIDMapping.put(entityName, Integer.valueOf(id));
 		}
 	}
@@ -162,6 +165,29 @@ public class EntityList {
 		}
 
 		return entity;
+	}
+
+	public static Entity createEntityByClass(Class<? extends Entity> entityClass, World worldIn) {
+		Entity entity = null;
+
+		try {
+			EntityConstructor<? extends Entity> constructor = classToConstructorMapping.get(entityClass);
+			if (constructor != null) {
+				entity = constructor.createEntity(worldIn);
+			}
+		} catch (Exception exception) {
+			logger.error("Could not create entity", exception);
+		}
+
+		return entity;
+	}
+
+	public static Entity createEntityByClassUnsafe(Class<? extends Entity> entityClass, World worldIn) {
+		EntityConstructor<? extends Entity> constructor = classToConstructorMapping.get(entityClass);
+		if (constructor != null) {
+			return constructor.createEntity(worldIn);
+		}
+		return null;
 	}
 
 	/**+
@@ -301,7 +327,7 @@ public class EntityList {
 		addMapping(EntityEnderEye.class, (w) -> new EntityEnderEye(w), "EyeOfEnderSignal", 15);
 		addMapping(EntityPotion.class, (w) -> new EntityPotion(w), "ThrownPotion", 16);
 		addMapping(EntityExpBottle.class, (w) -> new EntityExpBottle(w), "ThrownExpBottle", 17);
-		addMapping(EntityItemFrame.class, (w) -> new EntityItem(w), "ItemFrame", 18);
+		addMapping(EntityItemFrame.class, (w) -> new EntityItemFrame(w), "ItemFrame", 18);
 		addMapping(EntityWitherSkull.class, (w) -> new EntityWitherSkull(w), "WitherSkull", 19);
 		addMapping(EntityTNTPrimed.class, (w) -> new EntityTNTPrimed(w), "PrimedTnt", 20);
 		addMapping(EntityFallingBlock.class, (w) -> new EntityFallingBlock(w), "FallingSand", 21);

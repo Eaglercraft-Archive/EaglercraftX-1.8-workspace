@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -56,6 +57,10 @@ public class BiomeGenMutated extends BiomeGenBase {
 		this.maxHeight = biome.maxHeight + 0.2F;
 	}
 
+	public void decorate(World world, EaglercraftRandom random, BlockPos blockpos) {
+		this.baseBiome.theBiomeDecorator.decorate(world, random, this, blockpos);
+	}
+
 	public void genTerrainBlocks(World world, EaglercraftRandom random, ChunkPrimer chunkprimer, int i, int j,
 			double d0) {
 		this.baseBiome.genTerrainBlocks(world, random, chunkprimer, i, j, d0);
@@ -66,6 +71,10 @@ public class BiomeGenMutated extends BiomeGenBase {
 	 */
 	public float getSpawningChance() {
 		return this.baseBiome.getSpawningChance();
+	}
+
+	public WorldGenAbstractTree genBigTreeChance(EaglercraftRandom random) {
+		return this.baseBiome.genBigTreeChance(random);
 	}
 
 	public int getFoliageColorAtPos(BlockPos blockpos) {

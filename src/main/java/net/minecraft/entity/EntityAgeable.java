@@ -48,6 +48,29 @@ public abstract class EntityAgeable extends EntityCreature {
 	public boolean interact(EntityPlayer player) {
 		ItemStack itemstack = player.inventory.getCurrentItem();
 		if (itemstack != null && itemstack.getItem() == Items.spawn_egg) {
+			if (!this.worldObj.isRemote) {
+				Class oclass = EntityList.getClassFromID(itemstack.getMetadata());
+				if (oclass != null && this.getClass() == oclass) {
+					EntityAgeable entityageable = this.createChild(this);
+					if (entityageable != null) {
+						entityageable.setGrowingAge(-24000);
+						entityageable.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
+						this.worldObj.spawnEntityInWorld(entityageable);
+						if (itemstack.hasDisplayName()) {
+							entityageable.setCustomNameTag(itemstack.getDisplayName());
+						}
+
+						if (!player.capabilities.isCreativeMode) {
+							--itemstack.stackSize;
+							if (itemstack.stackSize <= 0) {
+								player.inventory.setInventorySlotContents(player.inventory.currentItem,
+										(ItemStack) null);
+							}
+						}
+					}
+				}
+			}
+
 			return true;
 		} else {
 			return false;
@@ -67,7 +90,7 @@ public abstract class EntityAgeable extends EntityCreature {
 	 * considered a child.
 	 */
 	public int getGrowingAge() {
-		return this.dataWatcher.getWatchableObjectByte(12);
+		return this.worldObj.isRemote ? this.dataWatcher.getWatchableObjectByte(12) : this.growingAge;
 	}
 
 	public void func_175501_a(int parInt1, boolean parFlag) {
@@ -144,19 +167,34 @@ public abstract class EntityAgeable extends EntityCreature {
 	 */
 	public void onLivingUpdate() {
 		super.onLivingUpdate();
-		if (this.field_175503_c > 0) {
-			if (this.field_175503_c % 4 == 0) {
-				this.worldObj.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY,
-						this.posX + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width,
-						this.posY + 0.5D + (double) (this.rand.nextFloat() * this.height),
-						this.posZ + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width, 0.0D,
-						0.0D, 0.0D, new int[0]);
+		if (this.worldObj.isRemote) {
+			if (this.field_175503_c > 0) {
+				if (this.field_175503_c % 4 == 0) {
+					this.worldObj.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY,
+							this.posX + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width,
+							this.posY + 0.5D + (double) (this.rand.nextFloat() * this.height),
+							this.posZ + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width,
+							0.0D, 0.0D, 0.0D, new int[0]);
+				}
+
+				--this.field_175503_c;
 			}
 
-			--this.field_175503_c;
+			this.setScaleForAge(this.isChild());
+		} else {
+			int i = this.getGrowingAge();
+			if (i < 0) {
+				++i;
+				this.setGrowingAge(i);
+				if (i == 0) {
+					this.onGrowingAdult();
+				}
+			} else if (i > 0) {
+				--i;
+				this.setGrowingAge(i);
+			}
 		}
 
-		this.setScaleForAge(this.isChild());
 	}
 
 	/**+

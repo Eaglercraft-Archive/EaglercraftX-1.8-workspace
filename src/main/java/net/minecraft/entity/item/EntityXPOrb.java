@@ -210,6 +210,23 @@ public class EntityXPOrb extends Entity {
 	}
 
 	/**+
+	 * Called by a player entity when they collide with an entity
+	 */
+	public void onCollideWithPlayer(EntityPlayer entityplayer) {
+		if (!this.worldObj.isRemote) {
+			if (this.delayBeforeCanPickup == 0 && entityplayer.xpCooldown == 0) {
+				entityplayer.xpCooldown = 2;
+				this.worldObj.playSoundAtEntity(entityplayer, "random.orb", 0.1F,
+						0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
+				entityplayer.onItemPickup(this, 1);
+				entityplayer.addExperience(this.xpValue);
+				this.setDead();
+			}
+
+		}
+	}
+
+	/**+
 	 * Returns the XP value of this XP orb.
 	 */
 	public int getXpValue() {

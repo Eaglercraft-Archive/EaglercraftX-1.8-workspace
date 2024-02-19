@@ -209,7 +209,11 @@ public class BlockDoor extends Block {
 				}
 			}
 
-			if (!flag1) {
+			if (flag1) {
+				if (!world.isRemote) {
+					this.dropBlockAsItem(world, blockpos, iblockstate, 0);
+				}
+			} else {
 				boolean flag = world.isBlockPowered(blockpos) || world.isBlockPowered(blockpos2);
 				if ((flag || block.canProvidePower()) && block != this
 						&& flag != ((Boolean) iblockstate2.getValue(POWERED)).booleanValue()) {

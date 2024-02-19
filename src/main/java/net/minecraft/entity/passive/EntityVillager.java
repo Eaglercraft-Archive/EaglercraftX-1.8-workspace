@@ -1,18 +1,39 @@
 package net.minecraft.entity.passive;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAvoidEntity;
+import net.minecraft.entity.ai.EntityAIFollowGolem;
+import net.minecraft.entity.ai.EntityAIHarvestFarmland;
+import net.minecraft.entity.ai.EntityAILookAtTradePlayer;
+import net.minecraft.entity.ai.EntityAIMoveIndoors;
+import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
+import net.minecraft.entity.ai.EntityAIOpenDoor;
+import net.minecraft.entity.ai.EntityAIPlay;
+import net.minecraft.entity.ai.EntityAIRestrictOpenDoor;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAITradePlayer;
+import net.minecraft.entity.ai.EntityAIVillagerInteract;
+import net.minecraft.entity.ai.EntityAIVillagerMate;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.ai.EntityAIWatchClosest2;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -22,16 +43,21 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.pathfinding.PathNavigateGround;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Tuple;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import net.minecraft.village.Village;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 
@@ -59,6 +85,7 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 	private int randomTickDivider;
 	private boolean isMating;
 	private boolean isPlaying;
+	Village villageObj;
 	private EntityPlayer buyingPlayer;
 	private MerchantRecipeList buyingList;
 	private int timeUntilReset;
@@ -251,12 +278,96 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 		this.villagerInventory = new InventoryBasic("Items", false, 8);
 		this.setProfession(professionId);
 		this.setSize(0.6F, 1.8F);
+		((PathNavigateGround) this.getNavigator()).setBreakDoors(true);
+		((PathNavigateGround) this.getNavigator()).setAvoidsWater(true);
+		this.tasks.addTask(0, new EntityAISwimming(this));
+		this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityZombie.class, 8.0F, 0.6D, 0.6D));
+		this.tasks.addTask(1, new EntityAITradePlayer(this));
+		this.tasks.addTask(1, new EntityAILookAtTradePlayer(this));
+		this.tasks.addTask(2, new EntityAIMoveIndoors(this));
+		this.tasks.addTask(3, new EntityAIRestrictOpenDoor(this));
+		this.tasks.addTask(4, new EntityAIOpenDoor(this, true));
+		this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
+		this.tasks.addTask(6, new EntityAIVillagerMate(this));
+		this.tasks.addTask(7, new EntityAIFollowGolem(this));
+		this.tasks.addTask(9, new EntityAIWatchClosest2(this, EntityPlayer.class, 3.0F, 1.0F));
+		this.tasks.addTask(9, new EntityAIVillagerInteract(this));
+		this.tasks.addTask(9, new EntityAIWander(this, 0.6D));
+		this.tasks.addTask(10, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
 		this.setCanPickUpLoot(true);
+	}
+
+	private void setAdditionalAItasks() {
+		if (!this.areAdditionalTasksSet) {
+			this.areAdditionalTasksSet = true;
+			if (this.isChild()) {
+				this.tasks.addTask(8, new EntityAIPlay(this, 0.32D));
+			} else if (this.getProfession() == 0) {
+				this.tasks.addTask(6, new EntityAIHarvestFarmland(this, 0.6D));
+			}
+
+		}
+	}
+
+	/**+
+	 * This is called when Entity's growing age timer reaches 0
+	 * (negative values are considered as a child, positive as an
+	 * adult)
+	 */
+	protected void onGrowingAdult() {
+		if (this.getProfession() == 0) {
+			this.tasks.addTask(8, new EntityAIHarvestFarmland(this, 0.6D));
+		}
+
+		super.onGrowingAdult();
 	}
 
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.5D);
+	}
+
+	protected void updateAITasks() {
+		if (--this.randomTickDivider <= 0) {
+			BlockPos blockpos = new BlockPos(this);
+			this.worldObj.getVillageCollection().addToVillagerPositionList(blockpos);
+			this.randomTickDivider = 70 + this.rand.nextInt(50);
+			this.villageObj = this.worldObj.getVillageCollection().getNearestVillage(blockpos, 32);
+			if (this.villageObj == null) {
+				this.detachHome();
+			} else {
+				BlockPos blockpos1 = this.villageObj.getCenter();
+				this.setHomePosAndDistance(blockpos1, (int) ((float) this.villageObj.getVillageRadius() * 1.0F));
+				if (this.isLookingForHome) {
+					this.isLookingForHome = false;
+					this.villageObj.setDefaultPlayerReputation(5);
+				}
+			}
+		}
+
+		if (!this.isTrading() && this.timeUntilReset > 0) {
+			--this.timeUntilReset;
+			if (this.timeUntilReset <= 0) {
+				if (this.needsInitilization) {
+					for (MerchantRecipe merchantrecipe : this.buyingList) {
+						if (merchantrecipe.isRecipeDisabled()) {
+							merchantrecipe.increaseMaxTradeUses(this.rand.nextInt(6) + this.rand.nextInt(6) + 2);
+						}
+					}
+
+					this.populateBuyingList();
+					this.needsInitilization = false;
+					if (this.villageObj != null && this.lastBuyingPlayer != null) {
+						this.worldObj.setEntityState(this, (byte) 14);
+						this.villageObj.setReputationForPlayer(this.lastBuyingPlayer, 1);
+					}
+				}
+
+				this.addPotionEffect(new PotionEffect(Potion.regeneration.id, 200, 0));
+			}
+		}
+
+		super.updateAITasks();
 	}
 
 	/**+
@@ -267,6 +378,11 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 		ItemStack itemstack = entityplayer.inventory.getCurrentItem();
 		boolean flag = itemstack != null && itemstack.getItem() == Items.spawn_egg;
 		if (!flag && this.isEntityAlive() && !this.isTrading() && !this.isChild()) {
+			if (!this.worldObj.isRemote && (this.buyingList == null || this.buyingList.size() > 0)) {
+				this.setCustomer(entityplayer);
+				entityplayer.displayVillagerTradeGui(this);
+			}
+
 			entityplayer.triggerAchievement(StatList.timesTalkedToVillagerStat);
 			return true;
 		} else {
@@ -291,7 +407,11 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 		nbttagcompound.setInteger("CareerLevel", this.careerLevel);
 		nbttagcompound.setBoolean("Willing", this.isWillingToMate);
 		if (this.buyingList != null) {
-			nbttagcompound.setTag("Offers", this.buyingList.getRecipiesAsTags());
+			try {
+				nbttagcompound.setTag("Offers", this.buyingList.getRecipiesAsTags());
+			} catch (Throwable t) {
+				this.buyingList = null; // workaround
+			}
 		}
 
 		NBTTagList nbttaglist = new NBTTagList();
@@ -332,6 +452,7 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 		}
 
 		this.setCanPickUpLoot(true);
+		this.setAdditionalAItasks();
 	}
 
 	/**+
@@ -385,6 +506,48 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 
 	public boolean isPlaying() {
 		return this.isPlaying;
+	}
+
+	public void setRevengeTarget(EntityLivingBase entitylivingbase) {
+		super.setRevengeTarget(entitylivingbase);
+		if (this.villageObj != null && entitylivingbase != null) {
+			this.villageObj.addOrRenewAgressor(entitylivingbase);
+			if (entitylivingbase instanceof EntityPlayer) {
+				byte b0 = -1;
+				if (this.isChild()) {
+					b0 = -3;
+				}
+
+				this.villageObj.setReputationForPlayer(entitylivingbase.getName(), b0);
+				if (this.isEntityAlive()) {
+					this.worldObj.setEntityState(this, (byte) 13);
+				}
+			}
+		}
+
+	}
+
+	/**+
+	 * Called when the mob's health reaches 0.
+	 */
+	public void onDeath(DamageSource damagesource) {
+		if (this.villageObj != null) {
+			Entity entity = damagesource.getEntity();
+			if (entity != null) {
+				if (entity instanceof EntityPlayer) {
+					this.villageObj.setReputationForPlayer(entity.getName(), -2);
+				} else if (entity instanceof IMob) {
+					this.villageObj.endMatingSeason();
+				}
+			} else {
+				EntityPlayer entityplayer = this.worldObj.getClosestPlayerToEntity(this, 16.0D);
+				if (entityplayer != null) {
+					this.villageObj.endMatingSeason();
+				}
+			}
+		}
+
+		super.onDeath(damagesource);
 	}
 
 	public void setCustomer(EntityPlayer entityplayer) {
@@ -468,6 +631,14 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 	 * played depending if the suggested itemstack is not null.
 	 */
 	public void verifySellingItem(ItemStack itemstack) {
+		if (!this.worldObj.isRemote && this.livingSoundTime > -this.getTalkInterval() + 20) {
+			this.livingSoundTime = -this.getTalkInterval();
+			if (itemstack != null) {
+				this.playSound("mob.villager.yes", this.getSoundVolume(), this.getSoundPitch());
+			} else {
+				this.playSound("mob.villager.no", this.getSoundVolume(), this.getSoundPitch());
+			}
+		}
 
 	}
 
@@ -618,6 +789,7 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 			IEntityLivingData ientitylivingdata) {
 		ientitylivingdata = super.onInitialSpawn(difficultyinstance, ientitylivingdata);
 		this.setProfession(this.worldObj.rand.nextInt(5));
+		this.setAdditionalAItasks();
 		return ientitylivingdata;
 	}
 
@@ -640,7 +812,20 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 	 * Called when a lightning bolt hits the entity.
 	 */
 	public void onStruckByLightning(EntityLightningBolt var1) {
+		if (!this.worldObj.isRemote && !this.isDead) {
+			EntityWitch entitywitch = new EntityWitch(this.worldObj);
+			entitywitch.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
+			entitywitch.onInitialSpawn(this.worldObj.getDifficultyForLocation(new BlockPos(entitywitch)),
+					(IEntityLivingData) null);
+			entitywitch.setNoAI(this.isAIDisabled());
+			if (this.hasCustomName()) {
+				entitywitch.setCustomNameTag(this.getCustomNameTag());
+				entitywitch.setAlwaysRenderNameTag(this.getAlwaysRenderNameTag());
+			}
 
+			this.worldObj.spawnEntityInWorld(entitywitch);
+			this.setDead();
+		}
 	}
 
 	public InventoryBasic getVillagerInventory() {

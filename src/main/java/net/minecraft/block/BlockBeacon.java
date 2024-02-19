@@ -6,13 +6,17 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBeacon;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -51,6 +55,13 @@ public class BlockBeacon extends BlockContainer {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
+		if (!world.isRemote) {
+			TileEntity tileentity = world.getTileEntity(blockpos);
+			if (tileentity instanceof TileEntityBeacon) {
+				entityplayer.displayGUIChest((TileEntityBeacon) tileentity);
+				entityplayer.triggerAchievement(StatList.field_181730_N);
+			}
+		}
 		return true;
 	}
 
@@ -106,4 +117,27 @@ public class BlockBeacon extends BlockContainer {
 		return EnumWorldBlockLayer.CUTOUT;
 	}
 
+	public static void updateColorAsync(final World worldIn, final BlockPos glassPos) {
+		Chunk chunk = worldIn.getChunkFromBlockCoords(glassPos);
+
+		for (int i = glassPos.getY() - 1; i >= 0; --i) {
+			final BlockPos blockpos = new BlockPos(glassPos.getX(), i, glassPos.getZ());
+			if (!chunk.canSeeSky(blockpos)) {
+				break;
+			}
+
+			IBlockState iblockstate = worldIn.getBlockState(blockpos);
+			if (iblockstate.getBlock() == Blocks.beacon) {
+				((WorldServer) worldIn).addScheduledTask(new Runnable() {
+					public void run() {
+						TileEntity tileentity = worldIn.getTileEntity(blockpos);
+						if (tileentity instanceof TileEntityBeacon) {
+							((TileEntityBeacon) tileentity).updateBeacon();
+							worldIn.addBlockEvent(blockpos, Blocks.beacon, 1, 0);
+						}
+					}
+				});
+			}
+		}
+	}
 }

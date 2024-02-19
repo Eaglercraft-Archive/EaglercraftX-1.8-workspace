@@ -104,6 +104,10 @@ public class ItemBoat extends Item {
 						return itemstack;
 					}
 
+					if (!world.isRemote) {
+						world.spawnEntityInWorld(entityboat);
+					}
+
 					if (!entityplayer.capabilities.isCreativeMode) {
 						--itemstack.stackSize;
 					}

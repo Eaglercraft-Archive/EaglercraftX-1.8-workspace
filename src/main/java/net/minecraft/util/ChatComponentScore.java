@@ -1,5 +1,12 @@
 package net.minecraft.util;
 
+import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.server.MinecraftServer;
+
+import net.lax1dude.eaglercraft.v1_8.HString;
+
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
  * 
@@ -54,6 +61,18 @@ public class ChatComponentScore extends ChatComponentStyle {
 	 * different methods?
 	 */
 	public String getUnformattedTextForChat() {
+		MinecraftServer minecraftserver = MinecraftServer.getServer();
+		if (minecraftserver != null && StringUtils.isNullOrEmpty(this.value)) {
+			Scoreboard scoreboard = minecraftserver.worldServerForDimension(0).getScoreboard();
+			ScoreObjective scoreobjective = scoreboard.getObjective(this.objective);
+			if (scoreboard.entityHasObjective(this.name, scoreobjective)) {
+				Score score = scoreboard.getValueFromObjective(this.name, scoreobjective);
+				this.setValue(HString.format("%d", new Object[] { Integer.valueOf(score.getScorePoints()) }));
+			} else {
+				this.value = "";
+			}
+		}
+
 		return this.value;
 	}
 

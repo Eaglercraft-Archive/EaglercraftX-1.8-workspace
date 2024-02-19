@@ -6,6 +6,7 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -117,7 +118,24 @@ public abstract class BlockBasePressurePlate extends Block {
 	}
 
 	public void updateTick(World worldIn, BlockPos pos, IBlockState state, EaglercraftRandom rand) {
+		if (!worldIn.isRemote) {
+			int i = this.getRedstoneStrength(state);
+			if (i > 0) {
+				this.updateState(worldIn, pos, state, i);
+			}
+		}
+	}
 
+	/**+
+	 * Called When an Entity Collided with the Block
+	 */
+	public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
+		if (!worldIn.isRemote) {
+			int i = this.getRedstoneStrength(state);
+			if (i == 0) {
+				this.updateState(worldIn, pos, state, i);
+			}
+		}
 	}
 
 	/**+

@@ -1,5 +1,7 @@
 package net.minecraft.block;
 
+import java.util.List;
+import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
@@ -7,8 +9,10 @@ import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -204,6 +208,29 @@ public abstract class BlockButton extends Block {
 	}
 
 	/**+
+	 * Called randomly when setTickRandomly is set to true (used by
+	 * e.g. crops to grow, etc.)
+	 */
+	public void randomTick(World var1, BlockPos var2, IBlockState var3, EaglercraftRandom var4) {
+	}
+
+	public void updateTick(World world, BlockPos blockpos, IBlockState iblockstate, EaglercraftRandom var4) {
+		if (!world.isRemote) {
+			if (((Boolean) iblockstate.getValue(POWERED)).booleanValue()) {
+				if (this.wooden) {
+					this.checkForArrows(world, blockpos, iblockstate);
+				} else {
+					world.setBlockState(blockpos, iblockstate.withProperty(POWERED, Boolean.valueOf(false)));
+					this.notifyNeighbors(world, blockpos, (EnumFacing) iblockstate.getValue(FACING));
+					world.playSoundEffect((double) blockpos.getX() + 0.5D, (double) blockpos.getY() + 0.5D,
+							(double) blockpos.getZ() + 0.5D, "random.click", 0.3F, 0.5F);
+					world.markBlockRangeForRenderUpdate(blockpos, blockpos);
+				}
+			}
+		}
+	}
+
+	/**+
 	 * Sets the block's bounds for rendering it as an item
 	 */
 	public void setBlockBoundsForItemRender() {
@@ -211,6 +238,49 @@ public abstract class BlockButton extends Block {
 		float f1 = 0.125F;
 		float f2 = 0.125F;
 		this.setBlockBounds(0.5F - f, 0.5F - f1, 0.5F - f2, 0.5F + f, 0.5F + f1, 0.5F + f2);
+	}
+
+	/**+
+	 * Called When an Entity Collided with the Block
+	 */
+	public void onEntityCollidedWithBlock(World world, BlockPos blockpos, IBlockState iblockstate, Entity var4) {
+		if (!world.isRemote) {
+			if (this.wooden) {
+				if (!((Boolean) iblockstate.getValue(POWERED)).booleanValue()) {
+					this.checkForArrows(world, blockpos, iblockstate);
+				}
+			}
+		}
+	}
+
+	private void checkForArrows(World worldIn, BlockPos pos, IBlockState state) {
+		this.updateBlockBounds(state);
+		List list = worldIn.getEntitiesWithinAABB(EntityArrow.class,
+				new AxisAlignedBB((double) pos.getX() + this.minX, (double) pos.getY() + this.minY,
+						(double) pos.getZ() + this.minZ, (double) pos.getX() + this.maxX,
+						(double) pos.getY() + this.maxY, (double) pos.getZ() + this.maxZ));
+		boolean flag = !list.isEmpty();
+		boolean flag1 = ((Boolean) state.getValue(POWERED)).booleanValue();
+		if (flag && !flag1) {
+			worldIn.setBlockState(pos, state.withProperty(POWERED, Boolean.valueOf(true)));
+			this.notifyNeighbors(worldIn, pos, (EnumFacing) state.getValue(FACING));
+			worldIn.markBlockRangeForRenderUpdate(pos, pos);
+			worldIn.playSoundEffect((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D,
+					"random.click", 0.3F, 0.6F);
+		}
+
+		if (!flag && flag1) {
+			worldIn.setBlockState(pos, state.withProperty(POWERED, Boolean.valueOf(false)));
+			this.notifyNeighbors(worldIn, pos, (EnumFacing) state.getValue(FACING));
+			worldIn.markBlockRangeForRenderUpdate(pos, pos);
+			worldIn.playSoundEffect((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D,
+					"random.click", 0.3F, 0.5F);
+		}
+
+		if (flag) {
+			worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+		}
+
 	}
 
 	private void notifyNeighbors(World worldIn, BlockPos pos, EnumFacing facing) {

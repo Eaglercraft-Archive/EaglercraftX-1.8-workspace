@@ -93,7 +93,13 @@ public class BlockSign extends BlockContainer {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
-		return true;
+		if (world.isRemote) {
+			return true;
+		} else {
+			TileEntity tileentity = world.getTileEntity(blockpos);
+			return tileentity instanceof TileEntitySign ? ((TileEntitySign) tileentity).executeCommand(entityplayer)
+					: false;
+		}
 	}
 
 	public boolean canPlaceBlockAt(World world, BlockPos blockpos) {

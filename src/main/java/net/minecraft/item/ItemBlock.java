@@ -1,13 +1,15 @@
 package net.minecraft.item;
 
 import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -88,7 +90,37 @@ public class ItemBlock extends Item {
 	}
 
 	public static boolean setTileEntityNBT(World worldIn, EntityPlayer pos, BlockPos stack, ItemStack parItemStack) {
-		return false;
+		MinecraftServer minecraftserver = MinecraftServer.getServer();
+		if (minecraftserver == null) {
+			return false;
+		} else {
+			if (parItemStack.hasTagCompound() && parItemStack.getTagCompound().hasKey("BlockEntityTag", 10)) {
+				TileEntity tileentity = worldIn.getTileEntity(stack);
+				if (tileentity != null) {
+					if (!worldIn.isRemote && tileentity.func_183000_F()
+							&& !minecraftserver.getConfigurationManager().canSendCommands(pos.getGameProfile())) {
+						return false;
+					}
+
+					NBTTagCompound nbttagcompound = new NBTTagCompound();
+					NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbttagcompound.copy();
+					tileentity.writeToNBT(nbttagcompound);
+					NBTTagCompound nbttagcompound2 = (NBTTagCompound) parItemStack.getTagCompound()
+							.getTag("BlockEntityTag");
+					nbttagcompound.merge(nbttagcompound2);
+					nbttagcompound.setInteger("x", stack.getX());
+					nbttagcompound.setInteger("y", stack.getY());
+					nbttagcompound.setInteger("z", stack.getZ());
+					if (!nbttagcompound.equals(nbttagcompound1)) {
+						tileentity.readFromNBT(nbttagcompound);
+						tileentity.markDirty();
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
 	}
 
 	public boolean canPlaceBlockOnSide(World world, BlockPos blockpos, EnumFacing enumfacing, EntityPlayer var4,

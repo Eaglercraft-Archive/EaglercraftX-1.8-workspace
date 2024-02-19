@@ -1,9 +1,9 @@
 package net.minecraft.tileentity;
 
 import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
+import net.minecraft.block.BlockHopper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -215,10 +215,87 @@ public class TileEntityHopper extends TileEntityLockable implements IHopper, ITi
 	 * Like the old updateEntity(), except more generic.
 	 */
 	public void update() {
+		if (this.worldObj != null && !this.worldObj.isRemote) {
+			--this.transferCooldown;
+			if (!this.isOnTransferCooldown()) {
+				this.setTransferCooldown(0);
+				this.updateHopper();
+			}
+
+		}
 	}
 
 	public boolean updateHopper() {
-		return false;
+		if (this.worldObj != null && !this.worldObj.isRemote) {
+			if (!this.isOnTransferCooldown() && BlockHopper.isEnabled(this.getBlockMetadata())) {
+				boolean flag = false;
+				if (!this.isEmpty()) {
+					flag = this.transferItemsOut();
+				}
+
+				if (!this.isFull()) {
+					flag = captureDroppedItems(this) || flag;
+				}
+
+				if (flag) {
+					this.setTransferCooldown(8);
+					this.markDirty();
+					return true;
+				}
+			}
+
+			return false;
+		} else {
+			return false;
+		}
+	}
+
+	private boolean isEmpty() {
+		for (ItemStack itemstack : this.inventory) {
+			if (itemstack != null) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean isFull() {
+		for (ItemStack itemstack : this.inventory) {
+			if (itemstack == null || itemstack.stackSize != itemstack.getMaxStackSize()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean transferItemsOut() {
+		IInventory iinventory = this.getInventoryForHopperTransfer();
+		if (iinventory == null) {
+			return false;
+		} else {
+			EnumFacing enumfacing = BlockHopper.getFacing(this.getBlockMetadata()).getOpposite();
+			if (this.isInventoryFull(iinventory, enumfacing)) {
+				return false;
+			} else {
+				for (int i = 0; i < this.getSizeInventory(); ++i) {
+					if (this.getStackInSlot(i) != null) {
+						ItemStack itemstack = this.getStackInSlot(i).copy();
+						ItemStack itemstack1 = putStackInInventoryAllSlots(iinventory, this.decrStackSize(i, 1),
+								enumfacing);
+						if (itemstack1 == null || itemstack1.stackSize == 0) {
+							iinventory.markDirty();
+							return true;
+						}
+
+						this.setInventorySlotContents(i, itemstack);
+					}
+				}
+
+				return false;
+			}
+		}
 	}
 
 	/**+
@@ -439,6 +516,20 @@ public class TileEntityHopper extends TileEntityLockable implements IHopper, ITi
 		}
 
 		return stack;
+	}
+
+	/**+
+	 * Returns the IInventory that this hopper is pointing into
+	 */
+	private IInventory getInventoryForHopperTransfer() {
+		EnumFacing enumfacing = BlockHopper.getFacing(this.getBlockMetadata());
+		/**+
+		 * Returns the IInventory (if applicable) of the TileEntity at
+		 * the specified position
+		 */
+		return getInventoryAtPosition(this.getWorld(), (double) (this.pos.getX() + enumfacing.getFrontOffsetX()),
+				(double) (this.pos.getY() + enumfacing.getFrontOffsetY()),
+				(double) (this.pos.getZ() + enumfacing.getFrontOffsetZ()));
 	}
 
 	/**+

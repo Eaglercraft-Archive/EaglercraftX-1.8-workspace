@@ -1,12 +1,28 @@
 package net.minecraft.entity.passive;
 
+import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIBeg;
+import net.minecraft.entity.ai.EntityAIFollowOwner;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILeapAtTarget;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIMate;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
+import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAITargetNonTamed;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
@@ -15,6 +31,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
@@ -52,6 +69,27 @@ public class EntityWolf extends EntityTameable {
 	public EntityWolf(World worldIn) {
 		super(worldIn);
 		this.setSize(0.6F, 0.8F);
+		((PathNavigateGround) this.getNavigator()).setAvoidsWater(true);
+		this.tasks.addTask(1, new EntityAISwimming(this));
+		this.tasks.addTask(2, this.aiSit);
+		this.tasks.addTask(3, new EntityAILeapAtTarget(this, 0.4F));
+		this.tasks.addTask(4, new EntityAIAttackOnCollide(this, 1.0D, true));
+		this.tasks.addTask(5, new EntityAIFollowOwner(this, 1.0D, 10.0F, 2.0F));
+		this.tasks.addTask(6, new EntityAIMate(this, 1.0D));
+		this.tasks.addTask(7, new EntityAIWander(this, 1.0D));
+		this.tasks.addTask(8, new EntityAIBeg(this, 8.0F));
+		this.tasks.addTask(9, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+		this.tasks.addTask(9, new EntityAILookIdle(this));
+		this.targetTasks.addTask(1, new EntityAIOwnerHurtByTarget(this));
+		this.targetTasks.addTask(2, new EntityAIOwnerHurtTarget(this));
+		this.targetTasks.addTask(3, new EntityAIHurtByTarget(this, true, new Class[0]));
+		this.targetTasks.addTask(4,
+				new EntityAITargetNonTamed(this, EntityAnimal.class, false, new Predicate<Entity>() {
+					public boolean apply(Entity entity) {
+						return entity instanceof EntitySheep || entity instanceof EntityRabbit;
+					}
+				}));
+		this.targetTasks.addTask(5, new EntityAINearestAttackableTarget(this, EntitySkeleton.class, false));
 		this.setTamed(false);
 	}
 
@@ -156,6 +194,26 @@ public class EntityWolf extends EntityTameable {
 	}
 
 	/**+
+	 * Called frequently so the entity can update its state every
+	 * tick as required. For example, zombies and skeletons use this
+	 * to react to sunlight and start to burn.
+	 */
+	public void onLivingUpdate() {
+		super.onLivingUpdate();
+		if (!this.worldObj.isRemote && this.isWet && !this.isShaking && !this.hasPath() && this.onGround) {
+			this.isShaking = true;
+			this.timeWolfIsShaking = 0.0F;
+			this.prevTimeWolfIsShaking = 0.0F;
+			this.worldObj.setEntityState(this, (byte) 8);
+		}
+
+		if (!this.worldObj.isRemote && this.getAttackTarget() == null && this.isAngry()) {
+			this.setAngry(false);
+		}
+
+	}
+
+	/**+
 	 * Called to update the entity's position/logic.
 	 */
 	public void onUpdate() {
@@ -257,6 +315,7 @@ public class EntityWolf extends EntityTameable {
 			return false;
 		} else {
 			Entity entity = damagesource.getEntity();
+			this.aiSit.setSitting(false);
 			if (entity != null && !(entity instanceof EntityPlayer) && !(entity instanceof EntityArrow)) {
 				f = (f + 1.0F) / 2.0F;
 			}
@@ -322,6 +381,13 @@ public class EntityWolf extends EntityTameable {
 					}
 				}
 			}
+
+			if (this.isOwner(entityplayer) && !this.worldObj.isRemote && !this.isBreedingItem(itemstack)) {
+				this.aiSit.setSitting(!this.isSitting());
+				this.isJumping = false;
+				this.navigator.clearPathEntity();
+				this.setAttackTarget((EntityLivingBase) null);
+			}
 		} else if (itemstack != null && itemstack.getItem() == Items.bone && !this.isAngry()) {
 			if (!entityplayer.capabilities.isCreativeMode) {
 				--itemstack.stackSize;
@@ -329,6 +395,22 @@ public class EntityWolf extends EntityTameable {
 
 			if (itemstack.stackSize <= 0) {
 				entityplayer.inventory.setInventorySlotContents(entityplayer.inventory.currentItem, (ItemStack) null);
+			}
+
+			if (!this.worldObj.isRemote) {
+				if (this.rand.nextInt(3) == 0) {
+					this.setTamed(true);
+					this.navigator.clearPathEntity();
+					this.setAttackTarget((EntityLivingBase) null);
+					this.aiSit.setSitting(true);
+					this.setHealth(20.0F);
+					this.setOwnerId(entityplayer.getUniqueID().toString());
+					this.playTameEffect(true);
+					this.worldObj.setEntityState(this, (byte) 7);
+				} else {
+					this.playTameEffect(false);
+					this.worldObj.setEntityState(this, (byte) 6);
+				}
 			}
 
 			return true;

@@ -26,6 +26,11 @@ import net.minecraft.init.Blocks;
 public class BiomeGenMushroomIsland extends BiomeGenBase {
 	public BiomeGenMushroomIsland(int parInt1) {
 		super(parInt1);
+		this.theBiomeDecorator.treesPerChunk = -100;
+		this.theBiomeDecorator.flowersPerChunk = -100;
+		this.theBiomeDecorator.grassPerChunk = -100;
+		this.theBiomeDecorator.mushroomsPerChunk = 1;
+		this.theBiomeDecorator.bigMushroomsPerChunk = 1;
 		this.topBlock = Blocks.mycelium.getDefaultState();
 		this.spawnableMonsterList.clear();
 		this.spawnableCreatureList.clear();

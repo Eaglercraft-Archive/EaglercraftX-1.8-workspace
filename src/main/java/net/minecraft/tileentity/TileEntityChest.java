@@ -7,9 +7,11 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -276,6 +278,23 @@ public class TileEntityChest extends TileEntityLockable implements ITickable, II
 		int j = this.pos.getY();
 		int k = this.pos.getZ();
 		++this.ticksSinceSync;
+		if (!this.worldObj.isRemote && this.numPlayersUsing != 0 && (this.ticksSinceSync + i + j + k) % 200 == 0) {
+			this.numPlayersUsing = 0;
+			float f = 5.0F;
+
+			for (EntityPlayer entityplayer : this.worldObj.getEntitiesWithinAABB(EntityPlayer.class,
+					new AxisAlignedBB((double) ((float) i - f), (double) ((float) j - f), (double) ((float) k - f),
+							(double) ((float) (i + 1) + f), (double) ((float) (j + 1) + f),
+							(double) ((float) (k + 1) + f)))) {
+				if (entityplayer.openContainer instanceof ContainerChest) {
+					IInventory iinventory = ((ContainerChest) entityplayer.openContainer).getLowerChestInventory();
+					if (iinventory == this || iinventory instanceof InventoryLargeChest
+							&& ((InventoryLargeChest) iinventory).isPartOfLargeChest(this)) {
+						++this.numPlayersUsing;
+					}
+				}
+			}
+		}
 
 		this.prevLidAngle = this.lidAngle;
 		float f1 = 0.1F;

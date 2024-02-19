@@ -8,15 +8,19 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -55,7 +59,83 @@ public class BlockBed extends BlockDirectional {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState iblockstate, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
-		return true;
+		if (world.isRemote) {
+			return true;
+		} else {
+			if (iblockstate.getValue(PART) != BlockBed.EnumPartType.HEAD) {
+				blockpos = blockpos.offset((EnumFacing) iblockstate.getValue(FACING));
+				iblockstate = world.getBlockState(blockpos);
+				if (iblockstate.getBlock() != this) {
+					return true;
+				}
+			}
+		}
+
+		if (world.provider.canRespawnHere() && world.getBiomeGenForCoords(blockpos) != BiomeGenBase.hell) {
+			if (MinecraftServer.getServer().worldServers[0].getWorldInfo().getGameRulesInstance()
+					.getBoolean("bedSpawnPoint") && Math.abs(entityplayer.posX - (double) blockpos.getX()) <= 3.0D
+					&& Math.abs(entityplayer.posY - (double) blockpos.getY()) <= 2.0D
+					&& Math.abs(entityplayer.posZ - (double) blockpos.getZ()) <= 3.0D) {
+				BlockPos blockpos1 = BlockBed.getSafeExitLocation(world, blockpos, 0);
+				if (blockpos1 == null) {
+					blockpos1 = blockpos.up();
+				}
+				entityplayer.setSpawnPoint(blockpos1.add(0.5F, 0.1F, 0.5F), false);
+				entityplayer.addChatComponentMessage(new ChatComponentTranslation("tile.bed.setspawn"));
+				if (entityplayer.isSneaking()) {
+					return true;
+				}
+			}
+
+			if (((Boolean) iblockstate.getValue(OCCUPIED)).booleanValue()) {
+				EntityPlayer entityplayer1 = this.getPlayerInBed(world, blockpos);
+				if (entityplayer1 != null) {
+					entityplayer
+							.addChatComponentMessage(new ChatComponentTranslation("tile.bed.occupied", new Object[0]));
+					return true;
+				}
+
+				iblockstate = iblockstate.withProperty(OCCUPIED, Boolean.valueOf(false));
+				world.setBlockState(blockpos, iblockstate, 4);
+			}
+
+			EntityPlayer.EnumStatus entityplayer$enumstatus = entityplayer.trySleep(blockpos);
+			if (entityplayer$enumstatus == EntityPlayer.EnumStatus.OK) {
+				iblockstate = iblockstate.withProperty(OCCUPIED, Boolean.valueOf(true));
+				world.setBlockState(blockpos, iblockstate, 4);
+				return true;
+			} else {
+				if (entityplayer$enumstatus == EntityPlayer.EnumStatus.NOT_POSSIBLE_NOW) {
+					entityplayer
+							.addChatComponentMessage(new ChatComponentTranslation("tile.bed.noSleep", new Object[0]));
+				} else if (entityplayer$enumstatus == EntityPlayer.EnumStatus.NOT_SAFE) {
+					entityplayer
+							.addChatComponentMessage(new ChatComponentTranslation("tile.bed.notSafe", new Object[0]));
+				}
+
+				return true;
+			}
+		} else {
+			world.setBlockToAir(blockpos);
+			BlockPos blockpos1 = blockpos.offset(((EnumFacing) iblockstate.getValue(FACING)).getOpposite());
+			if (world.getBlockState(blockpos1).getBlock() == this) {
+				world.setBlockToAir(blockpos1);
+			}
+
+			world.newExplosion((Entity) null, (double) blockpos.getX() + 0.5D, (double) blockpos.getY() + 0.5D,
+					(double) blockpos.getZ() + 0.5D, 5.0F, true, true);
+			return true;
+		}
+	}
+
+	private EntityPlayer getPlayerInBed(World worldIn, BlockPos pos) {
+		for (EntityPlayer entityplayer : worldIn.playerEntities) {
+			if (entityplayer.isPlayerSleeping() && entityplayer.playerLocation.equals(pos)) {
+				return entityplayer;
+			}
+		}
+
+		return null;
 	}
 
 	public boolean isFullCube() {
@@ -85,6 +165,9 @@ public class BlockBed extends BlockDirectional {
 			}
 		} else if (world.getBlockState(blockpos.offset(enumfacing)).getBlock() != this) {
 			world.setBlockToAir(blockpos);
+			if (!world.isRemote) {
+				this.dropBlockAsItem(world, blockpos, iblockstate, 0);
+			}
 		}
 
 	}

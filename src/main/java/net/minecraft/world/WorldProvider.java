@@ -4,7 +4,15 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.WorldChunkManagerHell;
 import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderDebug;
+import net.minecraft.world.gen.ChunkProviderFlat;
+import net.minecraft.world.gen.ChunkProviderGenerate;
+import net.minecraft.world.gen.FlatGeneratorInfo;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -31,6 +39,7 @@ public abstract class WorldProvider {
 	protected World worldObj;
 	private WorldType terrainType;
 	private String generatorSettings;
+	protected WorldChunkManager worldChunkMgr;
 	protected boolean isHellWorld;
 	protected boolean hasNoSky;
 	/**+
@@ -72,7 +81,35 @@ public abstract class WorldProvider {
 	 * creates a new world chunk manager for WorldProvider
 	 */
 	protected void registerWorldChunkManager() {
+		WorldType worldtype = this.worldObj.getWorldInfo().getTerrainType();
+		if (worldtype == WorldType.FLAT) {
+			FlatGeneratorInfo flatgeneratorinfo = FlatGeneratorInfo
+					.createFlatGeneratorFromString(this.worldObj.getWorldInfo().getGeneratorOptions());
+			this.worldChunkMgr = new WorldChunkManagerHell(
+					BiomeGenBase.getBiomeFromBiomeList(flatgeneratorinfo.getBiome(), BiomeGenBase.field_180279_ad),
+					0.5F);
+		} else if (worldtype == WorldType.DEBUG_WORLD) {
+			this.worldChunkMgr = new WorldChunkManagerHell(BiomeGenBase.plains, 0.0F);
+		} else {
+			this.worldChunkMgr = new WorldChunkManager(this.worldObj);
+		}
 
+	}
+
+	/**+
+	 * Returns a new chunk provider which generates chunks for this
+	 * world
+	 */
+	public IChunkProvider createChunkGenerator() {
+		return (IChunkProvider) (this.terrainType == WorldType.FLAT
+				? new ChunkProviderFlat(this.worldObj, this.worldObj.getSeed(),
+						this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings)
+				: (this.terrainType == WorldType.DEBUG_WORLD ? new ChunkProviderDebug(this.worldObj)
+						: (this.terrainType == WorldType.CUSTOMIZED
+								? new ChunkProviderGenerate(this.worldObj, this.worldObj.getSeed(),
+										this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings)
+								: new ChunkProviderGenerate(this.worldObj, this.worldObj.getSeed(),
+										this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings))));
 	}
 
 	/**+
@@ -204,6 +241,10 @@ public abstract class WorldProvider {
 	public abstract String getDimensionName();
 
 	public abstract String getInternalNameSuffix();
+
+	public WorldChunkManager getWorldChunkManager() {
+		return this.worldChunkMgr;
+	}
 
 	public boolean doesWaterVaporize() {
 		return this.isHellWorld;

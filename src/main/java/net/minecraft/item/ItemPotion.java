@@ -15,6 +15,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.init.Items;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -110,6 +111,15 @@ public class ItemPotion extends Item {
 			--itemstack.stackSize;
 		}
 
+		if (!world.isRemote) {
+			List list = this.getEffects(itemstack);
+			if (list != null) {
+				for (PotionEffect potioneffect : (List<PotionEffect>) list) {
+					entityplayer.addPotionEffect(new PotionEffect(potioneffect));
+				}
+			}
+		}
+
 		entityplayer.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
 		if (!entityplayer.capabilities.isCreativeMode) {
 			if (itemstack.stackSize <= 0) {
@@ -148,6 +158,9 @@ public class ItemPotion extends Item {
 			}
 
 			world.playSoundAtEntity(entityplayer, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+			if (!world.isRemote) {
+				world.spawnEntityInWorld(new EntityPotion(world, entityplayer, itemstack));
+			}
 
 			entityplayer.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
 			return itemstack;
@@ -223,7 +236,7 @@ public class ItemPotion extends Item {
 					Potion potion = Potion.potionTypes[potioneffect.getPotionID()];
 					Map map = potion.getAttributeModifierMap();
 					if (map != null && map.size() > 0) {
-						for (Entry entry : (Set<Entry>) map.entrySet()) {
+						for (Entry entry : (Set<Entry<Object, Object>>) map.entrySet()) {
 							AttributeModifier attributemodifier = (AttributeModifier) entry.getValue();
 							AttributeModifier attributemodifier1 = new AttributeModifier(attributemodifier.getName(),
 									potion.getAttributeModifierAmount(potioneffect.getAmplifier(), attributemodifier),
@@ -257,7 +270,7 @@ public class ItemPotion extends Item {
 				list.add("");
 				list.add(EnumChatFormatting.DARK_PURPLE + StatCollector.translateToLocal("potion.effects.whenDrank"));
 
-				for (Entry entry1 : (Set<Entry>) hashmultimap.entries()) {
+				for (Entry entry1 : (Set<Entry<Object, Object>>) hashmultimap.entries()) {
 					AttributeModifier attributemodifier2 = (AttributeModifier) entry1.getValue();
 					double d0 = attributemodifier2.getAmount();
 					double d1;

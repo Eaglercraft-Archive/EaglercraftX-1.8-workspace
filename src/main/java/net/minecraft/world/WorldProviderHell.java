@@ -1,7 +1,11 @@
 package net.minecraft.world;
 
 import net.minecraft.util.Vec3;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManagerHell;
 import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderHell;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -28,6 +32,7 @@ public class WorldProviderHell extends WorldProvider {
 	 * creates a new world chunk manager for WorldProvider
 	 */
 	public void registerWorldChunkManager() {
+		this.worldChunkMgr = new WorldChunkManagerHell(BiomeGenBase.hell, 0.0F);
 		this.isHellWorld = true;
 		this.hasNoSky = true;
 		this.dimensionId = -1;
@@ -51,6 +56,15 @@ public class WorldProviderHell extends WorldProvider {
 			this.lightBrightnessTable[i] = (1.0F - f1) / (f1 * 3.0F + 1.0F) * (1.0F - f) + f;
 		}
 
+	}
+
+	/**+
+	 * Returns a new chunk provider which generates chunks for this
+	 * world
+	 */
+	public IChunkProvider createChunkGenerator() {
+		return new ChunkProviderHell(this.worldObj, this.worldObj.getWorldInfo().isMapFeaturesEnabled(),
+				this.worldObj.getSeed());
 	}
 
 	/**+

@@ -10,9 +10,16 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemBanner;
+import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -86,9 +93,109 @@ public class BlockCauldron extends Block {
 		return false;
 	}
 
+	/**+
+	 * Called When an Entity Collided with the Block
+	 */
+	public void onEntityCollidedWithBlock(World world, BlockPos blockpos, IBlockState iblockstate, Entity entity) {
+		int i = ((Integer) iblockstate.getValue(LEVEL)).intValue();
+		float f = (float) blockpos.getY() + (6.0F + (float) (3 * i)) / 16.0F;
+		if (!world.isRemote && entity.isBurning() && i > 0 && entity.getEntityBoundingBox().minY <= (double) f) {
+			entity.extinguish();
+			this.setWaterLevel(world, blockpos, iblockstate, i - 1);
+		}
+
+	}
+
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState iblockstate, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
-		return true;
+		if (!world.isRemote) {
+			ItemStack itemstack = entityplayer.inventory.getCurrentItem();
+			if (itemstack == null) {
+				return true;
+			} else {
+				int i = ((Integer) iblockstate.getValue(LEVEL)).intValue();
+				Item item = itemstack.getItem();
+				if (item == Items.water_bucket) {
+					if (i < 3) {
+						if (!entityplayer.capabilities.isCreativeMode) {
+							entityplayer.inventory.setInventorySlotContents(entityplayer.inventory.currentItem,
+									new ItemStack(Items.bucket));
+						}
+
+						entityplayer.triggerAchievement(StatList.field_181725_I);
+						this.setWaterLevel(world, blockpos, iblockstate, 3);
+					}
+
+					return true;
+				} else if (item == Items.glass_bottle) {
+					if (i > 0) {
+						if (!entityplayer.capabilities.isCreativeMode) {
+							ItemStack itemstack2 = new ItemStack(Items.potionitem, 1, 0);
+							if (!entityplayer.inventory.addItemStackToInventory(itemstack2)) {
+								world.spawnEntityInWorld(new EntityItem(world, (double) blockpos.getX() + 0.5D,
+										(double) blockpos.getY() + 1.5D, (double) blockpos.getZ() + 0.5D, itemstack2));
+							} else if (entityplayer instanceof EntityPlayerMP) {
+								((EntityPlayerMP) entityplayer).sendContainerToPlayer(entityplayer.inventoryContainer);
+							}
+
+							entityplayer.triggerAchievement(StatList.field_181726_J);
+							--itemstack.stackSize;
+							if (itemstack.stackSize <= 0) {
+								entityplayer.inventory.setInventorySlotContents(entityplayer.inventory.currentItem,
+										(ItemStack) null);
+							}
+						}
+
+						this.setWaterLevel(world, blockpos, iblockstate, i - 1);
+					}
+
+					return true;
+				} else {
+					if (i > 0 && item instanceof ItemArmor) {
+						ItemArmor itemarmor = (ItemArmor) item;
+						if (itemarmor.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER
+								&& itemarmor.hasColor(itemstack)) {
+							itemarmor.removeColor(itemstack);
+							this.setWaterLevel(world, blockpos, iblockstate, i - 1);
+							entityplayer.triggerAchievement(StatList.field_181727_K);
+							return true;
+						}
+					}
+
+					if (i > 0 && item instanceof ItemBanner && TileEntityBanner.getPatterns(itemstack) > 0) {
+						ItemStack itemstack1 = itemstack.copy();
+						itemstack1.stackSize = 1;
+						TileEntityBanner.removeBannerData(itemstack1);
+						if (itemstack.stackSize <= 1 && !entityplayer.capabilities.isCreativeMode) {
+							entityplayer.inventory.setInventorySlotContents(entityplayer.inventory.currentItem,
+									itemstack1);
+						} else {
+							if (!entityplayer.inventory.addItemStackToInventory(itemstack1)) {
+								world.spawnEntityInWorld(new EntityItem(world, (double) blockpos.getX() + 0.5D,
+										(double) blockpos.getY() + 1.5D, (double) blockpos.getZ() + 0.5D, itemstack1));
+							} else if (entityplayer instanceof EntityPlayerMP) {
+								((EntityPlayerMP) entityplayer).sendContainerToPlayer(entityplayer.inventoryContainer);
+							}
+
+							entityplayer.triggerAchievement(StatList.field_181728_L);
+							if (!entityplayer.capabilities.isCreativeMode) {
+								--itemstack.stackSize;
+							}
+						}
+
+						if (!entityplayer.capabilities.isCreativeMode) {
+							this.setWaterLevel(world, blockpos, iblockstate, i - 1);
+						}
+
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}
+		} else {
+			return true;
+		}
 	}
 
 	public void setWaterLevel(World worldIn, BlockPos pos, IBlockState state, int level) {

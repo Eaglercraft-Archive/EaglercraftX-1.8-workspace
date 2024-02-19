@@ -16,6 +16,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBrewingStand;
 import net.minecraft.util.AxisAlignedBB;
@@ -114,6 +115,13 @@ public class BlockBrewingStand extends BlockContainer {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
+		if (!world.isRemote) {
+			TileEntity tileentity = world.getTileEntity(blockpos);
+			if (tileentity instanceof TileEntityBrewingStand) {
+				entityplayer.displayGUIChest((TileEntityBrewingStand) tileentity);
+				entityplayer.triggerAchievement(StatList.field_181729_M);
+			}
+		}
 		return true;
 	}
 

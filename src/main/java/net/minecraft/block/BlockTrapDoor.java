@@ -145,6 +145,28 @@ public class BlockTrapDoor extends Block {
 	}
 
 	/**+
+	 * Called when a neighboring block changes.
+	 */
+	public void onNeighborBlockChange(World world, BlockPos blockpos, IBlockState iblockstate, Block block) {
+		if (!world.isRemote) {
+			BlockPos blockpos1 = blockpos.offset(((EnumFacing) iblockstate.getValue(FACING)).getOpposite());
+			if (!isValidSupportBlock(world.getBlockState(blockpos1).getBlock())) {
+				world.setBlockToAir(blockpos);
+				this.dropBlockAsItem(world, blockpos, iblockstate, 0);
+			} else {
+				boolean flag = world.isBlockPowered(blockpos);
+				if (flag || block.canProvidePower()) {
+					boolean flag1 = ((Boolean) iblockstate.getValue(OPEN)).booleanValue();
+					if (flag1 != flag) {
+						world.setBlockState(blockpos, iblockstate.withProperty(OPEN, Boolean.valueOf(flag)), 2);
+						world.playAuxSFXAtEntity((EntityPlayer) null, flag ? 1003 : 1006, blockpos, 0);
+					}
+				}
+			}
+		}
+	}
+
+	/**+
 	 * Ray traces through the blocks collision from start vector to
 	 * end vector returning a ray trace hit.
 	 */

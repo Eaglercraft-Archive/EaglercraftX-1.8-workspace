@@ -9,6 +9,7 @@ import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
@@ -84,6 +85,14 @@ public class BlockFarmland extends Block {
 	 */
 	public void onFallenUpon(World world, BlockPos blockpos, Entity entity, float f) {
 		if (entity instanceof EntityLivingBase) {
+			if (!world.isRemote && world.rand.nextFloat() < f - 0.5F) {
+				if (!(entity instanceof EntityPlayer) && !world.getGameRules().getBoolean("mobGriefing")) {
+					return;
+				}
+
+				world.setBlockState(blockpos, Blocks.dirt.getDefaultState());
+			}
+
 			super.onFallenUpon(world, blockpos, entity, f);
 		}
 	}

@@ -108,6 +108,26 @@ public class ItemMinecart extends Item {
 			float hitX, float hitY, float hitZ) {
 		IBlockState iblockstate = worldIn.getBlockState(pos);
 		if (BlockRailBase.isRailBlock(iblockstate)) {
+			if (!worldIn.isRemote) {
+				BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = iblockstate
+						.getBlock() instanceof BlockRailBase
+								? (BlockRailBase.EnumRailDirection) iblockstate
+										.getValue(((BlockRailBase) iblockstate.getBlock()).getShapeProperty())
+								: BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+				double d0 = 0.0D;
+				if (blockrailbase$enumraildirection.isAscending()) {
+					d0 = 0.5D;
+				}
+
+				EntityMinecart entityminecart = EntityMinecart.func_180458_a(worldIn, (double) pos.getX() + 0.5D,
+						(double) pos.getY() + 0.0625D + d0, (double) pos.getZ() + 0.5D, this.minecartType);
+				if (stack.hasDisplayName()) {
+					entityminecart.setCustomNameTag(stack.getDisplayName());
+				}
+
+				worldIn.spawnEntityInWorld(entityminecart);
+			}
+
 			--stack.stackSize;
 			return true;
 		} else {

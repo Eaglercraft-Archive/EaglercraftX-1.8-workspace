@@ -9,10 +9,13 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.world.ColorizerGrass;
@@ -95,6 +98,19 @@ public class BlockTallGrass extends BlockBush implements IGrowable {
 	 */
 	public int quantityDroppedWithBonus(int i, EaglercraftRandom random) {
 		return 1 + random.nextInt(i * 2 + 1);
+	}
+
+	public void harvestBlock(World world, EntityPlayer entityplayer, BlockPos blockpos, IBlockState iblockstate,
+			TileEntity tileentity) {
+		if (!world.isRemote && entityplayer.getCurrentEquippedItem() != null
+				&& entityplayer.getCurrentEquippedItem().getItem() == Items.shears) {
+			entityplayer.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
+			spawnAsEntity(world, blockpos, new ItemStack(Blocks.tallgrass, 1,
+					((BlockTallGrass.EnumType) iblockstate.getValue(TYPE)).getMeta()));
+		} else {
+			super.harvestBlock(world, entityplayer, blockpos, iblockstate, tileentity);
+		}
+
 	}
 
 	public int getDamageValue(World world, BlockPos blockpos) {

@@ -105,6 +105,12 @@ public class BlockEnchantmentTable extends BlockContainer {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
+		if (!world.isRemote) {
+			TileEntity tileentity = world.getTileEntity(blockpos);
+			if (tileentity instanceof TileEntityEnchantmentTable) {
+				entityplayer.displayGui((TileEntityEnchantmentTable) tileentity);
+			}
+		}
 		return true;
 	}
 

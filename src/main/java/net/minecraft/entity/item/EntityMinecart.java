@@ -12,10 +12,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.ai.EntityMinecartMobSpawner;
+import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
@@ -27,6 +30,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IWorldNameable;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -159,7 +163,33 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 	 * Called when the entity is attacked.
 	 */
 	public boolean attackEntityFrom(DamageSource damagesource, float f) {
-		return true;
+		if (!this.worldObj.isRemote && !this.isDead) {
+			if (this.isEntityInvulnerable(damagesource)) {
+				return false;
+			} else {
+				this.setRollingDirection(-this.getRollingDirection());
+				this.setRollingAmplitude(10);
+				this.setBeenAttacked();
+				this.setDamage(this.getDamage() + f * 10.0F);
+				boolean flag = damagesource.getEntity() instanceof EntityPlayer
+						&& ((EntityPlayer) damagesource.getEntity()).capabilities.isCreativeMode;
+				if (flag || this.getDamage() > 40.0F) {
+					if (this.riddenByEntity != null) {
+						this.riddenByEntity.mountEntity((Entity) null);
+					}
+
+					if (flag && !this.hasCustomName()) {
+						this.setDead();
+					} else {
+						this.killMinecart(damagesource);
+					}
+				}
+
+				return true;
+			}
+		} else {
+			return true;
+		}
 	}
 
 	public void killMinecart(DamageSource parDamageSource) {
@@ -216,20 +246,120 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 			this.kill();
 		}
 
-		if (this.turnProgress > 0) {
-			double d4 = this.posX + (this.minecartX - this.posX) / (double) this.turnProgress;
-			double d5 = this.posY + (this.minecartY - this.posY) / (double) this.turnProgress;
-			double d6 = this.posZ + (this.minecartZ - this.posZ) / (double) this.turnProgress;
-			double d1 = MathHelper.wrapAngleTo180_double(this.minecartYaw - (double) this.rotationYaw);
-			this.rotationYaw = (float) ((double) this.rotationYaw + d1 / (double) this.turnProgress);
-			this.rotationPitch = (float) ((double) this.rotationPitch
-					+ (this.minecartPitch - (double) this.rotationPitch) / (double) this.turnProgress);
-			--this.turnProgress;
-			this.setPosition(d4, d5, d6);
-			this.setRotation(this.rotationYaw, this.rotationPitch);
+		if (!this.worldObj.isRemote && this.worldObj instanceof WorldServer) {
+			this.worldObj.theProfiler.startSection("portal");
+			MinecraftServer minecraftserver = ((WorldServer) this.worldObj).getMinecraftServer();
+			int i = this.getMaxInPortalTime();
+			if (this.inPortal) {
+				if (minecraftserver.getAllowNether()) {
+					if (this.ridingEntity == null && this.portalCounter++ >= i) {
+						this.portalCounter = i;
+						this.timeUntilPortal = this.getPortalCooldown();
+						byte b0;
+						if (this.worldObj.provider.getDimensionId() == -1) {
+							b0 = 0;
+						} else {
+							b0 = -1;
+						}
+
+						this.travelToDimension(b0);
+					}
+
+					this.inPortal = false;
+				}
+			} else {
+				if (this.portalCounter > 0) {
+					this.portalCounter -= 4;
+				}
+
+				if (this.portalCounter < 0) {
+					this.portalCounter = 0;
+				}
+			}
+
+			if (this.timeUntilPortal > 0) {
+				--this.timeUntilPortal;
+			}
+
+			this.worldObj.theProfiler.endSection();
+		}
+
+		if (this.worldObj.isRemote) {
+			if (this.turnProgress > 0) {
+				double d4 = this.posX + (this.minecartX - this.posX) / (double) this.turnProgress;
+				double d5 = this.posY + (this.minecartY - this.posY) / (double) this.turnProgress;
+				double d6 = this.posZ + (this.minecartZ - this.posZ) / (double) this.turnProgress;
+				double d1 = MathHelper.wrapAngleTo180_double(this.minecartYaw - (double) this.rotationYaw);
+				this.rotationYaw = (float) ((double) this.rotationYaw + d1 / (double) this.turnProgress);
+				this.rotationPitch = (float) ((double) this.rotationPitch
+						+ (this.minecartPitch - (double) this.rotationPitch) / (double) this.turnProgress);
+				--this.turnProgress;
+				this.setPosition(d4, d5, d6);
+				this.setRotation(this.rotationYaw, this.rotationPitch);
+			} else {
+				this.setPosition(this.posX, this.posY, this.posZ);
+				this.setRotation(this.rotationYaw, this.rotationPitch);
+			}
+
 		} else {
-			this.setPosition(this.posX, this.posY, this.posZ);
+			this.prevPosX = this.posX;
+			this.prevPosY = this.posY;
+			this.prevPosZ = this.posZ;
+			this.motionY -= 0.03999999910593033D;
+			int j = MathHelper.floor_double(this.posX);
+			int k = MathHelper.floor_double(this.posY);
+			int l = MathHelper.floor_double(this.posZ);
+			if (BlockRailBase.isRailBlock(this.worldObj, new BlockPos(j, k - 1, l))) {
+				--k;
+			}
+
+			BlockPos blockpos = new BlockPos(j, k, l);
+			IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
+			if (BlockRailBase.isRailBlock(iblockstate)) {
+				this.func_180460_a(blockpos, iblockstate);
+				if (iblockstate.getBlock() == Blocks.activator_rail) {
+					this.onActivatorRailPass(j, k, l,
+							((Boolean) iblockstate.getValue(BlockRailPowered.POWERED)).booleanValue());
+				}
+			} else {
+				this.moveDerailedMinecart();
+			}
+
+			this.doBlockCollisions();
+			this.rotationPitch = 0.0F;
+			double d0 = this.prevPosX - this.posX;
+			double d2 = this.prevPosZ - this.posZ;
+			if (d0 * d0 + d2 * d2 > 0.001D) {
+				this.rotationYaw = (float) (MathHelper.func_181159_b(d2, d0) * 180.0D / 3.141592653589793D);
+				if (this.isInReverse) {
+					this.rotationYaw += 180.0F;
+				}
+			}
+
+			double d3 = (double) MathHelper.wrapAngleTo180_float(this.rotationYaw - this.prevRotationYaw);
+			if (d3 < -170.0D || d3 >= 170.0D) {
+				this.rotationYaw += 180.0F;
+				this.isInReverse = !this.isInReverse;
+			}
+
 			this.setRotation(this.rotationYaw, this.rotationPitch);
+
+			for (Entity entity : this.worldObj.getEntitiesWithinAABBExcludingEntity(this,
+					this.getEntityBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D))) {
+				if (entity != this.riddenByEntity && entity.canBePushed() && entity instanceof EntityMinecart) {
+					entity.applyEntityCollision(this);
+				}
+			}
+
+			if (this.riddenByEntity != null && this.riddenByEntity.isDead) {
+				if (this.riddenByEntity.ridingEntity == this) {
+					this.riddenByEntity.ridingEntity = null;
+				}
+
+				this.riddenByEntity = null;
+			}
+
+			this.handleWaterMovement();
 		}
 	}
 
@@ -607,7 +737,84 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 	 * from each other. Args: entity
 	 */
 	public void applyEntityCollision(Entity entity) {
+		if (!this.worldObj.isRemote) {
+			if (!entity.noClip && !this.noClip) {
+				if (entity != this.riddenByEntity) {
+					if (entity instanceof EntityLivingBase && !(entity instanceof EntityPlayer)
+							&& !(entity instanceof EntityIronGolem)
+							&& this.getMinecartType() == EntityMinecart.EnumMinecartType.RIDEABLE
+							&& this.motionX * this.motionX + this.motionZ * this.motionZ > 0.01D
+							&& this.riddenByEntity == null && entity.ridingEntity == null) {
+						entity.mountEntity(this);
+					}
 
+					double d0 = entity.posX - this.posX;
+					double d1 = entity.posZ - this.posZ;
+					double d2 = d0 * d0 + d1 * d1;
+					if (d2 >= 9.999999747378752E-5D) {
+						d2 = (double) MathHelper.sqrt_double(d2);
+						d0 = d0 / d2;
+						d1 = d1 / d2;
+						double d3 = 1.0D / d2;
+						if (d3 > 1.0D) {
+							d3 = 1.0D;
+						}
+
+						d0 = d0 * d3;
+						d1 = d1 * d3;
+						d0 = d0 * 0.10000000149011612D;
+						d1 = d1 * 0.10000000149011612D;
+						d0 = d0 * (double) (1.0F - this.entityCollisionReduction);
+						d1 = d1 * (double) (1.0F - this.entityCollisionReduction);
+						d0 = d0 * 0.5D;
+						d1 = d1 * 0.5D;
+						if (entity instanceof EntityMinecart) {
+							double d4 = entity.posX - this.posX;
+							double d5 = entity.posZ - this.posZ;
+							Vec3 vec3 = (new Vec3(d4, 0.0D, d5)).normalize();
+							Vec3 vec31 = (new Vec3((double) MathHelper.cos(this.rotationYaw * 3.1415927F / 180.0F),
+									0.0D, (double) MathHelper.sin(this.rotationYaw * 3.1415927F / 180.0F))).normalize();
+							double d6 = Math.abs(vec3.dotProduct(vec31));
+							if (d6 < 0.800000011920929D) {
+								return;
+							}
+
+							double d7 = entity.motionX + this.motionX;
+							double d8 = entity.motionZ + this.motionZ;
+							if (((EntityMinecart) entity).getMinecartType() == EntityMinecart.EnumMinecartType.FURNACE
+									&& this.getMinecartType() != EntityMinecart.EnumMinecartType.FURNACE) {
+								this.motionX *= 0.20000000298023224D;
+								this.motionZ *= 0.20000000298023224D;
+								this.addVelocity(entity.motionX - d0, 0.0D, entity.motionZ - d1);
+								entity.motionX *= 0.949999988079071D;
+								entity.motionZ *= 0.949999988079071D;
+							} else if (((EntityMinecart) entity)
+									.getMinecartType() != EntityMinecart.EnumMinecartType.FURNACE
+									&& this.getMinecartType() == EntityMinecart.EnumMinecartType.FURNACE) {
+								entity.motionX *= 0.20000000298023224D;
+								entity.motionZ *= 0.20000000298023224D;
+								entity.addVelocity(this.motionX + d0, 0.0D, this.motionZ + d1);
+								this.motionX *= 0.949999988079071D;
+								this.motionZ *= 0.949999988079071D;
+							} else {
+								d7 = d7 / 2.0D;
+								d8 = d8 / 2.0D;
+								this.motionX *= 0.20000000298023224D;
+								this.motionZ *= 0.20000000298023224D;
+								this.addVelocity(d7 - d0, 0.0D, d8 - d1);
+								entity.motionX *= 0.20000000298023224D;
+								entity.motionZ *= 0.20000000298023224D;
+								entity.addVelocity(d7 + d0, 0.0D, d8 + d1);
+							}
+						} else {
+							this.addVelocity(-d0, 0.0D, -d1);
+							entity.addVelocity(d0 / 4.0D, 0.0D, d1 / 4.0D);
+						}
+					}
+
+				}
+			}
+		}
 	}
 
 	public void setPositionAndRotation2(double d0, double d1, double d2, float f, float f1, int i, boolean var10) {

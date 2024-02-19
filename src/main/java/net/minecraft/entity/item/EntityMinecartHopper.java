@@ -77,6 +77,10 @@ public class EntityMinecartHopper extends EntityMinecartContainer implements IHo
 	 * First layer of player interaction
 	 */
 	public boolean interactFirst(EntityPlayer entityplayer) {
+		if (!this.worldObj.isRemote) {
+			entityplayer.displayGUIChest(this);
+		}
+
 		return true;
 	}
 
@@ -134,6 +138,30 @@ public class EntityMinecartHopper extends EntityMinecartContainer implements IHo
 	 */
 	public double getZPos() {
 		return this.posZ;
+	}
+
+	/**+
+	 * Called to update the entity's position/logic.
+	 */
+	public void onUpdate() {
+		super.onUpdate();
+		if (!this.worldObj.isRemote && this.isEntityAlive() && this.getBlocked()) {
+			BlockPos blockpos = new BlockPos(this);
+			if (blockpos.equals(this.field_174900_c)) {
+				--this.transferTicker;
+			} else {
+				this.setTransferTicker(0);
+			}
+
+			if (!this.canTransfer()) {
+				this.setTransferTicker(0);
+				if (this.func_96112_aD()) {
+					this.setTransferTicker(4);
+					this.markDirty();
+				}
+			}
+		}
+
 	}
 
 	public boolean func_96112_aD() {

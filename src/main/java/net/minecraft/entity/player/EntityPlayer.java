@@ -1,13 +1,12 @@
 package net.minecraft.entity.player;
 
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
+import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
+
 import java.util.Collection;
 import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-
-import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
 import net.minecraft.block.BlockDirectional;
@@ -29,6 +28,7 @@ import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityPig;
@@ -48,6 +48,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Score;
@@ -55,6 +56,7 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
@@ -147,7 +149,7 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		super(worldIn);
 		this.entityUniqueID = getUUID(gameProfileIn);
 		this.gameProfile = gameProfileIn;
-		this.inventoryContainer = new ContainerPlayer(this.inventory, false, this);
+		this.inventoryContainer = new ContainerPlayer(this.inventory, !worldIn.isRemote, this);
 		this.openContainer = this.inventoryContainer;
 		BlockPos blockpos = worldIn.getSpawnPoint();
 		this.setLocationAndAngles((double) blockpos.getX() + 0.5D, (double) (blockpos.getY() + 1),
@@ -211,6 +213,10 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 	public void clearItemInUse() {
 		this.itemInUse = null;
 		this.itemInUseCount = 0;
+		if (!this.worldObj.isRemote) {
+			this.setEating(false);
+		}
+
 	}
 
 	public boolean isBlocking() {
@@ -233,7 +239,9 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 					this.updateItemUse(itemstack, 5);
 				}
 
-				--this.itemInUseCount;
+				if (--this.itemInUseCount == 0 && !this.worldObj.isRemote) {
+					this.onItemUseFinish();
+				}
 			} else {
 				this.clearItemInUse();
 			}
@@ -248,6 +256,14 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 			if (this.sleepTimer > 100) {
 				this.sleepTimer = 100;
 			}
+
+			if (!this.worldObj.isRemote) {
+				if (!this.isInBed()) {
+					this.wakeUpPlayer(true, true, false);
+				} else if (this.worldObj.isDaytime()) {
+					this.wakeUpPlayer(false, true, true);
+				}
+			}
 		} else if (this.sleepTimer > 0) {
 			++this.sleepTimer;
 			if (this.sleepTimer >= 110) {
@@ -256,6 +272,10 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		}
 
 		super.onUpdate();
+		if (!this.worldObj.isRemote && this.openContainer != null && !this.openContainer.canInteractWith(this)) {
+			this.closeScreen();
+			this.openContainer = this.inventoryContainer;
+		}
 
 		if (this.isBurning() && this.capabilities.disableDamage) {
 			this.extinguish();
@@ -297,6 +317,14 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		this.chasingPosY += d0 * 0.25D;
 		if (this.ridingEntity == null) {
 			this.startMinecartRidingCoordinate = null;
+		}
+
+		if (!this.worldObj.isRemote) {
+			this.foodStats.onUpdate(this);
+			this.triggerAchievement(StatList.minutesPlayedStat);
+			if (this.isEntityAlive()) {
+				this.triggerAchievement(StatList.timeSinceDeathStat);
+			}
 		}
 
 		int i = 29999999;
@@ -422,19 +450,25 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 	 * Handles updating while being ridden by an entity
 	 */
 	public void updateRidden() {
-		double d0 = this.posX;
-		double d1 = this.posY;
-		double d2 = this.posZ;
-		float f = this.rotationYaw;
-		float f1 = this.rotationPitch;
-		super.updateRidden();
-		this.prevCameraYaw = this.cameraYaw;
-		this.cameraYaw = 0.0F;
-		this.addMountedMovementStat(this.posX - d0, this.posY - d1, this.posZ - d2);
-		if (this.ridingEntity instanceof EntityPig) {
-			this.rotationPitch = f1;
-			this.rotationYaw = f;
-			this.renderYawOffset = ((EntityPig) this.ridingEntity).renderYawOffset;
+		if (!this.worldObj.isRemote && this.isSneaking()) {
+			this.mountEntity((Entity) null);
+			this.setSneaking(false);
+		} else {
+			double d0 = this.posX;
+			double d1 = this.posY;
+			double d2 = this.posZ;
+			float f = this.rotationYaw;
+			float f1 = this.rotationPitch;
+			super.updateRidden();
+			this.prevCameraYaw = this.cameraYaw;
+			this.cameraYaw = 0.0F;
+			this.addMountedMovementStat(this.posX - d0, this.posY - d1, this.posZ - d2);
+			if (this.ridingEntity instanceof EntityPig) {
+				this.rotationPitch = f1;
+				this.rotationYaw = f;
+				this.renderYawOffset = ((EntityPig) this.ridingEntity).renderYawOffset;
+			}
+
 		}
 	}
 
@@ -481,6 +515,9 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		this.prevCameraYaw = this.cameraYaw;
 		super.onLivingUpdate();
 		IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+		if (!this.worldObj.isRemote) {
+			iattributeinstance.setBaseValue((double) this.capabilities.getWalkSpeed());
+		}
 
 		this.jumpMovementFactor = this.speedInAir;
 		if (this.isSprinting()) {
@@ -598,7 +635,7 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 	 */
 	public void addToPlayerScore(Entity entity, int i) {
 		this.addScore(i);
-		Collection collection = this.getWorldScoreboard()
+		Collection<ScoreObjective> collection = this.getWorldScoreboard()
 				.getObjectivesFromCriteria(IScoreObjectiveCriteria.totalKillCount);
 		if (entity instanceof EntityPlayer) {
 			this.triggerAchievement(StatList.playerKillsStat);
@@ -609,7 +646,7 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 			this.triggerAchievement(StatList.mobKillsStat);
 		}
 
-		for (ScoreObjective scoreobjective : (Collection<ScoreObjective>) collection) {
+		for (ScoreObjective scoreobjective : collection) {
 			Score score = this.getWorldScoreboard().getValueFromObjective(this.getName(), scoreobjective);
 			score.func_96648_a();
 		}
@@ -850,6 +887,10 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 			if (this.getHealth() <= 0.0F) {
 				return false;
 			} else {
+				if (this.isPlayerSleeping() && !this.worldObj.isRemote) {
+					this.wakeUpPlayer(true, true, false);
+				}
+
 				if (damagesource.isDifficultyScaled()) {
 					if (this.worldObj.getDifficulty() == EnumDifficulty.PEACEFUL) {
 						f = 0.0F;
@@ -993,6 +1034,17 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 
 						return true;
 					}
+				} else if (!this.worldObj.isRemote && MinecraftServer.getServer().worldServers[0].getWorldInfo()
+						.getGameRulesInstance().getBoolean("clickToRide") && itemstack == null
+						&& parEntity instanceof EntityPlayer) {
+					EntityPlayer otherPlayer = (EntityPlayer) parEntity;
+					while (otherPlayer.riddenByEntity instanceof EntityPlayer) {
+						otherPlayer = (EntityPlayer) otherPlayer.riddenByEntity;
+					}
+					if (otherPlayer.riddenByEntity == null && otherPlayer != this) {
+						mountEntity(otherPlayer);
+						return true;
+					}
 				}
 
 				return false;
@@ -1085,6 +1137,15 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 							this.motionX *= 0.6D;
 							this.motionZ *= 0.6D;
 							this.setSprinting(false);
+						}
+
+						if (entity instanceof EntityPlayerMP && entity.velocityChanged) {
+							((EntityPlayerMP) entity).playerNetServerHandler
+									.sendPacket(new S12PacketEntityVelocity(entity));
+							entity.velocityChanged = false;
+							entity.motionX = d0;
+							entity.motionY = d1;
+							entity.motionZ = d2;
 						}
 
 						if (flag) {
@@ -1186,6 +1247,35 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 	}
 
 	public EntityPlayer.EnumStatus trySleep(BlockPos blockpos) {
+		if (!this.worldObj.isRemote) {
+			if (this.isPlayerSleeping() || !this.isEntityAlive()) {
+				return EntityPlayer.EnumStatus.OTHER_PROBLEM;
+			}
+
+			if (!this.worldObj.provider.isSurfaceWorld()) {
+				return EntityPlayer.EnumStatus.NOT_POSSIBLE_HERE;
+			}
+
+			if (this.worldObj.isDaytime()) {
+				return EntityPlayer.EnumStatus.NOT_POSSIBLE_NOW;
+			}
+
+			if (Math.abs(this.posX - (double) blockpos.getX()) > 3.0D
+					|| Math.abs(this.posY - (double) blockpos.getY()) > 2.0D
+					|| Math.abs(this.posZ - (double) blockpos.getZ()) > 3.0D) {
+				return EntityPlayer.EnumStatus.TOO_FAR_AWAY;
+			}
+
+			double d0 = 8.0D;
+			double d1 = 5.0D;
+			List list = this.worldObj.getEntitiesWithinAABB(EntityMob.class,
+					new AxisAlignedBB((double) blockpos.getX() - d0, (double) blockpos.getY() - d1,
+							(double) blockpos.getZ() - d0, (double) blockpos.getX() + d0, (double) blockpos.getY() + d1,
+							(double) blockpos.getZ() + d0));
+			if (!list.isEmpty()) {
+				return EntityPlayer.EnumStatus.NOT_SAFE;
+			}
+		}
 
 		if (this.isRiding()) {
 			this.mountEntity((Entity) null);
@@ -1223,6 +1313,9 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		this.sleepTimer = 0;
 		this.playerLocation = blockpos;
 		this.motionX = this.motionZ = this.motionY = 0.0D;
+		if (!this.worldObj.isRemote) {
+			this.worldObj.updateAllPlayersSleepingFlag();
+		}
 
 		return EntityPlayer.EnumStatus.OK;
 	}
@@ -1265,6 +1358,9 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		}
 
 		this.sleeping = false;
+		if (!this.worldObj.isRemote && flag1) {
+			this.worldObj.updateAllPlayersSleepingFlag();
+		}
 
 		this.sleepTimer = flag ? 0 : 100;
 		if (flag2) {
@@ -1618,7 +1714,12 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 	 * increases exhaustion level by supplied amount
 	 */
 	public void addExhaustion(float parFloat1) {
+		if (!this.capabilities.disableDamage) {
+			if (!this.worldObj.isRemote) {
+				this.foodStats.addExhaustion(parFloat1);
+			}
 
+		}
 	}
 
 	/**+
@@ -1647,6 +1748,10 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		if (itemstack != this.itemInUse) {
 			this.itemInUse = itemstack;
 			this.itemInUseCount = i;
+			if (!this.worldObj.isRemote) {
+				this.setEating(true);
+			}
+
 		}
 	}
 
@@ -1897,7 +2002,7 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 	 * about executed commands
 	 */
 	public boolean sendCommandFeedback() {
-		return true;
+		return MinecraftServer.getServer().worldServers[0].getGameRules().getBoolean("sendCommandFeedback");
 	}
 
 	public boolean replaceItemInInventory(int i, ItemStack itemstack) {

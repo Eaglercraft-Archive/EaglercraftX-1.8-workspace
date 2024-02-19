@@ -1,7 +1,6 @@
 package net.minecraft.entity.monster;
 
 import java.util.Calendar;
-
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -12,6 +11,18 @@ import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIArrowAttack;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIAvoidEntity;
+import net.minecraft.entity.ai.EntityAIFleeSun;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAIRestrictSun;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
@@ -26,6 +37,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProviderHell;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -48,9 +60,26 @@ import net.minecraft.world.World;
  * 
  */
 public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
+	private EntityAIArrowAttack aiArrowAttack = new EntityAIArrowAttack(this, 1.0D, 20, 60, 15.0F);
+	private EntityAIAttackOnCollide aiAttackOnCollide = new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.2D,
+			false);
 
 	public EntitySkeleton(World worldIn) {
 		super(worldIn);
+		this.tasks.addTask(1, new EntityAISwimming(this));
+		this.tasks.addTask(2, new EntityAIRestrictSun(this));
+		this.tasks.addTask(3, new EntityAIFleeSun(this, 1.0D));
+		this.tasks.addTask(3, new EntityAIAvoidEntity(this, EntityWolf.class, 6.0F, 1.0D, 1.2D));
+		this.tasks.addTask(4, new EntityAIWander(this, 1.0D));
+		this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+		this.tasks.addTask(6, new EntityAILookIdle(this));
+		this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
+		this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+		this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityIronGolem.class, true));
+		if (worldIn != null && !worldIn.isRemote) {
+			this.setCombatTask();
+		}
+
 	}
 
 	protected void applyEntityAttributes() {
@@ -113,8 +142,31 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 	 * to react to sunlight and start to burn.
 	 */
 	public void onLivingUpdate() {
+		if (this.worldObj.isDaytime() && !this.worldObj.isRemote) {
+			float f = this.getBrightness(1.0F);
+			BlockPos blockpos = new BlockPos(this.posX, (double) Math.round(this.posY), this.posZ);
+			if (f > 0.5F && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.worldObj.canSeeSky(blockpos)) {
+				boolean flag = true;
+				ItemStack itemstack = this.getEquipmentInSlot(4);
+				if (itemstack != null) {
+					if (itemstack.isItemStackDamageable()) {
+						itemstack.setItemDamage(itemstack.getItemDamage() + this.rand.nextInt(2));
+						if (itemstack.getItemDamage() >= itemstack.getMaxDamage()) {
+							this.renderBrokenItemStack(itemstack);
+							this.setCurrentItemOrArmor(4, (ItemStack) null);
+						}
+					}
 
-		if (this.getSkeletonType() == 1) {
+					flag = false;
+				}
+
+				if (flag) {
+					this.setFire(8);
+				}
+			}
+		}
+
+		if (this.worldObj.isRemote && this.getSkeletonType() == 1) {
 			this.setSize(0.72F, 2.535F);
 		}
 
@@ -213,6 +265,16 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 	public IEntityLivingData onInitialSpawn(DifficultyInstance difficultyinstance,
 			IEntityLivingData ientitylivingdata) {
 		ientitylivingdata = super.onInitialSpawn(difficultyinstance, ientitylivingdata);
+		if (this.worldObj.provider instanceof WorldProviderHell && this.getRNG().nextInt(5) > 0) {
+			this.tasks.addTask(4, this.aiAttackOnCollide);
+			this.setSkeletonType(1);
+			this.setCurrentItemOrArmor(0, new ItemStack(Items.stone_sword));
+			this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
+		} else {
+			this.tasks.addTask(4, this.aiArrowAttack);
+			this.setEquipmentBasedOnDifficulty(difficultyinstance);
+			this.setEnchantmentBasedOnDifficulty(difficultyinstance);
+		}
 
 		this.setCanPickUpLoot(this.rand.nextFloat() < 0.55F * difficultyinstance.getClampedAdditionalDifficulty());
 		if (this.getEquipmentInSlot(4) == null) {
@@ -231,6 +293,15 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 	 * sets this entity's combat AI.
 	 */
 	public void setCombatTask() {
+		this.tasks.removeTask(this.aiAttackOnCollide);
+		this.tasks.removeTask(this.aiArrowAttack);
+		ItemStack itemstack = this.getHeldItem();
+		if (itemstack != null && itemstack.getItem() == Items.bow) {
+			this.tasks.addTask(4, this.aiArrowAttack);
+		} else {
+			this.tasks.addTask(4, this.aiAttackOnCollide);
+		}
+
 	}
 
 	/**+
@@ -302,6 +373,18 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 	public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
 		nbttagcompound.setByte("SkeletonType", (byte) this.getSkeletonType());
+	}
+
+	/**+
+	 * Sets the held item, or an armor slot. Slot 0 is held item.
+	 * Slot 1-4 is armor. Params: Item, slot
+	 */
+	public void setCurrentItemOrArmor(int i, ItemStack itemstack) {
+		super.setCurrentItemOrArmor(i, itemstack);
+		if (!this.worldObj.isRemote && i == 0) {
+			this.setCombatTask();
+		}
+
 	}
 
 	public float getEyeHeight() {

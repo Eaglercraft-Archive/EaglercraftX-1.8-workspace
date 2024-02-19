@@ -10,6 +10,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -135,6 +136,25 @@ public class BlockCrops extends BlockBush implements IGrowable {
 
 	protected Item getCrop() {
 		return Items.wheat;
+	}
+
+	/**+
+	 * Spawns this Block's drops into the World as EntityItems.
+	 */
+	public void dropBlockAsItemWithChance(World world, BlockPos blockpos, IBlockState iblockstate, float f, int i) {
+		super.dropBlockAsItemWithChance(world, blockpos, iblockstate, f, 0);
+		if (!world.isRemote) {
+			int j = ((Integer) iblockstate.getValue(AGE)).intValue();
+			if (j >= 7) {
+				int k = 3 + i;
+
+				for (int l = 0; l < k; ++l) {
+					if (world.rand.nextInt(15) <= j) {
+						spawnAsEntity(world, blockpos, new ItemStack(this.getSeed(), 1, 0));
+					}
+				}
+			}
+		}
 	}
 
 	/**+

@@ -12,6 +12,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
@@ -66,6 +67,25 @@ public class BlockNetherWart extends BlockBush {
 		}
 
 		super.updateTick(world, blockpos, iblockstate, random);
+	}
+
+	/**+
+	 * Spawns this Block's drops into the World as EntityItems.
+	 */
+	public void dropBlockAsItemWithChance(World world, BlockPos blockpos, IBlockState iblockstate, float var4, int i) {
+		if (!world.isRemote) {
+			int j = 1;
+			if (((Integer) iblockstate.getValue(AGE)).intValue() >= 3) {
+				j = 2 + world.rand.nextInt(3);
+				if (i > 0) {
+					j += world.rand.nextInt(i + 1);
+				}
+			}
+
+			for (int k = 0; k < j; ++k) {
+				spawnAsEntity(world, blockpos, new ItemStack(Items.nether_wart));
+			}
+		}
 	}
 
 	/**+

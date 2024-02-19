@@ -15,17 +15,23 @@ import net.minecraft.block.state.pattern.BlockPattern;
 import net.minecraft.block.state.pattern.BlockStateHelper;
 import net.minecraft.block.state.pattern.FactoryBlockPattern;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.stats.AchievementList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -159,7 +165,25 @@ public class BlockSkull extends BlockContainer {
 	}
 
 	public void breakBlock(World world, BlockPos blockpos, IBlockState iblockstate) {
+		if (!world.isRemote) {
+			if (!((Boolean) iblockstate.getValue(NODROP)).booleanValue()) {
+				TileEntity tileentity = world.getTileEntity(blockpos);
+				if (tileentity instanceof TileEntitySkull) {
+					TileEntitySkull tileentityskull = (TileEntitySkull) tileentity;
+					ItemStack itemstack = new ItemStack(Items.skull, 1, this.getDamageValue(world, blockpos));
+					if (tileentityskull.getSkullType() == 3 && tileentityskull.getPlayerProfile() != null) {
+						itemstack.setTagCompound(new NBTTagCompound());
+						NBTTagCompound nbttagcompound = new NBTTagCompound();
+						NBTUtil.writeGameProfile(nbttagcompound, tileentityskull.getPlayerProfile());
+						itemstack.getTagCompound().setTag("SkullOwner", nbttagcompound);
+					}
 
+					spawnAsEntity(world, blockpos, itemstack);
+				}
+			}
+
+			super.breakBlock(world, blockpos, iblockstate);
+		}
 	}
 
 	/**+
@@ -170,11 +194,63 @@ public class BlockSkull extends BlockContainer {
 	}
 
 	public boolean canDispenserPlace(World worldIn, BlockPos pos, ItemStack stack) {
-		return false;
+		return stack.getMetadata() == 1 && pos.getY() >= 2 && worldIn.getDifficulty() != EnumDifficulty.PEACEFUL
+				&& !worldIn.isRemote ? this.getWitherBasePattern().match(worldIn, pos) != null : false;
 	}
 
 	public void checkWitherSpawn(World worldIn, BlockPos pos, TileEntitySkull te) {
+		if (te.getSkullType() == 1 && pos.getY() >= 2 && worldIn.getDifficulty() != EnumDifficulty.PEACEFUL
+				&& !worldIn.isRemote) {
+			BlockPattern blockpattern = this.getWitherPattern();
+			BlockPattern.PatternHelper blockpattern$patternhelper = blockpattern.match(worldIn, pos);
+			if (blockpattern$patternhelper != null) {
+				for (int i = 0; i < 3; ++i) {
+					BlockWorldState blockworldstate = blockpattern$patternhelper.translateOffset(i, 0, 0);
+					worldIn.setBlockState(blockworldstate.getPos(),
+							blockworldstate.getBlockState().withProperty(NODROP, Boolean.valueOf(true)), 2);
+				}
 
+				for (int j = 0; j < blockpattern.getPalmLength(); ++j) {
+					for (int k = 0; k < blockpattern.getThumbLength(); ++k) {
+						BlockWorldState blockworldstate1 = blockpattern$patternhelper.translateOffset(j, k, 0);
+						worldIn.setBlockState(blockworldstate1.getPos(), Blocks.air.getDefaultState(), 2);
+					}
+				}
+
+				BlockPos blockpos = blockpattern$patternhelper.translateOffset(1, 0, 0).getPos();
+				EntityWither entitywither = new EntityWither(worldIn);
+				BlockPos blockpos1 = blockpattern$patternhelper.translateOffset(1, 2, 0).getPos();
+				entitywither.setLocationAndAngles((double) blockpos1.getX() + 0.5D, (double) blockpos1.getY() + 0.55D,
+						(double) blockpos1.getZ() + 0.5D,
+						blockpattern$patternhelper.getFinger().getAxis() == EnumFacing.Axis.X ? 0.0F : 90.0F, 0.0F);
+				entitywither.renderYawOffset = blockpattern$patternhelper.getFinger().getAxis() == EnumFacing.Axis.X
+						? 0.0F
+						: 90.0F;
+				entitywither.func_82206_m();
+
+				for (EntityPlayer entityplayer : worldIn.getEntitiesWithinAABB(EntityPlayer.class,
+						entitywither.getEntityBoundingBox().expand(50.0D, 50.0D, 50.0D))) {
+					entityplayer.triggerAchievement(AchievementList.spawnWither);
+				}
+
+				worldIn.spawnEntityInWorld(entitywither);
+
+				for (int l = 0; l < 120; ++l) {
+					worldIn.spawnParticle(EnumParticleTypes.SNOWBALL,
+							(double) blockpos.getX() + worldIn.rand.nextDouble(),
+							(double) (blockpos.getY() - 2) + worldIn.rand.nextDouble() * 3.9D,
+							(double) blockpos.getZ() + worldIn.rand.nextDouble(), 0.0D, 0.0D, 0.0D, new int[0]);
+				}
+
+				for (int i1 = 0; i1 < blockpattern.getPalmLength(); ++i1) {
+					for (int j1 = 0; j1 < blockpattern.getThumbLength(); ++j1) {
+						BlockWorldState blockworldstate2 = blockpattern$patternhelper.translateOffset(i1, j1, 0);
+						worldIn.notifyNeighborsRespectDebug(blockworldstate2.getPos(), Blocks.air);
+					}
+				}
+
+			}
+		}
 	}
 
 	/**+

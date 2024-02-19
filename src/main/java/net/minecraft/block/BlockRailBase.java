@@ -101,12 +101,58 @@ public abstract class BlockRailBase extends Block {
 		return World.doesBlockHaveSolidTopSurface(world, blockpos.down());
 	}
 
+	public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
+		if (!worldIn.isRemote) {
+			state = this.func_176564_a(worldIn, pos, state, true);
+			if (this.isPowered) {
+				this.onNeighborBlockChange(worldIn, pos, state, this);
+			}
+		}
+	}
+
+	/**+
+	 * Called when a neighboring block changes.
+	 */
+	public void onNeighborBlockChange(World world, BlockPos blockpos, IBlockState iblockstate, Block block) {
+		if (!world.isRemote) {
+			BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = (BlockRailBase.EnumRailDirection) iblockstate
+					.getValue(this.getShapeProperty());
+			boolean flag = false;
+			if (!World.doesBlockHaveSolidTopSurface(world, blockpos.down())) {
+				flag = true;
+			}
+
+			if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_EAST
+					&& !World.doesBlockHaveSolidTopSurface(world, blockpos.east())) {
+				flag = true;
+			} else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_WEST
+					&& !World.doesBlockHaveSolidTopSurface(world, blockpos.west())) {
+				flag = true;
+			} else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_NORTH
+					&& !World.doesBlockHaveSolidTopSurface(world, blockpos.north())) {
+				flag = true;
+			} else if (blockrailbase$enumraildirection == BlockRailBase.EnumRailDirection.ASCENDING_SOUTH
+					&& !World.doesBlockHaveSolidTopSurface(world, blockpos.south())) {
+				flag = true;
+			}
+
+			if (flag) {
+				this.dropBlockAsItem(world, blockpos, iblockstate, 0);
+				world.setBlockToAir(blockpos);
+			} else {
+				this.onNeighborChangedInternal(world, blockpos, iblockstate, block);
+			}
+		}
+	}
+
 	protected void onNeighborChangedInternal(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock) {
 	}
 
 	protected IBlockState func_176564_a(World worldIn, BlockPos parBlockPos, IBlockState parIBlockState,
 			boolean parFlag) {
-		return parIBlockState;
+		return worldIn.isRemote ? parIBlockState
+				: (new BlockRailBase.Rail(worldIn, parBlockPos, parIBlockState))
+						.func_180364_a(worldIn.isBlockPowered(parBlockPos), parFlag).getBlockState();
 	}
 
 	public int getMobilityFlag() {

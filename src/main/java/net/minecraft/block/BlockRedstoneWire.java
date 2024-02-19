@@ -224,12 +224,73 @@ public class BlockRedstoneWire extends Block {
 		}
 	}
 
+	public void onBlockAdded(World world, BlockPos blockpos, IBlockState iblockstate) {
+		if (!world.isRemote) {
+			this.updateSurroundingRedstone(world, blockpos, iblockstate);
+
+			for (EnumFacing enumfacing : EnumFacing.Plane.VERTICAL) {
+				world.notifyNeighborsOfStateChange(blockpos.offset(enumfacing), this);
+			}
+
+			for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL) {
+				this.notifyWireNeighborsOfStateChange(world, blockpos.offset(enumfacing1));
+			}
+
+			for (EnumFacing enumfacing2 : EnumFacing.Plane.HORIZONTAL) {
+				BlockPos blockpos1 = blockpos.offset(enumfacing2);
+				if (world.getBlockState(blockpos1).getBlock().isNormalCube()) {
+					this.notifyWireNeighborsOfStateChange(world, blockpos1.up());
+				} else {
+					this.notifyWireNeighborsOfStateChange(world, blockpos1.down());
+				}
+			}
+		}
+	}
+
+	public void breakBlock(World world, BlockPos blockpos, IBlockState iblockstate) {
+		super.breakBlock(world, blockpos, iblockstate);
+		if (!world.isRemote) {
+			for (EnumFacing enumfacing : EnumFacing.values()) {
+				world.notifyNeighborsOfStateChange(blockpos.offset(enumfacing), this);
+			}
+
+			this.updateSurroundingRedstone(world, blockpos, iblockstate);
+
+			for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL) {
+				this.notifyWireNeighborsOfStateChange(world, blockpos.offset(enumfacing1));
+			}
+
+			for (EnumFacing enumfacing2 : EnumFacing.Plane.HORIZONTAL) {
+				BlockPos blockpos1 = blockpos.offset(enumfacing2);
+				if (world.getBlockState(blockpos1).getBlock().isNormalCube()) {
+					this.notifyWireNeighborsOfStateChange(world, blockpos1.up());
+				} else {
+					this.notifyWireNeighborsOfStateChange(world, blockpos1.down());
+				}
+			}
+		}
+	}
+
 	private int getMaxCurrentStrength(World worldIn, BlockPos pos, int strength) {
 		if (worldIn.getBlockState(pos).getBlock() != this) {
 			return strength;
 		} else {
 			int i = ((Integer) worldIn.getBlockState(pos).getValue(POWER)).intValue();
 			return i > strength ? i : strength;
+		}
+	}
+
+	/**+
+	 * Called when a neighboring block changes.
+	 */
+	public void onNeighborBlockChange(World world, BlockPos blockpos, IBlockState iblockstate, Block var4) {
+		if (!world.isRemote) {
+			if (this.canPlaceBlockAt(world, blockpos)) {
+				this.updateSurroundingRedstone(world, blockpos, iblockstate);
+			} else {
+				this.dropBlockAsItem(world, blockpos, iblockstate, 0);
+				world.setBlockToAir(blockpos);
+			}
 		}
 	}
 

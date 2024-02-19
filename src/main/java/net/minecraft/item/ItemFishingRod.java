@@ -2,6 +2,7 @@ package net.minecraft.item;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.stats.StatList;
 import net.minecraft.world.World;
 
@@ -58,6 +59,10 @@ public class ItemFishingRod extends Item {
 			entityplayer.swingItem();
 		} else {
 			world.playSoundAtEntity(entityplayer, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+			if (!world.isRemote) {
+				world.spawnEntityInWorld(new EntityFishHook(world, entityplayer));
+			}
+
 			entityplayer.swingItem();
 			entityplayer.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
 		}

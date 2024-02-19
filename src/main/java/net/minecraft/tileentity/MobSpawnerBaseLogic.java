@@ -13,6 +13,7 @@ import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.StringUtils;
@@ -99,18 +100,78 @@ public abstract class MobSpawnerBaseLogic {
 	public void updateSpawner() {
 		if (this.isActivated()) {
 			BlockPos blockpos = this.getSpawnerPosition();
-			double d3 = (double) ((float) blockpos.getX() + this.getSpawnerWorld().rand.nextFloat());
-			double d4 = (double) ((float) blockpos.getY() + this.getSpawnerWorld().rand.nextFloat());
-			double d5 = (double) ((float) blockpos.getZ() + this.getSpawnerWorld().rand.nextFloat());
-			this.getSpawnerWorld().spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d3, d4, d5, 0.0D, 0.0D, 0.0D,
-					new int[0]);
-			this.getSpawnerWorld().spawnParticle(EnumParticleTypes.FLAME, d3, d4, d5, 0.0D, 0.0D, 0.0D, new int[0]);
-			if (this.spawnDelay > 0) {
-				--this.spawnDelay;
+			if (this.getSpawnerWorld().isRemote) {
+				double d3 = (double) ((float) blockpos.getX() + this.getSpawnerWorld().rand.nextFloat());
+				double d4 = (double) ((float) blockpos.getY() + this.getSpawnerWorld().rand.nextFloat());
+				double d5 = (double) ((float) blockpos.getZ() + this.getSpawnerWorld().rand.nextFloat());
+				this.getSpawnerWorld().spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d3, d4, d5, 0.0D, 0.0D, 0.0D,
+						new int[0]);
+				this.getSpawnerWorld().spawnParticle(EnumParticleTypes.FLAME, d3, d4, d5, 0.0D, 0.0D, 0.0D, new int[0]);
+				if (this.spawnDelay > 0) {
+					--this.spawnDelay;
+				}
+
+				this.prevMobRotation = this.mobRotation;
+				this.mobRotation = (this.mobRotation + (double) (1000.0F / ((float) this.spawnDelay + 200.0F)))
+						% 360.0D;
+			} else {
+				if (this.spawnDelay == -1) {
+					this.resetTimer();
+				}
+
+				if (this.spawnDelay > 0) {
+					--this.spawnDelay;
+					return;
+				}
+
+				boolean flag = false;
+
+				for (int i = 0; i < this.spawnCount; ++i) {
+					Entity entity = EntityList.createEntityByName(this.getEntityNameToSpawn(), this.getSpawnerWorld());
+					if (entity == null) {
+						return;
+					}
+
+					int j = this.getSpawnerWorld()
+							.getEntitiesWithinAABB(entity.getClass(),
+									(new AxisAlignedBB((double) blockpos.getX(), (double) blockpos.getY(),
+											(double) blockpos.getZ(), (double) (blockpos.getX() + 1),
+											(double) (blockpos.getY() + 1), (double) (blockpos.getZ() + 1))).expand(
+													(double) this.spawnRange, (double) this.spawnRange,
+													(double) this.spawnRange))
+							.size();
+					if (j >= this.maxNearbyEntities) {
+						this.resetTimer();
+						return;
+					}
+
+					double d0 = (double) blockpos.getX()
+							+ (this.getSpawnerWorld().rand.nextDouble() - this.getSpawnerWorld().rand.nextDouble())
+									* (double) this.spawnRange
+							+ 0.5D;
+					double d1 = (double) (blockpos.getY() + this.getSpawnerWorld().rand.nextInt(3) - 1);
+					double d2 = (double) blockpos.getZ()
+							+ (this.getSpawnerWorld().rand.nextDouble() - this.getSpawnerWorld().rand.nextDouble())
+									* (double) this.spawnRange
+							+ 0.5D;
+					EntityLiving entityliving = entity instanceof EntityLiving ? (EntityLiving) entity : null;
+					entity.setLocationAndAngles(d0, d1, d2, this.getSpawnerWorld().rand.nextFloat() * 360.0F, 0.0F);
+					if (entityliving == null || entityliving.getCanSpawnHere() && entityliving.isNotColliding()) {
+						this.spawnNewEntity(entity, true);
+						this.getSpawnerWorld().playAuxSFX(2004, blockpos, 0);
+						if (entityliving != null) {
+							entityliving.spawnExplosionParticle();
+						}
+
+						flag = true;
+					}
+				}
+
+				if (flag) {
+					this.resetTimer();
+				}
 			}
 
-			this.prevMobRotation = this.mobRotation;
-			this.mobRotation = (this.mobRotation + (double) (1000.0F / ((float) this.spawnDelay + 200.0F))) % 360.0D;
 		}
 	}
 
@@ -271,7 +332,7 @@ public abstract class MobSpawnerBaseLogic {
 	 * return false.
 	 */
 	public boolean setDelayToMin(int delay) {
-		if (delay == 1) {
+		if (delay == 1 && this.getSpawnerWorld().isRemote) {
 			this.spawnDelay = this.minSpawnDelay;
 			return true;
 		} else {

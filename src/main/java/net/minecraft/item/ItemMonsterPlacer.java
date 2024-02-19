@@ -1,7 +1,9 @@
 package net.minecraft.item;
 
 import java.util.List;
-
+import net.minecraft.block.BlockFence;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -9,9 +11,17 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
@@ -64,7 +74,92 @@ public class ItemMonsterPlacer extends Item {
 	 */
 	public boolean onItemUse(ItemStack itemstack, EntityPlayer entityplayer, World world, BlockPos blockpos,
 			EnumFacing enumfacing, float var6, float var7, float var8) {
-		return true;
+		if (world.isRemote) {
+			return true;
+		} else if (!entityplayer.canPlayerEdit(blockpos.offset(enumfacing), enumfacing, itemstack)) {
+			return false;
+		} else {
+			IBlockState iblockstate = world.getBlockState(blockpos);
+			if (iblockstate.getBlock() == Blocks.mob_spawner) {
+				TileEntity tileentity = world.getTileEntity(blockpos);
+				if (tileentity instanceof TileEntityMobSpawner) {
+					MobSpawnerBaseLogic mobspawnerbaselogic = ((TileEntityMobSpawner) tileentity).getSpawnerBaseLogic();
+					mobspawnerbaselogic.setEntityName(EntityList.getStringFromID(itemstack.getMetadata()));
+					tileentity.markDirty();
+					world.markBlockForUpdate(blockpos);
+					if (!entityplayer.capabilities.isCreativeMode) {
+						--itemstack.stackSize;
+					}
+
+					return true;
+				}
+			}
+
+			blockpos = blockpos.offset(enumfacing);
+			double d0 = 0.0D;
+			if (enumfacing == EnumFacing.UP && iblockstate instanceof BlockFence) {
+				d0 = 0.5D;
+			}
+
+			Entity entity = spawnCreature(world, itemstack.getMetadata(), (double) blockpos.getX() + 0.5D,
+					(double) blockpos.getY() + d0, (double) blockpos.getZ() + 0.5D);
+			if (entity != null) {
+				if (entity instanceof EntityLivingBase && itemstack.hasDisplayName()) {
+					entity.setCustomNameTag(itemstack.getDisplayName());
+				}
+
+				if (!entityplayer.capabilities.isCreativeMode) {
+					--itemstack.stackSize;
+				}
+			}
+
+			return true;
+		}
+	}
+
+	/**+
+	 * Called whenever this item is equipped and the right mouse
+	 * button is pressed. Args: itemStack, world, entityPlayer
+	 */
+	public ItemStack onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityplayer) {
+		if (world.isRemote) {
+			return itemstack;
+		} else {
+			MovingObjectPosition movingobjectposition = this.getMovingObjectPositionFromPlayer(world, entityplayer,
+					true);
+			if (movingobjectposition == null) {
+				return itemstack;
+			} else {
+				if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+					BlockPos blockpos = movingobjectposition.getBlockPos();
+					if (!world.isBlockModifiable(entityplayer, blockpos)) {
+						return itemstack;
+					}
+
+					if (!entityplayer.canPlayerEdit(blockpos, movingobjectposition.sideHit, itemstack)) {
+						return itemstack;
+					}
+
+					if (world.getBlockState(blockpos).getBlock() instanceof BlockLiquid) {
+						Entity entity = spawnCreature(world, itemstack.getMetadata(), (double) blockpos.getX() + 0.5D,
+								(double) blockpos.getY() + 0.5D, (double) blockpos.getZ() + 0.5D);
+						if (entity != null) {
+							if (entity instanceof EntityLivingBase && itemstack.hasDisplayName()) {
+								((EntityLiving) entity).setCustomNameTag(itemstack.getDisplayName());
+							}
+
+							if (!entityplayer.capabilities.isCreativeMode) {
+								--itemstack.stackSize;
+							}
+
+							entityplayer.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
+						}
+					}
+				}
+
+				return itemstack;
+			}
+		}
 	}
 
 	/**+

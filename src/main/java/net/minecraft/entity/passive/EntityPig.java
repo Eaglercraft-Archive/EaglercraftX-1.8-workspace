@@ -3,12 +3,23 @@ package net.minecraft.entity.passive;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIControlledByPlayer;
+import net.minecraft.entity.ai.EntityAIFollowParent;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIMate;
+import net.minecraft.entity.ai.EntityAIPanic;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAITempt;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.entity.monster.EntityPigZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
@@ -34,10 +45,22 @@ import net.minecraft.world.World;
  * 
  */
 public class EntityPig extends EntityAnimal {
+	private final EntityAIControlledByPlayer aiControlledByPlayer;
 
 	public EntityPig(World worldIn) {
 		super(worldIn);
 		this.setSize(0.9F, 0.9F);
+		((PathNavigateGround) this.getNavigator()).setAvoidsWater(true);
+		this.tasks.addTask(0, new EntityAISwimming(this));
+		this.tasks.addTask(1, new EntityAIPanic(this, 1.25D));
+		this.tasks.addTask(2, this.aiControlledByPlayer = new EntityAIControlledByPlayer(this, 0.3F));
+		this.tasks.addTask(3, new EntityAIMate(this, 1.0D));
+		this.tasks.addTask(4, new EntityAITempt(this, 1.2D, Items.carrot_on_a_stick, false));
+		this.tasks.addTask(4, new EntityAITempt(this, 1.2D, Items.carrot, false));
+		this.tasks.addTask(5, new EntityAIFollowParent(this, 1.1D));
+		this.tasks.addTask(6, new EntityAIWander(this, 1.0D));
+		this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+		this.tasks.addTask(8, new EntityAILookIdle(this));
 	}
 
 	protected void applyEntityAttributes() {
@@ -104,6 +127,22 @@ public class EntityPig extends EntityAnimal {
 		this.playSound("mob.pig.step", 0.15F, 1.0F);
 	}
 
+	/**+
+	 * Called when a player interacts with a mob. e.g. gets milk
+	 * from a cow, gets into the saddle on a pig.
+	 */
+	public boolean interact(EntityPlayer entityplayer) {
+		if (super.interact(entityplayer)) {
+			return true;
+		} else if (!this.getSaddled() || this.worldObj.isRemote
+				|| this.riddenByEntity != null && this.riddenByEntity != entityplayer) {
+			return false;
+		} else {
+			entityplayer.mountEntity(this);
+			return true;
+		}
+	}
+
 	protected Item getDropItem() {
 		return this.isBurning() ? Items.cooked_porkchop : Items.porkchop;
 	}
@@ -151,7 +190,19 @@ public class EntityPig extends EntityAnimal {
 	 * Called when a lightning bolt hits the entity.
 	 */
 	public void onStruckByLightning(EntityLightningBolt var1) {
+		if (!this.worldObj.isRemote && !this.isDead) {
+			EntityPigZombie entitypigzombie = new EntityPigZombie(this.worldObj);
+			entitypigzombie.setCurrentItemOrArmor(0, new ItemStack(Items.golden_sword));
+			entitypigzombie.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
+			entitypigzombie.setNoAI(this.isAIDisabled());
+			if (this.hasCustomName()) {
+				entitypigzombie.setCustomNameTag(this.getCustomNameTag());
+				entitypigzombie.setAlwaysRenderNameTag(this.getAlwaysRenderNameTag());
+			}
 
+			this.worldObj.spawnEntityInWorld(entitypigzombie);
+			this.setDead();
+		}
 	}
 
 	public void fall(float f, float f1) {
@@ -173,5 +224,12 @@ public class EntityPig extends EntityAnimal {
 	 */
 	public boolean isBreedingItem(ItemStack itemstack) {
 		return itemstack != null && itemstack.getItem() == Items.carrot;
+	}
+
+	/**+
+	 * Return the AI task for player control.
+	 */
+	public EntityAIControlledByPlayer getAIControlledByPlayer() {
+		return this.aiControlledByPlayer;
 	}
 }

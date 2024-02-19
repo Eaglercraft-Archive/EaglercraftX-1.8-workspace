@@ -33,4 +33,6 @@ public interface IGrowable {
 	boolean canGrow(World var1, BlockPos var2, IBlockState var3, boolean var4);
 
 	boolean canUseBonemeal(World var1, EaglercraftRandom var2, BlockPos var3, IBlockState var4);
+
+	void grow(World var1, EaglercraftRandom var2, BlockPos var3, IBlockState var4);
 }

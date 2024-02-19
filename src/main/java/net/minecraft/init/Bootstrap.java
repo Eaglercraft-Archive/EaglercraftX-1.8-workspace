@@ -1,10 +1,9 @@
 package net.minecraft.init;
 
+import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import java.io.PrintStream;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-
-import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
-import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockFire;
@@ -34,6 +33,8 @@ import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
@@ -44,13 +45,20 @@ import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.util.LoggingPrintStream;
 import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.LoggingPrintStream;
+import net.minecraft.util.StringUtils;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
+import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -318,7 +326,9 @@ public class Bootstrap {
 					World world = iblocksource.getWorld();
 					BlockPos blockpos = iblocksource.getBlockPos()
 							.offset(BlockDispenser.getFacing(iblocksource.getBlockMetadata()));
-					if (!ItemDye.applyBonemeal(itemstack, world, blockpos)) {
+					if (ItemDye.applyBonemeal(itemstack, world, blockpos)) {
+						world.playAuxSFX(2005, blockpos, 0);
+					} else {
 						this.field_150838_b = false;
 					}
 
@@ -359,7 +369,40 @@ public class Bootstrap {
 				EnumFacing enumfacing = BlockDispenser.getFacing(iblocksource.getBlockMetadata());
 				BlockPos blockpos = iblocksource.getBlockPos().offset(enumfacing);
 				BlockSkull blockskull = Blocks.skull;
-				if (!(world.isAirBlock(blockpos) && blockskull.canDispenserPlace(world, blockpos, itemstack))) {
+				if (world.isAirBlock(blockpos) && blockskull.canDispenserPlace(world, blockpos, itemstack)) {
+					{
+						world.setBlockState(blockpos,
+								blockskull.getDefaultState().withProperty(BlockSkull.FACING, EnumFacing.UP), 3);
+						TileEntity tileentity = world.getTileEntity(blockpos);
+						if (tileentity instanceof TileEntitySkull) {
+							if (itemstack.getMetadata() == 3) {
+								GameProfile gameprofile = null;
+								if (itemstack.hasTagCompound()) {
+									NBTTagCompound nbttagcompound = itemstack.getTagCompound();
+									if (nbttagcompound.hasKey("SkullOwner", 10)) {
+										gameprofile = NBTUtil
+												.readGameProfileFromNBT(nbttagcompound.getCompoundTag("SkullOwner"));
+									} else if (nbttagcompound.hasKey("SkullOwner", 8)) {
+										String s = nbttagcompound.getString("SkullOwner");
+										if (!StringUtils.isNullOrEmpty(s)) {
+											gameprofile = new GameProfile((EaglercraftUUID) null, s);
+										}
+									}
+								}
+
+								((TileEntitySkull) tileentity).setPlayerProfile(gameprofile);
+							} else {
+								((TileEntitySkull) tileentity).setType(itemstack.getMetadata());
+							}
+
+							((TileEntitySkull) tileentity)
+									.setSkullRotation(enumfacing.getOpposite().getHorizontalIndex() * 4);
+							Blocks.skull.checkWitherSpawn(world, blockpos, (TileEntitySkull) tileentity);
+						}
+
+						--itemstack.stackSize;
+					}
+				} else {
 					this.field_179240_b = false;
 				}
 
@@ -385,6 +428,7 @@ public class Bootstrap {
 								.offset(BlockDispenser.getFacing(iblocksource.getBlockMetadata()));
 						BlockPumpkin blockpumpkin = (BlockPumpkin) Blocks.pumpkin;
 						if (world.isAirBlock(blockpos) && blockpumpkin.canDispenserPlace(world, blockpos)) {
+							world.setBlockState(blockpos, blockpumpkin.getDefaultState(), 3);
 							--itemstack.stackSize;
 						} else {
 							this.field_179241_b = false;
@@ -416,7 +460,7 @@ public class Bootstrap {
 
 			Block.registerBlocks();
 			Blocks.doBootstrap();
-			BiomeGenBase.bootstrap();
+			BiomeGenBase.doBootstrap();
 			BlockFire.init();
 			EntityEnderman.bootstrap();
 			ItemAxe.bootstrap();

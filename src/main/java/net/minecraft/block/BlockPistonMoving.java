@@ -8,6 +8,7 @@ import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
@@ -114,6 +115,16 @@ public class BlockPistonMoving extends BlockContainer {
 		return false;
 	}
 
+	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer var4,
+			EnumFacing var5, float var6, float var7, float var8) {
+		if (!world.isRemote && world.getTileEntity(blockpos) == null) {
+			world.setBlockToAir(blockpos);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	/**+
 	 * Get the Item that this Block should drop when harvested.
 	 */
@@ -122,11 +133,33 @@ public class BlockPistonMoving extends BlockContainer {
 	}
 
 	/**+
+	 * Spawns this Block's drops into the World as EntityItems.
+	 */
+	public void dropBlockAsItemWithChance(World world, BlockPos blockpos, IBlockState var3, float var4, int var5) {
+		if (!world.isRemote) {
+			TileEntityPiston tileentitypiston = this.getTileEntity(world, blockpos);
+			if (tileentitypiston != null) {
+				IBlockState iblockstate = tileentitypiston.getPistonState();
+				iblockstate.getBlock().dropBlockAsItem(world, blockpos, iblockstate, 0);
+			}
+		}
+	}
+
+	/**+
 	 * Ray traces through the blocks collision from start vector to
 	 * end vector returning a ray trace hit.
 	 */
 	public MovingObjectPosition collisionRayTrace(World var1, BlockPos var2, Vec3 var3, Vec3 var4) {
 		return null;
+	}
+
+	/**+
+	 * Called when a neighboring block changes.
+	 */
+	public void onNeighborBlockChange(World world, BlockPos blockpos, IBlockState var3, Block var4) {
+		if (!world.isRemote) {
+			world.getTileEntity(blockpos);
+		}
 	}
 
 	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos blockpos, IBlockState var3) {

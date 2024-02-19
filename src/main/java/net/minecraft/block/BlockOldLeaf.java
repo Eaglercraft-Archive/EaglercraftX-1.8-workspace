@@ -9,9 +9,12 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.ColorizerFoliage;
 import net.minecraft.world.IBlockAccess;
@@ -152,4 +155,15 @@ public class BlockOldLeaf extends BlockLeaves {
 		return ((BlockPlanks.EnumType) iblockstate.getValue(VARIANT)).getMetadata();
 	}
 
+	public void harvestBlock(World world, EntityPlayer entityplayer, BlockPos blockpos, IBlockState iblockstate,
+			TileEntity tileentity) {
+		if (!world.isRemote && entityplayer.getCurrentEquippedItem() != null
+				&& entityplayer.getCurrentEquippedItem().getItem() == Items.shears) {
+			entityplayer.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
+			spawnAsEntity(world, blockpos, new ItemStack(Item.getItemFromBlock(this), 1,
+					((BlockPlanks.EnumType) iblockstate.getValue(VARIANT)).getMetadata()));
+		} else {
+			super.harvestBlock(world, entityplayer, blockpos, iblockstate, tileentity);
+		}
+	}
 }

@@ -104,7 +104,8 @@ public abstract class EntityFireball extends Entity {
 	 * Called to update the entity's position/logic.
 	 */
 	public void onUpdate() {
-		if (this.worldObj.isBlockLoaded(new BlockPos(this))) {
+		if (this.worldObj.isRemote || (this.shootingEntity == null || !this.shootingEntity.isDead)
+				&& this.worldObj.isBlockLoaded(new BlockPos(this))) {
 			super.onUpdate();
 			this.setFire(1);
 			if (this.inGround) {

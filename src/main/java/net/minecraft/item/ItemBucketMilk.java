@@ -41,6 +41,11 @@ public class ItemBucketMilk extends Item {
 		if (!playerIn.capabilities.isCreativeMode) {
 			--stack.stackSize;
 		}
+
+		if (!worldIn.isRemote) {
+			playerIn.clearActivePotions();
+		}
+
 		playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
 		return stack.stackSize <= 0 ? new ItemStack(Items.bucket) : stack;
 	}

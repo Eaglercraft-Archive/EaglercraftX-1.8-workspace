@@ -14,7 +14,9 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -526,6 +528,14 @@ public class BlockStairs extends Block {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
+		if (!world.isRemote && MinecraftServer.getServer().worldServers[0].getWorldInfo().getGameRulesInstance()
+				.getBoolean("clickToSit") && entityplayer.getHeldItem() == null) {
+			EntityArrow arrow = new EntityArrow(world, blockpos.getX() + 0.5D, blockpos.getY(), blockpos.getZ() + 0.5D);
+			arrow.isChair = true;
+			world.spawnEntityInWorld(arrow);
+			entityplayer.mountEntity(arrow);
+			return true;
+		}
 		return this.modelBlock.onBlockActivated(world, blockpos, this.modelState, entityplayer, EnumFacing.DOWN, 0.0F,
 				0.0F, 0.0F);
 	}

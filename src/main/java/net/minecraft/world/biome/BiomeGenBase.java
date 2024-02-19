@@ -1,19 +1,17 @@
 package net.minecraft.world.biome;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import java.util.Set;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
-import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockSand;
+import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLiving;
@@ -41,6 +39,15 @@ import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
+import net.minecraft.world.gen.feature.WorldGenAbstractTree;
+import net.minecraft.world.gen.feature.WorldGenBigTree;
+import net.minecraft.world.gen.feature.WorldGenDoublePlant;
+import net.minecraft.world.gen.feature.WorldGenSwamp;
+import net.minecraft.world.gen.feature.WorldGenTallGrass;
+import net.minecraft.world.gen.feature.WorldGenTrees;
+import net.minecraft.world.gen.feature.WorldGenerator;
+import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
+import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -124,10 +131,9 @@ public abstract class BiomeGenBase {
 	public static BiomeGenBase mesaPlateau_F;
 	public static BiomeGenBase mesaPlateau;
 	public static BiomeGenBase field_180279_ad;
-	protected static final NoiseGeneratorPerlin temperatureNoise = new NoiseGeneratorPerlin(
-			new EaglercraftRandom(1234L), 1);
-	protected static final NoiseGeneratorPerlin GRASS_COLOR_NOISE = new NoiseGeneratorPerlin(
-			new EaglercraftRandom(2345L), 1);
+	protected static NoiseGeneratorPerlin temperatureNoise;
+	protected static NoiseGeneratorPerlin GRASS_COLOR_NOISE;
+	protected static WorldGenDoublePlant DOUBLE_PLANT_GENERATOR;
 	public String biomeName;
 	public int color;
 	public int field_150609_ah;
@@ -145,6 +151,7 @@ public abstract class BiomeGenBase {
 	public float temperature;
 	public float rainfall;
 	public int waterColorMultiplier;
+	public BiomeDecorator theBiomeDecorator;
 	protected List<BiomeGenBase.SpawnListEntry> spawnableMonsterList;
 	protected List<BiomeGenBase.SpawnListEntry> spawnableCreatureList;
 	protected List<BiomeGenBase.SpawnListEntry> spawnableWaterCreatureList;
@@ -152,6 +159,9 @@ public abstract class BiomeGenBase {
 	protected boolean enableSnow;
 	protected boolean enableRain;
 	public final int biomeID;
+	protected WorldGenTrees worldGeneratorTrees;
+	protected WorldGenBigTree worldGeneratorBigTree;
+	protected WorldGenSwamp worldGeneratorSwamp;
 
 	protected BiomeGenBase(int id) {
 		this.minHeight = height_Default.rootHeight;
@@ -164,8 +174,12 @@ public abstract class BiomeGenBase {
 		this.spawnableWaterCreatureList = Lists.newArrayList();
 		this.spawnableCaveCreatureList = Lists.newArrayList();
 		this.enableRain = true;
+		this.worldGeneratorTrees = new WorldGenTrees(false);
+		this.worldGeneratorBigTree = new WorldGenBigTree(false);
+		this.worldGeneratorSwamp = new WorldGenSwamp();
 		this.biomeID = id;
 		biomeList[id] = this;
+		this.theBiomeDecorator = this.createBiomeDecorator();
 		this.spawnableCreatureList.add(new BiomeGenBase.SpawnListEntry(EntitySheep.class, 12, 4, 4));
 		this.spawnableCreatureList.add(new BiomeGenBase.SpawnListEntry(EntityRabbit.class, 10, 3, 3));
 		this.spawnableCreatureList.add(new BiomeGenBase.SpawnListEntry(EntityPig.class, 10, 4, 4));
@@ -180,6 +194,13 @@ public abstract class BiomeGenBase {
 		this.spawnableMonsterList.add(new BiomeGenBase.SpawnListEntry(EntityWitch.class, 5, 1, 1));
 		this.spawnableWaterCreatureList.add(new BiomeGenBase.SpawnListEntry(EntitySquid.class, 10, 4, 4));
 		this.spawnableCaveCreatureList.add(new BiomeGenBase.SpawnListEntry(EntityBat.class, 10, 8, 8));
+	}
+
+	/**+
+	 * Allocate a new BiomeDecorator for this BiomeGenBase
+	 */
+	protected BiomeDecorator createBiomeDecorator() {
+		return new BiomeDecorator();
 	}
 
 	/**+
@@ -207,6 +228,17 @@ public abstract class BiomeGenBase {
 	protected BiomeGenBase setDisableRain() {
 		this.enableRain = false;
 		return this;
+	}
+
+	public WorldGenAbstractTree genBigTreeChance(EaglercraftRandom rand) {
+		return (WorldGenAbstractTree) (rand.nextInt(10) == 0 ? this.worldGeneratorBigTree : this.worldGeneratorTrees);
+	}
+
+	/**+
+	 * Gets a WorldGen appropriate for this biome.
+	 */
+	public WorldGenerator getRandomWorldGenForGrass(EaglercraftRandom rand) {
+		return new WorldGenTallGrass(BlockTallGrass.EnumType.GRASS);
 	}
 
 	public BlockFlower.EnumFlowerType pickRandomFlower(EaglercraftRandom rand, BlockPos pos) {
@@ -338,6 +370,10 @@ public abstract class BiomeGenBase {
 		} else {
 			return this.temperature;
 		}
+	}
+
+	public void decorate(World worldIn, EaglercraftRandom rand, BlockPos pos) {
+		this.theBiomeDecorator.decorate(worldIn, rand, this, pos);
 	}
 
 	public int getGrassColorAtPos(BlockPos pos) {
@@ -475,44 +511,7 @@ public abstract class BiomeGenBase {
 		}
 	}
 
-	public static class Height {
-		public float rootHeight;
-		public float variation;
-
-		public Height(float rootHeightIn, float variationIn) {
-			this.rootHeight = rootHeightIn;
-			this.variation = variationIn;
-		}
-
-		public BiomeGenBase.Height attenuate() {
-			return new BiomeGenBase.Height(this.rootHeight * 0.8F, this.variation * 0.6F);
-		}
-	}
-
-	public static class SpawnListEntry extends WeightedRandom.Item {
-		public Class<? extends EntityLiving> entityClass;
-		public int minGroupCount;
-		public int maxGroupCount;
-
-		public SpawnListEntry(Class<? extends EntityLiving> entityclassIn, int weight, int groupCountMin,
-				int groupCountMax) {
-			super(weight);
-			this.entityClass = entityclassIn;
-			this.minGroupCount = groupCountMin;
-			this.maxGroupCount = groupCountMax;
-		}
-
-		public String toString() {
-			return this.entityClass.getSimpleName() + "*(" + this.minGroupCount + "-" + this.maxGroupCount + "):"
-					+ this.itemWeight;
-		}
-	}
-
-	public static enum TempCategory {
-		OCEAN, COLD, MEDIUM, WARM;
-	}
-
-	public static void bootstrap() {
+	public static void doBootstrap() {
 		ocean = (new BiomeGenOcean(0)).setColor(112).setBiomeName("Ocean").setHeight(height_Oceans);
 		plains = (new BiomeGenPlains(1)).setColor(9286496).setBiomeName("Plains");
 		desert = (new BiomeGenDesert(2)).setColor(16421912).setBiomeName("Desert").setDisableRain()
@@ -610,6 +609,8 @@ public abstract class BiomeGenBase {
 		extremeHillsPlus.createMutation();
 		megaTaiga.createMutatedBiome(megaTaigaHills.biomeID + 128).setBiomeName("Redwood Taiga Hills M");
 
+		explorationBiomesList.clear();
+
 		for (BiomeGenBase biomegenbase : biomeList) {
 			if (biomegenbase != null) {
 				if (BIOME_ID_MAP.containsKey(biomegenbase.biomeName)) {
@@ -629,6 +630,45 @@ public abstract class BiomeGenBase {
 		explorationBiomesList.remove(sky);
 		explorationBiomesList.remove(frozenOcean);
 		explorationBiomesList.remove(extremeHillsEdge);
+		temperatureNoise = new NoiseGeneratorPerlin(new EaglercraftRandom(1234L), 1);
+		GRASS_COLOR_NOISE = new NoiseGeneratorPerlin(new EaglercraftRandom(2345L), 1);
+		DOUBLE_PLANT_GENERATOR = new WorldGenDoublePlant();
 	}
 
+	public static class Height {
+		public float rootHeight;
+		public float variation;
+
+		public Height(float rootHeightIn, float variationIn) {
+			this.rootHeight = rootHeightIn;
+			this.variation = variationIn;
+		}
+
+		public BiomeGenBase.Height attenuate() {
+			return new BiomeGenBase.Height(this.rootHeight * 0.8F, this.variation * 0.6F);
+		}
+	}
+
+	public static class SpawnListEntry extends WeightedRandom.Item {
+		public Class<? extends EntityLiving> entityClass;
+		public int minGroupCount;
+		public int maxGroupCount;
+
+		public SpawnListEntry(Class<? extends EntityLiving> entityclassIn, int weight, int groupCountMin,
+				int groupCountMax) {
+			super(weight);
+			this.entityClass = entityclassIn;
+			this.minGroupCount = groupCountMin;
+			this.maxGroupCount = groupCountMax;
+		}
+
+		public String toString() {
+			return this.entityClass.getSimpleName() + "*(" + this.minGroupCount + "-" + this.maxGroupCount + "):"
+					+ this.itemWeight;
+		}
+	}
+
+	public static enum TempCategory {
+		OCEAN, COLD, MEDIUM, WARM;
+	}
 }

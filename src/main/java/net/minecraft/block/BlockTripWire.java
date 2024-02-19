@@ -1,5 +1,6 @@
 package net.minecraft.block;
 
+import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 
 import net.minecraft.block.material.Material;
@@ -7,6 +8,8 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -144,6 +147,15 @@ public class BlockTripWire extends Block {
 		this.notifyHook(world, blockpos, iblockstate.withProperty(POWERED, Boolean.valueOf(true)));
 	}
 
+	public void onBlockHarvested(World world, BlockPos blockpos, IBlockState iblockstate, EntityPlayer entityplayer) {
+		if (!world.isRemote) {
+			if (entityplayer.getCurrentEquippedItem() != null
+					&& entityplayer.getCurrentEquippedItem().getItem() == Items.shears) {
+				world.setBlockState(blockpos, iblockstate.withProperty(DISARMED, Boolean.valueOf(true)), 4);
+			}
+		}
+	}
+
 	private void notifyHook(World worldIn, BlockPos pos, IBlockState state) {
 		for (EnumFacing enumfacing : new EnumFacing[] { EnumFacing.SOUTH, EnumFacing.WEST }) {
 			for (int i = 1; i < 42; ++i) {
@@ -160,6 +172,61 @@ public class BlockTripWire extends Block {
 					break;
 				}
 			}
+		}
+
+	}
+
+	/**+
+	 * Called When an Entity Collided with the Block
+	 */
+	public void onEntityCollidedWithBlock(World world, BlockPos blockpos, IBlockState iblockstate, Entity var4) {
+		if (!world.isRemote) {
+			if (!((Boolean) iblockstate.getValue(POWERED)).booleanValue()) {
+				this.updateState(world, blockpos);
+			}
+		}
+	}
+
+	/**+
+	 * Called randomly when setTickRandomly is set to true (used by
+	 * e.g. crops to grow, etc.)
+	 */
+	public void randomTick(World var1, BlockPos var2, IBlockState var3, EaglercraftRandom var4) {
+	}
+
+	public void updateTick(World world, BlockPos blockpos, IBlockState var3, EaglercraftRandom var4) {
+		if (!world.isRemote) {
+			if (((Boolean) world.getBlockState(blockpos).getValue(POWERED)).booleanValue()) {
+				this.updateState(world, blockpos);
+			}
+		}
+	}
+
+	private void updateState(World worldIn, BlockPos pos) {
+		IBlockState iblockstate = worldIn.getBlockState(pos);
+		boolean flag = ((Boolean) iblockstate.getValue(POWERED)).booleanValue();
+		boolean flag1 = false;
+		List list = worldIn.getEntitiesWithinAABBExcludingEntity((Entity) null,
+				new AxisAlignedBB((double) pos.getX() + this.minX, (double) pos.getY() + this.minY,
+						(double) pos.getZ() + this.minZ, (double) pos.getX() + this.maxX,
+						(double) pos.getY() + this.maxY, (double) pos.getZ() + this.maxZ));
+		if (!list.isEmpty()) {
+			for (Entity entity : (List<Entity>) list) {
+				if (!entity.doesEntityNotTriggerPressurePlate()) {
+					flag1 = true;
+					break;
+				}
+			}
+		}
+
+		if (flag1 != flag) {
+			iblockstate = iblockstate.withProperty(POWERED, Boolean.valueOf(flag1));
+			worldIn.setBlockState(pos, iblockstate, 3);
+			this.notifyHook(worldIn, pos, iblockstate);
+		}
+
+		if (flag1) {
+			worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
 		}
 
 	}

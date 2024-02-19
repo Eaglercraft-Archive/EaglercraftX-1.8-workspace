@@ -92,12 +92,20 @@ public class EntityTNTPrimed extends Entity {
 
 		if (this.fuse-- <= 0) {
 			this.setDead();
+			if (!this.worldObj.isRemote) {
+				this.explode();
+			}
 		} else {
 			this.handleWaterMovement();
 			this.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, this.posX, this.posY + 0.5D, this.posZ, 0.0D,
 					0.0D, 0.0D, new int[0]);
 		}
 
+	}
+
+	private void explode() {
+		float f = 4.0F;
+		this.worldObj.createExplosion(this, this.posX, this.posY + (double) (this.height / 16.0F), this.posZ, f, true);
 	}
 
 	/**+

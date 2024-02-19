@@ -88,6 +88,18 @@ public class BlockDaylightDetector extends BlockContainer {
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState iblockstate, EntityPlayer entityplayer,
 			EnumFacing enumfacing, float f, float f1, float f2) {
 		if (entityplayer.isAllowEdit()) {
+			if (!world.isRemote) {
+				if (this.inverted) {
+					world.setBlockState(blockpos,
+							Blocks.daylight_detector.getDefaultState().withProperty(POWER, iblockstate.getValue(POWER)),
+							4);
+					Blocks.daylight_detector.updatePower(world, blockpos);
+				} else {
+					world.setBlockState(blockpos, Blocks.daylight_detector_inverted.getDefaultState()
+							.withProperty(POWER, iblockstate.getValue(POWER)), 4);
+					Blocks.daylight_detector_inverted.updatePower(world, blockpos);
+				}
+			}
 			return true;
 		} else {
 			return super.onBlockActivated(world, blockpos, iblockstate, entityplayer, enumfacing, f, f1, f2);

@@ -15,6 +15,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
@@ -180,6 +182,16 @@ public class BlockDoublePlant extends BlockBush implements IGrowable {
 				this.getDefaultState().withProperty(HALF, BlockDoublePlant.EnumBlockHalf.UPPER), 2);
 	}
 
+	public void harvestBlock(World world, EntityPlayer entityplayer, BlockPos blockpos, IBlockState iblockstate,
+			TileEntity tileentity) {
+		if (world.isRemote || entityplayer.getCurrentEquippedItem() == null
+				|| entityplayer.getCurrentEquippedItem().getItem() != Items.shears
+				|| iblockstate.getValue(HALF) != BlockDoublePlant.EnumBlockHalf.LOWER
+				|| !this.onHarvest(world, blockpos, iblockstate, entityplayer)) {
+			super.harvestBlock(world, entityplayer, blockpos, iblockstate, tileentity);
+		}
+	}
+
 	public void onBlockHarvested(World world, BlockPos blockpos, IBlockState iblockstate, EntityPlayer entityplayer) {
 		if (iblockstate.getValue(HALF) == BlockDoublePlant.EnumBlockHalf.UPPER) {
 			if (world.getBlockState(blockpos.down()).getBlock() == this) {
@@ -190,6 +202,14 @@ public class BlockDoublePlant extends BlockBush implements IGrowable {
 					if (blockdoubleplant$enumplanttype != BlockDoublePlant.EnumPlantType.FERN
 							&& blockdoubleplant$enumplanttype != BlockDoublePlant.EnumPlantType.GRASS) {
 						world.destroyBlock(blockpos.down(), true);
+					} else if (!world.isRemote) {
+						if (entityplayer.getCurrentEquippedItem() != null
+								&& entityplayer.getCurrentEquippedItem().getItem() == Items.shears) {
+							this.onHarvest(world, blockpos, iblockstate1, entityplayer);
+							world.setBlockToAir(blockpos.down());
+						} else {
+							world.destroyBlock(blockpos.down(), true);
+						}
 					} else {
 						world.setBlockToAir(blockpos.down());
 					}
@@ -202,6 +222,22 @@ public class BlockDoublePlant extends BlockBush implements IGrowable {
 		}
 
 		super.onBlockHarvested(world, blockpos, iblockstate, entityplayer);
+	}
+
+	private boolean onHarvest(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player) {
+		BlockDoublePlant.EnumPlantType blockdoubleplant$enumplanttype = (BlockDoublePlant.EnumPlantType) state
+				.getValue(VARIANT);
+		if (blockdoubleplant$enumplanttype != BlockDoublePlant.EnumPlantType.FERN
+				&& blockdoubleplant$enumplanttype != BlockDoublePlant.EnumPlantType.GRASS) {
+			return false;
+		} else {
+			player.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
+			int i = (blockdoubleplant$enumplanttype == BlockDoublePlant.EnumPlantType.GRASS
+					? BlockTallGrass.EnumType.GRASS
+					: BlockTallGrass.EnumType.FERN).getMeta();
+			spawnAsEntity(worldIn, pos, new ItemStack(Blocks.tallgrass, 2, i));
+			return true;
+		}
 	}
 
 	/**+

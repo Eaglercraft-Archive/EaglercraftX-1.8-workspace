@@ -1,9 +1,14 @@
 package net.minecraft.entity.projectile;
 
+import java.util.List;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
@@ -95,6 +100,41 @@ public class EntityPotion extends EntityThrowable {
 	 * Called when this EntityThrowable hits a block or entity.
 	 */
 	protected void onImpact(MovingObjectPosition movingobjectposition) {
+		if (!this.worldObj.isRemote) {
+			List list = Items.potionitem.getEffects(this.potionDamage);
+			if (list != null && !list.isEmpty()) {
+				AxisAlignedBB axisalignedbb = this.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D);
+				List list1 = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, axisalignedbb);
+				if (!list1.isEmpty()) {
+					for (EntityLivingBase entitylivingbase : (List<EntityLivingBase>) list1) {
+						double d0 = this.getDistanceSqToEntity(entitylivingbase);
+						if (d0 < 16.0D) {
+							double d1 = 1.0D - Math.sqrt(d0) / 4.0D;
+							if (entitylivingbase == movingobjectposition.entityHit) {
+								d1 = 1.0D;
+							}
+
+							for (PotionEffect potioneffect : (List<PotionEffect>) list) {
+								int i = potioneffect.getPotionID();
+								if (Potion.potionTypes[i].isInstant()) {
+									Potion.potionTypes[i].affectEntity(this, this.getThrower(), entitylivingbase,
+											potioneffect.getAmplifier(), d1);
+								} else {
+									int j = (int) (d1 * (double) potioneffect.getDuration() + 0.5D);
+									if (j > 20) {
+										entitylivingbase
+												.addPotionEffect(new PotionEffect(i, j, potioneffect.getAmplifier()));
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			this.worldObj.playAuxSFX(2002, new BlockPos(this), this.getPotionDamage());
+			this.setDead();
+		}
 
 	}
 

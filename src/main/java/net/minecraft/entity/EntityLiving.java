@@ -1,8 +1,12 @@
 package net.minecraft.entity;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.ai.EntityAITasks;
+import net.minecraft.entity.ai.EntityJumpHelper;
+import net.minecraft.entity.ai.EntityLookHelper;
+import net.minecraft.entity.ai.EntityMoveHelper;
+import net.minecraft.entity.ai.EntitySenses;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityGhast;
@@ -20,6 +24,9 @@ import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.play.server.S1BPacketEntityAttach;
+import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
@@ -27,6 +34,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -51,8 +59,15 @@ import net.minecraft.world.World;
 public abstract class EntityLiving extends EntityLivingBase {
 	public int livingSoundTime;
 	protected int experienceValue;
+	private EntityLookHelper lookHelper;
+	protected EntityMoveHelper moveHelper;
+	protected EntityJumpHelper jumpHelper;
 	private EntityBodyHelper bodyHelper;
+	protected PathNavigate navigator;
+	protected final EntityAITasks tasks;
+	protected final EntityAITasks targetTasks;
 	private EntityLivingBase attackTarget;
+	private EntitySenses senses;
 	/**+
 	 * Equipment (armor and held item) for this entity.
 	 */
@@ -70,12 +85,55 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 	public EntityLiving(World worldIn) {
 		super(worldIn);
+		this.tasks = new EntityAITasks(worldIn != null && worldIn.theProfiler != null ? worldIn.theProfiler : null);
+		this.targetTasks = new EntityAITasks(
+				worldIn != null && worldIn.theProfiler != null ? worldIn.theProfiler : null);
+		this.lookHelper = new EntityLookHelper(this);
+		this.moveHelper = new EntityMoveHelper(this);
+		this.jumpHelper = new EntityJumpHelper(this);
 		this.bodyHelper = new EntityBodyHelper(this);
+		this.navigator = this.getNewNavigator(worldIn);
+		this.senses = new EntitySenses(this);
+
+		for (int i = 0; i < this.equipmentDropChances.length; ++i) {
+			this.equipmentDropChances[i] = 0.085F;
+		}
+
 	}
 
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		this.getAttributeMap().registerAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
+	}
+
+	/**+
+	 * Returns new PathNavigateGround instance
+	 */
+	protected PathNavigate getNewNavigator(World worldIn) {
+		return new PathNavigateGround(this, worldIn);
+	}
+
+	public EntityLookHelper getLookHelper() {
+		return this.lookHelper;
+	}
+
+	public EntityMoveHelper getMoveHelper() {
+		return this.moveHelper;
+	}
+
+	public EntityJumpHelper getJumpHelper() {
+		return this.jumpHelper;
+	}
+
+	public PathNavigate getNavigator() {
+		return this.navigator;
+	}
+
+	/**+
+	 * returns the EntitySenses Object for the EntityLiving
+	 */
+	public EntitySenses getEntitySenses() {
+		return this.senses;
 	}
 
 	/**+
@@ -170,17 +228,23 @@ public abstract class EntityLiving extends EntityLivingBase {
 	 * Spawns an explosion particle around the Entity's location
 	 */
 	public void spawnExplosionParticle() {
-		for (int i = 0; i < 20; ++i) {
-			double d0 = this.rand.nextGaussian() * 0.02D;
-			double d1 = this.rand.nextGaussian() * 0.02D;
-			double d2 = this.rand.nextGaussian() * 0.02D;
-			double d3 = 10.0D;
-			this.worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL,
-					this.posX + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width - d0 * d3,
-					this.posY + (double) (this.rand.nextFloat() * this.height) - d1 * d3,
-					this.posZ + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width - d2 * d3,
-					d0, d1, d2, new int[0]);
+		if (this.worldObj.isRemote) {
+			for (int i = 0; i < 20; ++i) {
+				double d0 = this.rand.nextGaussian() * 0.02D;
+				double d1 = this.rand.nextGaussian() * 0.02D;
+				double d2 = this.rand.nextGaussian() * 0.02D;
+				double d3 = 10.0D;
+				this.worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL,
+						this.posX + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width
+								- d0 * d3,
+						this.posY + (double) (this.rand.nextFloat() * this.height) - d1 * d3, this.posZ
+								+ (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width - d2 * d3,
+						d0, d1, d2, new int[0]);
+			}
+		} else {
+			this.worldObj.setEntityState(this, (byte) 20);
 		}
+
 	}
 
 	public void handleStatusUpdate(byte b0) {
@@ -188,6 +252,17 @@ public abstract class EntityLiving extends EntityLivingBase {
 			this.spawnExplosionParticle();
 		} else {
 			super.handleStatusUpdate(b0);
+		}
+
+	}
+
+	/**+
+	 * Called to update the entity's position/logic.
+	 */
+	public void onUpdate() {
+		super.onUpdate();
+		if (!this.worldObj.isRemote) {
+			this.updateLeashedState();
 		}
 
 	}
@@ -323,6 +398,27 @@ public abstract class EntityLiving extends EntityLivingBase {
 	}
 
 	/**+
+	 * Called frequently so the entity can update its state every
+	 * tick as required. For example, zombies and skeletons use this
+	 * to react to sunlight and start to burn.
+	 */
+	public void onLivingUpdate() {
+		super.onLivingUpdate();
+		this.worldObj.theProfiler.startSection("looting");
+		if (!this.worldObj.isRemote && this.canPickUpLoot() && !this.dead
+				&& this.worldObj.getGameRules().getBoolean("mobGriefing")) {
+			for (EntityItem entityitem : this.worldObj.getEntitiesWithinAABB(EntityItem.class,
+					this.getEntityBoundingBox().expand(1.0D, 0.0D, 1.0D))) {
+				if (!entityitem.isDead && entityitem.getEntityItem() != null && !entityitem.cannotPickup()) {
+					this.updateEquipmentIfNeeded(entityitem);
+				}
+			}
+		}
+
+		this.worldObj.theProfiler.endSection();
+	}
+
+	/**+
 	 * Tests if this entity should pickup a weapon or an armor.
 	 * Entity drops current weapon or armor if the new one is
 	 * better.
@@ -429,6 +525,34 @@ public abstract class EntityLiving extends EntityLivingBase {
 	}
 
 	protected final void updateEntityActionState() {
+		++this.entityAge;
+		this.worldObj.theProfiler.startSection("checkDespawn");
+		this.despawnEntity();
+		this.worldObj.theProfiler.endSection();
+		this.worldObj.theProfiler.startSection("sensing");
+		this.senses.clearSensingCache();
+		this.worldObj.theProfiler.endSection();
+		this.worldObj.theProfiler.startSection("targetSelector");
+		this.targetTasks.onUpdateTasks();
+		this.worldObj.theProfiler.endSection();
+		this.worldObj.theProfiler.startSection("goalSelector");
+		this.tasks.onUpdateTasks();
+		this.worldObj.theProfiler.endSection();
+		this.worldObj.theProfiler.startSection("navigation");
+		this.navigator.onUpdateNavigation();
+		this.worldObj.theProfiler.endSection();
+		this.worldObj.theProfiler.startSection("mob tick");
+		this.updateAITasks();
+		this.worldObj.theProfiler.endSection();
+		this.worldObj.theProfiler.startSection("controls");
+		this.worldObj.theProfiler.startSection("move");
+		this.moveHelper.onUpdateMoveHelper();
+		this.worldObj.theProfiler.endStartSection("look");
+		this.lookHelper.onUpdateLook();
+		this.worldObj.theProfiler.endStartSection("jump");
+		this.jumpHelper.doJump();
+		this.worldObj.theProfiler.endSection();
+		this.worldObj.theProfiler.endSection();
 	}
 
 	protected void updateAITasks() {
@@ -845,6 +969,14 @@ public abstract class EntityLiving extends EntityLivingBase {
 		if (this.isLeashed) {
 			this.isLeashed = false;
 			this.leashedToEntity = null;
+			if (!this.worldObj.isRemote && dropLead) {
+				this.dropItem(Items.lead, 1);
+			}
+
+			if (!this.worldObj.isRemote && sendPacket && this.worldObj instanceof WorldServer) {
+				((WorldServer) this.worldObj).getEntityTracker().sendToAllTrackingEntity(this,
+						new S1BPacketEntityAttach(1, this, (Entity) null));
+			}
 		}
 
 	}
@@ -867,6 +999,11 @@ public abstract class EntityLiving extends EntityLivingBase {
 	public void setLeashedToEntity(Entity entityIn, boolean sendAttachNotification) {
 		this.isLeashed = true;
 		this.leashedToEntity = entityIn;
+		if (!this.worldObj.isRemote && sendAttachNotification && this.worldObj instanceof WorldServer) {
+			((WorldServer) this.worldObj).getEntityTracker().sendToAllTrackingEntity(this,
+					new S1BPacketEntityAttach(1, this, this.leashedToEntity));
+		}
+
 	}
 
 	private void recreateLeash() {

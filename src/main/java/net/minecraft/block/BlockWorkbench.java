@@ -8,6 +8,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerWorkbench;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumFacing;
@@ -43,7 +44,13 @@ public class BlockWorkbench extends Block {
 
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
-		return true;
+		if (world.isRemote) {
+			return true;
+		} else {
+			entityplayer.displayGui(new BlockWorkbench.InterfaceCraftingTable(world, blockpos));
+			entityplayer.triggerAchievement(StatList.field_181742_Z);
+			return true;
+		}
 	}
 
 	public static class InterfaceCraftingTable implements IInteractionObject {

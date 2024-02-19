@@ -1,7 +1,5 @@
 package net.minecraft.util;
 
-import net.lax1dude.eaglercraft.v1_8.futures.ListenableFuture;
-
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
  * 
@@ -23,5 +21,5 @@ import net.lax1dude.eaglercraft.v1_8.futures.ListenableFuture;
  * 
  */
 public interface IThreadListener {
-	ListenableFuture<Object> addScheduledTask(Runnable var1);
+	void addScheduledTask(Runnable var1);
 }

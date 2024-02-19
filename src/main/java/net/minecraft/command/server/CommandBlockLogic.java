@@ -1,13 +1,22 @@
 package net.minecraft.command.server;
 
-import java.text.SimpleDateFormat;
-
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.netty.ByteBuf;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.Callable;
+import net.minecraft.command.CommandResultStats;
+import net.minecraft.command.ICommandManager;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.ReportedException;
 import net.minecraft.world.World;
 
 /**+
@@ -30,11 +39,11 @@ import net.minecraft.world.World;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-public abstract class CommandBlockLogic {
+public abstract class CommandBlockLogic implements ICommandSender {
 	/**+
 	 * The formatting for the timestamp on commands run.
 	 */
-	private static final SimpleDateFormat timestampFormat = EagRuntime.fixDateFormat(new SimpleDateFormat("HH:mm:ss"));
+	private static final SimpleDateFormat timestampFormat = new SimpleDateFormat("HH:mm:ss");
 	private int successCount;
 	private boolean trackOutput = true;
 	/**+
@@ -49,6 +58,7 @@ public abstract class CommandBlockLogic {
 	 * The custom name of the command block. (defaults to "@")
 	 */
 	private String customName = "@";
+	private final CommandResultStats resultStats = new CommandResultStats();
 
 	/**+
 	 * returns the successCount int.
@@ -75,6 +85,8 @@ public abstract class CommandBlockLogic {
 		if (this.lastOutput != null && this.trackOutput) {
 			tagCompound.setString("LastOutput", IChatComponent.Serializer.componentToJson(this.lastOutput));
 		}
+
+		this.resultStats.writeStatsToNBT(tagCompound);
 	}
 
 	/**+
@@ -94,6 +106,8 @@ public abstract class CommandBlockLogic {
 		if (nbt.hasKey("LastOutput", 8) && this.trackOutput) {
 			this.lastOutput = IChatComponent.Serializer.jsonToComponent(nbt.getString("LastOutput"));
 		}
+
+		this.resultStats.readStatsFromNBT(nbt);
 	}
 
 	/**+
@@ -120,6 +134,35 @@ public abstract class CommandBlockLogic {
 	}
 
 	public void trigger(World worldIn) {
+		if (worldIn.isRemote) {
+			this.successCount = 0;
+		}
+
+		MinecraftServer minecraftserver = MinecraftServer.getServer();
+		if (minecraftserver != null && minecraftserver.isCommandBlockEnabled()) {
+			ICommandManager icommandmanager = minecraftserver.getCommandManager();
+
+			try {
+				this.lastOutput = null;
+				this.successCount = icommandmanager.executeCommand(this, this.commandStored);
+			} catch (Throwable throwable) {
+				CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Executing command block");
+				CrashReportCategory crashreportcategory = crashreport.makeCategory("Command to be executed");
+				crashreportcategory.addCrashSectionCallable("Command", new Callable<String>() {
+					public String call() throws Exception {
+						return CommandBlockLogic.this.getCommand();
+					}
+				});
+				crashreportcategory.addCrashSectionCallable("Name", new Callable<String>() {
+					public String call() throws Exception {
+						return CommandBlockLogic.this.getName();
+					}
+				});
+				throw new ReportedException(crashreport);
+			}
+		} else {
+			this.successCount = 0;
+		}
 
 	}
 
@@ -147,6 +190,11 @@ public abstract class CommandBlockLogic {
 	 * Send a chat message to the CommandSender
 	 */
 	public void addChatMessage(IChatComponent ichatcomponent) {
+		if (this.trackOutput && this.getEntityWorld() != null && !this.getEntityWorld().isRemote) {
+			this.lastOutput = (new ChatComponentText("[" + timestampFormat.format(new Date()) + "] "))
+					.appendSibling(ichatcomponent);
+			this.updateCommand();
+		}
 
 	}
 
@@ -155,7 +203,13 @@ public abstract class CommandBlockLogic {
 	 * about executed commands
 	 */
 	public boolean sendCommandFeedback() {
-		return true;
+		MinecraftServer minecraftserver = MinecraftServer.getServer();
+		return minecraftserver == null
+				|| minecraftserver.worldServers[0].getGameRules().getBoolean("commandBlockOutput");
+	}
+
+	public void setCommandStat(CommandResultStats.Type commandresultstats$type, int i) {
+		this.resultStats.func_179672_a(this, commandresultstats$type, i);
 	}
 
 	public abstract void updateCommand();
@@ -180,8 +234,15 @@ public abstract class CommandBlockLogic {
 		if (!playerIn.capabilities.isCreativeMode) {
 			return false;
 		} else {
-			playerIn.openEditCommandBlock(this);
+			if (playerIn.getEntityWorld().isRemote) {
+				playerIn.openEditCommandBlock(this);
+			}
+
 			return true;
 		}
+	}
+
+	public CommandResultStats getCommandResultStats() {
+		return this.resultStats;
 	}
 }

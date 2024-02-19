@@ -1,7 +1,6 @@
 package net.minecraft.entity.projectile;
 
 import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -11,7 +10,11 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
@@ -178,11 +181,20 @@ public class EntityArrow extends Entity implements IProjectile {
 
 	}
 
+	public boolean isChair = false;
+
 	/**+
 	 * Called to update the entity's position/logic.
 	 */
 	public void onUpdate() {
 		super.onUpdate();
+		if (isChair) {
+			if (!(riddenByEntity instanceof EntityPlayer)) {
+				isChair = false;
+				setDead();
+			}
+			return;
+		}
 		if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F) {
 			float f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
 			this.prevRotationYaw = this.rotationYaw = (float) (MathHelper.func_181159_b(this.motionX, this.motionZ)
@@ -292,6 +304,10 @@ public class EntityArrow extends Entity implements IProjectile {
 					if (movingobjectposition.entityHit.attackEntityFrom(damagesource, (float) l)) {
 						if (movingobjectposition.entityHit instanceof EntityLivingBase) {
 							EntityLivingBase entitylivingbase = (EntityLivingBase) movingobjectposition.entityHit;
+							if (!this.worldObj.isRemote) {
+								entitylivingbase.setArrowCountInEntity(entitylivingbase.getArrowCountInEntity() + 1);
+							}
+
 							if (this.knockbackStrength > 0) {
 								float f7 = MathHelper
 										.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
@@ -308,6 +324,13 @@ public class EntityArrow extends Entity implements IProjectile {
 								EnchantmentHelper.applyThornEnchantments(entitylivingbase, this.shootingEntity);
 								EnchantmentHelper.applyArthropodEnchantments((EntityLivingBase) this.shootingEntity,
 										entitylivingbase);
+							}
+
+							if (this.shootingEntity != null && movingobjectposition.entityHit != this.shootingEntity
+									&& movingobjectposition.entityHit instanceof EntityPlayer
+									&& this.shootingEntity instanceof EntityPlayerMP) {
+								((EntityPlayerMP) this.shootingEntity).playerNetServerHandler
+										.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
 							}
 						}
 
@@ -456,6 +479,28 @@ public class EntityArrow extends Entity implements IProjectile {
 			this.canBePickedUp = nbttagcompound.getBoolean("player") ? 1 : 0;
 		}
 
+	}
+
+	/**+
+	 * Called by a player entity when they collide with an entity
+	 */
+	public void onCollideWithPlayer(EntityPlayer entityplayer) {
+		if (!this.worldObj.isRemote && this.inGround && this.arrowShake <= 0) {
+			boolean flag = this.canBePickedUp == 1
+					|| this.canBePickedUp == 2 && entityplayer.capabilities.isCreativeMode;
+			if (this.canBePickedUp == 1
+					&& !entityplayer.inventory.addItemStackToInventory(new ItemStack(Items.arrow, 1))) {
+				flag = false;
+			}
+
+			if (flag) {
+				this.playSound("random.pop", 0.2F,
+						((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+				entityplayer.onItemPickup(this, 1);
+				this.setDead();
+			}
+
+		}
 	}
 
 	/**+

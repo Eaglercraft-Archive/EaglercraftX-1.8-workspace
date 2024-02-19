@@ -1,20 +1,23 @@
 package net.minecraft.entity.item;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.collect.Lists;
-
+import java.util.ArrayList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAnvil;
+import net.minecraft.block.BlockFalling;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -102,6 +105,9 @@ public class EntityFallingBlock extends Entity {
 				BlockPos blockpos = new BlockPos(this);
 				if (this.worldObj.getBlockState(blockpos).getBlock() == block) {
 					this.worldObj.setBlockToAir(blockpos);
+				} else if (!this.worldObj.isRemote) {
+					this.setDead();
+					return;
 				}
 			}
 
@@ -110,6 +116,54 @@ public class EntityFallingBlock extends Entity {
 			this.motionX *= 0.9800000190734863D;
 			this.motionY *= 0.9800000190734863D;
 			this.motionZ *= 0.9800000190734863D;
+			if (!this.worldObj.isRemote) {
+				BlockPos blockpos1 = new BlockPos(this);
+				if (this.onGround) {
+					this.motionX *= 0.699999988079071D;
+					this.motionZ *= 0.699999988079071D;
+					this.motionY *= -0.5D;
+					if (this.worldObj.getBlockState(blockpos1).getBlock() != Blocks.piston_extension) {
+						this.setDead();
+						if (!this.canSetAsBlock) {
+							if (this.worldObj.canBlockBePlaced(block, blockpos1, true, EnumFacing.UP, (Entity) null,
+									(ItemStack) null) && !BlockFalling.canFallInto(this.worldObj, blockpos1.down())
+									&& this.worldObj.setBlockState(blockpos1, this.fallTile, 3)) {
+								if (block instanceof BlockFalling) {
+									((BlockFalling) block).onEndFalling(this.worldObj, blockpos1);
+								}
+
+								if (this.tileEntityData != null && block instanceof ITileEntityProvider) {
+									TileEntity tileentity = this.worldObj.getTileEntity(blockpos1);
+									if (tileentity != null) {
+										NBTTagCompound nbttagcompound = new NBTTagCompound();
+										tileentity.writeToNBT(nbttagcompound);
+
+										for (String s : this.tileEntityData.getKeySet()) {
+											NBTBase nbtbase = this.tileEntityData.getTag(s);
+											if (!s.equals("x") && !s.equals("y") && !s.equals("z")) {
+												nbttagcompound.setTag(s, nbtbase.copy());
+											}
+										}
+
+										tileentity.readFromNBT(nbttagcompound);
+										tileentity.markDirty();
+									}
+								}
+							} else if (this.shouldDropItem
+									&& this.worldObj.getGameRules().getBoolean("doEntityDrops")) {
+								this.entityDropItem(new ItemStack(block, 1, block.damageDropped(this.fallTile)), 0.0F);
+							}
+						}
+					}
+				} else if (this.fallTime > 100 && !this.worldObj.isRemote
+						&& (blockpos1.getY() < 1 || blockpos1.getY() > 256) || this.fallTime > 600) {
+					if (this.shouldDropItem && this.worldObj.getGameRules().getBoolean("doEntityDrops")) {
+						this.entityDropItem(new ItemStack(block, 1, block.damageDropped(this.fallTile)), 0.0F);
+					}
+
+					this.setDead();
+				}
+			}
 
 		}
 	}
@@ -119,12 +173,12 @@ public class EntityFallingBlock extends Entity {
 		if (this.hurtEntities) {
 			int i = MathHelper.ceiling_float_int(f - 1.0F);
 			if (i > 0) {
-				ArrayList arraylist = Lists.newArrayList(
+				ArrayList<Entity> arraylist = Lists.newArrayList(
 						this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox()));
 				boolean flag = block == Blocks.anvil;
 				DamageSource damagesource = flag ? DamageSource.anvil : DamageSource.fallingBlock;
 
-				for (Entity entity : (List<Entity>) arraylist) {
+				for (Entity entity : arraylist) {
 					entity.attackEntityFrom(damagesource, (float) Math
 							.min(MathHelper.floor_float((float) i * this.fallHurtAmount), this.fallHurtMax));
 				}

@@ -7,6 +7,7 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -49,6 +50,7 @@ public class BlockJukebox extends BlockContainer {
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState iblockstate, EntityPlayer var4,
 			EnumFacing var5, float var6, float var7, float var8) {
 		if (((Boolean) iblockstate.getValue(HAS_RECORD)).booleanValue()) {
+			this.dropRecord(world, blockpos, iblockstate);
 			iblockstate = iblockstate.withProperty(HAS_RECORD, Boolean.valueOf(false));
 			world.setBlockState(blockpos, iblockstate, 2);
 			return true;
@@ -58,7 +60,52 @@ public class BlockJukebox extends BlockContainer {
 	}
 
 	public void insertRecord(World worldIn, BlockPos pos, IBlockState state, ItemStack recordStack) {
+		if (!worldIn.isRemote) {
+			TileEntity tileentity = worldIn.getTileEntity(pos);
+			if (tileentity instanceof BlockJukebox.TileEntityJukebox) {
+				((BlockJukebox.TileEntityJukebox) tileentity)
+						.setRecord(new ItemStack(recordStack.getItem(), 1, recordStack.getMetadata()));
+				worldIn.setBlockState(pos, state.withProperty(HAS_RECORD, Boolean.valueOf(true)), 2);
+			}
+		}
+	}
 
+	private void dropRecord(World worldIn, BlockPos pos, IBlockState state) {
+		if (!worldIn.isRemote) {
+			TileEntity tileentity = worldIn.getTileEntity(pos);
+			if (tileentity instanceof BlockJukebox.TileEntityJukebox) {
+				BlockJukebox.TileEntityJukebox blockjukebox$tileentityjukebox = (BlockJukebox.TileEntityJukebox) tileentity;
+				ItemStack itemstack = blockjukebox$tileentityjukebox.getRecord();
+				if (itemstack != null) {
+					worldIn.playAuxSFX(1005, pos, 0);
+					worldIn.playRecord(pos, (String) null);
+					blockjukebox$tileentityjukebox.setRecord((ItemStack) null);
+					float f = 0.7F;
+					double d0 = (double) (worldIn.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+					double d1 = (double) (worldIn.rand.nextFloat() * f) + (double) (1.0F - f) * 0.2D + 0.6D;
+					double d2 = (double) (worldIn.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+					ItemStack itemstack1 = itemstack.copy();
+					EntityItem entityitem = new EntityItem(worldIn, (double) pos.getX() + d0, (double) pos.getY() + d1,
+							(double) pos.getZ() + d2, itemstack1);
+					entityitem.setDefaultPickupDelay();
+					worldIn.spawnEntityInWorld(entityitem);
+				}
+			}
+		}
+	}
+
+	public void breakBlock(World world, BlockPos blockpos, IBlockState iblockstate) {
+		this.dropRecord(world, blockpos, iblockstate);
+		super.breakBlock(world, blockpos, iblockstate);
+	}
+
+	/**+
+	 * Spawns this Block's drops into the World as EntityItems.
+	 */
+	public void dropBlockAsItemWithChance(World world, BlockPos blockpos, IBlockState iblockstate, float f, int var5) {
+		if (!world.isRemote) {
+			super.dropBlockAsItemWithChance(world, blockpos, iblockstate, f, 0);
+		}
 	}
 
 	/**+

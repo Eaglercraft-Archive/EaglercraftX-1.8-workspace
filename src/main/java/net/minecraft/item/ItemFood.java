@@ -2,6 +2,7 @@ package net.minecraft.item;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.stats.StatList;
 import net.minecraft.world.World;
 
@@ -63,6 +64,11 @@ public class ItemFood extends Item {
 	}
 
 	protected void onFoodEaten(ItemStack var1, World world, EntityPlayer entityplayer) {
+		if (!world.isRemote && this.potionId > 0 && world.rand.nextFloat() < this.potionEffectProbability) {
+			entityplayer
+					.addPotionEffect(new PotionEffect(this.potionId, this.potionDuration * 20, this.potionAmplifier));
+		}
+
 	}
 
 	/**+

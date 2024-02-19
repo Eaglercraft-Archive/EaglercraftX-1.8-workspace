@@ -137,6 +137,10 @@ public class ItemBucket extends Item {
 								(double) j + Math.random(), (double) k + Math.random(), 0.0D, 0.0D, 0.0D, new int[0]);
 					}
 				} else {
+					if (!worldIn.isRemote && flag && !material.isLiquid()) {
+						worldIn.destroyBlock(pos, true);
+					}
+
 					worldIn.setBlockState(pos, this.isFull.getDefaultState(), 3);
 				}
 

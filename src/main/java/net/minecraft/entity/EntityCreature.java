@@ -2,8 +2,11 @@ package net.minecraft.entity;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
@@ -37,6 +40,7 @@ public abstract class EntityCreature extends EntityLiving {
 	 * If -1 there is no maximum distance
 	 */
 	private float maximumHomeDistance = -1.0F;
+	private EntityAIBase aiBase = new EntityAIMoveTowardsRestriction(this, 1.0D);
 	private boolean isMovementAITaskSet;
 
 	public EntityCreature(World worldIn) {
@@ -60,7 +64,7 @@ public abstract class EntityCreature extends EntityLiving {
 	 * if the entity got a PathEntity it returns true, else false
 	 */
 	public boolean hasPath() {
-		return false;
+		return !this.navigator.noPath();
 	}
 
 	public boolean isWithinHomeDistanceCurrentPosition() {
@@ -119,10 +123,19 @@ public abstract class EntityCreature extends EntityLiving {
 			}
 
 			if (!this.isMovementAITaskSet) {
+				this.tasks.addTask(2, this.aiBase);
+				if (this.getNavigator() instanceof PathNavigateGround) {
+					((PathNavigateGround) this.getNavigator()).setAvoidsWater(false);
+				}
+
 				this.isMovementAITaskSet = true;
 			}
 
 			this.func_142017_o(f);
+			if (f > 4.0F) {
+				this.getNavigator().tryMoveToEntityLiving(entity, 1.0D);
+			}
+
 			if (f > 6.0F) {
 				double d0 = (entity.posX - this.posX) / (double) f;
 				double d1 = (entity.posY - this.posY) / (double) f;
@@ -137,6 +150,11 @@ public abstract class EntityCreature extends EntityLiving {
 			}
 		} else if (!this.getLeashed() && this.isMovementAITaskSet) {
 			this.isMovementAITaskSet = false;
+			this.tasks.removeTask(this.aiBase);
+			if (this.getNavigator() instanceof PathNavigateGround) {
+				((PathNavigateGround) this.getNavigator()).setAvoidsWater(true);
+			}
+
 			this.detachHome();
 		}
 

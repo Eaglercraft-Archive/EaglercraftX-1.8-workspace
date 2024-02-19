@@ -1,7 +1,12 @@
 package net.minecraft.world.storage;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.lax1dude.eaglercraft.v1_8.internal.vfs2.VFile2;
 import net.minecraft.world.MinecraftException;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.chunk.storage.IChunkLoader;
+import net.minecraft.world.storage.IPlayerFileData;
+import net.minecraft.world.storage.WorldInfo;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -35,6 +40,12 @@ public interface ISaveHandler {
 	void checkSessionLock() throws MinecraftException;
 
 	/**+
+	 * initializes and returns the chunk loader for the specified
+	 * world provider
+	 */
+	IChunkLoader getChunkLoader(WorldProvider var1);
+
+	/**+
 	 * Saves the given World Info with the given NBTTagCompound as
 	 * the Player.
 	 */
@@ -52,6 +63,17 @@ public interface ISaveHandler {
 	 * complete.
 	 */
 	void flush();
+
+	/**+
+	 * Gets the File object corresponding to the base directory of
+	 * this world.
+	 */
+	VFile2 getWorldDirectory();
+
+	/**+
+	 * Gets the file location of the given map
+	 */
+	VFile2 getMapFileFromName(String var1);
 
 	/**+
 	 * Returns the name of the directory where world information is

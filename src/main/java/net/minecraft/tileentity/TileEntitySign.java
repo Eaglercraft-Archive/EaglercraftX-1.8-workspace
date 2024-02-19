@@ -1,20 +1,24 @@
 package net.minecraft.tileentity;
 
-import org.json.JSONException;
-
 import net.minecraft.command.CommandException;
+import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.event.ClickEvent;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S33PacketUpdateSign;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentProcessor;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+
+import org.json.JSONException;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -47,6 +51,7 @@ public class TileEntitySign extends TileEntity {
 	public int lineBeingEdited = -1;
 	private boolean isEditable = true;
 	private EntityPlayer player;
+	private final CommandResultStats stats = new CommandResultStats();
 
 	public void writeToNBT(NBTTagCompound nbttagcompound) {
 		super.writeToNBT(nbttagcompound);
@@ -56,6 +61,7 @@ public class TileEntitySign extends TileEntity {
 			nbttagcompound.setString("Text" + (i + 1), s);
 		}
 
+		this.stats.writeStatsToNBT(nbttagcompound);
 	}
 
 	public void readFromNBT(NBTTagCompound nbttagcompound) {
@@ -98,6 +104,8 @@ public class TileEntitySign extends TileEntity {
 				return false;
 			}
 
+			public void setCommandStat(CommandResultStats.Type var1, int var2) {
+			}
 		};
 
 		for (int i = 0; i < 4; ++i) {
@@ -117,6 +125,7 @@ public class TileEntitySign extends TileEntity {
 			}
 		}
 
+		this.stats.readStatsFromNBT(nbttagcompound);
 	}
 
 	/**+
@@ -159,7 +168,63 @@ public class TileEntitySign extends TileEntity {
 	}
 
 	public boolean executeCommand(final EntityPlayer playerIn) {
+		ICommandSender icommandsender = new ICommandSender() {
+			public String getName() {
+				return playerIn.getName();
+			}
+
+			public IChatComponent getDisplayName() {
+				return playerIn.getDisplayName();
+			}
+
+			public void addChatMessage(IChatComponent var1) {
+			}
+
+			public boolean canCommandSenderUseCommand(int j, String var2) {
+				return j <= 2;
+			}
+
+			public BlockPos getPosition() {
+				return TileEntitySign.this.pos;
+			}
+
+			public Vec3 getPositionVector() {
+				return new Vec3((double) TileEntitySign.this.pos.getX() + 0.5D,
+						(double) TileEntitySign.this.pos.getY() + 0.5D, (double) TileEntitySign.this.pos.getZ() + 0.5D);
+			}
+
+			public World getEntityWorld() {
+				return playerIn.getEntityWorld();
+			}
+
+			public Entity getCommandSenderEntity() {
+				return playerIn;
+			}
+
+			public boolean sendCommandFeedback() {
+				return false;
+			}
+
+			public void setCommandStat(CommandResultStats.Type commandresultstats$type, int j) {
+				TileEntitySign.this.stats.func_179672_a(this, commandresultstats$type, j);
+			}
+		};
+
+		for (int i = 0; i < this.signText.length; ++i) {
+			ChatStyle chatstyle = this.signText[i] == null ? null : this.signText[i].getChatStyle();
+			if (chatstyle != null && chatstyle.getChatClickEvent() != null) {
+				ClickEvent clickevent = chatstyle.getChatClickEvent();
+				if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND) {
+					MinecraftServer.getServer().getCommandManager().executeCommand(icommandsender,
+							clickevent.getValue());
+				}
+			}
+		}
+
 		return true;
 	}
 
+	public CommandResultStats getStats() {
+		return this.stats;
+	}
 }

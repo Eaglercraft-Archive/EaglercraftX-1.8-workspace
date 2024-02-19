@@ -42,6 +42,37 @@ public class BlockRedstoneLight extends Block {
 
 	}
 
+	public void onBlockAdded(World world, BlockPos blockpos, IBlockState var3) {
+		if (!world.isRemote) {
+			if (this.isOn && !world.isBlockPowered(blockpos)) {
+				world.setBlockState(blockpos, Blocks.redstone_lamp.getDefaultState(), 2);
+			} else if (!this.isOn && world.isBlockPowered(blockpos)) {
+				world.setBlockState(blockpos, Blocks.lit_redstone_lamp.getDefaultState(), 2);
+			}
+		}
+	}
+
+	/**+
+	 * Called when a neighboring block changes.
+	 */
+	public void onNeighborBlockChange(World world, BlockPos blockpos, IBlockState var3, Block var4) {
+		if (!world.isRemote) {
+			if (this.isOn && !world.isBlockPowered(blockpos)) {
+				world.scheduleUpdate(blockpos, this, 4);
+			} else if (!this.isOn && world.isBlockPowered(blockpos)) {
+				world.setBlockState(blockpos, Blocks.lit_redstone_lamp.getDefaultState(), 2);
+			}
+		}
+	}
+
+	public void updateTick(World world, BlockPos blockpos, IBlockState var3, EaglercraftRandom var4) {
+		if (!world.isRemote) {
+			if (this.isOn && !world.isBlockPowered(blockpos)) {
+				world.setBlockState(blockpos, Blocks.redstone_lamp.getDefaultState(), 2);
+			}
+		}
+	}
+
 	/**+
 	 * Get the Item that this Block should drop when harvested.
 	 */

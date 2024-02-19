@@ -1,18 +1,18 @@
 package net.minecraft.entity;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Maps;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Maps;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -20,7 +20,12 @@ import net.minecraft.entity.ai.attributes.BaseAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
@@ -30,6 +35,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagShort;
+import net.minecraft.network.play.server.S04PacketEntityEquipment;
+import net.minecraft.network.play.server.S0BPacketAnimation;
+import net.minecraft.network.play.server.S0DPacketCollectItem;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionHelper;
@@ -43,6 +51,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -175,6 +184,23 @@ public abstract class EntityLivingBase extends Entity {
 			this.handleWaterMovement();
 		}
 
+		if (!this.worldObj.isRemote && this.fallDistance > 3.0F && flag) {
+			IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
+			Block block1 = iblockstate.getBlock();
+			float f = (float) MathHelper.ceiling_float_int(this.fallDistance - 3.0F);
+			if (block1.getMaterial() != Material.air) {
+				double d1 = (double) Math.min(0.2F + f / 15.0F, 10.0F);
+				if (d1 > 2.5D) {
+					d1 = 2.5D;
+				}
+
+				int i = (int) (150.0D * d1);
+				((WorldServer) this.worldObj).spawnParticle(EnumParticleTypes.BLOCK_DUST, this.posX, this.posY,
+						this.posZ, i, 0.0D, 0.0D, 0.0D, 0.15000000596046448D,
+						new int[] { Block.getStateId(iblockstate) });
+			}
+		}
+
 		super.updateFallState(d0, flag, block, blockpos);
 	}
 
@@ -203,7 +229,9 @@ public abstract class EntityLivingBase extends Entity {
 			}
 		}
 
-		this.extinguish();
+		if (this.isImmuneToFire() || this.worldObj.isRemote) {
+			this.extinguish();
+		}
 
 		boolean flag1 = flag && ((EntityPlayer) this).capabilities.disableDamage;
 		if (this.isEntityAlive()) {
@@ -226,6 +254,9 @@ public abstract class EntityLivingBase extends Entity {
 					}
 				}
 
+				if (!this.worldObj.isRemote && this.isRiding() && this.ridingEntity instanceof EntityLivingBase) {
+					this.mountEntity((Entity) null);
+				}
 			} else {
 				this.setAir(300);
 			}
@@ -240,7 +271,7 @@ public abstract class EntityLivingBase extends Entity {
 			--this.hurtTime;
 		}
 
-		if (this.hurtResistantTime > 0) {
+		if (this.hurtResistantTime > 0 && !(this instanceof EntityPlayerMP)) {
 			--this.hurtResistantTime;
 		}
 
@@ -289,6 +320,17 @@ public abstract class EntityLivingBase extends Entity {
 	protected void onDeathUpdate() {
 		++this.deathTime;
 		if (this.deathTime == 20) {
+			if (!this.worldObj.isRemote && (this.recentlyHit > 0 || this.isPlayer()) && this.canDropLoot()
+					&& this.worldObj.getGameRules().getBoolean("doMobLoot")) {
+				int i = this.getExperiencePoints(this.attackingPlayer);
+
+				while (i > 0) {
+					int j = EntityXPOrb.getXPSplit(i);
+					i -= j;
+					this.worldObj
+							.spawnEntityInWorld(new EntityXPOrb(this.worldObj, this.posX, this.posY, this.posZ, j));
+				}
+			}
 
 			this.setDead();
 
@@ -420,6 +462,9 @@ public abstract class EntityLivingBase extends Entity {
 	 */
 	public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		this.setAbsorptionAmount(nbttagcompound.getFloat("AbsorptionAmount"));
+		if (nbttagcompound.hasKey("Attributes", 9) && this.worldObj != null && !this.worldObj.isRemote) {
+			SharedMonsterAttributes.func_151475_a(this.getAttributeMap(), nbttagcompound.getTagList("Attributes", 10));
+		}
 
 		if (nbttagcompound.hasKey("ActiveEffects", 9)) {
 			NBTTagList nbttaglist = nbttagcompound.getTagList("ActiveEffects", 10);
@@ -457,12 +502,23 @@ public abstract class EntityLivingBase extends Entity {
 		while (iterator.hasNext()) {
 			Integer integer = (Integer) iterator.next();
 			PotionEffect potioneffect = (PotionEffect) this.activePotionsMap.get(integer);
-			if (potioneffect.onUpdate(this) && potioneffect.getDuration() % 600 == 0) {
+			if (!potioneffect.onUpdate(this)) {
+				if (!this.worldObj.isRemote) {
+					iterator.remove();
+					this.onFinishedPotionEffect(potioneffect);
+				}
+			} else if (potioneffect.getDuration() % 600 == 0) {
 				this.onChangedPotionEffect(potioneffect, false);
 			}
 		}
 
-		this.potionsNeedUpdate = false;
+		if (this.potionsNeedUpdate) {
+			if (!this.worldObj.isRemote) {
+				this.updatePotionMetadata();
+			}
+
+			this.potionsNeedUpdate = false;
+		}
 
 		int i = this.dataWatcher.getWatchableObjectInt(7);
 		boolean flag1 = this.dataWatcher.getWatchableObjectByte(8) > 0;
@@ -519,6 +575,16 @@ public abstract class EntityLivingBase extends Entity {
 	}
 
 	public void clearActivePotions() {
+		Iterator iterator = this.activePotionsMap.keySet().iterator();
+
+		while (iterator.hasNext()) {
+			Integer integer = (Integer) iterator.next();
+			PotionEffect potioneffect = (PotionEffect) this.activePotionsMap.get(integer);
+			if (!this.worldObj.isRemote) {
+				iterator.remove();
+				this.onFinishedPotionEffect(potioneffect);
+			}
+		}
 
 	}
 
@@ -598,14 +664,31 @@ public abstract class EntityLivingBase extends Entity {
 
 	protected void onNewPotionEffect(PotionEffect potioneffect) {
 		this.potionsNeedUpdate = true;
+		if (!this.worldObj.isRemote) {
+			Potion.potionTypes[potioneffect.getPotionID()].applyAttributesModifiersToEntity(this,
+					this.getAttributeMap(), potioneffect.getAmplifier());
+		}
+
 	}
 
 	protected void onChangedPotionEffect(PotionEffect potioneffect, boolean flag) {
 		this.potionsNeedUpdate = true;
+		if (flag && !this.worldObj.isRemote) {
+			Potion.potionTypes[potioneffect.getPotionID()].removeAttributesModifiersFromEntity(this,
+					this.getAttributeMap(), potioneffect.getAmplifier());
+			Potion.potionTypes[potioneffect.getPotionID()].applyAttributesModifiersToEntity(this,
+					this.getAttributeMap(), potioneffect.getAmplifier());
+		}
+
 	}
 
 	protected void onFinishedPotionEffect(PotionEffect potioneffect) {
 		this.potionsNeedUpdate = true;
+		if (!this.worldObj.isRemote) {
+			Potion.potionTypes[potioneffect.getPotionID()].removeAttributesModifiersFromEntity(this,
+					this.getAttributeMap(), potioneffect.getAmplifier());
+		}
+
 	}
 
 	/**+
@@ -631,7 +714,99 @@ public abstract class EntityLivingBase extends Entity {
 	 * Called when the entity is attacked.
 	 */
 	public boolean attackEntityFrom(DamageSource damagesource, float f) {
-		return false;
+		if (this.isEntityInvulnerable(damagesource)) {
+			return false;
+		} else if (this.worldObj.isRemote) {
+			return false;
+		} else {
+			this.entityAge = 0;
+			if (this.getHealth() <= 0.0F) {
+				return false;
+			} else if (damagesource.isFireDamage() && this.isPotionActive(Potion.fireResistance)) {
+				return false;
+			} else {
+				if ((damagesource == DamageSource.anvil || damagesource == DamageSource.fallingBlock)
+						&& this.getEquipmentInSlot(4) != null) {
+					this.getEquipmentInSlot(4).damageItem((int) (f * 4.0F + this.rand.nextFloat() * f * 2.0F), this);
+					f *= 0.75F;
+				}
+
+				this.limbSwingAmount = 1.5F;
+				boolean flag = true;
+				if ((float) this.hurtResistantTime > (float) this.maxHurtResistantTime / 2.0F) {
+					if (f <= this.lastDamage) {
+						return false;
+					}
+
+					this.damageEntity(damagesource, f - this.lastDamage);
+					this.lastDamage = f;
+					flag = false;
+				} else {
+					this.lastDamage = f;
+					this.hurtResistantTime = this.maxHurtResistantTime;
+					this.damageEntity(damagesource, f);
+					this.hurtTime = this.maxHurtTime = 10;
+				}
+
+				this.attackedAtYaw = 0.0F;
+				Entity entity = damagesource.getEntity();
+				if (entity != null) {
+					if (entity instanceof EntityLivingBase) {
+						this.setRevengeTarget((EntityLivingBase) entity);
+					}
+
+					if (entity instanceof EntityPlayer) {
+						this.recentlyHit = 100;
+						this.attackingPlayer = (EntityPlayer) entity;
+					} else if (entity instanceof EntityWolf) {
+						EntityWolf entitywolf = (EntityWolf) entity;
+						if (entitywolf.isTamed()) {
+							this.recentlyHit = 100;
+							this.attackingPlayer = null;
+						}
+					}
+				}
+
+				if (flag) {
+					this.worldObj.setEntityState(this, (byte) 2);
+					if (damagesource != DamageSource.drown) {
+						this.setBeenAttacked();
+					}
+
+					if (entity != null) {
+						double d1 = entity.posX - this.posX;
+
+						double d0;
+						for (d0 = entity.posZ - this.posZ; d1 * d1
+								+ d0 * d0 < 1.0E-4D; d0 = (Math.random() - Math.random()) * 0.01D) {
+							d1 = (Math.random() - Math.random()) * 0.01D;
+						}
+
+						this.attackedAtYaw = (float) (MathHelper.func_181159_b(d0, d1) * 180.0D / 3.1415927410125732D
+								- (double) this.rotationYaw);
+						this.knockBack(entity, f, d1, d0);
+					} else {
+						this.attackedAtYaw = (float) ((int) (Math.random() * 2.0D) * 180);
+					}
+				}
+
+				if (this.getHealth() <= 0.0F) {
+					String s = this.getDeathSound();
+					if (flag && s != null) {
+						this.playSound(s, this.getSoundVolume(), this.getSoundPitch());
+					}
+
+					this.onDeath(damagesource);
+				} else {
+					String s1 = this.getHurtSound();
+					if (flag && s1 != null) {
+						this.playSound(s1, this.getSoundVolume(), this.getSoundPitch());
+					}
+				}
+
+				return true;
+			}
+		}
 	}
 
 	/**+
@@ -671,6 +846,20 @@ public abstract class EntityLivingBase extends Entity {
 
 		this.dead = true;
 		this.getCombatTracker().reset();
+		if (!this.worldObj.isRemote) {
+			int i = 0;
+			if (entity instanceof EntityPlayer) {
+				i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
+			}
+
+			if (this.canDropLoot() && this.worldObj.getGameRules().getBoolean("doMobLoot")) {
+				this.dropFewItems(this.recentlyHit > 0, i);
+				this.dropEquipment(this.recentlyHit > 0, i);
+				if (this.recentlyHit > 0 && this.rand.nextFloat() < 0.025F + (float) i * 0.01F) {
+					this.addRandomDrop();
+				}
+			}
+		}
 
 		this.worldObj.setEntityState(this, (byte) 3);
 	}
@@ -922,6 +1111,10 @@ public abstract class EntityLivingBase extends Entity {
 				|| this.swingProgressInt < 0) {
 			this.swingProgressInt = -1;
 			this.isSwingInProgress = true;
+			if (this.worldObj instanceof WorldServer) {
+				((WorldServer) this.worldObj).getEntityTracker().sendToAllTrackingEntity(this,
+						new S0BPacketAnimation(this, 0));
+			}
 		}
 
 	}
@@ -989,6 +1182,7 @@ public abstract class EntityLivingBase extends Entity {
 		if (this.attributeMap == null) {
 			this.attributeMap = new ServersideAttributeMap();
 		}
+
 		return this.attributeMap;
 	}
 
@@ -1171,9 +1365,11 @@ public abstract class EntityLivingBase extends Entity {
 						this.motionY = 0.2D;
 					}
 
-					if (!this.worldObj.isBlockLoaded(new BlockPos((int) this.posX, 0, (int) this.posZ))
-							|| !this.worldObj.getChunkFromBlockCoords(new BlockPos((int) this.posX, 0, (int) this.posZ))
-									.isLoaded()) {
+					if (this.worldObj.isRemote
+							&& (!this.worldObj.isBlockLoaded(new BlockPos((int) this.posX, 0, (int) this.posZ))
+									|| !this.worldObj
+											.getChunkFromBlockCoords(new BlockPos((int) this.posX, 0, (int) this.posZ))
+											.isLoaded())) {
 						if (this.posY > 0.0D) {
 							this.motionY = -0.1D;
 						} else {
@@ -1273,6 +1469,42 @@ public abstract class EntityLivingBase extends Entity {
 	 */
 	public void onUpdate() {
 		super.onUpdate();
+		if (!this.worldObj.isRemote) {
+			int i = this.getArrowCountInEntity();
+			if (i > 0) {
+				if (this.arrowHitTimer <= 0) {
+					this.arrowHitTimer = 20 * (30 - i);
+				}
+
+				--this.arrowHitTimer;
+				if (this.arrowHitTimer <= 0) {
+					this.setArrowCountInEntity(i - 1);
+				}
+			}
+
+			for (int j = 0; j < 5; ++j) {
+				ItemStack itemstack = this.previousEquipment[j];
+				ItemStack itemstack1 = this.getEquipmentInSlot(j);
+				if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
+					((WorldServer) this.worldObj).getEntityTracker().sendToAllTrackingEntity(this,
+							new S04PacketEntityEquipment(this.getEntityId(), j, itemstack1));
+					if (itemstack != null) {
+						this.attributeMap.removeAttributeModifiers(itemstack.getAttributeModifiers());
+					}
+
+					if (itemstack1 != null) {
+						this.attributeMap.applyAttributeModifiers(itemstack1.getAttributeModifiers());
+					}
+
+					this.previousEquipment[j] = itemstack1 == null ? null : itemstack1.copy();
+				}
+			}
+
+			if (this.ticksExisted % 20 == 0) {
+				this.getCombatTracker().reset();
+			}
+		}
+
 		this.onLivingUpdate();
 		double d0 = this.posX - this.prevPosX;
 		double d1 = this.posZ - this.prevPosZ;
@@ -1436,6 +1668,10 @@ public abstract class EntityLivingBase extends Entity {
 		this.moveEntityWithHeading(this.moveStrafing, this.moveForward);
 		this.worldObj.theProfiler.endSection();
 		this.worldObj.theProfiler.startSection("push");
+		if (!this.worldObj.isRemote) {
+			this.collideWithNearbyEntities();
+		}
+
 		this.worldObj.theProfiler.endSection();
 	}
 
@@ -1469,6 +1705,10 @@ public abstract class EntityLivingBase extends Entity {
 	 */
 	public void mountEntity(Entity entity) {
 		if (this.ridingEntity != null && entity == null) {
+			if (!this.worldObj.isRemote) {
+				this.dismountEntity(this.ridingEntity);
+			}
+
 			if (this.ridingEntity != null) {
 				this.ridingEntity.riddenByEntity = null;
 			}
@@ -1507,6 +1747,23 @@ public abstract class EntityLivingBase extends Entity {
 	 * Args: pickedUpEntity, stackSize
 	 */
 	public void onItemPickup(Entity entity, int var2) {
+		if (!entity.isDead && !this.worldObj.isRemote) {
+			EntityTracker entitytracker = ((WorldServer) this.worldObj).getEntityTracker();
+			if (entity instanceof EntityItem) {
+				entitytracker.sendToAllTrackingEntity(entity,
+						new S0DPacketCollectItem(entity.getEntityId(), this.getEntityId()));
+			}
+
+			if (entity instanceof EntityArrow) {
+				entitytracker.sendToAllTrackingEntity(entity,
+						new S0DPacketCollectItem(entity.getEntityId(), this.getEntityId()));
+			}
+
+			if (entity instanceof EntityXPOrb) {
+				entitytracker.sendToAllTrackingEntity(entity,
+						new S0DPacketCollectItem(entity.getEntityId(), this.getEntityId()));
+			}
+		}
 
 	}
 
@@ -1556,7 +1813,7 @@ public abstract class EntityLivingBase extends Entity {
 	 * Returns whether the entity is in a server world
 	 */
 	public boolean isServerWorld() {
-		return false;
+		return !this.worldObj.isRemote;
 	}
 
 	/**+

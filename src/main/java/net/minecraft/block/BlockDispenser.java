@@ -20,8 +20,10 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.tileentity.TileEntityDropper;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.RegistryDefaulted;
@@ -68,8 +70,48 @@ public class BlockDispenser extends BlockContainer {
 		return 4;
 	}
 
+	public void onBlockAdded(World world, BlockPos blockpos, IBlockState iblockstate) {
+		super.onBlockAdded(world, blockpos, iblockstate);
+		this.setDefaultDirection(world, blockpos, iblockstate);
+	}
+
+	private void setDefaultDirection(World worldIn, BlockPos pos, IBlockState state) {
+		if (!worldIn.isRemote) {
+			EnumFacing enumfacing = (EnumFacing) state.getValue(FACING);
+			boolean flag = worldIn.getBlockState(pos.north()).getBlock().isFullBlock();
+			boolean flag1 = worldIn.getBlockState(pos.south()).getBlock().isFullBlock();
+			if (enumfacing == EnumFacing.NORTH && flag && !flag1) {
+				enumfacing = EnumFacing.SOUTH;
+			} else if (enumfacing == EnumFacing.SOUTH && flag1 && !flag) {
+				enumfacing = EnumFacing.NORTH;
+			} else {
+				boolean flag2 = worldIn.getBlockState(pos.west()).getBlock().isFullBlock();
+				boolean flag3 = worldIn.getBlockState(pos.east()).getBlock().isFullBlock();
+				if (enumfacing == EnumFacing.WEST && flag2 && !flag3) {
+					enumfacing = EnumFacing.EAST;
+				} else if (enumfacing == EnumFacing.EAST && flag3 && !flag2) {
+					enumfacing = EnumFacing.WEST;
+				}
+			}
+
+			worldIn.setBlockState(pos,
+					state.withProperty(FACING, enumfacing).withProperty(TRIGGERED, Boolean.valueOf(false)), 2);
+		}
+	}
+
 	public boolean onBlockActivated(World world, BlockPos blockpos, IBlockState var3, EntityPlayer entityplayer,
 			EnumFacing var5, float var6, float var7, float var8) {
+		if (!world.isRemote) {
+			TileEntity tileentity = world.getTileEntity(blockpos);
+			if (tileentity instanceof TileEntityDispenser) {
+				entityplayer.displayGUIChest((TileEntityDispenser) tileentity);
+				if (tileentity instanceof TileEntityDropper) {
+					entityplayer.triggerAchievement(StatList.field_181731_O);
+				} else {
+					entityplayer.triggerAchievement(StatList.field_181733_Q);
+				}
+			}
+		}
 		return true;
 	}
 
@@ -109,6 +151,12 @@ public class BlockDispenser extends BlockContainer {
 			world.setBlockState(blockpos, iblockstate.withProperty(TRIGGERED, Boolean.valueOf(false)), 4);
 		}
 
+	}
+
+	public void updateTick(World world, BlockPos blockpos, IBlockState var3, EaglercraftRandom var4) {
+		if (!world.isRemote) {
+			this.dispense(world, blockpos);
+		}
 	}
 
 	/**+

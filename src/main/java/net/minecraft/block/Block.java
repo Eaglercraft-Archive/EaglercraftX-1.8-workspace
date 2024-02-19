@@ -12,6 +12,8 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -548,7 +550,18 @@ public class Block {
 	 * Spawns this Block's drops into the World as EntityItems.
 	 */
 	public void dropBlockAsItemWithChance(World world, BlockPos blockpos, IBlockState iblockstate, float f, int i) {
+		if (!world.isRemote) {
+			int j = this.quantityDroppedWithBonus(i, world.rand);
 
+			for (int k = 0; k < j; ++k) {
+				if (world.rand.nextFloat() <= f) {
+					Item item = this.getItemDropped(iblockstate, world.rand, i);
+					if (item != null) {
+						spawnAsEntity(world, blockpos, new ItemStack(item, 1, this.damageDropped(iblockstate)));
+					}
+				}
+			}
+		}
 	}
 
 	/**+
@@ -556,7 +569,16 @@ public class Block {
 	 * the given position
 	 */
 	public static void spawnAsEntity(World worldIn, BlockPos pos, ItemStack stack) {
-
+		if (!worldIn.isRemote && worldIn.getGameRules().getBoolean("doTileDrops")) {
+			float f = 0.5F;
+			double d0 = (double) (worldIn.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+			double d1 = (double) (worldIn.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+			double d2 = (double) (worldIn.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+			EntityItem entityitem = new EntityItem(worldIn, (double) pos.getX() + d0, (double) pos.getY() + d1,
+					(double) pos.getZ() + d2, stack);
+			entityitem.setDefaultPickupDelay();
+			worldIn.spawnEntityInWorld(entityitem);
+		}
 	}
 
 	/**+
@@ -564,7 +586,14 @@ public class Block {
 	 * orb entities
 	 */
 	protected void dropXpOnBlockBreak(World worldIn, BlockPos pos, int amount) {
-
+		if (!worldIn.isRemote) {
+			while (amount > 0) {
+				int i = EntityXPOrb.getXPSplit(amount);
+				amount -= i;
+				worldIn.spawnEntityInWorld(new EntityXPOrb(worldIn, (double) pos.getX() + 0.5D,
+						(double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, i));
+			}
+		}
 	}
 
 	/**+

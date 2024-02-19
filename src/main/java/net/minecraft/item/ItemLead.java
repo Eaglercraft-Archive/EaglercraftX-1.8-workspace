@@ -43,7 +43,12 @@ public class ItemLead extends Item {
 			float var6, float var7, float var8) {
 		Block block = world.getBlockState(blockpos).getBlock();
 		if (block instanceof BlockFence) {
-			return true;
+			if (world.isRemote) {
+				return true;
+			} else {
+				attachToFence(entityplayer, world, blockpos);
+				return true;
+			}
 		} else {
 			return false;
 		}

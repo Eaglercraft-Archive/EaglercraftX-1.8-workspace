@@ -1,13 +1,13 @@
 package net.minecraft.entity.passive;
 
 import java.util.Calendar;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -198,6 +198,21 @@ public class EntityBat extends EntityAmbientCreature {
 	 */
 	public boolean doesEntityNotTriggerPressurePlate() {
 		return true;
+	}
+
+	/**+
+	 * Called when the entity is attacked.
+	 */
+	public boolean attackEntityFrom(DamageSource damagesource, float f) {
+		if (this.isEntityInvulnerable(damagesource)) {
+			return false;
+		} else {
+			if (!this.worldObj.isRemote && this.getIsBatHanging()) {
+				this.setIsBatHanging(false);
+			}
+
+			return super.attackEntityFrom(damagesource, f);
+		}
 	}
 
 	/**+

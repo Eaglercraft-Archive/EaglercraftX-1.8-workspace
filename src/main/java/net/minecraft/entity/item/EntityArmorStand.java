@@ -1,19 +1,27 @@
 package net.minecraft.entity.item;
 
 import java.util.List;
-
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Rotations;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -318,8 +326,98 @@ public class EntityArmorStand extends EntityLivingBase {
 	public boolean interactAt(EntityPlayer entityplayer, Vec3 vec3) {
 		if (this.func_181026_s()) {
 			return false;
+		} else if (!this.worldObj.isRemote && !entityplayer.isSpectator()) {
+			byte b0 = 0;
+			ItemStack itemstack = entityplayer.getCurrentEquippedItem();
+			boolean flag = itemstack != null;
+			if (flag && itemstack.getItem() instanceof ItemArmor) {
+				ItemArmor itemarmor = (ItemArmor) itemstack.getItem();
+				if (itemarmor.armorType == 3) {
+					b0 = 1;
+				} else if (itemarmor.armorType == 2) {
+					b0 = 2;
+				} else if (itemarmor.armorType == 1) {
+					b0 = 3;
+				} else if (itemarmor.armorType == 0) {
+					b0 = 4;
+				}
+			}
+
+			if (flag && (itemstack.getItem() == Items.skull
+					|| itemstack.getItem() == Item.getItemFromBlock(Blocks.pumpkin))) {
+				b0 = 4;
+			}
+
+			double d4 = 0.1D;
+			double d0 = 0.9D;
+			double d1 = 0.4D;
+			double d2 = 1.6D;
+			byte b1 = 0;
+			boolean flag1 = this.isSmall();
+			double d3 = flag1 ? vec3.yCoord * 2.0D : vec3.yCoord;
+			if (d3 >= 0.1D && d3 < 0.1D + (flag1 ? 0.8D : 0.45D) && this.contents[1] != null) {
+				b1 = 1;
+			} else if (d3 >= 0.9D + (flag1 ? 0.3D : 0.0D) && d3 < 0.9D + (flag1 ? 1.0D : 0.7D)
+					&& this.contents[3] != null) {
+				b1 = 3;
+			} else if (d3 >= 0.4D && d3 < 0.4D + (flag1 ? 1.0D : 0.8D) && this.contents[2] != null) {
+				b1 = 2;
+			} else if (d3 >= 1.6D && this.contents[4] != null) {
+				b1 = 4;
+			}
+
+			boolean flag2 = this.contents[b1] != null;
+			if ((this.disabledSlots & 1 << b1) != 0 || (this.disabledSlots & 1 << b0) != 0) {
+				b1 = b0;
+				if ((this.disabledSlots & 1 << b0) != 0) {
+					if ((this.disabledSlots & 1) != 0) {
+						return true;
+					}
+
+					b1 = 0;
+				}
+			}
+
+			if (flag && b0 == 0 && !this.getShowArms()) {
+				return true;
+			} else {
+				if (flag) {
+					this.func_175422_a(entityplayer, b0);
+				} else if (flag2) {
+					this.func_175422_a(entityplayer, b1);
+				}
+
+				return true;
+			}
 		} else {
 			return true;
+		}
+	}
+
+	private void func_175422_a(EntityPlayer parEntityPlayer, int parInt1) {
+		ItemStack itemstack = this.contents[parInt1];
+		if (itemstack == null || (this.disabledSlots & 1 << parInt1 + 8) == 0) {
+			if (itemstack != null || (this.disabledSlots & 1 << parInt1 + 16) == 0) {
+				int i = parEntityPlayer.inventory.currentItem;
+				ItemStack itemstack1 = parEntityPlayer.inventory.getStackInSlot(i);
+				if (parEntityPlayer.capabilities.isCreativeMode
+						&& (itemstack == null || itemstack.getItem() == Item.getItemFromBlock(Blocks.air))
+						&& itemstack1 != null) {
+					ItemStack itemstack3 = itemstack1.copy();
+					itemstack3.stackSize = 1;
+					this.setCurrentItemOrArmor(parInt1, itemstack3);
+				} else if (itemstack1 != null && itemstack1.stackSize > 1) {
+					if (itemstack == null) {
+						ItemStack itemstack2 = itemstack1.copy();
+						itemstack2.stackSize = 1;
+						this.setCurrentItemOrArmor(parInt1, itemstack2);
+						--itemstack1.stackSize;
+					}
+				} else {
+					this.setCurrentItemOrArmor(parInt1, itemstack1);
+					parEntityPlayer.inventory.setInventorySlotContents(i, itemstack);
+				}
+			}
 		}
 	}
 
@@ -327,7 +425,61 @@ public class EntityArmorStand extends EntityLivingBase {
 	 * Called when the entity is attacked.
 	 */
 	public boolean attackEntityFrom(DamageSource damagesource, float var2) {
-		return false;
+		if (this.worldObj.isRemote) {
+			return false;
+		} else if (DamageSource.outOfWorld.equals(damagesource)) {
+			this.setDead();
+			return false;
+		} else if (!this.isEntityInvulnerable(damagesource) && !this.canInteract && !this.func_181026_s()) {
+			if (damagesource.isExplosion()) {
+				this.dropContents();
+				this.setDead();
+				return false;
+			} else if (DamageSource.inFire.equals(damagesource)) {
+				if (!this.isBurning()) {
+					this.setFire(5);
+				} else {
+					this.damageArmorStand(0.15F);
+				}
+
+				return false;
+			} else if (DamageSource.onFire.equals(damagesource) && this.getHealth() > 0.5F) {
+				this.damageArmorStand(4.0F);
+				return false;
+			} else {
+				boolean flag = "arrow".equals(damagesource.getDamageType());
+				boolean flag1 = "player".equals(damagesource.getDamageType());
+				if (!flag1 && !flag) {
+					return false;
+				} else {
+					if (damagesource.getSourceOfDamage() instanceof EntityArrow) {
+						damagesource.getSourceOfDamage().setDead();
+					}
+
+					if (damagesource.getEntity() instanceof EntityPlayer
+							&& !((EntityPlayer) damagesource.getEntity()).capabilities.allowEdit) {
+						return false;
+					} else if (damagesource.isCreativePlayer()) {
+						this.playParticles();
+						this.setDead();
+						return false;
+					} else {
+						long i = this.worldObj.getTotalWorldTime();
+						if (i - this.punchCooldown > 5L && !flag) {
+							this.punchCooldown = i;
+						} else {
+							this.dropBlock();
+							this.playParticles();
+							this.setDead();
+						}
+
+						return false;
+					}
+				}
+			}
+		} else {
+			return false;
+		}
 	}
 
 	/**+
@@ -343,6 +495,46 @@ public class EntityArmorStand extends EntityLivingBase {
 
 		d1 = d1 * 64.0D;
 		return d0 < d1 * d1;
+	}
+
+	private void playParticles() {
+		if (this.worldObj instanceof WorldServer) {
+			((WorldServer) this.worldObj).spawnParticle(EnumParticleTypes.BLOCK_DUST, this.posX,
+					this.posY + (double) this.height / 1.5D, this.posZ, 10, (double) (this.width / 4.0F),
+					(double) (this.height / 4.0F), (double) (this.width / 4.0F), 0.05D,
+					new int[] { Block.getStateId(Blocks.planks.getDefaultState()) });
+		}
+
+	}
+
+	private void damageArmorStand(float parFloat1) {
+		float f = this.getHealth();
+		f = f - parFloat1;
+		if (f <= 0.5F) {
+			this.dropContents();
+			this.setDead();
+		} else {
+			this.setHealth(f);
+		}
+
+	}
+
+	private void dropBlock() {
+		Block.spawnAsEntity(this.worldObj, new BlockPos(this), new ItemStack(Items.armor_stand));
+		this.dropContents();
+	}
+
+	private void dropContents() {
+		for (int i = 0; i < this.contents.length; ++i) {
+			if (this.contents[i] != null && this.contents[i].stackSize > 0) {
+				if (this.contents[i] != null) {
+					Block.spawnAsEntity(this.worldObj, (new BlockPos(this)).up(), this.contents[i]);
+				}
+
+				this.contents[i] = null;
+			}
+		}
+
 	}
 
 	protected float func_110146_f(float var1, float var2) {

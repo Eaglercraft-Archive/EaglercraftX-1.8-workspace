@@ -1,7 +1,10 @@
 package net.minecraft.world.storage;
 
+import net.lax1dude.eaglercraft.v1_8.internal.vfs2.VFile2;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.MinecraftException;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.chunk.storage.IChunkLoader;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -67,6 +70,32 @@ public class SaveHandlerMP implements ISaveHandler {
 	 */
 	public String getWorldDirectoryName() {
 		return "none";
+	}
+
+	@Override
+	/**+
+	 * initializes and returns the chunk loader for the specified
+	 * world provider
+	 */
+	public IChunkLoader getChunkLoader(WorldProvider var1) {
+		return null;
+	}
+
+	@Override
+	/**+
+	 * Gets the File object corresponding to the base directory of
+	 * this world.
+	 */
+	public VFile2 getWorldDirectory() {
+		return null;
+	}
+
+	@Override
+	/**+
+	 * Gets the file location of the given map
+	 */
+	public VFile2 getMapFileFromName(String var1) {
+		return null;
 	}
 
 }

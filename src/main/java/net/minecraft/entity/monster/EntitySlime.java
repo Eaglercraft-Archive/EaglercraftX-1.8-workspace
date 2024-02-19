@@ -5,10 +5,15 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAIFindEntityNearest;
+import net.minecraft.entity.ai.EntityAIFindEntityNearestPlayer;
+import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
@@ -48,6 +53,13 @@ public class EntitySlime extends EntityLiving implements IMob {
 
 	public EntitySlime(World worldIn) {
 		super(worldIn);
+		this.moveHelper = new EntitySlime.SlimeMoveHelper(this);
+		this.tasks.addTask(1, new EntitySlime.AISlimeFloat(this));
+		this.tasks.addTask(2, new EntitySlime.AISlimeAttack(this));
+		this.tasks.addTask(3, new EntitySlime.AISlimeFaceRandom(this));
+		this.tasks.addTask(5, new EntitySlime.AISlimeHop(this));
+		this.targetTasks.addTask(1, new EntityAIFindEntityNearestPlayer(this));
+		this.targetTasks.addTask(3, new EntityAIFindEntityNearest(this, EntityIronGolem.class));
 	}
 
 	protected void entityInit() {
@@ -113,6 +125,11 @@ public class EntitySlime extends EntityLiving implements IMob {
 	 * Called to update the entity's position/logic.
 	 */
 	public void onUpdate() {
+		if (!this.worldObj.isRemote && this.worldObj.getDifficulty() == EnumDifficulty.PEACEFUL
+				&& this.getSlimeSize() > 0) {
+			this.isDead = true;
+		}
+
 		this.squishFactor += (this.squishAmount - this.squishFactor) * 0.5F;
 		this.prevSquishFactor = this.squishFactor;
 		super.onUpdate();
@@ -174,6 +191,36 @@ public class EntitySlime extends EntityLiving implements IMob {
 		}
 
 		super.onDataWatcherUpdate(i);
+	}
+
+	/**+
+	 * Will get destroyed next tick.
+	 */
+	public void setDead() {
+		int i = this.getSlimeSize();
+		if (!this.worldObj.isRemote && i > 1 && this.getHealth() <= 0.0F) {
+			int j = 2 + this.rand.nextInt(3);
+
+			for (int k = 0; k < j; ++k) {
+				float f = ((float) (k % 2) - 0.5F) * (float) i / 4.0F;
+				float f1 = ((float) (k / 2) - 0.5F) * (float) i / 4.0F;
+				EntitySlime entityslime = this.createInstance();
+				if (this.hasCustomName()) {
+					entityslime.setCustomNameTag(this.getCustomNameTag());
+				}
+
+				if (this.isNoDespawnRequired()) {
+					entityslime.enablePersistence();
+				}
+
+				entityslime.setSlimeSize(i / 2);
+				entityslime.setLocationAndAngles(this.posX + (double) f, this.posY + 0.5D, this.posZ + (double) f1,
+						this.rand.nextFloat() * 360.0F, 0.0F);
+				this.worldObj.spawnEntityInWorld(entityslime);
+			}
+		}
+
+		super.setDead();
 	}
 
 	/**+
@@ -335,4 +382,162 @@ public class EntitySlime extends EntityLiving implements IMob {
 		return super.onInitialSpawn(difficultyinstance, ientitylivingdata);
 	}
 
+	static class AISlimeAttack extends EntityAIBase {
+		private EntitySlime slime;
+		private int field_179465_b;
+
+		public AISlimeAttack(EntitySlime parEntitySlime) {
+			this.slime = parEntitySlime;
+			this.setMutexBits(2);
+		}
+
+		public boolean shouldExecute() {
+			EntityLivingBase entitylivingbase = this.slime.getAttackTarget();
+			return entitylivingbase == null ? false
+					: (!entitylivingbase.isEntityAlive() ? false
+							: !(entitylivingbase instanceof EntityPlayer)
+									|| !((EntityPlayer) entitylivingbase).capabilities.disableDamage);
+		}
+
+		public void startExecuting() {
+			this.field_179465_b = 300;
+			super.startExecuting();
+		}
+
+		public boolean continueExecuting() {
+			EntityLivingBase entitylivingbase = this.slime.getAttackTarget();
+			return entitylivingbase == null ? false
+					: (!entitylivingbase.isEntityAlive() ? false
+							: (entitylivingbase instanceof EntityPlayer
+									&& ((EntityPlayer) entitylivingbase).capabilities.disableDamage ? false
+											: --this.field_179465_b > 0));
+		}
+
+		public void updateTask() {
+			this.slime.faceEntity(this.slime.getAttackTarget(), 10.0F, 10.0F);
+			((EntitySlime.SlimeMoveHelper) this.slime.getMoveHelper()).func_179920_a(this.slime.rotationYaw,
+					this.slime.canDamagePlayer());
+		}
+	}
+
+	static class AISlimeFaceRandom extends EntityAIBase {
+		private EntitySlime slime;
+		private float field_179459_b;
+		private int field_179460_c;
+
+		public AISlimeFaceRandom(EntitySlime parEntitySlime) {
+			this.slime = parEntitySlime;
+			this.setMutexBits(2);
+		}
+
+		public boolean shouldExecute() {
+			return this.slime.getAttackTarget() == null
+					&& (this.slime.onGround || this.slime.isInWater() || this.slime.isInLava());
+		}
+
+		public void updateTask() {
+			if (--this.field_179460_c <= 0) {
+				this.field_179460_c = 40 + this.slime.getRNG().nextInt(60);
+				this.field_179459_b = (float) this.slime.getRNG().nextInt(360);
+			}
+
+			((EntitySlime.SlimeMoveHelper) this.slime.getMoveHelper()).func_179920_a(this.field_179459_b, false);
+		}
+	}
+
+	static class AISlimeFloat extends EntityAIBase {
+		private EntitySlime slime;
+
+		public AISlimeFloat(EntitySlime parEntitySlime) {
+			this.slime = parEntitySlime;
+			this.setMutexBits(5);
+			((PathNavigateGround) parEntitySlime.getNavigator()).setCanSwim(true);
+		}
+
+		public boolean shouldExecute() {
+			return this.slime.isInWater() || this.slime.isInLava();
+		}
+
+		public void updateTask() {
+			if (this.slime.getRNG().nextFloat() < 0.8F) {
+				this.slime.getJumpHelper().setJumping();
+			}
+
+			((EntitySlime.SlimeMoveHelper) this.slime.getMoveHelper()).setSpeed(1.2D);
+		}
+	}
+
+	static class AISlimeHop extends EntityAIBase {
+		private EntitySlime slime;
+
+		public AISlimeHop(EntitySlime parEntitySlime) {
+			this.slime = parEntitySlime;
+			this.setMutexBits(5);
+		}
+
+		public boolean shouldExecute() {
+			return true;
+		}
+
+		public void updateTask() {
+			((EntitySlime.SlimeMoveHelper) this.slime.getMoveHelper()).setSpeed(1.0D);
+		}
+	}
+
+	static class SlimeMoveHelper extends EntityMoveHelper {
+		private float field_179922_g;
+		private int field_179924_h;
+		private EntitySlime slime;
+		private boolean field_179923_j;
+
+		public SlimeMoveHelper(EntitySlime parEntitySlime) {
+			super(parEntitySlime);
+			this.slime = parEntitySlime;
+		}
+
+		public void func_179920_a(float parFloat1, boolean parFlag) {
+			this.field_179922_g = parFloat1;
+			this.field_179923_j = parFlag;
+		}
+
+		public void setSpeed(double speedIn) {
+			this.speed = speedIn;
+			this.update = true;
+		}
+
+		public void onUpdateMoveHelper() {
+			this.entity.rotationYaw = this.limitAngle(this.entity.rotationYaw, this.field_179922_g, 30.0F);
+			this.entity.rotationYawHead = this.entity.rotationYaw;
+			this.entity.renderYawOffset = this.entity.rotationYaw;
+			if (!this.update) {
+				this.entity.setMoveForward(0.0F);
+			} else {
+				this.update = false;
+				if (this.entity.onGround) {
+					this.entity.setAIMoveSpeed((float) (this.speed * this.entity
+							.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue()));
+					if (this.field_179924_h-- <= 0) {
+						this.field_179924_h = this.slime.getJumpDelay();
+						if (this.field_179923_j) {
+							this.field_179924_h /= 3;
+						}
+
+						this.slime.getJumpHelper().setJumping();
+						if (this.slime.makesSoundOnJump()) {
+							this.slime.playSound(this.slime.getJumpSound(), this.slime.getSoundVolume(),
+									((this.slime.getRNG().nextFloat() - this.slime.getRNG().nextFloat()) * 0.2F + 1.0F)
+											* 0.8F);
+						}
+					} else {
+						this.slime.moveStrafing = this.slime.moveForward = 0.0F;
+						this.entity.setAIMoveSpeed(0.0F);
+					}
+				} else {
+					this.entity.setAIMoveSpeed((float) (this.speed * this.entity
+							.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue()));
+				}
+
+			}
+		}
+	}
 }

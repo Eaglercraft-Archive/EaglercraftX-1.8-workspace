@@ -1,6 +1,14 @@
 package net.minecraft.entity.effect;
 
+import java.util.List;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.effect.EntityWeatherEffect;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
 /**+
@@ -34,6 +42,25 @@ public class EntityLightningBolt extends EntityWeatherEffect {
 		this.lightningState = 2;
 		this.boltVertex = this.rand.nextLong();
 		this.boltLivingTime = this.rand.nextInt(3) + 1;
+		BlockPos blockpos = new BlockPos(this);
+		if (!worldIn.isRemote && worldIn.getGameRules().getBoolean("doFireTick")
+				&& (worldIn.getDifficulty() == EnumDifficulty.NORMAL || worldIn.getDifficulty() == EnumDifficulty.HARD)
+				&& worldIn.isAreaLoaded(blockpos, 10)) {
+			if (worldIn.getBlockState(blockpos).getBlock().getMaterial() == Material.air
+					&& Blocks.fire.canPlaceBlockAt(worldIn, blockpos)) {
+				worldIn.setBlockState(blockpos, Blocks.fire.getDefaultState());
+			}
+
+			for (int i = 0; i < 4; ++i) {
+				BlockPos blockpos1 = blockpos.add(this.rand.nextInt(3) - 1, this.rand.nextInt(3) - 1,
+						this.rand.nextInt(3) - 1);
+				if (worldIn.getBlockState(blockpos1).getBlock().getMaterial() == Material.air
+						&& Blocks.fire.canPlaceBlockAt(worldIn, blockpos1)) {
+					worldIn.setBlockState(blockpos1, Blocks.fire.getDefaultState());
+				}
+			}
+		}
+
 	}
 
 	/**+
@@ -56,11 +83,29 @@ public class EntityLightningBolt extends EntityWeatherEffect {
 				--this.boltLivingTime;
 				this.lightningState = 1;
 				this.boltVertex = this.rand.nextLong();
+				BlockPos blockpos = new BlockPos(this);
+				if (!this.worldObj.isRemote && this.worldObj.getGameRules().getBoolean("doFireTick")
+						&& this.worldObj.isAreaLoaded(blockpos, 10)
+						&& this.worldObj.getBlockState(blockpos).getBlock().getMaterial() == Material.air
+						&& Blocks.fire.canPlaceBlockAt(this.worldObj, blockpos)) {
+					this.worldObj.setBlockState(blockpos, Blocks.fire.getDefaultState());
+				}
 			}
 		}
 
 		if (this.lightningState >= 0) {
-			this.worldObj.setLastLightningBolt(2);
+			if (this.worldObj.isRemote) {
+				this.worldObj.setLastLightningBolt(2);
+			} else {
+				double d0 = 3.0D;
+				List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, new AxisAlignedBB(this.posX - d0,
+						this.posY - d0, this.posZ - d0, this.posX + d0, this.posY + 6.0D + d0, this.posZ + d0));
+
+				for (int i = 0; i < list.size(); ++i) {
+					Entity entity = (Entity) list.get(i);
+					entity.onStruckByLightning(this);
+				}
+			}
 		}
 
 	}

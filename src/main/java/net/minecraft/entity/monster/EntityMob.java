@@ -53,6 +53,17 @@ public abstract class EntityMob extends EntityCreature implements IMob {
 		super.onLivingUpdate();
 	}
 
+	/**+
+	 * Called to update the entity's position/logic.
+	 */
+	public void onUpdate() {
+		super.onUpdate();
+		if (!this.worldObj.isRemote && this.worldObj.getDifficulty() == EnumDifficulty.PEACEFUL) {
+			this.setDead();
+		}
+
+	}
+
 	protected String getSwimSound() {
 		return "game.hostile.swim";
 	}

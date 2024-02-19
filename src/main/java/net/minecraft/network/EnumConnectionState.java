@@ -1,13 +1,13 @@
 package net.minecraft.network;
 
-import java.util.Collection;
-import java.util.Map;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 
-import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
+import java.util.Collection;
+import java.util.Map;
+import net.minecraft.network.EnumPacketDirection;
+import net.minecraft.network.Packet;
 import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.client.C00PacketLoginStart;
 import net.minecraft.network.login.client.C01PacketEncryptionResponse;
@@ -109,10 +109,7 @@ import net.minecraft.network.play.server.S46PacketSetCompressionLevel;
 import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.network.play.server.S49PacketUpdateEntityNBT;
-import net.minecraft.network.status.client.C00PacketServerQuery;
-import net.minecraft.network.status.client.C01PacketPing;
-import net.minecraft.network.status.server.S00PacketServerInfo;
-import net.minecraft.network.status.server.S01PacketPong;
+import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -242,14 +239,6 @@ public enum EnumConnectionState {
 			this.registerPacket(EnumPacketDirection.SERVERBOUND, C17PacketCustomPayload.class);
 			this.registerPacket(EnumPacketDirection.SERVERBOUND, C18PacketSpectate.class);
 			this.registerPacket(EnumPacketDirection.SERVERBOUND, C19PacketResourcePackStatus.class);
-		}
-	},
-	STATUS(1) {
-		{
-			this.registerPacket(EnumPacketDirection.SERVERBOUND, C00PacketServerQuery.class);
-			this.registerPacket(EnumPacketDirection.CLIENTBOUND, S00PacketServerInfo.class);
-			this.registerPacket(EnumPacketDirection.SERVERBOUND, C01PacketPing.class);
-			this.registerPacket(EnumPacketDirection.CLIENTBOUND, S01PacketPong.class);
 		}
 	},
 	LOGIN(2) {

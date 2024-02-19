@@ -1,21 +1,37 @@
 package net.minecraft.entity.monster;
 
+import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIDefendVillage;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILookAtVillager;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIMoveThroughVillage;
+import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
+import net.minecraft.entity.ai.EntityAIMoveTowardsTarget;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
+import net.minecraft.village.Village;
 import net.minecraft.world.World;
 
 /**+
@@ -40,17 +56,46 @@ import net.minecraft.world.World;
  */
 public class EntityIronGolem extends EntityGolem {
 	private int homeCheckTimer;
+	Village villageObj;
 	private int attackTimer;
 	private int holdRoseTick;
 
 	public EntityIronGolem(World worldIn) {
 		super(worldIn);
 		this.setSize(1.4F, 2.9F);
+		((PathNavigateGround) this.getNavigator()).setAvoidsWater(true);
+		this.tasks.addTask(1, new EntityAIAttackOnCollide(this, 1.0D, true));
+		this.tasks.addTask(2, new EntityAIMoveTowardsTarget(this, 0.9D, 32.0F));
+		this.tasks.addTask(3, new EntityAIMoveThroughVillage(this, 0.6D, true));
+		this.tasks.addTask(4, new EntityAIMoveTowardsRestriction(this, 1.0D));
+		this.tasks.addTask(5, new EntityAILookAtVillager(this));
+		this.tasks.addTask(6, new EntityAIWander(this, 0.6D));
+		this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+		this.tasks.addTask(8, new EntityAILookIdle(this));
+		this.targetTasks.addTask(1, new EntityAIDefendVillage(this));
+		this.targetTasks.addTask(2, new EntityAIHurtByTarget(this, false, new Class[0]));
+		this.targetTasks.addTask(3, new EntityIronGolem.AINearestAttackableTargetNonCreeper(this, EntityLiving.class,
+				10, false, true, IMob.VISIBLE_MOB_SELECTOR));
 	}
 
 	protected void entityInit() {
 		super.entityInit();
 		this.dataWatcher.addObject(16, Byte.valueOf((byte) 0));
+	}
+
+	protected void updateAITasks() {
+		if (--this.homeCheckTimer <= 0) {
+			this.homeCheckTimer = 70 + this.rand.nextInt(50);
+			this.villageObj = this.worldObj.getVillageCollection().getNearestVillage(new BlockPos(this), 32);
+			if (this.villageObj == null) {
+				this.detachHome();
+			} else {
+				BlockPos blockpos = this.villageObj.getCenter();
+				this.setHomePosAndDistance(blockpos, (int) ((float) this.villageObj.getVillageRadius() * 0.6F));
+			}
+		}
+
+		super.updateAITasks();
 	}
 
 	protected void applyEntityAttributes() {
@@ -160,6 +205,10 @@ public class EntityIronGolem extends EntityGolem {
 
 	}
 
+	public Village getVillage() {
+		return this.villageObj;
+	}
+
 	public int getAttackTimer() {
 		return this.attackTimer;
 	}
@@ -222,5 +271,55 @@ public class EntityIronGolem extends EntityGolem {
 			this.dataWatcher.updateObject(16, Byte.valueOf((byte) (b0 & -2)));
 		}
 
+	}
+
+	/**+
+	 * Called when the mob's health reaches 0.
+	 */
+	public void onDeath(DamageSource damagesource) {
+		if (!this.isPlayerCreated() && this.attackingPlayer != null && this.villageObj != null) {
+			this.villageObj.setReputationForPlayer(this.attackingPlayer.getName(), -5);
+		}
+
+		super.onDeath(damagesource);
+	}
+
+	static class AINearestAttackableTargetNonCreeper<T extends EntityLivingBase>
+			extends EntityAINearestAttackableTarget<T> {
+		public AINearestAttackableTargetNonCreeper(final EntityCreature creature, Class<T> classTarget, int chance,
+				boolean parFlag, boolean parFlag2, final Predicate<? super T> parPredicate) {
+			super(creature, classTarget, chance, parFlag, parFlag2, parPredicate);
+			this.targetEntitySelector = new Predicate<T>() {
+				public boolean apply(T entitylivingbase) {
+					if (parPredicate != null && !parPredicate.apply(entitylivingbase)) {
+						return false;
+					} else if (entitylivingbase instanceof EntityCreeper) {
+						return false;
+					} else {
+						if (entitylivingbase instanceof EntityPlayer) {
+							double d0 = AINearestAttackableTargetNonCreeper.this.getTargetDistance();
+							if (entitylivingbase.isSneaking()) {
+								d0 *= 0.800000011920929D;
+							}
+
+							if (entitylivingbase.isInvisible()) {
+								float f = ((EntityPlayer) entitylivingbase).getArmorVisibility();
+								if (f < 0.1F) {
+									f = 0.1F;
+								}
+
+								d0 *= (double) (0.7F * f);
+							}
+
+							if ((double) entitylivingbase.getDistanceToEntity(creature) > d0) {
+								return false;
+							}
+						}
+
+						return AINearestAttackableTargetNonCreeper.this.isSuitableTarget(entitylivingbase, false);
+					}
+				}
+			};
+		}
 	}
 }

@@ -70,6 +70,21 @@ public class ContainerWorkbench extends Container {
 				CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.worldObj));
 	}
 
+	/**+
+	 * Called when the container is closed.
+	 */
+	public void onContainerClosed(EntityPlayer entityplayer) {
+		super.onContainerClosed(entityplayer);
+		if (!this.worldObj.isRemote) {
+			for (int i = 0; i < 9; ++i) {
+				ItemStack itemstack = this.craftMatrix.removeStackFromSlot(i);
+				if (itemstack != null) {
+					entityplayer.dropPlayerItemWithRandomChoice(itemstack, false);
+				}
+			}
+		}
+	}
+
 	public boolean canInteractWith(EntityPlayer entityplayer) {
 		return this.worldObj.getBlockState(this.pos).getBlock() != Blocks.crafting_table ? false
 				: entityplayer.getDistanceSq((double) this.pos.getX() + 0.5D, (double) this.pos.getY() + 0.5D,

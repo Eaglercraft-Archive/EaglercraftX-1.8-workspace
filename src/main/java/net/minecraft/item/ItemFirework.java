@@ -1,14 +1,16 @@
 package net.minecraft.item;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.Lists;
-
+import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.World;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -31,6 +33,26 @@ import net.minecraft.util.StatCollector;
  * 
  */
 public class ItemFirework extends Item {
+
+	/**+
+	 * Called when a Block is right-clicked with this Item
+	 */
+	public boolean onItemUse(ItemStack itemstack, EntityPlayer entityplayer, World world, BlockPos blockpos,
+			EnumFacing var5, float f, float f1, float f2) {
+		if (!world.isRemote) {
+			EntityFireworkRocket entityfireworkrocket = new EntityFireworkRocket(world,
+					(double) ((float) blockpos.getX() + f), (double) ((float) blockpos.getY() + f1),
+					(double) ((float) blockpos.getZ() + f2), itemstack);
+			world.spawnEntityInWorld(entityfireworkrocket);
+			if (!entityplayer.capabilities.isCreativeMode) {
+				--itemstack.stackSize;
+			}
+
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/**+
 	 * allows items to add custom lines of information to the

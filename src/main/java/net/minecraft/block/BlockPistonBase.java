@@ -74,6 +74,27 @@ public class BlockPistonBase extends Block {
 			EntityLivingBase entitylivingbase, ItemStack var5) {
 		world.setBlockState(blockpos,
 				iblockstate.withProperty(FACING, getFacingFromEntity(world, blockpos, entitylivingbase)), 2);
+		if (!world.isRemote) {
+			this.checkForMove(world, blockpos, iblockstate);
+		}
+
+	}
+
+	/**+
+	 * Called when a neighboring block changes.
+	 */
+	public void onNeighborBlockChange(World world, BlockPos blockpos, IBlockState iblockstate, Block var4) {
+		if (!world.isRemote) {
+			this.checkForMove(world, blockpos, iblockstate);
+		}
+
+	}
+
+	public void onBlockAdded(World world, BlockPos blockpos, IBlockState iblockstate) {
+		if (!world.isRemote && world.getTileEntity(blockpos) == null) {
+			this.checkForMove(world, blockpos, iblockstate);
+		}
+
 	}
 
 	/**+
@@ -129,6 +150,18 @@ public class BlockPistonBase extends Block {
 	 */
 	public boolean onBlockEventReceived(World world, BlockPos blockpos, IBlockState iblockstate, int i, int j) {
 		EnumFacing enumfacing = (EnumFacing) iblockstate.getValue(FACING);
+		if (!world.isRemote) {
+			boolean flag = this.shouldBeExtended(world, blockpos, enumfacing);
+			if (flag && i == 1) {
+				world.setBlockState(blockpos, iblockstate.withProperty(EXTENDED, Boolean.valueOf(true)), 2);
+				return false;
+			}
+
+			if (!flag && i == 0) {
+				return false;
+			}
+		}
+
 		if (i == 0) {
 			if (!this.doMove(world, blockpos, enumfacing, true)) {
 				return false;

@@ -3,7 +3,6 @@ package net.minecraft.entity.monster;
 import java.util.Calendar;
 import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -11,8 +10,19 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIBreakDoor;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIMoveThroughVillage;
+import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.passive.EntityVillager;
@@ -22,6 +32,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
@@ -63,6 +74,7 @@ public class EntityZombie extends EntityMob {
 			.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
 	private static final AttributeModifier babySpeedBoostModifier = new AttributeModifier(babySpeedBoostUUID,
 			"Baby speed boost", 0.5D, 1);
+	private final EntityAIBreakDoor breakDoor = new EntityAIBreakDoor(this);
 	private int conversionTime;
 	private boolean isBreakDoorsTaskSet = false;
 	/**+
@@ -73,7 +85,25 @@ public class EntityZombie extends EntityMob {
 
 	public EntityZombie(World worldIn) {
 		super(worldIn);
+		((PathNavigateGround) this.getNavigator()).setBreakDoors(true);
+		this.tasks.addTask(0, new EntityAISwimming(this));
+		this.tasks.addTask(2, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
+		this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 1.0D));
+		this.tasks.addTask(7, new EntityAIWander(this, 1.0D));
+		this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+		this.tasks.addTask(8, new EntityAILookIdle(this));
+		this.applyEntityAI();
 		this.setSize(0.6F, 1.95F);
+	}
+
+	protected void applyEntityAI() {
+		this.tasks.addTask(4, new EntityAIAttackOnCollide(this, EntityVillager.class, 1.0D, true));
+		this.tasks.addTask(4, new EntityAIAttackOnCollide(this, EntityIronGolem.class, 1.0D, true));
+		this.tasks.addTask(6, new EntityAIMoveThroughVillage(this, 1.0D, false));
+		this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[] { EntityPigZombie.class }));
+		this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+		this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityVillager.class, false));
+		this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityIronGolem.class, true));
 	}
 
 	protected void applyEntityAttributes() {
@@ -110,6 +140,21 @@ public class EntityZombie extends EntityMob {
 	}
 
 	/**+
+	 * Sets or removes EntityAIBreakDoor task
+	 */
+	public void setBreakDoorsAItask(boolean par1) {
+		if (this.isBreakDoorsTaskSet != par1) {
+			this.isBreakDoorsTaskSet = par1;
+			if (par1) {
+				this.tasks.addTask(1, this.breakDoor);
+			} else {
+				this.tasks.removeTask(this.breakDoor);
+			}
+		}
+
+	}
+
+	/**+
 	 * If Animal, checks if the age timer is negative
 	 */
 	public boolean isChild() {
@@ -132,6 +177,14 @@ public class EntityZombie extends EntityMob {
 	 */
 	public void setChild(boolean childZombie) {
 		this.getDataWatcher().updateObject(12, Byte.valueOf((byte) (childZombie ? 1 : 0)));
+		if (this.worldObj != null && !this.worldObj.isRemote) {
+			IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+			iattributeinstance.removeModifier(babySpeedBoostModifier);
+			if (childZombie) {
+				iattributeinstance.applyModifier(babySpeedBoostModifier);
+			}
+		}
+
 		this.setChildSize(childZombie);
 	}
 
@@ -147,6 +200,43 @@ public class EntityZombie extends EntityMob {
 	 */
 	public void setVillager(boolean villager) {
 		this.getDataWatcher().updateObject(13, Byte.valueOf((byte) (villager ? 1 : 0)));
+	}
+
+	/**+
+	 * Called frequently so the entity can update its state every
+	 * tick as required. For example, zombies and skeletons use this
+	 * to react to sunlight and start to burn.
+	 */
+	public void onLivingUpdate() {
+		if (this.worldObj.isDaytime() && !this.worldObj.isRemote && !this.isChild()) {
+			float f = this.getBrightness(1.0F);
+			BlockPos blockpos = new BlockPos(this.posX, (double) Math.round(this.posY), this.posZ);
+			if (f > 0.5F && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.worldObj.canSeeSky(blockpos)) {
+				boolean flag = true;
+				ItemStack itemstack = this.getEquipmentInSlot(4);
+				if (itemstack != null) {
+					if (itemstack.isItemStackDamageable()) {
+						itemstack.setItemDamage(itemstack.getItemDamage() + this.rand.nextInt(2));
+						if (itemstack.getItemDamage() >= itemstack.getMaxDamage()) {
+							this.renderBrokenItemStack(itemstack);
+							this.setCurrentItemOrArmor(4, (ItemStack) null);
+						}
+					}
+
+					flag = false;
+				}
+
+				if (flag) {
+					this.setFire(8);
+				}
+			}
+		}
+
+		if (this.isRiding() && this.getAttackTarget() != null && this.ridingEntity instanceof EntityChicken) {
+			((EntityLiving) this.ridingEntity).getNavigator().setPath(this.getNavigator().getPath(), 1.5D);
+		}
+
+		super.onLivingUpdate();
 	}
 
 	/**+
@@ -203,6 +293,21 @@ public class EntityZombie extends EntityMob {
 		} else {
 			return false;
 		}
+	}
+
+	/**+
+	 * Called to update the entity's position/logic.
+	 */
+	public void onUpdate() {
+		if (!this.worldObj.isRemote && this.isConverting()) {
+			int i = this.getConversionTimeBoost();
+			this.conversionTime -= i;
+			if (this.conversionTime <= 0) {
+				this.convertToVillager();
+			}
+		}
+
+		super.onUpdate();
 	}
 
 	public boolean attackEntityAsMob(Entity entity) {
@@ -322,6 +427,8 @@ public class EntityZombie extends EntityMob {
 		if (nbttagcompound.hasKey("ConversionTime", 99) && nbttagcompound.getInteger("ConversionTime") > -1) {
 			this.startConversion(nbttagcompound.getInteger("ConversionTime"));
 		}
+
+		this.setBreakDoorsAItask(nbttagcompound.getBoolean("CanBreakDoors"));
 	}
 
 	/**+
@@ -417,6 +524,7 @@ public class EntityZombie extends EntityMob {
 			}
 		}
 
+		this.setBreakDoorsAItask(this.rand.nextFloat() < f * 0.1F);
 		this.setEquipmentBasedOnDifficulty(difficultyinstance);
 		this.setEnchantmentBasedOnDifficulty(difficultyinstance);
 		if (this.getEquipmentInSlot(4) == null) {
@@ -441,6 +549,7 @@ public class EntityZombie extends EntityMob {
 					new AttributeModifier("Leader zombie bonus", this.rand.nextDouble() * 0.25D + 0.5D, 0));
 			this.getEntityAttribute(SharedMonsterAttributes.maxHealth).applyModifier(
 					new AttributeModifier("Leader zombie bonus", this.rand.nextDouble() * 3.0D + 1.0D, 2));
+			this.setBreakDoorsAItask(true);
 		}
 
 		return ientitylivingdata;
@@ -460,6 +569,10 @@ public class EntityZombie extends EntityMob {
 
 			if (itemstack.stackSize <= 0) {
 				entityplayer.inventory.setInventorySlotContents(entityplayer.inventory.currentItem, (ItemStack) null);
+			}
+
+			if (!this.worldObj.isRemote) {
+				this.startConversion(this.rand.nextInt(2401) + 3600);
 			}
 
 			return true;

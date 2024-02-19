@@ -2,7 +2,6 @@ package net.minecraft.world.biome;
 
 import java.util.Arrays;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockSand;
@@ -12,8 +11,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
+import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -53,7 +54,20 @@ public class BiomeGenMesa extends BiomeGenBase {
 		this.spawnableCreatureList.clear();
 		this.topBlock = Blocks.sand.getDefaultState().withProperty(BlockSand.VARIANT, BlockSand.EnumType.RED_SAND);
 		this.fillerBlock = Blocks.stained_hardened_clay.getDefaultState();
+		this.theBiomeDecorator.treesPerChunk = -999;
+		this.theBiomeDecorator.deadBushPerChunk = 20;
+		this.theBiomeDecorator.reedsPerChunk = 3;
+		this.theBiomeDecorator.cactiPerChunk = 5;
+		this.theBiomeDecorator.flowersPerChunk = 0;
 		this.spawnableCreatureList.clear();
+		if (parFlag2) {
+			this.theBiomeDecorator.treesPerChunk = 5;
+		}
+
+	}
+
+	public WorldGenAbstractTree genBigTreeChance(EaglercraftRandom var1) {
+		return this.worldGeneratorTrees;
 	}
 
 	public int getFoliageColorAtPos(BlockPos var1) {
@@ -62,6 +76,10 @@ public class BiomeGenMesa extends BiomeGenBase {
 
 	public int getGrassColorAtPos(BlockPos var1) {
 		return 9470285;
+	}
+
+	public void decorate(World world, EaglercraftRandom random, BlockPos blockpos) {
+		super.decorate(world, random, blockpos);
 	}
 
 	public void genTerrainBlocks(World world, EaglercraftRandom random, ChunkPrimer chunkprimer, int i, int j,

@@ -2,11 +2,8 @@ package net.minecraft.inventory;
 
 import java.util.Iterator;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-
-import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
-import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.minecraft.block.BlockAnvil;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,6 +13,9 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.StringUtils;
+import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
+import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -96,6 +96,22 @@ public class ContainerRepair extends Container {
 				}
 
 				ContainerRepair.this.maximumCost = 0;
+				IBlockState iblockstate = worldIn.getBlockState(blockPosIn);
+				if (!entityplayer.capabilities.isCreativeMode && !worldIn.isRemote
+						&& iblockstate.getBlock() == Blocks.anvil && entityplayer.getRNG().nextFloat() < 0.12F) {
+					int l = ((Integer) iblockstate.getValue(BlockAnvil.DAMAGE)).intValue();
+					++l;
+					if (l > 2) {
+						worldIn.setBlockToAir(blockPosIn);
+						worldIn.playAuxSFX(1020, blockPosIn, 0);
+					} else {
+						worldIn.setBlockState(blockPosIn,
+								iblockstate.withProperty(BlockAnvil.DAMAGE, Integer.valueOf(l)), 2);
+						worldIn.playAuxSFX(1021, blockPosIn, 0);
+					}
+				} else if (!worldIn.isRemote) {
+					worldIn.playAuxSFX(1021, blockPosIn, 0);
+				}
 
 			}
 		});
@@ -320,6 +336,22 @@ public class ContainerRepair extends Container {
 			this.maximumCost = j;
 		}
 
+	}
+
+	/**+
+	 * Called when the container is closed.
+	 */
+	public void onContainerClosed(EntityPlayer entityplayer) {
+		super.onContainerClosed(entityplayer);
+		if (!this.theWorld.isRemote) {
+			for (int i = 0; i < this.inputSlots.getSizeInventory(); ++i) {
+				ItemStack itemstack = this.inputSlots.removeStackFromSlot(i);
+				if (itemstack != null) {
+					entityplayer.dropPlayerItemWithRandomChoice(itemstack, false);
+				}
+			}
+
+		}
 	}
 
 	public boolean canInteractWith(EntityPlayer entityplayer) {

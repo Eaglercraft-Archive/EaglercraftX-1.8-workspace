@@ -9,7 +9,13 @@ import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -217,6 +223,142 @@ public class BlockVine extends Block {
 	}
 
 	/**+
+	 * Called when a neighboring block changes.
+	 */
+	public void onNeighborBlockChange(World world, BlockPos blockpos, IBlockState iblockstate, Block var4) {
+		if (!world.isRemote && !this.recheckGrownSides(world, blockpos, iblockstate)) {
+			this.dropBlockAsItem(world, blockpos, iblockstate, 0);
+			world.setBlockToAir(blockpos);
+		}
+
+	}
+
+	public void updateTick(World world, BlockPos blockpos, IBlockState iblockstate, EaglercraftRandom random) {
+		if (!world.isRemote) {
+			if (world.rand.nextInt(4) == 0) {
+				byte b0 = 4;
+				int i = 5;
+				boolean flag = false;
+
+				label62: for (int j = -b0; j <= b0; ++j) {
+					for (int k = -b0; k <= b0; ++k) {
+						for (int l = -1; l <= 1; ++l) {
+							if (world.getBlockState(blockpos.add(j, l, k)).getBlock() == this) {
+								--i;
+								if (i <= 0) {
+									flag = true;
+									break label62;
+								}
+							}
+						}
+					}
+				}
+
+				EnumFacing enumfacing1 = EnumFacing.random(random);
+				BlockPos blockpos2 = blockpos.up();
+				if (enumfacing1 == EnumFacing.UP && blockpos.getY() < 255 && world.isAirBlock(blockpos2)) {
+					if (!flag) {
+						IBlockState iblockstate3 = iblockstate;
+
+						for (EnumFacing enumfacing3 : EnumFacing.Plane.HORIZONTAL) {
+							if (random.nextBoolean() || !this
+									.canPlaceOn(world.getBlockState(blockpos2.offset(enumfacing3)).getBlock())) {
+								iblockstate3 = iblockstate3.withProperty(getPropertyFor(enumfacing3),
+										Boolean.valueOf(false));
+							}
+						}
+
+						if (((Boolean) iblockstate3.getValue(NORTH)).booleanValue()
+								|| ((Boolean) iblockstate3.getValue(EAST)).booleanValue()
+								|| ((Boolean) iblockstate3.getValue(SOUTH)).booleanValue()
+								|| ((Boolean) iblockstate3.getValue(WEST)).booleanValue()) {
+							world.setBlockState(blockpos2, iblockstate3, 2);
+						}
+
+					}
+				} else if (enumfacing1.getAxis().isHorizontal()
+						&& !((Boolean) iblockstate.getValue(getPropertyFor(enumfacing1))).booleanValue()) {
+					if (!flag) {
+						BlockPos blockpos4 = blockpos.offset(enumfacing1);
+						Block block1 = world.getBlockState(blockpos4).getBlock();
+						if (block1.blockMaterial == Material.air) {
+							EnumFacing enumfacing2 = enumfacing1.rotateY();
+							EnumFacing enumfacing4 = enumfacing1.rotateYCCW();
+							boolean flag1 = ((Boolean) iblockstate.getValue(getPropertyFor(enumfacing2)))
+									.booleanValue();
+							boolean flag2 = ((Boolean) iblockstate.getValue(getPropertyFor(enumfacing4)))
+									.booleanValue();
+							BlockPos blockpos5 = blockpos4.offset(enumfacing2);
+							BlockPos blockpos1 = blockpos4.offset(enumfacing4);
+							if (flag1 && this.canPlaceOn(world.getBlockState(blockpos5).getBlock())) {
+								world.setBlockState(blockpos4, this.getDefaultState()
+										.withProperty(getPropertyFor(enumfacing2), Boolean.valueOf(true)), 2);
+							} else if (flag2 && this.canPlaceOn(world.getBlockState(blockpos1).getBlock())) {
+								world.setBlockState(blockpos4, this.getDefaultState()
+										.withProperty(getPropertyFor(enumfacing4), Boolean.valueOf(true)), 2);
+							} else if (flag1 && world.isAirBlock(blockpos5)
+									&& this.canPlaceOn(world.getBlockState(blockpos.offset(enumfacing2)).getBlock())) {
+								world.setBlockState(blockpos5, this.getDefaultState().withProperty(
+										getPropertyFor(enumfacing1.getOpposite()), Boolean.valueOf(true)), 2);
+							} else if (flag2 && world.isAirBlock(blockpos1)
+									&& this.canPlaceOn(world.getBlockState(blockpos.offset(enumfacing4)).getBlock())) {
+								world.setBlockState(blockpos1, this.getDefaultState().withProperty(
+										getPropertyFor(enumfacing1.getOpposite()), Boolean.valueOf(true)), 2);
+							} else if (this.canPlaceOn(world.getBlockState(blockpos4.up()).getBlock())) {
+								world.setBlockState(blockpos4, this.getDefaultState(), 2);
+							}
+						} else if (block1.blockMaterial.isOpaque() && block1.isFullCube()) {
+							world.setBlockState(blockpos,
+									iblockstate.withProperty(getPropertyFor(enumfacing1), Boolean.valueOf(true)), 2);
+						}
+
+					}
+				} else {
+					if (blockpos.getY() > 1) {
+						BlockPos blockpos3 = blockpos.down();
+						IBlockState iblockstate1 = world.getBlockState(blockpos3);
+						Block block = iblockstate1.getBlock();
+						if (block.blockMaterial == Material.air) {
+							IBlockState iblockstate2 = iblockstate;
+
+							for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+								if (random.nextBoolean()) {
+									iblockstate2 = iblockstate2.withProperty(getPropertyFor(enumfacing),
+											Boolean.valueOf(false));
+								}
+							}
+
+							if (((Boolean) iblockstate2.getValue(NORTH)).booleanValue()
+									|| ((Boolean) iblockstate2.getValue(EAST)).booleanValue()
+									|| ((Boolean) iblockstate2.getValue(SOUTH)).booleanValue()
+									|| ((Boolean) iblockstate2.getValue(WEST)).booleanValue()) {
+								world.setBlockState(blockpos3, iblockstate2, 2);
+							}
+						} else if (block == this) {
+							IBlockState iblockstate4 = iblockstate1;
+
+							for (EnumFacing enumfacing5 : EnumFacing.Plane.HORIZONTAL) {
+								PropertyBool propertybool = getPropertyFor(enumfacing5);
+								if (random.nextBoolean()
+										&& ((Boolean) iblockstate.getValue(propertybool)).booleanValue()) {
+									iblockstate4 = iblockstate4.withProperty(propertybool, Boolean.valueOf(true));
+								}
+							}
+
+							if (((Boolean) iblockstate4.getValue(NORTH)).booleanValue()
+									|| ((Boolean) iblockstate4.getValue(EAST)).booleanValue()
+									|| ((Boolean) iblockstate4.getValue(SOUTH)).booleanValue()
+									|| ((Boolean) iblockstate4.getValue(WEST)).booleanValue()) {
+								world.setBlockState(blockpos3, iblockstate4, 2);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**+
 	 * Called by ItemBlocks just before a block is actually set in
 	 * the world, to allow for adjustments to the IBlockstate
 	 */
@@ -242,6 +384,18 @@ public class BlockVine extends Block {
 	 */
 	public int quantityDropped(EaglercraftRandom var1) {
 		return 0;
+	}
+
+	public void harvestBlock(World world, EntityPlayer entityplayer, BlockPos blockpos, IBlockState iblockstate,
+			TileEntity tileentity) {
+		if (!world.isRemote && entityplayer.getCurrentEquippedItem() != null
+				&& entityplayer.getCurrentEquippedItem().getItem() == Items.shears) {
+			entityplayer.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
+			spawnAsEntity(world, blockpos, new ItemStack(Blocks.vine, 1, 0));
+		} else {
+			super.harvestBlock(world, entityplayer, blockpos, iblockstate, tileentity);
+		}
+
 	}
 
 	public EnumWorldBlockLayer getBlockLayer() {

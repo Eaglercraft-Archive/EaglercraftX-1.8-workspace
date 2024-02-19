@@ -14,6 +14,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
@@ -146,6 +147,26 @@ public class BlockStem extends BlockBush implements IGrowable {
 				+ 2) / 16.0F);
 		float f = 0.125F;
 		this.setBlockBounds(0.5F - f, 0.0F, 0.5F - f, 0.5F + f, (float) this.maxY, 0.5F + f);
+	}
+
+	/**+
+	 * Spawns this Block's drops into the World as EntityItems.
+	 */
+	public void dropBlockAsItemWithChance(World world, BlockPos blockpos, IBlockState iblockstate, float f, int i) {
+		super.dropBlockAsItemWithChance(world, blockpos, iblockstate, f, i);
+		if (!world.isRemote) {
+			Item item = this.getSeedItem();
+			if (item != null) {
+				int j = ((Integer) iblockstate.getValue(AGE)).intValue();
+
+				for (int k = 0; k < 3; ++k) {
+					if (world.rand.nextInt(15) <= j) {
+						spawnAsEntity(world, blockpos, new ItemStack(item));
+					}
+				}
+
+			}
+		}
 	}
 
 	protected Item getSeedItem() {
