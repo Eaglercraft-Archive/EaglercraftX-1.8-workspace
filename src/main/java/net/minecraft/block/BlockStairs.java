@@ -587,14 +587,15 @@ public class BlockStairs extends Block {
 			}
 		}
 
-		for (int k : aint) {
-			amovingobjectposition[k] = null;
+		for (int l = 0; l < aint.length; ++l) {
+			amovingobjectposition[aint[l]] = null;
 		}
 
 		MovingObjectPosition movingobjectposition1 = null;
 		double d1 = 0.0D;
 
-		for (MovingObjectPosition movingobjectposition : amovingobjectposition) {
+		for (int l = 0; l < amovingobjectposition.length; ++l) {
+			MovingObjectPosition movingobjectposition = amovingobjectposition[l];
 			if (movingobjectposition != null) {
 				double d0 = movingobjectposition.hitVec.squareDistanceTo(vec31);
 				if (d0 > d1) {

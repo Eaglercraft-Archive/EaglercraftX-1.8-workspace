@@ -7,9 +7,6 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
-import net.minecraft.entity.ai.EntityAITarget;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
@@ -36,7 +33,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class EntityAIFindEntityNearest extends EntityAIBase {
-
 	private static final Logger field_179444_a = LogManager.getLogger();
 	private EntityLiving field_179442_b;
 	private final Predicate<EntityLivingBase> field_179443_c;

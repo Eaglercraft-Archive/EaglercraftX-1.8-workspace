@@ -10,6 +10,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
+import java.util.List;
+
 import org.apache.commons.lang3.Validate;
 
 /**+
@@ -140,9 +142,9 @@ public abstract class EntityHanging extends Entity {
 				}
 			}
 
-			for (Entity entity : this.worldObj.getEntitiesWithinAABBExcludingEntity(this,
-					this.getEntityBoundingBox())) {
-				if (entity instanceof EntityHanging) {
+			List<Entity> lst = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox());
+			for (int k = 0, l = lst.size(); k < l; ++k) {
+				if (lst.get(k) instanceof EntityHanging) {
 					return false;
 				}
 			}

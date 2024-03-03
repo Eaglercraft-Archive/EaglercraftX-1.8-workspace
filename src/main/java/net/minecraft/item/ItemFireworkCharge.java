@@ -46,7 +46,8 @@ public class ItemFireworkCharge extends Item {
 					int k = 0;
 					int l = 0;
 
-					for (int i1 : aint) {
+					for (int m = 0; m < aint.length; ++m) {
+						int i1 = aint[m];
 						j += (i1 & 16711680) >> 16;
 						k += (i1 & '\uff00') >> 8;
 						l += (i1 & 255) >> 0;
@@ -99,7 +100,8 @@ public class ItemFireworkCharge extends Item {
 			boolean flag = true;
 			String s = "";
 
-			for (int i : aint) {
+			for (int m = 0; m < aint.length; ++m) {
+				int i = aint[m];
 				if (!flag) {
 					s = s + ", ";
 				}
@@ -129,7 +131,8 @@ public class ItemFireworkCharge extends Item {
 			boolean flag2 = true;
 			String s1 = StatCollector.translateToLocal("item.fireworksCharge.fadeTo") + " ";
 
-			for (int l : aint1) {
+			for (int m = 0; m < aint1.length; ++m) {
+				int l = aint1[m];
 				if (!flag2) {
 					s1 = s1 + ", ";
 				}

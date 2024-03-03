@@ -83,7 +83,9 @@ public class ItemModelGenerator {
 		float f1 = (float) parTextureAtlasSprite.getIconHeight();
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (ItemModelGenerator.Span itemmodelgenerator$span : this.func_178393_a(parTextureAtlasSprite)) {
+		List<ItemModelGenerator.Span> lst = this.func_178393_a(parTextureAtlasSprite);
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			ItemModelGenerator.Span itemmodelgenerator$span = lst.get(i);
 			float f2 = 0.0F;
 			float f3 = 0.0F;
 			float f4 = 0.0F;
@@ -217,7 +219,8 @@ public class ItemModelGenerator {
 			int parInt1, int parInt2) {
 		ItemModelGenerator.Span itemmodelgenerator$span = null;
 
-		for (ItemModelGenerator.Span itemmodelgenerator$span1 : parList) {
+		for (int j = 0, l = parList.size(); j < l; ++j) {
+			ItemModelGenerator.Span itemmodelgenerator$span1 = parList.get(j);
 			if (itemmodelgenerator$span1.func_178383_a() == parSpanFacing) {
 				int i = parSpanFacing.func_178369_d() ? parInt2 : parInt1;
 				if (itemmodelgenerator$span1.func_178381_d() == i) {

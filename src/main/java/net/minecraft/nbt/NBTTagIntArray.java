@@ -70,8 +70,8 @@ public class NBTTagIntArray extends NBTBase {
 	public String toString() {
 		String s = "[";
 
-		for (int i : this.intArray) {
-			s = s + i + ",";
+		for (int i = 0; i < this.intArray.length; ++i) {
+			s = s + this.intArray[i] + ",";
 		}
 
 		return s + "]";

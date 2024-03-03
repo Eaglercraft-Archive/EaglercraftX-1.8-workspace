@@ -5,8 +5,6 @@ import net.lax1dude.eaglercraft.v1_8.internal.vfs2.VFile2;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
-import net.minecraft.world.storage.IPlayerFileData;
-import net.minecraft.world.storage.WorldInfo;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.

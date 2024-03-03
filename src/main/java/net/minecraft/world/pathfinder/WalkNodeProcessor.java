@@ -13,7 +13,6 @@ import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.pathfinder.NodeProcessor;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -36,7 +35,6 @@ import net.minecraft.world.pathfinder.NodeProcessor;
  * 
  */
 public class WalkNodeProcessor extends NodeProcessor {
-
 	private boolean canEnterDoors;
 	private boolean canBreakDoors;
 	private boolean avoidsWater;

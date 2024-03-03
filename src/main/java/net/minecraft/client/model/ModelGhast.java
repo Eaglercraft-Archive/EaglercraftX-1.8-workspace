@@ -74,8 +74,8 @@ public class ModelGhast extends ModelBase {
 		GlStateManager.translate(0.0F, 0.6F, 0.0F);
 		this.body.render(f5);
 
-		for (ModelRenderer modelrenderer : this.tentacles) {
-			modelrenderer.render(f5);
+		for (int i = 0; i < this.tentacles.length; ++i) {
+			this.tentacles[i].render(f5);
 		}
 
 		GlStateManager.popMatrix();

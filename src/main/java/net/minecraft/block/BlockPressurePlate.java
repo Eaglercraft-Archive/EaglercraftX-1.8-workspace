@@ -66,7 +66,8 @@ public class BlockPressurePlate extends BlockBasePressurePlate {
 		}
 
 		if (!list.isEmpty()) {
-			for (Entity entity : list) {
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				Entity entity = list.get(i);
 				if (!entity.doesEntityNotTriggerPressurePlate()) {
 					return 15;
 				}

@@ -6,7 +6,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -29,11 +28,12 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  * 
  */
 public class WorldGenGlowStone2 extends WorldGenerator {
-
 	public boolean generate(World world, EaglercraftRandom random, BlockPos blockpos) {
+		BlockPos tmp;
 		if (!world.isAirBlock(blockpos)) {
 			return false;
-		} else if (world.getBlockState(blockpos.up()).getBlock() != Blocks.netherrack) {
+		} else if (world.getBlockState(blockpos.offsetEvenFaster(EnumFacing.UP, tmp = new BlockPos(0, 0, 0)))
+				.getBlock() != Blocks.netherrack) {
 			return false;
 		} else {
 			world.setBlockState(blockpos, Blocks.glowstone.getDefaultState(), 2);
@@ -44,8 +44,10 @@ public class WorldGenGlowStone2 extends WorldGenerator {
 				if (world.getBlockState(blockpos1).getBlock().getMaterial() == Material.air) {
 					int j = 0;
 
-					for (EnumFacing enumfacing : EnumFacing.values()) {
-						if (world.getBlockState(blockpos1.offset(enumfacing)).getBlock() == Blocks.glowstone) {
+					EnumFacing[] facings = EnumFacing._VALUES;
+					for (int k = 0; k < facings.length; ++k) {
+						if (world.getBlockState(blockpos1.offsetEvenFaster(facings[k], tmp))
+								.getBlock() == Blocks.glowstone) {
 							++j;
 						}
 

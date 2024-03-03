@@ -50,7 +50,8 @@ public class GuiPageButtonList extends GuiListExtended {
 	}
 
 	private void func_178069_s() {
-		for (GuiPageButtonList.GuiListEntry[] aguipagebuttonlist$guilistentry : this.field_178078_x) {
+		for (int n = 0; n < this.field_178078_x.length; ++n) {
+			GuiPageButtonList.GuiListEntry[] aguipagebuttonlist$guilistentry = this.field_178078_x[n];
 			for (int i = 0; i < aguipagebuttonlist$guilistentry.length; i += 2) {
 				GuiPageButtonList.GuiListEntry guipagebuttonlist$guilistentry = aguipagebuttonlist$guilistentry[i];
 				GuiPageButtonList.GuiListEntry guipagebuttonlist$guilistentry1 = i < aguipagebuttonlist$guilistentry.length
@@ -137,17 +138,18 @@ public class GuiPageButtonList extends GuiListExtended {
 	}
 
 	private void func_178060_e(int parInt1, int parInt2) {
-		for (GuiPageButtonList.GuiListEntry guipagebuttonlist$guilistentry : this.field_178078_x[parInt1]) {
-			if (guipagebuttonlist$guilistentry != null) {
-				this.func_178066_a((Gui) this.field_178073_v.lookup(guipagebuttonlist$guilistentry.func_178935_b()),
-						false);
+
+		GuiListEntry[] etr = this.field_178078_x[parInt1];
+		for (int i = 0; i < etr.length; ++i) {
+			if (etr[i] != null) {
+				this.func_178066_a((Gui) this.field_178073_v.lookup(etr[i].func_178935_b()), false);
 			}
 		}
 
-		for (GuiPageButtonList.GuiListEntry guipagebuttonlist$guilistentry1 : this.field_178078_x[parInt2]) {
-			if (guipagebuttonlist$guilistentry1 != null) {
-				this.func_178066_a((Gui) this.field_178073_v.lookup(guipagebuttonlist$guilistentry1.func_178935_b()),
-						true);
+		etr = this.field_178078_x[parInt2];
+		for (int i = 0; i < etr.length; ++i) {
+			if (etr[i] != null) {
+				this.func_178066_a((Gui) this.field_178073_v.lookup(etr[i].func_178935_b()), true);
 			}
 		}
 
@@ -181,7 +183,8 @@ public class GuiPageButtonList extends GuiListExtended {
 	}
 
 	public void func_181155_a(boolean parFlag) {
-		for (GuiPageButtonList.GuiEntry guipagebuttonlist$guientry : this.field_178074_u) {
+		for (int i = 0, l = this.field_178074_u.size(); i < l; ++i) {
+			GuiPageButtonList.GuiEntry guipagebuttonlist$guientry = this.field_178074_u.get(i);
 			if (guipagebuttonlist$guientry.field_178029_b instanceof GuiButton) {
 				((GuiButton) guipagebuttonlist$guientry.field_178029_b).enabled = parFlag;
 			}
@@ -290,8 +293,8 @@ public class GuiPageButtonList extends GuiListExtended {
 				int i = this.field_178072_w.indexOf(this.field_178075_A);
 				int j = i;
 
-				for (String s1 : astring) {
-					((GuiTextField) this.field_178072_w.get(j)).setText(s1);
+				for (int k = 0; k < astring.length; ++k) {
+					((GuiTextField) this.field_178072_w.get(j)).setText(astring[k]);
 					if (j == this.field_178072_w.size() - 1) {
 						j = 0;
 					} else {

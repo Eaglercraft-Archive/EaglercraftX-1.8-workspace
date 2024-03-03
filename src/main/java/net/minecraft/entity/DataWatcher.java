@@ -167,8 +167,8 @@ public class DataWatcher {
 	public static void writeWatchedListToPacketBuffer(List<DataWatcher.WatchableObject> objectsList,
 			PacketBuffer buffer) throws IOException {
 		if (objectsList != null) {
-			for (DataWatcher.WatchableObject datawatcher$watchableobject : objectsList) {
-				writeWatchableObjectToPacketBuffer(buffer, datawatcher$watchableobject);
+			for (int i = 0, l = objectsList.size(); i < l; ++i) {
+				writeWatchableObjectToPacketBuffer(buffer, objectsList.get(i));
 			}
 		}
 
@@ -316,7 +316,8 @@ public class DataWatcher {
 
 	public void updateWatchedObjectsFromList(List<DataWatcher.WatchableObject> parList) {
 
-		for (DataWatcher.WatchableObject datawatcher$watchableobject : parList) {
+		for (int i = 0, l = parList.size(); i < l; ++i) {
+			DataWatcher.WatchableObject datawatcher$watchableobject = parList.get(i);
 			DataWatcher.WatchableObject datawatcher$watchableobject1 = (DataWatcher.WatchableObject) this.watchedObjects
 					.get(Integer.valueOf(datawatcher$watchableobject.getDataValueId()));
 			if (datawatcher$watchableobject1 != null) {

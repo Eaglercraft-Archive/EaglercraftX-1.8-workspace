@@ -43,7 +43,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable {
-
 	private static final Logger logger = LogManager.getLogger();
 	private static final EaglercraftRandom RANDOM = new EaglercraftRandom();
 	private final byte[] verifyToken = new byte[4];

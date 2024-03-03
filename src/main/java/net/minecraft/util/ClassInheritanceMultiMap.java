@@ -52,9 +52,10 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 	protected void createLookup(Class<?> clazz) {
 		field_181158_a.add(clazz);
 
-		for (Object object : this.field_181745_e) {
+		for (int i = 0, l = this.field_181745_e.size(); i < l; ++i) {
+			T object = this.field_181745_e.get(i);
 			if (clazz.isAssignableFrom(object.getClass())) {
-				this.func_181743_a((T) object, clazz);
+				this.func_181743_a(object, clazz);
 			}
 		}
 

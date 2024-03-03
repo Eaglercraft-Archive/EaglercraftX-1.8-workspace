@@ -11,10 +11,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.StructureComponent;
-import net.minecraft.world.gen.structure.StructureStart;
-import net.minecraft.world.gen.structure.StructureStrongholdPieces;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -37,7 +33,6 @@ import net.minecraft.world.gen.structure.StructureStrongholdPieces;
  * 
  */
 public class MapGenStronghold extends MapGenStructure {
-
 	private List<BiomeGenBase> field_151546_e;
 	private boolean ranBiomeCheck;
 	private ChunkCoordIntPair[] structureCoords;
@@ -50,7 +45,9 @@ public class MapGenStronghold extends MapGenStructure {
 		this.field_82672_i = 3;
 		this.field_151546_e = Lists.newArrayList();
 
-		for (BiomeGenBase biomegenbase : BiomeGenBase.getBiomeGenArray()) {
+		BiomeGenBase[] biomes = BiomeGenBase.getBiomeGenArray();
+		for (int i = 0; i < biomes.length; ++i) {
+			BiomeGenBase biomegenbase = biomes[i];
 			if (biomegenbase != null && biomegenbase.minHeight > 0.0F) {
 				this.field_151546_e.add(biomegenbase);
 			}
@@ -109,7 +106,8 @@ public class MapGenStronghold extends MapGenStructure {
 			this.ranBiomeCheck = true;
 		}
 
-		for (ChunkCoordIntPair chunkcoordintpair : this.structureCoords) {
+		for (int l = 0; l < this.structureCoords.length; ++l) {
+			ChunkCoordIntPair chunkcoordintpair = this.structureCoords[l];
 			if (i == chunkcoordintpair.chunkXPos && j == chunkcoordintpair.chunkZPos) {
 				return true;
 			}
@@ -126,7 +124,8 @@ public class MapGenStronghold extends MapGenStructure {
 	protected List<BlockPos> getCoordList() {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (ChunkCoordIntPair chunkcoordintpair : this.structureCoords) {
+		for (int l = 0; l < this.structureCoords.length; ++l) {
+			ChunkCoordIntPair chunkcoordintpair = this.structureCoords[l];
 			if (chunkcoordintpair != null) {
 				arraylist.add(chunkcoordintpair.getCenterBlock(64));
 			}

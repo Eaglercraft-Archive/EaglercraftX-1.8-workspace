@@ -1,5 +1,7 @@
 package net.minecraft.entity.monster;
 
+import java.util.List;
+
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -397,13 +399,15 @@ public class EntityGuardian extends EntityMob {
 			if ((this.ticksExisted + this.getEntityId()) % 1200 == 0) {
 				Potion potion = Potion.digSlowdown;
 
-				for (EntityPlayerMP entityplayermp : this.worldObj.getPlayers(EntityPlayerMP.class,
+				List<EntityPlayerMP> lst = this.worldObj.getPlayers(EntityPlayerMP.class,
 						new Predicate<EntityPlayerMP>() {
 							public boolean apply(EntityPlayerMP entityplayermp1) {
 								return EntityGuardian.this.getDistanceSqToEntity(entityplayermp1) < 2500.0D
 										&& entityplayermp1.theItemInWorldManager.survivalOrAdventure();
 							}
-						})) {
+						});
+				for (int i = 0, l = lst.size(); i < l; ++i) {
+					EntityPlayerMP entityplayermp = lst.get(i);
 					if (!entityplayermp.isPotionActive(potion)
 							|| entityplayermp.getActivePotionEffect(potion).getAmplifier() < 2
 							|| entityplayermp.getActivePotionEffect(potion).getDuration() < 1200) {

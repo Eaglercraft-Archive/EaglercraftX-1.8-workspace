@@ -1,6 +1,5 @@
 package net.minecraft.command;
 
-import net.minecraft.command.CommandResultStats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;

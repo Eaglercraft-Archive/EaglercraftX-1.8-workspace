@@ -1,6 +1,5 @@
 package net.minecraft.entity.ai;
 
-import net.minecraft.entity.ai.EntityAIWatchClosest2;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Items;
@@ -30,7 +29,6 @@ import net.minecraft.util.MathHelper;
  * 
  */
 public class EntityAIVillagerInteract extends EntityAIWatchClosest2 {
-
 	private int interactionDelay;
 	private EntityVillager villager;
 

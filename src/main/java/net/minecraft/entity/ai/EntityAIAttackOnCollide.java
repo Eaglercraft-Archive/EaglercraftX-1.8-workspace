@@ -3,7 +3,6 @@ package net.minecraft.entity.ai;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
@@ -29,7 +28,6 @@ import net.minecraft.world.World;
  * 
  */
 public class EntityAIAttackOnCollide extends EntityAIBase {
-
 	World worldObj;
 	protected EntityCreature attacker;
 	int attackTick;

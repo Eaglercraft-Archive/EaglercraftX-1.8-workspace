@@ -256,7 +256,8 @@ public class CommandScoreboard extends CommandBase {
 			String s = parArrayOfString[i];
 			ArrayList arraylist = Lists.newArrayList();
 
-			for (String s1 : (ArrayList<String>) arraylist1) {
+			for (int j = 0, l = arraylist1.size(); j < l; ++j) {
+				String s1 = (String) arraylist1.get(j);
 				parArrayOfString[i] = s1;
 
 				try {
@@ -517,7 +518,9 @@ public class CommandScoreboard extends CommandBase {
 			while (parInt1 < parArrayOfString.length) {
 				String s1 = parArrayOfString[parInt1++];
 				if (s1.startsWith("@")) {
-					for (Entity entity : func_175763_c(parICommandSender, s1)) {
+					List<Entity> lst = func_175763_c(parICommandSender, s1);
+					for (int i = 0, l = lst.size(); i < l; ++i) {
+						Entity entity = lst.get(i);
 						String s3 = getEntityName(parICommandSender, entity.getUniqueID().toString());
 						if (scoreboard.addPlayerToTeam(s3, s)) {
 							hashset.add(s3);
@@ -565,7 +568,9 @@ public class CommandScoreboard extends CommandBase {
 			while (parInt1 < parArrayOfString.length) {
 				String s = parArrayOfString[parInt1++];
 				if (s.startsWith("@")) {
-					for (Entity entity : func_175763_c(parICommandSender, s)) {
+					List<Entity> lst = func_175763_c(parICommandSender, s);
+					for (int i = 0, l = lst.size(); i < l; ++i) {
+						Entity entity = lst.get(i);
 						String s2 = getEntityName(parICommandSender, entity.getUniqueID().toString());
 						if (scoreboard.removePlayerFromTeams(s2)) {
 							hashset.add(s2);
@@ -601,14 +606,14 @@ public class CommandScoreboard extends CommandBase {
 		Scoreboard scoreboard = this.getScoreboard();
 		ScorePlayerTeam scoreplayerteam = this.getTeam(parArrayOfString[parInt1]);
 		if (scoreplayerteam != null) {
-			ArrayList arraylist = Lists.newArrayList(scoreplayerteam.getMembershipCollection());
+			ArrayList<String> arraylist = Lists.newArrayList(scoreplayerteam.getMembershipCollection());
 			parICommandSender.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, arraylist.size());
 			if (arraylist.isEmpty()) {
 				throw new CommandException("commands.scoreboard.teams.empty.alreadyEmpty",
 						new Object[] { scoreplayerteam.getRegisteredName() });
 			} else {
-				for (String s : (ArrayList<String>) arraylist) {
-					scoreboard.removePlayerFromTeam(s, scoreplayerteam);
+				for (int i = 0, l = arraylist.size(); i < l; ++i) {
+					scoreboard.removePlayerFromTeam(arraylist.get(i), scoreplayerteam);
 				}
 
 				notifyOperators(parICommandSender, this, "commands.scoreboard.teams.empty.success",

@@ -1,10 +1,6 @@
 package net.minecraft.command;
 
 import java.util.List;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandResultStats;
-import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S19PacketEntityStatus;
 import net.minecraft.server.MinecraftServer;
@@ -92,8 +88,9 @@ public class CommandGameRule extends CommandBase {
 		if ("reducedDebugInfo".equals(parString1)) {
 			int i = parGameRules.getBoolean(parString1) ? 22 : 23;
 
-			for (EntityPlayerMP entityplayermp : MinecraftServer.getServer().getConfigurationManager()
-					.func_181057_v()) {
+			List<EntityPlayerMP> lst = MinecraftServer.getServer().getConfigurationManager().func_181057_v();
+			for (int j = 0, l = lst.size(); j < l; ++j) {
+				EntityPlayerMP entityplayermp = lst.get(j);
 				entityplayermp.playerNetServerHandler.sendPacket(new S19PacketEntityStatus(entityplayermp, (byte) i));
 			}
 		}

@@ -3,7 +3,6 @@ package net.minecraft.entity.ai;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.ai.EntityAIMoveToBlock;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -33,7 +32,6 @@ import net.minecraft.world.World;
  * 
  */
 public class EntityAIHarvestFarmland extends EntityAIMoveToBlock {
-
 	private final EntityVillager theVillager;
 	private boolean hasFarmItem;
 	private boolean field_179503_e;

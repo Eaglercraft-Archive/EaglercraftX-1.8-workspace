@@ -13,8 +13,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.LongHashMap;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.WorldServer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -37,7 +35,6 @@ import net.minecraft.world.WorldServer;
  * 
  */
 public class Teleporter {
-
 	private final WorldServer worldServerInstance;
 	private final EaglercraftRandom random;
 	/**+

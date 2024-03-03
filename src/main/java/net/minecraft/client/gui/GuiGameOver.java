@@ -54,8 +54,8 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback {
 			}
 		}
 
-		for (GuiButton guibutton : this.buttonList) {
-			guibutton.enabled = false;
+		for (int i = 0, l = this.buttonList.size(); i < l; ++i) {
+			this.buttonList.get(i).enabled = false;
 		}
 
 	}
@@ -150,8 +150,8 @@ public class GuiGameOver extends GuiScreen implements GuiYesNoCallback {
 		super.updateScreen();
 		++this.enableButtonsTimer;
 		if (this.enableButtonsTimer == 20) {
-			for (GuiButton guibutton : this.buttonList) {
-				guibutton.enabled = true;
+			for (int i = 0, l = this.buttonList.size(); i < l; ++i) {
+				this.buttonList.get(i).enabled = true;
 			}
 		}
 

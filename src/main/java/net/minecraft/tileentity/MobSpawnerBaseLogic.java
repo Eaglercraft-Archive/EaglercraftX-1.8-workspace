@@ -301,9 +301,10 @@ public abstract class MobSpawnerBaseLogic {
 
 			if (this.getRandomEntity() != null || this.minecartToSpawn.size() > 0) {
 				NBTTagList nbttaglist = new NBTTagList();
-				if (this.minecartToSpawn.size() > 0) {
-					for (MobSpawnerBaseLogic.WeightedRandomMinecart mobspawnerbaselogic$weightedrandomminecart : this.minecartToSpawn) {
-						nbttaglist.appendTag(mobspawnerbaselogic$weightedrandomminecart.toNBT());
+				int l = this.minecartToSpawn.size();
+				if (l > 0) {
+					for (int i = 0; i < l; ++i) {
+						nbttaglist.appendTag(this.minecartToSpawn.get(i).toNBT());
 					}
 				} else {
 					nbttaglist.appendTag(this.getRandomEntity().toNBT());

@@ -111,8 +111,10 @@ public class ChunkCache implements IBlockAccess {
 			if (this.getBlockState(parBlockPos).getBlock().getUseNeighborBrightness()) {
 				int l = 0;
 
-				for (EnumFacing enumfacing : EnumFacing.values()) {
-					int k = this.getLightFor(pos, parBlockPos.offset(enumfacing));
+				EnumFacing[] facings = EnumFacing._VALUES;
+				BlockPos tmp = new BlockPos(0, 0, 0);
+				for (int i = 0; i < facings.length; ++i) {
+					int k = this.getLightFor(pos, parBlockPos.offsetEvenFaster(facings[i], tmp));
 					if (k > l) {
 						l = k;
 					}

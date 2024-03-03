@@ -21,7 +21,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
@@ -329,12 +328,12 @@ public class EntityPlayerMP extends EntityPlayer implements ICrafting {
 					this.playerNetServerHandler.sendPacket(new S26PacketMapChunkBulk(arraylist));
 				}
 
-				for (TileEntity tileentity : (ArrayList<TileEntity>) arraylist1) {
-					this.sendTileEntityUpdate(tileentity);
+				for (int i = 0, l = arraylist1.size(); i < l; ++i) {
+					this.sendTileEntityUpdate((TileEntity) arraylist1.get(i));
 				}
 
-				for (Chunk chunk1 : (ArrayList<Chunk>) arraylist) {
-					this.getServerForPlayer().getEntityTracker().func_85172_a(this, chunk1);
+				for (int i = 0, l = arraylist.size(); i < l; ++i) {
+					this.getServerForPlayer().getEntityTracker().func_85172_a(this, (Chunk) arraylist.get(i));
 				}
 			}
 		}

@@ -43,7 +43,7 @@ public class LayerSheepWool implements LayerRenderer<EntitySheep> {
 			if (entitysheep.hasCustomName() && "jeb_".equals(entitysheep.getCustomNameTag())) {
 				boolean flag = true;
 				int i = entitysheep.ticksExisted / 25 + entitysheep.getEntityId();
-				int j = EnumDyeColor.values().length;
+				int j = EnumDyeColor.META_LOOKUP.length;
 				int k = i % j;
 				int l = (i + 1) % j;
 				float f7 = ((float) (entitysheep.ticksExisted % 25) + f2) / 25.0F;

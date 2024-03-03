@@ -93,7 +93,8 @@ public class S34PacketMaps implements Packet<INetHandlerPlayClient> {
 		parPacketBuffer.writeByte(this.mapScale);
 		parPacketBuffer.writeVarIntToBuffer(this.mapVisiblePlayersVec4b.length);
 
-		for (Vec4b vec4b : this.mapVisiblePlayersVec4b) {
+		for (int i = 0; i < this.mapVisiblePlayersVec4b.length; ++i) {
+			Vec4b vec4b = this.mapVisiblePlayersVec4b[i];
 			parPacketBuffer.writeByte((vec4b.func_176110_a() & 15) << 4 | vec4b.func_176111_d() & 15);
 			parPacketBuffer.writeByte(vec4b.func_176112_b());
 			parPacketBuffer.writeByte(vec4b.func_176113_c());

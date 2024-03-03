@@ -159,7 +159,9 @@ public abstract class BlockLiquid extends Block {
 		Vec3 vec3 = new Vec3(0.0D, 0.0D, 0.0D);
 		int i = this.getEffectiveFlowDecay(worldIn, pos);
 
-		for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+		EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+		for (int m = 0; m < facings.length; ++m) {
+			EnumFacing enumfacing = facings[m];
 			BlockPos blockpos = pos.offset(enumfacing);
 			int j = this.getEffectiveFlowDecay(worldIn, blockpos);
 			if (j < 0) {
@@ -180,7 +182,8 @@ public abstract class BlockLiquid extends Block {
 		}
 
 		if (((Integer) worldIn.getBlockState(pos).getValue(LEVEL)).intValue() >= 8) {
-			for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL) {
+			for (int j = 0; j < facings.length; ++j) {
+				EnumFacing enumfacing1 = facings[j];
 				BlockPos blockpos1 = pos.offset(enumfacing1);
 				if (this.isBlockSolid(worldIn, blockpos1, enumfacing1)
 						|| this.isBlockSolid(worldIn, blockpos1.up(), enumfacing1)) {
@@ -295,7 +298,9 @@ public abstract class BlockLiquid extends Block {
 		if (this.blockMaterial == Material.lava) {
 			boolean flag = false;
 
-			for (EnumFacing enumfacing : EnumFacing.values()) {
+			EnumFacing[] facings = EnumFacing._VALUES;
+			for (int j = 0; j < facings.length; ++j) {
+				EnumFacing enumfacing = facings[j];
 				if (enumfacing != EnumFacing.DOWN
 						&& worldIn.getBlockState(pos.offset(enumfacing)).getBlock().getMaterial() == Material.water) {
 					flag = true;

@@ -98,7 +98,8 @@ public class S27PacketExplosion implements Packet<INetHandlerPlayClient> {
 		int j = (int) this.posY;
 		int k = (int) this.posZ;
 
-		for (BlockPos blockpos : this.affectedBlockPositions) {
+		for (int m = 0, n = this.affectedBlockPositions.size(); m < n; ++m) {
+			BlockPos blockpos = this.affectedBlockPositions.get(m);
 			int l = blockpos.getX() - i;
 			int i1 = blockpos.getY() - j;
 			int j1 = blockpos.getZ() - k;

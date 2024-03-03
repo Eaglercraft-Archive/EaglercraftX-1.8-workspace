@@ -1,6 +1,5 @@
 package net.minecraft.command.server;
 
-import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.netty.ByteBuf;
 
 import java.text.SimpleDateFormat;

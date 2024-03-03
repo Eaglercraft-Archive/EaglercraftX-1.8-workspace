@@ -49,8 +49,8 @@ public class SoundEventAccessorComposite implements ISoundEventAccessor<SoundPoo
 	public int getWeight() {
 		int i = 0;
 
-		for (ISoundEventAccessor isoundeventaccessor : this.soundPool) {
-			i += isoundeventaccessor.getWeight();
+		for (int j = 0, l = this.soundPool.size(); j < l; ++j) {
+			i += this.soundPool.get(j).getWeight();
 		}
 
 		return i;
@@ -61,7 +61,8 @@ public class SoundEventAccessorComposite implements ISoundEventAccessor<SoundPoo
 		if (!this.soundPool.isEmpty() && i != 0) {
 			int j = this.rnd.nextInt(i);
 
-			for (ISoundEventAccessor isoundeventaccessor : this.soundPool) {
+			for (int k = 0, l = this.soundPool.size(); k < l; ++k) {
+				ISoundEventAccessor isoundeventaccessor = this.soundPool.get(k);
 				j -= isoundeventaccessor.getWeight();
 				if (j < 0) {
 					SoundPoolEntry soundpoolentry = (SoundPoolEntry) isoundeventaccessor.cloneEntry();

@@ -118,7 +118,8 @@ public class TileEntityPiston extends TileEntity implements ITickable {
 			if (!list.isEmpty()) {
 				this.field_174933_k.addAll(list);
 
-				for (Entity entity : this.field_174933_k) {
+				for (int i = 0, l = this.field_174933_k.size(); i < l; ++i) {
+					Entity entity = this.field_174933_k.get(i);
 					if (this.pistonState.getBlock() == Blocks.slime_block && this.extending) {
 						switch (this.pistonFacing.getAxis()) {
 						case X:

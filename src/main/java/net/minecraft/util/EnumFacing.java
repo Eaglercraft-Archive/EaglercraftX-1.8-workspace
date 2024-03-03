@@ -36,6 +36,8 @@ public enum EnumFacing implements IStringSerializable {
 	WEST(4, 5, 1, "west", EnumFacing.AxisDirection.NEGATIVE, EnumFacing.Axis.X, new Vec3i(-1, 0, 0)),
 	EAST(5, 4, 3, "east", EnumFacing.AxisDirection.POSITIVE, EnumFacing.Axis.X, new Vec3i(1, 0, 0));
 
+	public static final EnumFacing[] _VALUES = values();
+
 	private final int index;
 	private final int opposite;
 	private final int horizontalIndex;
@@ -276,14 +278,16 @@ public enum EnumFacing implements IStringSerializable {
 	 * Choose a random Facing using the given Random
 	 */
 	public static EnumFacing random(EaglercraftRandom rand) {
-		return values()[rand.nextInt(values().length)];
+		return _VALUES[rand.nextInt(_VALUES.length)];
 	}
 
 	public static EnumFacing getFacingFromVector(float parFloat1, float parFloat2, float parFloat3) {
 		EnumFacing enumfacing = NORTH;
 		float f = Float.MIN_VALUE;
 
-		for (EnumFacing enumfacing1 : values()) {
+		EnumFacing[] facings = _VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing1 = facings[i];
 			float f1 = parFloat1 * (float) enumfacing1.directionVec.getX()
 					+ parFloat2 * (float) enumfacing1.directionVec.getY()
 					+ parFloat3 * (float) enumfacing1.directionVec.getZ();
@@ -305,7 +309,9 @@ public enum EnumFacing implements IStringSerializable {
 	}
 
 	public static EnumFacing func_181076_a(EnumFacing.AxisDirection parAxisDirection, EnumFacing.Axis parAxis) {
-		for (EnumFacing enumfacing : values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			if (enumfacing.getAxisDirection() == parAxisDirection && enumfacing.getAxis() == parAxis) {
 				return enumfacing;
 			}
@@ -323,7 +329,10 @@ public enum EnumFacing implements IStringSerializable {
 	}
 
 	static {
-		for (EnumFacing enumfacing : values()) {
+		Plane.bootstrap();
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			VALUES[enumfacing.index] = enumfacing;
 			if (enumfacing.getAxis().isHorizontal()) {
 				HORIZONTALS[enumfacing.horizontalIndex] = enumfacing;
@@ -385,8 +394,9 @@ public enum EnumFacing implements IStringSerializable {
 		}
 
 		static {
-			for (EnumFacing.Axis enumfacing$axis : values()) {
-				NAME_LOOKUP.put(enumfacing$axis.getName2().toLowerCase(), enumfacing$axis);
+			EnumFacing.Axis[] axis = values();
+			for (int i = 0; i < axis.length; ++i) {
+				NAME_LOOKUP.put(axis[i].getName2().toLowerCase(), axis[i]);
 			}
 
 		}
@@ -394,6 +404,8 @@ public enum EnumFacing implements IStringSerializable {
 
 	public static enum AxisDirection {
 		POSITIVE(1, "Towards positive"), NEGATIVE(-1, "Towards negative");
+
+		public static final AxisDirection[] _VALUES = values();
 
 		private final int offset;
 		private final String description;
@@ -413,17 +425,16 @@ public enum EnumFacing implements IStringSerializable {
 	}
 
 	public static enum Plane implements Predicate<EnumFacing>, Iterable<EnumFacing> {
-		HORIZONTAL, VERTICAL;
+		HORIZONTAL(new EnumFacing[4]), VERTICAL(new EnumFacing[2]);
+
+		public final EnumFacing[] facingsArray;
+
+		private Plane(EnumFacing[] facingsArray) {
+			this.facingsArray = facingsArray;
+		}
 
 		public EnumFacing[] facings() {
-			switch (this) {
-			case HORIZONTAL:
-				return new EnumFacing[] { EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST };
-			case VERTICAL:
-				return new EnumFacing[] { EnumFacing.UP, EnumFacing.DOWN };
-			default:
-				throw new Error("Someone\'s been tampering with the universe!");
-			}
+			return facingsArray;
 		}
 
 		/**+
@@ -439,7 +450,16 @@ public enum EnumFacing implements IStringSerializable {
 		}
 
 		public Iterator<EnumFacing> iterator() {
-			return Iterators.forArray(this.facings());
+			return Iterators.forArray(facingsArray);
+		}
+
+		private static void bootstrap() {
+			HORIZONTAL.facingsArray[0] = EnumFacing.NORTH;
+			HORIZONTAL.facingsArray[1] = EnumFacing.EAST;
+			HORIZONTAL.facingsArray[2] = EnumFacing.SOUTH;
+			HORIZONTAL.facingsArray[3] = EnumFacing.WEST;
+			VERTICAL.facingsArray[0] = EnumFacing.UP;
+			VERTICAL.facingsArray[1] = EnumFacing.DOWN;
 		}
 	}
 }

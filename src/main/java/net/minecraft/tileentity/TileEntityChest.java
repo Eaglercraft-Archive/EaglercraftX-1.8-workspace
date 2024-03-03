@@ -1,5 +1,7 @@
 package net.minecraft.tileentity;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.entity.player.EntityPlayer;
@@ -282,10 +284,12 @@ public class TileEntityChest extends TileEntityLockable implements ITickable, II
 			this.numPlayersUsing = 0;
 			float f = 5.0F;
 
-			for (EntityPlayer entityplayer : this.worldObj.getEntitiesWithinAABB(EntityPlayer.class,
+			List<EntityPlayer> players = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class,
 					new AxisAlignedBB((double) ((float) i - f), (double) ((float) j - f), (double) ((float) k - f),
 							(double) ((float) (i + 1) + f), (double) ((float) (j + 1) + f),
-							(double) ((float) (k + 1) + f)))) {
+							(double) ((float) (k + 1) + f)));
+			for (int m = 0, l = players.size(); m < l; ++m) {
+				EntityPlayer entityplayer = players.get(m);
 				if (entityplayer.openContainer instanceof ContainerChest) {
 					IInventory iinventory = ((ContainerChest) entityplayer.openContainer).getLowerChestInventory();
 					if (iinventory == this || iinventory instanceof InventoryLargeChest

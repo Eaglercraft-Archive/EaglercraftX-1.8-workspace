@@ -223,8 +223,8 @@ public class MapData extends WorldSavedData {
 	public void updateMapData(int x, int y) {
 		super.markDirty();
 
-		for (MapData.MapInfo mapdata$mapinfo : this.playersArrayList) {
-			mapdata$mapinfo.update(x, y);
+		for (int i = 0, l = this.playersArrayList.size(); i < l; ++i) {
+			this.playersArrayList.get(i).update(x, y);
 		}
 
 	}

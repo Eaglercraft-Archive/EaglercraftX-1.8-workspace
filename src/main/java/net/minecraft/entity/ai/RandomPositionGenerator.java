@@ -27,7 +27,6 @@ import net.minecraft.util.Vec3;
  * 
  */
 public class RandomPositionGenerator {
-
 	/**+
 	 * used to store a driection when the user passes a point to
 	 * move towards or away from. WARNING: NEVER THREAD SAFE.

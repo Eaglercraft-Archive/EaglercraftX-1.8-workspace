@@ -45,7 +45,8 @@ public class LayeredTexture extends AbstractTexture {
 		ImageData bufferedimage = null;
 
 		try {
-			for (String s : this.layeredTextureNames) {
+			for (int i = 0, l = this.layeredTextureNames.size(); i < l; ++i) {
+				String s = this.layeredTextureNames.get(i);
 				if (s != null) {
 					InputStream inputstream = parIResourceManager.getResource(new ResourceLocation(s)).getInputStream();
 					ImageData bufferedimage1 = TextureUtil.readBufferedImage(inputstream);

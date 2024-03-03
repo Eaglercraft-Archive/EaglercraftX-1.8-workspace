@@ -153,6 +153,8 @@ public class ServerData {
 	public static enum ServerResourceMode {
 		ENABLED("enabled"), DISABLED("disabled"), PROMPT("prompt");
 
+		public static final ServerResourceMode[] _VALUES = values();
+
 		private final IChatComponent motd;
 
 		private ServerResourceMode(String parString2) {

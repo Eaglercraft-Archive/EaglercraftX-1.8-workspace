@@ -2,7 +2,6 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 
 /**+
@@ -26,7 +25,6 @@ import net.minecraft.entity.player.EntityPlayer;
  * 
  */
 public class EntityAIWatchClosest extends EntityAIBase {
-
 	protected EntityLiving theWatcher;
 	protected Entity closestEntity;
 	protected float maxDistanceForPlayer;

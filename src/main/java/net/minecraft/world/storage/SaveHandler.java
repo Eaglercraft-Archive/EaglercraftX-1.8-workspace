@@ -1,8 +1,5 @@
 package net.minecraft.world.storage;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -14,10 +11,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
-import net.minecraft.world.storage.IPlayerFileData;
-import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.WorldInfo;
-import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.internal.vfs2.VFile2;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
@@ -43,7 +36,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class SaveHandler implements ISaveHandler, IPlayerFileData {
-
 	private static final Logger logger = LogManager.getLogger();
 	private final VFile2 worldDirectory;
 	private final VFile2 playersDirectory;

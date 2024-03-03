@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBase;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -24,7 +23,6 @@ import net.minecraft.entity.ai.EntityAIBase;
  * 
  */
 public class EntityAILookIdle extends EntityAIBase {
-
 	private EntityLiving idleEntity;
 	private double lookX;
 	private double lookZ;

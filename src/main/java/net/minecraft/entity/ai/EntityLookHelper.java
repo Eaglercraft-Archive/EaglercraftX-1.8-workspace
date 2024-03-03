@@ -26,7 +26,6 @@ import net.minecraft.util.MathHelper;
  * 
  */
 public class EntityLookHelper {
-
 	private EntityLiving entity;
 	private float deltaLookYaw;
 	private float deltaLookPitch;

@@ -87,8 +87,9 @@ public class GuiDisconnected extends GuiScreen {
 				this.height / 2 - this.field_175353_i / 2 - this.fontRendererObj.FONT_HEIGHT * 2, 11184810);
 		int k = this.height / 2 - this.field_175353_i / 2;
 		if (this.multilineMessage != null) {
-			for (String s : this.multilineMessage) {
-				this.drawCenteredString(this.fontRendererObj, s, this.width / 2, k, 16777215);
+			for (int l = 0, m = this.multilineMessage.size(); l < m; ++l) {
+				this.drawCenteredString(this.fontRendererObj, this.multilineMessage.get(l), this.width / 2, k,
+						16777215);
 				k += this.fontRendererObj.FONT_HEIGHT;
 			}
 		}

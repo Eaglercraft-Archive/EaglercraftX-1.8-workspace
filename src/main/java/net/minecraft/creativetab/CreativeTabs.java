@@ -211,8 +211,8 @@ public abstract class CreativeTabs {
 		if (this.enchantmentTypes == null) {
 			return false;
 		} else {
-			for (EnumEnchantmentType enumenchantmenttype : this.enchantmentTypes) {
-				if (enumenchantmenttype == enchantmentType) {
+			for (int i = 0; i < this.enchantmentTypes.length; ++i) {
+				if (this.enchantmentTypes[i] == enchantmentType) {
 					return true;
 				}
 			}
@@ -242,12 +242,13 @@ public abstract class CreativeTabs {
 	 * EnumEnchantmentType to the given list.
 	 */
 	public void addEnchantmentBooksToList(List<ItemStack> itemList, EnumEnchantmentType... enchantmentType) {
-		for (Enchantment enchantment : Enchantment.enchantmentsBookList) {
+		for (int i = 0; i < Enchantment.enchantmentsBookList.length; ++i) {
+			Enchantment enchantment = Enchantment.enchantmentsBookList[i];
 			if (enchantment != null && enchantment.type != null) {
 				boolean flag = false;
 
-				for (int i = 0; i < enchantmentType.length && !flag; ++i) {
-					if (enchantment.type == enchantmentType[i]) {
+				for (int j = 0; j < enchantmentType.length && !flag; ++j) {
+					if (enchantment.type == enchantmentType[j]) {
 						flag = true;
 					}
 				}

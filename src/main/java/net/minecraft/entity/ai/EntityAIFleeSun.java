@@ -2,7 +2,6 @@ package net.minecraft.entity.ai;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -28,7 +27,6 @@ import net.minecraft.world.World;
  * 
  */
 public class EntityAIFleeSun extends EntityAIBase {
-
 	private EntityCreature theCreature;
 	private double shelterX;
 	private double shelterY;

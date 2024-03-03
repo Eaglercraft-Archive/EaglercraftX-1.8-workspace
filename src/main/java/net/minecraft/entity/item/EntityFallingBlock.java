@@ -178,8 +178,8 @@ public class EntityFallingBlock extends Entity {
 				boolean flag = block == Blocks.anvil;
 				DamageSource damagesource = flag ? DamageSource.anvil : DamageSource.fallingBlock;
 
-				for (Entity entity : arraylist) {
-					entity.attackEntityFrom(damagesource, (float) Math
+				for (int j = 0, l = arraylist.size(); j < l; ++j) {
+					arraylist.get(j).attackEntityFrom(damagesource, (float) Math
 							.min(MathHelper.floor_float((float) i * this.fallHurtAmount), this.fallHurtMax));
 				}
 

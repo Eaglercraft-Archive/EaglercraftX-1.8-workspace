@@ -212,8 +212,9 @@ public class BlockSapling extends BlockBush implements IGrowable {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (BlockPlanks.EnumType blockplanks$enumtype : BlockPlanks.EnumType.values()) {
-			list.add(new ItemStack(item, 1, blockplanks$enumtype.getMetadata()));
+		BlockPlanks.EnumType[] types = BlockPlanks.EnumType.META_LOOKUP;
+		for (int i = 0; i < types.length; ++i) {
+			list.add(new ItemStack(item, 1, types[i].getMetadata()));
 		}
 
 	}

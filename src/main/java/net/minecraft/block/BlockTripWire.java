@@ -206,13 +206,13 @@ public class BlockTripWire extends Block {
 		IBlockState iblockstate = worldIn.getBlockState(pos);
 		boolean flag = ((Boolean) iblockstate.getValue(POWERED)).booleanValue();
 		boolean flag1 = false;
-		List list = worldIn.getEntitiesWithinAABBExcludingEntity((Entity) null,
+		List<Entity> list = worldIn.getEntitiesWithinAABBExcludingEntity((Entity) null,
 				new AxisAlignedBB((double) pos.getX() + this.minX, (double) pos.getY() + this.minY,
 						(double) pos.getZ() + this.minZ, (double) pos.getX() + this.maxX,
 						(double) pos.getY() + this.maxY, (double) pos.getZ() + this.maxZ));
 		if (!list.isEmpty()) {
-			for (Entity entity : (List<Entity>) list) {
-				if (!entity.doesEntityNotTriggerPressurePlate()) {
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				if (!list.get(i).doesEntityNotTriggerPressurePlate()) {
 					flag1 = true;
 					break;
 				}

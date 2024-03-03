@@ -189,7 +189,8 @@ public class CrashReportCategory {
 		builder.append("-- ").append(this.name).append(" --\n");
 		builder.append("Details:");
 
-		for (CrashReportCategory.Entry crashreportcategory$entry : this.children) {
+		for (int i = 0, l = this.children.size(); i < l; ++i) {
+			CrashReportCategory.Entry crashreportcategory$entry = this.children.get(i);
 			builder.append("\n\t");
 			builder.append(crashreportcategory$entry.getKey());
 			builder.append(": ");
@@ -199,9 +200,9 @@ public class CrashReportCategory {
 		if (this.stackTrace != null && this.stackTrace.length > 0) {
 			builder.append("\nStacktrace:");
 
-			for (String stacktraceelement : this.stackTrace) {
+			for (int i = 0; i < this.stackTrace.length; ++i) {
 				builder.append("\n\tat ");
-				builder.append(stacktraceelement);
+				builder.append(this.stackTrace[i]);
 			}
 		}
 

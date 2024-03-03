@@ -143,8 +143,8 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
 	}
 
 	public void tick() {
-		for (ITickable itickable : this.listTickables) {
-			itickable.tick();
+		for (int i = 0, l = this.listTickables.size(); i < l; ++i) {
+			this.listTickables.get(i).tick();
 		}
 
 	}

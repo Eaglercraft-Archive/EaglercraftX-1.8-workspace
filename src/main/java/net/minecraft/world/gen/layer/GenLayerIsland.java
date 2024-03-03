@@ -1,8 +1,5 @@
 package net.minecraft.world.gen.layer;
 
-import net.minecraft.world.gen.layer.GenLayer;
-import net.minecraft.world.gen.layer.IntCache;
-
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
  * 
@@ -24,7 +21,6 @@ import net.minecraft.world.gen.layer.IntCache;
  * 
  */
 public class GenLayerIsland extends GenLayer {
-
 	public GenLayerIsland(long parLong1) {
 		super(parLong1);
 	}

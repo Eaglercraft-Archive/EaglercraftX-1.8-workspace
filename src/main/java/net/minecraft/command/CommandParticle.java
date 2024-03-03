@@ -1,10 +1,6 @@
 package net.minecraft.command;
 
 import java.util.List;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
@@ -64,7 +60,9 @@ public class CommandParticle extends CommandBase {
 			boolean flag = false;
 			EnumParticleTypes enumparticletypes = null;
 
-			for (EnumParticleTypes enumparticletypes1 : EnumParticleTypes.values()) {
+			EnumParticleTypes[] types = EnumParticleTypes._VALUES;
+			for (int i = 0; i < types.length; ++i) {
+				EnumParticleTypes enumparticletypes1 = types[i];
 				if (enumparticletypes1.hasArguments()) {
 					if (parArrayOfString[0].startsWith(enumparticletypes1.getParticleName())) {
 						flag = true;

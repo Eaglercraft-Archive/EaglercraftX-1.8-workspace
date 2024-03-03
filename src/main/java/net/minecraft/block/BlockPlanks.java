@@ -61,8 +61,9 @@ public class BlockPlanks extends Block {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (BlockPlanks.EnumType blockplanks$enumtype : BlockPlanks.EnumType.values()) {
-			list.add(new ItemStack(item, 1, blockplanks$enumtype.getMetadata()));
+		BlockPlanks.EnumType[] types = BlockPlanks.EnumType.META_LOOKUP;
+		for (int i = 0; i < types.length; ++i) {
+			list.add(new ItemStack(item, 1, types[i].getMetadata()));
 		}
 
 	}
@@ -97,7 +98,7 @@ public class BlockPlanks extends Block {
 		BIRCH(2, "birch", MapColor.sandColor), JUNGLE(3, "jungle", MapColor.dirtColor),
 		ACACIA(4, "acacia", MapColor.adobeColor), DARK_OAK(5, "dark_oak", "big_oak", MapColor.brownColor);
 
-		private static final BlockPlanks.EnumType[] META_LOOKUP = new BlockPlanks.EnumType[values().length];
+		public static final BlockPlanks.EnumType[] META_LOOKUP = new BlockPlanks.EnumType[6];
 		private final int meta;
 		private final String name;
 		private final String unlocalizedName;
@@ -143,8 +144,9 @@ public class BlockPlanks extends Block {
 		}
 
 		static {
-			for (BlockPlanks.EnumType blockplanks$enumtype : values()) {
-				META_LOOKUP[blockplanks$enumtype.getMetadata()] = blockplanks$enumtype;
+			BlockPlanks.EnumType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMetadata()] = types[i];
 			}
 
 		}

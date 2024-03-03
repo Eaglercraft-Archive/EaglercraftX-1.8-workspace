@@ -84,7 +84,9 @@ public abstract class BlockButton extends Block {
 	}
 
 	public boolean canPlaceBlockAt(World world, BlockPos blockpos) {
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			if (func_181088_a(world, blockpos, enumfacing)) {
 				return true;
 			}

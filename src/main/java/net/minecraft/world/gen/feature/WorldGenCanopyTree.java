@@ -12,7 +12,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -35,7 +34,6 @@ import net.minecraft.world.gen.feature.WorldGenAbstractTree;
  * 
  */
 public class WorldGenCanopyTree extends WorldGenAbstractTree {
-
 	private static final IBlockState field_181640_a = Blocks.log2.getDefaultState().withProperty(BlockNewLog.VARIANT,
 			BlockPlanks.EnumType.DARK_OAK);
 	private static final IBlockState field_181641_b = Blocks.leaves2.getDefaultState()

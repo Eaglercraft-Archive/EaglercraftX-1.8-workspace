@@ -226,15 +226,16 @@ public class GuiChat extends GuiScreen {
 			this.inputField.deleteFromCursor(i - this.inputField.getCursorPosition());
 		}
 
-		if (this.foundPlayerNames.size() > 1) {
+		int l = this.foundPlayerNames.size();
+		if (l > 1) {
 			StringBuilder stringbuilder = new StringBuilder();
 
-			for (String s2 : this.foundPlayerNames) {
+			for (int i = 0; i < l; ++i) {
 				if (stringbuilder.length() > 0) {
 					stringbuilder.append(", ");
 				}
 
-				stringbuilder.append(s2);
+				stringbuilder.append(this.foundPlayerNames.get(i));
 			}
 
 			this.mc.ingameGUI.getChatGUI()
@@ -306,7 +307,8 @@ public class GuiChat extends GuiScreen {
 			this.playerNamesFound = false;
 			this.foundPlayerNames.clear();
 
-			for (String s : parArrayOfString) {
+			for (int i = 0; i < parArrayOfString.length; ++i) {
+				String s = parArrayOfString[i];
 				if (s.length() > 0) {
 					this.foundPlayerNames.add(s);
 				}

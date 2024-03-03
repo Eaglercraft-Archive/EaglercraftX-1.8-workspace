@@ -1,8 +1,6 @@
 package net.minecraft.world.chunk.storage;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,6 +8,8 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.lax1dude.eaglercraft.v1_8.EaglerInputStream;
+import net.lax1dude.eaglercraft.v1_8.EaglerOutputStream;
 import net.lax1dude.eaglercraft.v1_8.EaglerZLIB;
 import net.lax1dude.eaglercraft.v1_8.sp.server.export.RandomAccessMemoryFile;
 
@@ -124,12 +124,12 @@ public class RegionFile {
 								byte[] abyte1 = new byte[l - 1];
 								this.dataFile.read(abyte1);
 								return new DataInputStream(new BufferedInputStream(
-										EaglerZLIB.newGZIPInputStream(new ByteArrayInputStream(abyte1))));
+										EaglerZLIB.newGZIPInputStream(new EaglerInputStream(abyte1))));
 							} else if (b0 == 2) {
 								byte[] abyte = new byte[l - 1];
 								this.dataFile.read(abyte);
 								return new DataInputStream(new BufferedInputStream(
-										EaglerZLIB.newInflaterInputStream(new ByteArrayInputStream(abyte))));
+										EaglerZLIB.newInflaterInputStream(new EaglerInputStream(abyte))));
 							} else {
 								return null;
 							}
@@ -277,7 +277,7 @@ public class RegionFile {
 		return dataFile;
 	}
 
-	class ChunkBuffer extends ByteArrayOutputStream {
+	class ChunkBuffer extends EaglerOutputStream {
 		private int chunkX;
 		private int chunkZ;
 

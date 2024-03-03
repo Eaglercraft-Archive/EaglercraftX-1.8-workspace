@@ -1,6 +1,5 @@
 package net.minecraft.client.gui;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,10 +8,11 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
-import net.lax1dude.eaglercraft.v1_8.vfs.SYS;
 import net.lax1dude.eaglercraft.v1_8.internal.FileChooserResult;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
+import net.lax1dude.eaglercraft.v1_8.minecraft.GuiScreenGenericErrorMessage;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.ResourcePackListEntry;
 import net.minecraft.client.resources.ResourcePackListEntryDefault;
@@ -58,10 +58,8 @@ public class GuiScreenResourcePacks extends GuiScreen {
 	 * window resizes, the buttonList is cleared beforehand.
 	 */
 	public void initGui() {
-		GuiButton btn;
-		this.buttonList.add(btn = new GuiOptionButton(2, this.width / 2 - 154, this.height - 48,
+		this.buttonList.add(new GuiOptionButton(2, this.width / 2 - 154, this.height - 48,
 				I18n.format("resourcePack.openFolder", new Object[0])));
-		btn.enabled = SYS.VFS != null;
 		this.buttonList.add(
 				new GuiOptionButton(1, this.width / 2 + 4, this.height - 48, I18n.format("gui.done", new Object[0])));
 		if (!this.changed) {
@@ -69,16 +67,18 @@ public class GuiScreenResourcePacks extends GuiScreen {
 			this.selectedResourcePacks = Lists.newArrayList();
 			ResourcePackRepository resourcepackrepository = this.mc.getResourcePackRepository();
 			resourcepackrepository.updateRepositoryEntriesAll();
-			ArrayList arraylist = Lists.newArrayList(resourcepackrepository.getRepositoryEntriesAll());
+			List arraylist = Lists.newArrayList(resourcepackrepository.getRepositoryEntriesAll());
 			arraylist.removeAll(resourcepackrepository.getRepositoryEntries());
 
-			for (ResourcePackRepository.Entry resourcepackrepository$entry : (List<ResourcePackRepository.Entry>) arraylist) {
-				this.availableResourcePacks.add(new ResourcePackListEntryFound(this, resourcepackrepository$entry));
+			for (int i = 0, l = arraylist.size(); i < l; ++i) {
+				this.availableResourcePacks
+						.add(new ResourcePackListEntryFound(this, (ResourcePackRepository.Entry) arraylist.get(i)));
 			}
 
-			for (ResourcePackRepository.Entry resourcepackrepository$entry1 : Lists
-					.reverse(resourcepackrepository.getRepositoryEntries())) {
-				this.selectedResourcePacks.add(new ResourcePackListEntryFound(this, resourcepackrepository$entry1));
+			arraylist = Lists.reverse(resourcepackrepository.getRepositoryEntries());
+			for (int i = 0, l = arraylist.size(); i < l; ++i) {
+				this.selectedResourcePacks
+						.add(new ResourcePackListEntryFound(this, (ResourcePackRepository.Entry) arraylist.get(i)));
 			}
 
 			this.selectedResourcePacks.add(new ResourcePackListEntryDefault(this));
@@ -138,14 +138,13 @@ public class GuiScreenResourcePacks extends GuiScreen {
 	protected void actionPerformed(GuiButton parGuiButton) {
 		if (parGuiButton.enabled) {
 			if (parGuiButton.id == 2) {
-				if (SYS.VFS == null)
-					return;
 				EagRuntime.displayFileChooser("application/zip", "zip");
 			} else if (parGuiButton.id == 1) {
 				if (this.changed) {
-					ArrayList arraylist = Lists.newArrayList();
+					ArrayList<ResourcePackRepository.Entry> arraylist = Lists.newArrayList();
 
-					for (ResourcePackListEntry resourcepacklistentry : this.selectedResourcePacks) {
+					for (int i = 0, l = this.selectedResourcePacks.size(); i < l; ++i) {
+						ResourcePackListEntry resourcepacklistentry = this.selectedResourcePacks.get(i);
 						if (resourcepacklistentry instanceof ResourcePackListEntryFound) {
 							arraylist.add(((ResourcePackListEntryFound) resourcepacklistentry).func_148318_i());
 						}
@@ -156,7 +155,8 @@ public class GuiScreenResourcePacks extends GuiScreen {
 					this.mc.gameSettings.resourcePacks.clear();
 					this.mc.gameSettings.field_183018_l.clear();
 
-					for (ResourcePackRepository.Entry resourcepackrepository$entry : (List<ResourcePackRepository.Entry>) arraylist) {
+					for (int i = 0, l = arraylist.size(); i < l; ++i) {
+						ResourcePackRepository.Entry resourcepackrepository$entry = arraylist.get(i);
 						this.mc.gameSettings.resourcePacks.add(resourcepackrepository$entry.getResourcePackName());
 						if (resourcepackrepository$entry.func_183027_f() != 1) {
 							this.mc.gameSettings.field_183018_l.add(resourcepackrepository$entry.getResourcePackName());
@@ -179,15 +179,25 @@ public class GuiScreenResourcePacks extends GuiScreen {
 		if (EagRuntime.fileChooserHasResult()) {
 			packFile = EagRuntime.getFileChooserResult();
 		}
-		if (packFile == null)
+		if (packFile == null) {
 			return;
-		logger.info("Loading resource pack: {}", packFile.fileName);
+		}
 		mc.loadingScreen.eaglerShow(I18n.format("resourcePack.load.loading"), packFile.fileName);
-		SYS.loadResourcePack(packFile.fileName, new ByteArrayInputStream(packFile.fileData), null);
+		try {
+			EaglerFolderResourcePack.importResourcePack(packFile.fileName, EaglerFolderResourcePack.RESOURCE_PACKS,
+					packFile.fileData);
+		} catch (IOException e) {
+			logger.error("Could not load resource pack: {}", packFile.fileName);
+			logger.error(e);
+			mc.displayGuiScreen(new GuiScreenGenericErrorMessage("resourcePack.importFailed.1",
+					"resourcePack.importFailed.2", parentScreen));
+			return;
+		}
 
-		ArrayList arraylist = Lists.newArrayList();
+		ArrayList<ResourcePackRepository.Entry> arraylist = Lists.newArrayList();
 
-		for (ResourcePackListEntry resourcepacklistentry : this.selectedResourcePacks) {
+		for (int i = 0, l = this.selectedResourcePacks.size(); i < l; ++i) {
+			ResourcePackListEntry resourcepacklistentry = this.selectedResourcePacks.get(i);
 			if (resourcepacklistentry instanceof ResourcePackListEntryFound) {
 				arraylist.add(((ResourcePackListEntryFound) resourcepacklistentry).func_148318_i());
 			}
@@ -198,7 +208,8 @@ public class GuiScreenResourcePacks extends GuiScreen {
 		this.mc.gameSettings.resourcePacks.clear();
 		this.mc.gameSettings.field_183018_l.clear();
 
-		for (ResourcePackRepository.Entry resourcepackrepository$entry : (List<ResourcePackRepository.Entry>) arraylist) {
+		for (int i = 0, l = arraylist.size(); i < l; ++i) {
+			ResourcePackRepository.Entry resourcepackrepository$entry = arraylist.get(i);
 			this.mc.gameSettings.resourcePacks.add(resourcepackrepository$entry.getResourcePackName());
 			if (resourcepackrepository$entry.func_183027_f() != 1) {
 				this.mc.gameSettings.field_183018_l.add(resourcepackrepository$entry.getResourcePackName());

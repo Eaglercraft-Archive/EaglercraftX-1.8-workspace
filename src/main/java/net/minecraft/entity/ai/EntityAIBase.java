@@ -21,7 +21,6 @@ package net.minecraft.entity.ai;
  * 
  */
 public abstract class EntityAIBase {
-
 	private int mutexBits;
 
 	public abstract boolean shouldExecute();

@@ -9,10 +9,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.StructureComponent;
-import net.minecraft.world.gen.structure.StructureStart;
-import net.minecraft.world.gen.structure.StructureVillagePieces;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -35,7 +31,6 @@ import net.minecraft.world.gen.structure.StructureVillagePieces;
  * 
  */
 public class MapGenVillage extends MapGenStructure {
-
 	/**+
 	 * A list of all the biomes villages can spawn in.
 	 */

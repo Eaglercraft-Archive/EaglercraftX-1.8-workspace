@@ -18,9 +18,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.WeightedRandom;
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 
@@ -45,7 +42,6 @@ import net.minecraft.world.chunk.Chunk;
  * 
  */
 public final class SpawnerAnimals {
-
 	private static final int MOB_COUNT_DIV = (int) Math.pow(17.0D, 2.0D);
 	/**+
 	 * The 17x17 area around the player where mobs can spawn
@@ -65,7 +61,9 @@ public final class SpawnerAnimals {
 			this.eligibleChunksForSpawning.clear();
 			int i = 0;
 
-			for (EntityPlayer entityplayer : spawnHostileMobs.playerEntities) {
+			List<EntityPlayer> lst = spawnHostileMobs.playerEntities;
+			for (int m = 0, n = lst.size(); m < n; ++m) {
+				EntityPlayer entityplayer = lst.get(m);
 				if (!entityplayer.isSpectator()) {
 					int j = MathHelper.floor_double(entityplayer.posX / 16.0D);
 					int k = MathHelper.floor_double(entityplayer.posZ / 16.0D);
@@ -91,7 +89,9 @@ public final class SpawnerAnimals {
 			int k3 = 0;
 			BlockPos blockpos2 = spawnHostileMobs.getSpawnPoint();
 
-			for (EnumCreatureType enumcreaturetype : EnumCreatureType.values()) {
+			EnumCreatureType[] types = EnumCreatureType._VALUES;
+			for (int m = 0; m < types.length; ++m) {
+				EnumCreatureType enumcreaturetype = types[m];
 				if ((!enumcreaturetype.getPeacefulCreature() || parFlag2)
 						&& (enumcreaturetype.getPeacefulCreature() || spawnPeacefulMobs)
 						&& (!enumcreaturetype.getAnimal() || parFlag3)) {

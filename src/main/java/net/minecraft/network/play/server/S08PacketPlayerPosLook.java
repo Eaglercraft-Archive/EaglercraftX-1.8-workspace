@@ -124,7 +124,9 @@ public class S08PacketPlayerPosLook implements Packet<INetHandlerPlayClient> {
 		public static Set<S08PacketPlayerPosLook.EnumFlags> func_180053_a(int parInt1) {
 			EnumSet enumset = EnumSet.noneOf(S08PacketPlayerPosLook.EnumFlags.class);
 
-			for (S08PacketPlayerPosLook.EnumFlags s08packetplayerposlook$enumflags : values()) {
+			S08PacketPlayerPosLook.EnumFlags[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				S08PacketPlayerPosLook.EnumFlags s08packetplayerposlook$enumflags = types[i];
 				if (s08packetplayerposlook$enumflags.func_180054_b(parInt1)) {
 					enumset.add(s08packetplayerposlook$enumflags);
 				}

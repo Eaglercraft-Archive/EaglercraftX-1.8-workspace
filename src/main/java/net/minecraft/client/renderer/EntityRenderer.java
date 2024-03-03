@@ -1302,8 +1302,6 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 	}
 
 	private void addRainParticles() {
-		if (DeferredStateManager.isDeferredRenderer())
-			return;
 		float f = this.mc.theWorld.getRainStrength(1.0F);
 		if (!this.mc.gameSettings.fancyGraphics) {
 			f /= 2.0F;
@@ -1351,9 +1349,11 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 							d2 = (double) blockpos2.getZ() + d4;
 						}
 
-						this.mc.theWorld.spawnParticle(EnumParticleTypes.WATER_DROP, (double) blockpos2.getX() + d3,
-								(double) ((float) blockpos2.getY() + 0.1F) + block.getBlockBoundsMaxY(),
-								(double) blockpos2.getZ() + d4, 0.0D, 0.0D, 0.0D, new int[0]);
+						if (!DeferredStateManager.isDeferredRenderer()) {
+							this.mc.theWorld.spawnParticle(EnumParticleTypes.WATER_DROP, (double) blockpos2.getX() + d3,
+									(double) ((float) blockpos2.getY() + 0.1F) + block.getBlockBoundsMaxY(),
+									(double) blockpos2.getZ() + d4, 0.0D, 0.0D, 0.0D, new int[0]);
+						}
 					}
 				}
 			}

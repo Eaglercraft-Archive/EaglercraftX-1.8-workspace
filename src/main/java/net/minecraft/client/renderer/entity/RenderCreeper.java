@@ -2,10 +2,8 @@ package net.minecraft.client.renderer.entity;
 
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
-import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DynamicLightManager;
 import net.minecraft.client.model.ModelCreeper;
 import net.minecraft.client.renderer.entity.layers.LayerCreeperCharge;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;

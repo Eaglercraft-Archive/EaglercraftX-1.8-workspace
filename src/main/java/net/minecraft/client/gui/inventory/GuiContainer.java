@@ -1,11 +1,11 @@
 package net.minecraft.client.gui.inventory;
 
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
 
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
-import net.lax1dude.eaglercraft.v1_8.internal.KeyboardConstants;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerTextureAtlasSprite;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.OpenGlHelper;
@@ -455,7 +455,9 @@ public abstract class GuiContainer extends GuiScreen {
 		if (this.doubleClick && slot != null && k == 0 && this.inventorySlots.canMergeSlot((ItemStack) null, slot)) {
 			if (isShiftKeyDown()) {
 				if (slot != null && slot.inventory != null && this.shiftClickedSlot != null) {
-					for (Slot slot2 : this.inventorySlots.inventorySlots) {
+					List<Slot> lst = this.inventorySlots.inventorySlots;
+					for (int n = 0, m = lst.size(); n < m; ++n) {
+						Slot slot2 = lst.get(n);
 						if (slot2 != null && slot2.canTakeStack(this.mc.thePlayer) && slot2.getHasStack()
 								&& slot2.inventory == slot.inventory
 								&& Container.canAddItemToSlot(slot2, this.shiftClickedSlot, true)) {

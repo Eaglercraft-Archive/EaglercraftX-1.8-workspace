@@ -49,18 +49,20 @@ public class BlockReed extends Block {
 	}
 
 	public void updateTick(World world, BlockPos blockpos, IBlockState iblockstate, EaglercraftRandom var4) {
-		if (world.getBlockState(blockpos.down()).getBlock() == Blocks.reeds
+		BlockPos tmp = new BlockPos(0, 0, 0);
+		if (world.getBlockState(blockpos.offsetEvenFaster(EnumFacing.DOWN, tmp)).getBlock() == Blocks.reeds
 				|| this.checkForDrop(world, blockpos, iblockstate)) {
-			if (world.isAirBlock(blockpos.up())) {
+			if (world.isAirBlock(blockpos.offsetEvenFaster(EnumFacing.UP, tmp))) {
 				int i;
-				for (i = 1; world.getBlockState(blockpos.down(i)).getBlock() == this; ++i) {
+				--tmp.y;
+				for (i = 1; world.getBlockState(tmp.offsetEvenFaster(EnumFacing.DOWN, tmp)).getBlock() == this; ++i) {
 					;
 				}
 
 				if (i < 3) {
 					int j = ((Integer) iblockstate.getValue(AGE)).intValue();
 					if (j == 15) {
-						world.setBlockState(blockpos.up(), this.getDefaultState());
+						world.setBlockState(blockpos.offsetEvenFaster(EnumFacing.UP, tmp), this.getDefaultState());
 						world.setBlockState(blockpos, iblockstate.withProperty(AGE, Integer.valueOf(0)), 4);
 					} else {
 						world.setBlockState(blockpos, iblockstate.withProperty(AGE, Integer.valueOf(j + 1)), 4);
@@ -72,15 +74,19 @@ public class BlockReed extends Block {
 	}
 
 	public boolean canPlaceBlockAt(World world, BlockPos blockpos) {
-		Block block = world.getBlockState(blockpos.down()).getBlock();
+		BlockPos down = blockpos.down();
+		Block block = world.getBlockState(down).getBlock();
 		if (block == this) {
 			return true;
 		} else if (block != Blocks.grass && block != Blocks.dirt && block != Blocks.sand) {
 			return false;
 		} else {
-			for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-				if (world.getBlockState(blockpos.offset(enumfacing).down()).getBlock()
-						.getMaterial() == Material.water) {
+			EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+			for (int i = 0; i < facings.length; ++i) {
+				EnumFacing enumfacing = facings[i];
+				down = blockpos.offsetEvenFaster(enumfacing, down);
+				--down.y;
+				if (world.getBlockState(down).getBlock().getMaterial() == Material.water) {
 					return true;
 				}
 			}

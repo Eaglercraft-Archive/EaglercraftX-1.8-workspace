@@ -12,11 +12,6 @@ import net.minecraft.network.play.server.S3BPacketScoreboardObjective;
 import net.minecraft.network.play.server.S3CPacketUpdateScore;
 import net.minecraft.network.play.server.S3DPacketDisplayScoreboard;
 import net.minecraft.network.play.server.S3EPacketTeams;
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.server.MinecraftServer;
 
 /**+
@@ -209,11 +204,13 @@ public class ServerScoreboard extends Scoreboard {
 	}
 
 	public void func_96549_e(ScoreObjective parScoreObjective) {
-		List list = this.func_96550_d(parScoreObjective);
+		List<Packet> list = this.func_96550_d(parScoreObjective);
 
-		for (EntityPlayerMP entityplayermp : this.scoreboardMCServer.getConfigurationManager().func_181057_v()) {
-			for (Packet packet : (List<Packet>) list) {
-				entityplayermp.playerNetServerHandler.sendPacket(packet);
+		List<EntityPlayerMP> players = this.scoreboardMCServer.getConfigurationManager().func_181057_v();
+		for (int i = 0, l = players.size(); i < l; ++i) {
+			EntityPlayerMP entityplayermp = players.get(i);
+			for (int j = 0, m = list.size(); j < m; ++j) {
+				entityplayermp.playerNetServerHandler.sendPacket(list.get(j));
 			}
 		}
 
@@ -234,11 +231,13 @@ public class ServerScoreboard extends Scoreboard {
 	}
 
 	public void getPlayerIterator(ScoreObjective parScoreObjective) {
-		List list = this.func_96548_f(parScoreObjective);
+		List<Packet> list = this.func_96548_f(parScoreObjective);
 
-		for (EntityPlayerMP entityplayermp : this.scoreboardMCServer.getConfigurationManager().func_181057_v()) {
-			for (Packet packet : (List<Packet>) list) {
-				entityplayermp.playerNetServerHandler.sendPacket(packet);
+		List<EntityPlayerMP> players = this.scoreboardMCServer.getConfigurationManager().func_181057_v();
+		for (int i = 0, l = players.size(); i < l; ++i) {
+			EntityPlayerMP entityplayermp = players.get(i);
+			for (int j = 0, m = list.size(); j < m; ++j) {
+				entityplayermp.playerNetServerHandler.sendPacket(list.get(j));
 			}
 		}
 

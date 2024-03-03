@@ -34,6 +34,7 @@ import net.lax1dude.eaglercraft.v1_8.internal.EnumPlatformType;
 import net.lax1dude.eaglercraft.v1_8.internal.PlatformRuntime;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFontRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
@@ -74,7 +75,6 @@ import net.minecraft.client.gui.GuiGameOver;
 import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.gui.GuiMemoryErrorScreen;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiSleepMP;
 import net.minecraft.client.gui.ScaledResolution;
@@ -384,6 +384,7 @@ public class Minecraft implements IThreadListener {
 		logger.info("EagRuntime Version: " + EagRuntime.getVersion());
 		this.createDisplay();
 		this.registerMetadataSerializers();
+		EaglerFolderResourcePack.deleteOldResourcePacks(EaglerFolderResourcePack.SERVER_RESOURCE_PACKS, 604800000L);
 		this.mcResourcePackRepository = new ResourcePackRepository(this.mcDefaultResourcePack, this.metadataSerializer_,
 				this.gameSettings);
 		this.mcResourceManager = new SimpleReloadableResourceManager(this.metadataSerializer_);
@@ -696,7 +697,7 @@ public class Minecraft implements IThreadListener {
 		if (SingleplayerServerController.shutdownEaglercraftServer()
 				|| SingleplayerServerController.getStatusState() == IntegratedServerState.WORLD_UNLOADING) {
 			displayGuiScreen(new GuiScreenIntegratedServerBusy(cont, "singleplayer.busy.stoppingIntegratedServer",
-					"singleplayer.failed.stoppingIntegratedServer", () -> SingleplayerServerController.isReady()));
+					"singleplayer.failed.stoppingIntegratedServer", SingleplayerServerController::isReady));
 		} else {
 			displayGuiScreen(cont);
 		}
@@ -1703,8 +1704,7 @@ public class Minecraft implements IThreadListener {
 				if (SingleplayerServerController.hangupEaglercraftServer()) {
 					this.displayGuiScreen(new GuiScreenIntegratedServerBusy(currentScreen,
 							"singleplayer.busy.stoppingIntegratedServer",
-							"singleplayer.failed.stoppingIntegratedServer",
-							() -> SingleplayerServerController.isReady()));
+							"singleplayer.failed.stoppingIntegratedServer", SingleplayerServerController::isReady));
 				}
 			}
 		}

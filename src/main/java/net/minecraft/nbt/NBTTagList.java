@@ -234,8 +234,8 @@ public class NBTTagList extends NBTBase {
 		NBTTagList nbttaglist = new NBTTagList();
 		nbttaglist.tagType = this.tagType;
 
-		for (NBTBase nbtbase : this.tagList) {
-			NBTBase nbtbase1 = nbtbase.copy();
+		for (int i = 0, l = this.tagList.size(); i < l; ++i) {
+			NBTBase nbtbase1 = this.tagList.get(i).copy();
 			nbttaglist.tagList.add(nbtbase1);
 		}
 

@@ -61,9 +61,9 @@ public abstract class BlockFlower extends BlockBush {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (BlockFlower.EnumFlowerType blockflower$enumflowertype : BlockFlower.EnumFlowerType
-				.getTypes(this.getBlockType())) {
-			list.add(new ItemStack(item, 1, blockflower$enumflowertype.getMeta()));
+		BlockFlower.EnumFlowerType[] flowerTypes = BlockFlower.EnumFlowerType.getTypes(this.getBlockType());
+		for (int i = 0; i < flowerTypes.length; ++i) {
+			list.add(new ItemStack(item, 1, flowerTypes[i].getMeta()));
 		}
 
 	}
@@ -130,8 +130,9 @@ public abstract class BlockFlower extends BlockBush {
 		PINK_TULIP(BlockFlower.EnumFlowerColor.RED, 7, "pink_tulip", "tulipPink"),
 		OXEYE_DAISY(BlockFlower.EnumFlowerColor.RED, 8, "oxeye_daisy", "oxeyeDaisy");
 
-		private static final BlockFlower.EnumFlowerType[][] TYPES_FOR_BLOCK = new BlockFlower.EnumFlowerType[BlockFlower.EnumFlowerColor
-				.values().length][];
+		public static final BlockFlower.EnumFlowerType[] _VALUES = EnumFlowerType.values();
+
+		private static final BlockFlower.EnumFlowerType[][] TYPES_FOR_BLOCK = new BlockFlower.EnumFlowerType[_VALUES.length][];
 		private final BlockFlower.EnumFlowerColor blockType;
 		private final int meta;
 		private final String name;
@@ -185,7 +186,9 @@ public abstract class BlockFlower extends BlockBush {
 		}
 
 		static {
-			for (final BlockFlower.EnumFlowerColor blockflower$enumflowercolor : BlockFlower.EnumFlowerColor.values()) {
+			BlockFlower.EnumFlowerColor[] colors = BlockFlower.EnumFlowerColor.values();
+			for (int i = 0; i < colors.length; ++i) {
+				final BlockFlower.EnumFlowerColor blockflower$enumflowercolor = colors[i];
 				Collection collection = Collections2.filter(Lists.newArrayList(values()),
 						new Predicate<BlockFlower.EnumFlowerType>() {
 							public boolean apply(BlockFlower.EnumFlowerType blockflower$enumflowertype) {

@@ -61,8 +61,8 @@ public class ViewFrustum {
 	}
 
 	public void deleteGlResources() {
-		for (RenderChunk renderchunk : this.renderChunks) {
-			renderchunk.deleteGlResources();
+		for (int i = 0; i < this.renderChunks.length; ++i) {
+			renderChunks[i].deleteGlResources();
 		}
 
 	}

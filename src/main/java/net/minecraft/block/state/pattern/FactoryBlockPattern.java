@@ -1,6 +1,5 @@
 package net.minecraft.block.state.pattern;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,14 +57,17 @@ public class FactoryBlockPattern {
 				throw new IllegalArgumentException("Expected aisle with height of " + this.aisleHeight
 						+ ", but was given one with a height of " + aisle.length + ")");
 			} else {
-				for (String s : aisle) {
+				for (int i = 0; i < aisle.length; ++i) {
+					String s = aisle[i];
 					if (s.length() != this.rowWidth) {
 						throw new IllegalArgumentException(
 								"Not all rows in the given aisle are the correct width (expected " + this.rowWidth
 										+ ", found one with " + s.length() + ")");
 					}
 
-					for (char c0 : s.toCharArray()) {
+					char[] achar = s.toCharArray();
+					for (int j = 0; j < achar.length; ++j) {
+						char c0 = achar[j];
 						if (!this.symbolMap.containsKey(Character.valueOf(c0))) {
 							this.symbolMap.put(Character.valueOf(c0), null);
 						}

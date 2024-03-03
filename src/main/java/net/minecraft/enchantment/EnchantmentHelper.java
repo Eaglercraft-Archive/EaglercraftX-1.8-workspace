@@ -142,8 +142,8 @@ public class EnchantmentHelper {
 		} else {
 			int i = 0;
 
-			for (ItemStack itemstack : stacks) {
-				int j = getEnchantmentLevel(enchID, itemstack);
+			for (int k = 0; k < stacks.length; ++k) {
+				int j = getEnchantmentLevel(enchID, stacks[k]);
 				if (j > i) {
 					i = j;
 				}
@@ -177,8 +177,8 @@ public class EnchantmentHelper {
 	 * passed.
 	 */
 	private static void applyEnchantmentModifierArray(EnchantmentHelper.IModifier modifier, ItemStack[] stacks) {
-		for (ItemStack itemstack : stacks) {
-			applyEnchantmentModifier(modifier, itemstack);
+		for (int k = 0; k < stacks.length; ++k) {
+			applyEnchantmentModifier(modifier, stacks[k]);
 		}
 
 	}
@@ -356,7 +356,9 @@ public class EnchantmentHelper {
 	}
 
 	public static ItemStack getEnchantedItem(Enchantment parEnchantment, EntityLivingBase parEntityLivingBase) {
-		for (ItemStack itemstack : parEntityLivingBase.getInventory()) {
+		ItemStack[] stacks = parEntityLivingBase.getInventory();
+		for (int k = 0; k < stacks.length; ++k) {
+			ItemStack itemstack = stacks[k];
 			if (itemstack != null && getEnchantmentLevel(parEnchantment.effectId, itemstack) > 0) {
 				return itemstack;
 			}
@@ -391,14 +393,15 @@ public class EnchantmentHelper {
 	 * random, itemStack, enchantabilityLevel
 	 */
 	public static ItemStack addRandomEnchantment(EaglercraftRandom parRandom, ItemStack parItemStack, int parInt1) {
-		List list = buildEnchantmentList(parRandom, parItemStack, parInt1);
+		List<EnchantmentData> list = buildEnchantmentList(parRandom, parItemStack, parInt1);
 		boolean flag = parItemStack.getItem() == Items.book;
 		if (flag) {
 			parItemStack.setItem(Items.enchanted_book);
 		}
 
 		if (list != null) {
-			for (EnchantmentData enchantmentdata : (List<EnchantmentData>) list) {
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				EnchantmentData enchantmentdata = list.get(i);
 				if (flag) {
 					Items.enchanted_book.addEnchantment(parItemStack, enchantmentdata);
 				} else {
@@ -431,7 +434,7 @@ public class EnchantmentHelper {
 				k = 1;
 			}
 
-			ArrayList arraylist = null;
+			ArrayList<EnchantmentData> arraylist = null;
 			Map map = mapEnchantmentData(k, itemStackIn);
 			if (map != null && !map.isEmpty()) {
 				EnchantmentData enchantmentdata = (EnchantmentData) WeightedRandom.getRandomItem(randomIn,
@@ -447,7 +450,8 @@ public class EnchantmentHelper {
 							Integer integer = (Integer) iterator.next();
 							boolean flag = true;
 
-							for (EnchantmentData enchantmentdata1 : (List<EnchantmentData>) arraylist) {
+							for (int m = 0, n = arraylist.size(); m < n; ++m) {
+								EnchantmentData enchantmentdata1 = arraylist.get(m);
 								if (!enchantmentdata1.enchantmentobj
 										.canApplyTogether(Enchantment.getEnchantmentById(integer.intValue()))) {
 									flag = false;
@@ -478,7 +482,8 @@ public class EnchantmentHelper {
 		HashMap hashmap = null;
 		boolean flag = parItemStack.getItem() == Items.book;
 
-		for (Enchantment enchantment : Enchantment.enchantmentsBookList) {
+		for (int j = 0; j < Enchantment.enchantmentsBookList.length; ++j) {
+			Enchantment enchantment = Enchantment.enchantmentsBookList[j];
 			if (enchantment != null && (enchantment.type.canEnchantItem(item) || flag)) {
 				for (int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); ++i) {
 					if (parInt1 >= enchantment.getMinEnchantability(i)

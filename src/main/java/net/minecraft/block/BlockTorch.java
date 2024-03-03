@@ -107,7 +107,9 @@ public class BlockTorch extends Block {
 		if (this.canPlaceAt(world, blockpos, enumfacing)) {
 			return this.getDefaultState().withProperty(FACING, enumfacing);
 		} else {
-			for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL) {
+			EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+			for (int i = 0; i < facings.length; ++i) {
+				EnumFacing enumfacing1 = facings[i];
 				if (world.isBlockNormalCube(blockpos.offset(enumfacing1.getOpposite()), true)) {
 					return this.getDefaultState().withProperty(FACING, enumfacing1);
 				}

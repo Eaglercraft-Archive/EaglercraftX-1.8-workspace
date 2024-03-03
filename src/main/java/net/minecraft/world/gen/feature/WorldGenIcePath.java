@@ -5,7 +5,6 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -28,7 +27,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  * 
  */
 public class WorldGenIcePath extends WorldGenerator {
-
 	private Block block = Blocks.packed_ice;
 	private int basePathWidth;
 

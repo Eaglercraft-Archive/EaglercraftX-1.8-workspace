@@ -2,7 +2,6 @@ package net.minecraft.entity.ai;
 
 import com.google.common.base.Predicate;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.passive.EntityTameable;
 
 /**+
@@ -26,7 +25,6 @@ import net.minecraft.entity.passive.EntityTameable;
  * 
  */
 public class EntityAITargetNonTamed<T extends EntityLivingBase> extends EntityAINearestAttackableTarget {
-
 	private EntityTameable theTameable;
 
 	public EntityAITargetNonTamed(EntityTameable entityIn, Class<T> classTarget, boolean checkSight,

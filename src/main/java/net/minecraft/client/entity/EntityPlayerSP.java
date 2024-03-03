@@ -1,8 +1,6 @@
 package net.minecraft.client.entity;
 
-import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
 import net.lax1dude.eaglercraft.v1_8.sp.lan.LANClientNetworkManager;
-import net.lax1dude.eaglercraft.v1_8.sp.lan.LANServerController;
 import net.lax1dude.eaglercraft.v1_8.sp.socket.ClientIntegratedServerNetworkManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.MovingSoundMinecartRiding;

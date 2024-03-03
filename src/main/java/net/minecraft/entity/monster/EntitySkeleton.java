@@ -89,7 +89,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob {
 
 	protected void entityInit() {
 		super.entityInit();
-		this.dataWatcher.addObject(13, new Byte((byte) 0));
+		this.dataWatcher.addObject(13, Byte.valueOf((byte) 0));
 	}
 
 	/**+

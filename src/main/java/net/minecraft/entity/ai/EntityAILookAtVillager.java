@@ -1,6 +1,5 @@
 package net.minecraft.entity.ai;
 
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.passive.EntityVillager;
 
@@ -25,7 +24,6 @@ import net.minecraft.entity.passive.EntityVillager;
  * 
  */
 public class EntityAILookAtVillager extends EntityAIBase {
-
 	private EntityIronGolem theGolem;
 	private EntityVillager theVillager;
 	private int lookTime;

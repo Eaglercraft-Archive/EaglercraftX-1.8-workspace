@@ -71,7 +71,8 @@ public class FlatGeneratorInfo {
 	public void func_82645_d() {
 		int i = 0;
 
-		for (FlatLayerInfo flatlayerinfo : this.flatLayers) {
+		for (int j = 0, l = this.flatLayers.size(); j < l; ++j) {
+			FlatLayerInfo flatlayerinfo = this.flatLayers.get(j);
 			flatlayerinfo.setMinY(i);
 			i += flatlayerinfo.getLayerCount();
 		}
@@ -197,8 +198,8 @@ public class FlatGeneratorInfo {
 			String[] astring = parString1.split(",");
 			int i = 0;
 
-			for (String s : astring) {
-				FlatLayerInfo flatlayerinfo = func_180715_a(parInt1, s, i);
+			for (int j = 0; j < astring.length; ++j) {
+				FlatLayerInfo flatlayerinfo = func_180715_a(parInt1, astring[j], i);
 				if (flatlayerinfo == null) {
 					return null;
 				}
@@ -235,8 +236,8 @@ public class FlatGeneratorInfo {
 					if (i > 0 && astring.length > j) {
 						String[] astring1 = astring[j++].toLowerCase().split(",");
 
-						for (String s : astring1) {
-							String[] astring2 = s.split("\\(", 2);
+						for (int m = 0; m < astring1.length; ++m) {
+							String[] astring2 = astring1[m].split("\\(", 2);
 							HashMap hashmap = Maps.newHashMap();
 							if (astring2[0].length() > 0) {
 								flatgeneratorinfo.getWorldFeatures().put(astring2[0], hashmap);

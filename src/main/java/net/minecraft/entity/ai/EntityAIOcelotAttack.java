@@ -2,7 +2,6 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.world.World;
 
 /**+
@@ -26,7 +25,6 @@ import net.minecraft.world.World;
  * 
  */
 public class EntityAIOcelotAttack extends EntityAIBase {
-
 	World theWorld;
 	EntityLiving theEntity;
 	EntityLivingBase theVictim;

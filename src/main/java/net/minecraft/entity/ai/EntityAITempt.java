@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -28,7 +27,6 @@ import net.minecraft.pathfinding.PathNavigateGround;
  * 
  */
 public class EntityAITempt extends EntityAIBase {
-
 	private EntityCreature temptedEntity;
 	private double speed;
 	private double targetX;

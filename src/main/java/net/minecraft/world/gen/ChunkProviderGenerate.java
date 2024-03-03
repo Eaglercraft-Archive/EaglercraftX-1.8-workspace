@@ -17,12 +17,6 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderSettings;
-import net.minecraft.world.gen.MapGenBase;
-import net.minecraft.world.gen.MapGenCaves;
-import net.minecraft.world.gen.MapGenRavine;
-import net.minecraft.world.gen.NoiseGeneratorOctaves;
-import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.feature.WorldGenDungeons;
 import net.minecraft.world.gen.feature.WorldGenLakes;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
@@ -52,7 +46,6 @@ import net.minecraft.world.gen.structure.StructureOceanMonument;
  * 
  */
 public class ChunkProviderGenerate implements IChunkProvider {
-
 	private EaglercraftRandom rand;
 	private NoiseGeneratorOctaves field_147431_j;
 	private NoiseGeneratorOctaves field_147432_k;

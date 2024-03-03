@@ -54,7 +54,9 @@ public class GuiScreenOptionsSounds extends GuiScreen {
 				this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), SoundCategory.MASTER, true));
 		i = i + 2;
 
-		for (SoundCategory soundcategory : SoundCategory.values()) {
+		SoundCategory[] cats = SoundCategory._VALUES;
+		for (int j = 0; j < cats.length; ++j) {
+			SoundCategory soundcategory = cats[j];
 			if (soundcategory != SoundCategory.MASTER) {
 				this.buttonList.add(new GuiScreenOptionsSounds.Button(soundcategory.getCategoryId(),
 						this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), soundcategory,

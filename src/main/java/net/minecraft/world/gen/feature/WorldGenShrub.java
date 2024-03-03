@@ -7,7 +7,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenTrees;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -30,7 +29,6 @@ import net.minecraft.world.gen.feature.WorldGenTrees;
  * 
  */
 public class WorldGenShrub extends WorldGenTrees {
-
 	private final IBlockState leavesMetadata;
 	private final IBlockState woodMetadata;
 

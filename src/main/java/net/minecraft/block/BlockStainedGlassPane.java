@@ -63,7 +63,7 @@ public class BlockStainedGlassPane extends BlockPane {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (int i = 0; i < EnumDyeColor.values().length; ++i) {
+		for (int i = 0; i < EnumDyeColor.META_LOOKUP.length; ++i) {
 			list.add(new ItemStack(item, 1, i));
 		}
 

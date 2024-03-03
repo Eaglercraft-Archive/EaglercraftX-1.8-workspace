@@ -74,11 +74,13 @@ public class BlockModelRenderer {
 	public boolean renderModelAmbientOcclusion(IBlockAccess blockAccessIn, IBakedModel modelIn, Block blockIn,
 			BlockPos blockPosIn, WorldRenderer worldRendererIn, boolean checkSides) {
 		boolean flag = false;
-		float[] afloat = new float[EnumFacing.values().length * 2];
+		float[] afloat = new float[EnumFacing._VALUES.length * 2];
 		BitSet bitset = new BitSet(3);
 		BlockModelRenderer.AmbientOcclusionFace blockmodelrenderer$ambientocclusionface = new BlockModelRenderer.AmbientOcclusionFace();
 
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			List list = modelIn.getFaceQuads(enumfacing);
 			if (!list.isEmpty()) {
 				BlockPos blockpos = blockPosIn.offset(enumfacing);
@@ -104,11 +106,13 @@ public class BlockModelRenderer {
 			BlockPos blockPosIn, WorldRenderer worldRendererIn, boolean checkSides) {
 		boolean isDeferred = DeferredStateManager.isDeferredRenderer();
 		boolean flag = false;
-		float[] afloat = isDeferred ? new float[EnumFacing.values().length * 2] : null;
+		float[] afloat = isDeferred ? new float[EnumFacing._VALUES.length * 2] : null;
 		BitSet bitset = new BitSet(3);
 
 		BlockPos.MutableBlockPos pointer = new BlockPos.MutableBlockPos();
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int m = 0; m < facings.length; ++m) {
+			EnumFacing enumfacing = facings[m];
 			List list = modelIn.getFaceQuads(enumfacing);
 			if (!list.isEmpty()) {
 				BlockPos blockpos = blockPosIn.offsetEvenFaster(enumfacing, pointer);
@@ -148,7 +152,8 @@ public class BlockModelRenderer {
 			}
 		}
 
-		for (BakedQuad bakedquad : listQuadsIn) {
+		for (int i = 0, l = listQuadsIn.size(); i < l; ++i) {
+			BakedQuad bakedquad = listQuadsIn.get(i);
 			int[] vertData = isDeferred ? bakedquad.getVertexDataWithNormals() : bakedquad.getVertexData();
 			this.fillQuadBounds(blockIn, vertData, bakedquad.getFace(), quadBounds, boundsFlags, isDeferred ? 8 : 7);
 			aoFaceIn.updateVertexBrightness(blockAccessIn, blockIn, blockPosIn, bakedquad.getFace(), quadBounds,
@@ -218,12 +223,12 @@ public class BlockModelRenderer {
 			quadBounds[EnumFacing.UP.getIndex()] = f4;
 			quadBounds[EnumFacing.NORTH.getIndex()] = f2;
 			quadBounds[EnumFacing.SOUTH.getIndex()] = f5;
-			quadBounds[EnumFacing.WEST.getIndex() + EnumFacing.values().length] = 1.0F - f;
-			quadBounds[EnumFacing.EAST.getIndex() + EnumFacing.values().length] = 1.0F - f3;
-			quadBounds[EnumFacing.DOWN.getIndex() + EnumFacing.values().length] = 1.0F - f1;
-			quadBounds[EnumFacing.UP.getIndex() + EnumFacing.values().length] = 1.0F - f4;
-			quadBounds[EnumFacing.NORTH.getIndex() + EnumFacing.values().length] = 1.0F - f2;
-			quadBounds[EnumFacing.SOUTH.getIndex() + EnumFacing.values().length] = 1.0F - f5;
+			quadBounds[EnumFacing.WEST.getIndex() + EnumFacing._VALUES.length] = 1.0F - f;
+			quadBounds[EnumFacing.EAST.getIndex() + EnumFacing._VALUES.length] = 1.0F - f3;
+			quadBounds[EnumFacing.DOWN.getIndex() + EnumFacing._VALUES.length] = 1.0F - f1;
+			quadBounds[EnumFacing.UP.getIndex() + EnumFacing._VALUES.length] = 1.0F - f4;
+			quadBounds[EnumFacing.NORTH.getIndex() + EnumFacing._VALUES.length] = 1.0F - f2;
+			quadBounds[EnumFacing.SOUTH.getIndex() + EnumFacing._VALUES.length] = 1.0F - f5;
 		}
 
 		float f9 = 1.0E-4F;
@@ -283,7 +288,8 @@ public class BlockModelRenderer {
 			}
 		}
 
-		for (BakedQuad bakedquad : listQuadsIn) {
+		for (int m = 0, n = listQuadsIn.size(); m < n; ++m) {
+			BakedQuad bakedquad = listQuadsIn.get(m);
 			EnumFacing facingIn = bakedquad.getFace();
 			int[] vertData = isDeferred ? bakedquad.getVertexDataWithNormals() : bakedquad.getVertexData();
 			blockPosIn.offsetEvenFaster(facingIn, blockpos0);
@@ -429,7 +435,9 @@ public class BlockModelRenderer {
 
 	public void renderModelBrightnessColor(IBakedModel bakedModel, float parFloat1, float parFloat2, float parFloat3,
 			float parFloat4) {
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			this.renderModelBrightnessColorQuads(parFloat1, parFloat2, parFloat3, parFloat4,
 					bakedModel.getFaceQuads(enumfacing));
 		}
@@ -462,7 +470,8 @@ public class BlockModelRenderer {
 		Tessellator tessellator = Tessellator.getInstance();
 		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
 
-		for (BakedQuad bakedquad : parList) {
+		for (int i = 0, l = parList.size(); i < l; ++i) {
+			BakedQuad bakedquad = parList.get(i);
 			worldrenderer.begin(7, DefaultVertexFormats.ITEM);
 			worldrenderer.addVertexData(bakedquad.getVertexData());
 			if (bakedquad.hasTintIndex()) {
@@ -800,7 +809,7 @@ public class BlockModelRenderer {
 		protected final int field_178229_m;
 
 		private Orientation(EnumFacing parEnumFacing, boolean parFlag) {
-			this.field_178229_m = parEnumFacing.getIndex() + (parFlag ? EnumFacing.values().length : 0);
+			this.field_178229_m = parEnumFacing.getIndex() + (parFlag ? EnumFacing._VALUES.length : 0);
 		}
 	}
 

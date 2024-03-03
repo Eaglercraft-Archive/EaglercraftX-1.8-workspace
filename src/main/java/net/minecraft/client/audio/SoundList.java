@@ -115,9 +115,10 @@ public class SoundList {
 			}
 
 			public static SoundList.SoundEntry.Type getType(String parString1) {
-				for (SoundList.SoundEntry.Type soundlist$soundentry$type : values()) {
-					if (soundlist$soundentry$type.field_148583_c.equals(parString1)) {
-						return soundlist$soundentry$type;
+				SoundList.SoundEntry.Type[] types = values();
+				for (int i = 0; i < types.length; ++i) {
+					if (types[i].field_148583_c.equals(parString1)) {
+						return types[i];
 					}
 				}
 

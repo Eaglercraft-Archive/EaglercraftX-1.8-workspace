@@ -106,7 +106,8 @@ public class EntityPotion extends EntityThrowable {
 				AxisAlignedBB axisalignedbb = this.getEntityBoundingBox().expand(4.0D, 2.0D, 4.0D);
 				List list1 = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, axisalignedbb);
 				if (!list1.isEmpty()) {
-					for (EntityLivingBase entitylivingbase : (List<EntityLivingBase>) list1) {
+					for (int k = 0, l = list1.size(); k < l; ++k) {
+						EntityLivingBase entitylivingbase = (EntityLivingBase) list1.get(k);
 						double d0 = this.getDistanceSqToEntity(entitylivingbase);
 						if (d0 < 16.0D) {
 							double d1 = 1.0D - Math.sqrt(d0) / 4.0D;
@@ -114,7 +115,8 @@ public class EntityPotion extends EntityThrowable {
 								d1 = 1.0D;
 							}
 
-							for (PotionEffect potioneffect : (List<PotionEffect>) list) {
+							for (int m = 0, n = list.size(); m < n; ++m) {
+								PotionEffect potioneffect = (PotionEffect) list.get(m);
 								int i = potioneffect.getPotionID();
 								if (Potion.potionTypes[i].isInstant()) {
 									Potion.potionTypes[i].affectEntity(this, this.getThrower(), entitylivingbase,

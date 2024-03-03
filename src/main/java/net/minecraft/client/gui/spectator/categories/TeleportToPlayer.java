@@ -57,7 +57,9 @@ public class TeleportToPlayer implements ISpectatorMenuView, ISpectatorMenuObjec
 	public TeleportToPlayer(Collection<NetworkPlayerInfo> parCollection) {
 		this.field_178673_b = Lists.newArrayList();
 
-		for (NetworkPlayerInfo networkplayerinfo : field_178674_a.sortedCopy(parCollection)) {
+		List<NetworkPlayerInfo> lst = field_178674_a.sortedCopy(parCollection);
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			NetworkPlayerInfo networkplayerinfo = lst.get(i);
 			if (networkplayerinfo.getGameType() != WorldSettings.GameType.SPECTATOR) {
 				this.field_178673_b.add(new PlayerMenuObject(networkplayerinfo.getGameProfile()));
 			}

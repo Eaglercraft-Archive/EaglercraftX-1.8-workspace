@@ -26,7 +26,7 @@ import net.minecraft.util.EnumFacing;
  * 
  */
 public class SetVisibility {
-	private static final int COUNT_FACES = EnumFacing.values().length;
+	private static final int COUNT_FACES = EnumFacing._VALUES.length;
 	private final BitSet bitSet;
 
 	public SetVisibility() {
@@ -34,9 +34,10 @@ public class SetVisibility {
 	}
 
 	public void setManyVisible(Set<EnumFacing> parSet) {
-		for (EnumFacing enumfacing : parSet) {
-			for (EnumFacing enumfacing1 : parSet) {
-				this.setVisible(enumfacing, enumfacing1, true);
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			for (int j = 0; j < facings.length; ++j) {
+				this.setVisible(facings[i], facings[j], true);
 			}
 		}
 
@@ -59,20 +60,22 @@ public class SetVisibility {
 		StringBuilder stringbuilder = new StringBuilder();
 		stringbuilder.append(' ');
 
-		for (EnumFacing enumfacing : EnumFacing.values()) {
-			stringbuilder.append(' ').append(enumfacing.toString().toUpperCase().charAt(0));
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			stringbuilder.append(' ').append(facings[i].toString().toUpperCase().charAt(0));
 		}
 
 		stringbuilder.append('\n');
 
-		for (EnumFacing enumfacing2 : EnumFacing.values()) {
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing2 = facings[i];
 			stringbuilder.append(enumfacing2.toString().toUpperCase().charAt(0));
 
-			for (EnumFacing enumfacing1 : EnumFacing.values()) {
-				if (enumfacing2 == enumfacing1) {
+			for (int j = 0; j < facings.length; ++j) {
+				if (enumfacing2 == facings[j]) {
 					stringbuilder.append("  ");
 				} else {
-					boolean flag = this.isVisible(enumfacing2, enumfacing1);
+					boolean flag = this.isVisible(enumfacing2, facings[j]);
 					stringbuilder.append(' ').append((char) (flag ? 'Y' : 'n'));
 				}
 			}

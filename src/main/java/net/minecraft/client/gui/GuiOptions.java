@@ -1,16 +1,23 @@
 package net.minecraft.client.gui;
 
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
+import net.lax1dude.eaglercraft.v1_8.Mouse;
+import net.lax1dude.eaglercraft.v1_8.internal.EnumCursorType;
 import net.lax1dude.eaglercraft.v1_8.internal.EnumPlatformType;
+import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
+import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.EaglerDeferredPipeline;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.gui.GuiShaderConfig;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.gui.GuiShadersNotSupported;
+import net.lax1dude.eaglercraft.v1_8.profile.GuiScreenImportExportProfile;
 import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
-import net.lax1dude.eaglercraft.v1_8.vfs.SYS;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumDifficulty;
 
 /**+
@@ -57,7 +64,8 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
 		int i = 0;
 		this.field_146442_a = I18n.format("options.title", new Object[0]);
 
-		for (GameSettings.Options gamesettings$options : field_146440_f) {
+		for (int j = 0; j < field_146440_f.length; ++j) {
+			GameSettings.Options gamesettings$options = field_146440_f[j];
 			if (gamesettings$options.getEnumFloat()) {
 				this.buttonList.add(new GuiOptionSlider(gamesettings$options.returnEnumOrdinal(),
 						this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1),
@@ -108,17 +116,15 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
 				I18n.format("options.language", new Object[0])));
 		this.buttonList.add(new GuiButton(103, this.width / 2 + 5, this.height / 6 + 120 - 6, 150, 20,
 				I18n.format("options.chat.title", new Object[0])));
-		GuiButton rp;
-		this.buttonList.add(rp = new GuiButton(105, this.width / 2 - 155, this.height / 6 + 144 - 6, 150, 20,
+		GuiButton btn;
+		this.buttonList.add(btn = new GuiButton(105, this.width / 2 - 155, this.height / 6 + 144 - 6, 150, 20,
 				I18n.format("options.resourcepack", new Object[0])));
-		GuiButton dbg;
-		this.buttonList.add(dbg = new GuiButton(104, this.width / 2 + 5, this.height / 6 + 144 - 6, 150, 20,
+		btn.enabled = EaglerFolderResourcePack.isSupported();
+		this.buttonList.add(btn = new GuiButton(104, this.width / 2 + 5, this.height / 6 + 144 - 6, 150, 20,
 				I18n.format("options.debugConsoleButton", new Object[0])));
-		dbg.enabled = EagRuntime.getPlatformType() != EnumPlatformType.DESKTOP;
+		btn.enabled = EagRuntime.getPlatformType() != EnumPlatformType.DESKTOP;
 		this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height / 6 + 168,
 				I18n.format("gui.done", new Object[0])));
-
-		rp.enabled = SYS.VFS != null;
 	}
 
 	public String func_175355_a(EnumDifficulty parEnumDifficulty) {
@@ -241,6 +247,36 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
 	public void drawScreen(int i, int j, float f) {
 		this.drawDefaultBackground();
 		this.drawCenteredString(this.fontRendererObj, this.field_146442_a, this.width / 2, 15, 16777215);
+
+		if (mc.theWorld == null && !EagRuntime.getConfiguration().isDemo()) {
+			GlStateManager.pushMatrix();
+			GlStateManager.scale(0.75f, 0.75f, 0.75f);
+			GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
+			String text = I18n.format("editProfile.importExport");
+
+			int w = mc.fontRendererObj.getStringWidth(text);
+			boolean hover = i > 1 && j > 1 && i < (w * 3 / 4) + 7 && j < 12;
+			if (hover) {
+				Mouse.showCursor(EnumCursorType.HAND);
+			}
+
+			drawString(mc.fontRendererObj, EnumChatFormatting.UNDERLINE + text, 5, 5, hover ? 0xFFEEEE22 : 0xFFCCCCCC);
+
+			GlStateManager.popMatrix();
+		}
+
 		super.drawScreen(i, j, f);
+	}
+
+	protected void mouseClicked(int mx, int my, int button) {
+		super.mouseClicked(mx, my, button);
+		if (mc.theWorld == null && !EagRuntime.getConfiguration().isDemo()) {
+			int w = mc.fontRendererObj.getStringWidth(I18n.format("editProfile.importExport"));
+			if (mx > 1 && my > 1 && mx < (w * 3 / 4) + 7 && my < 12) {
+				mc.displayGuiScreen(new GuiScreenImportExportProfile(this));
+				mc.getSoundHandler()
+						.playSound(PositionedSoundRecord.create(new ResourceLocation("gui.button.press"), 1.0F));
+			}
+		}
 	}
 }

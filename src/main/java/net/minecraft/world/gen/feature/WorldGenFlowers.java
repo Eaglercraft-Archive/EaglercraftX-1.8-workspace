@@ -5,7 +5,6 @@ import net.minecraft.block.BlockFlower;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -28,7 +27,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  * 
  */
 public class WorldGenFlowers extends WorldGenerator {
-
 	private BlockFlower flower;
 	private IBlockState field_175915_b;
 

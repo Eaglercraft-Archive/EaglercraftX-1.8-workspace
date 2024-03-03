@@ -132,7 +132,7 @@ public class BlockQuartz extends Block {
 		DEFAULT(0, "default", "default"), CHISELED(1, "chiseled", "chiseled"), LINES_Y(2, "lines_y", "lines"),
 		LINES_X(3, "lines_x", "lines"), LINES_Z(4, "lines_z", "lines");
 
-		private static final BlockQuartz.EnumType[] META_LOOKUP = new BlockQuartz.EnumType[values().length];
+		private static final BlockQuartz.EnumType[] META_LOOKUP = new BlockQuartz.EnumType[5];
 		private final int meta;
 		private final String field_176805_h;
 		private final String unlocalizedName;
@@ -164,8 +164,9 @@ public class BlockQuartz extends Block {
 		}
 
 		static {
-			for (BlockQuartz.EnumType blockquartz$enumtype : values()) {
-				META_LOOKUP[blockquartz$enumtype.getMetadata()] = blockquartz$enumtype;
+			BlockQuartz.EnumType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMetadata()] = types[i];
 			}
 
 		}

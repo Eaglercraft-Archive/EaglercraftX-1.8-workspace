@@ -6,7 +6,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -29,7 +28,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  * 
  */
 public class WorldGenHellLava extends WorldGenerator {
-
 	private final Block field_150553_a;
 	private final boolean field_94524_b;
 

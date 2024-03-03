@@ -59,7 +59,7 @@ public class ShapelessRecipes implements IRecipe {
 	 * Used to check if a recipe matches current crafting inventory
 	 */
 	public boolean matches(InventoryCrafting inventorycrafting, World var2) {
-		ArrayList arraylist = Lists.newArrayList(this.recipeItems);
+		ArrayList<ItemStack> arraylist = Lists.newArrayList(this.recipeItems);
 
 		for (int i = 0; i < inventorycrafting.getHeight(); ++i) {
 			for (int j = 0; j < inventorycrafting.getWidth(); ++j) {
@@ -67,7 +67,8 @@ public class ShapelessRecipes implements IRecipe {
 				if (itemstack != null) {
 					boolean flag = false;
 
-					for (ItemStack itemstack1 : (List<ItemStack>) arraylist) {
+					for (int m = 0, l = arraylist.size(); m < l; ++m) {
+						ItemStack itemstack1 = arraylist.get(m);
 						if (itemstack.getItem() == itemstack1.getItem() && (itemstack1.getMetadata() == 32767
 								|| itemstack.getMetadata() == itemstack1.getMetadata())) {
 							flag = true;

@@ -185,7 +185,9 @@ public class BlockPistonStructureHelper {
 	}
 
 	private boolean func_177250_b(BlockPos parBlockPos) {
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			if (enumfacing.getAxis() != this.moveDirection.getAxis()
 					&& !this.func_177251_a(parBlockPos.offset(enumfacing))) {
 				return false;

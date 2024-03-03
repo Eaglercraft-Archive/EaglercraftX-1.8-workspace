@@ -17,5 +17,6 @@
 	<classpathentry kind="lib" path="deps_fix/lwjgl-openal.jar"/>
 	<classpathentry kind="lib" path="deps_fix/lwjgl-opengles.jar"/>
 	<classpathentry kind="lib" path="deps_fix/soundsystem-20120107.jar"/>
+	<classpathentry kind="lib" path="deps_fix/webrtc-java-0.8.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

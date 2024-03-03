@@ -51,7 +51,7 @@ public class PropertyDirection extends PropertyEnum<EnumFacing> {
 		/**+
 		 * Create a new PropertyDirection with the given name
 		 */
-		return create(name, Collections2.filter(Lists.newArrayList(EnumFacing.values()), filter));
+		return create(name, Collections2.filter(Lists.newArrayList(EnumFacing._VALUES), filter));
 	}
 
 	/**+

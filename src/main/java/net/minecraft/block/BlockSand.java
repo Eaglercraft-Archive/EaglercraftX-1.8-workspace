@@ -58,8 +58,9 @@ public class BlockSand extends BlockFalling {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (BlockSand.EnumType blocksand$enumtype : BlockSand.EnumType.values()) {
-			list.add(new ItemStack(item, 1, blocksand$enumtype.getMetadata()));
+		BlockSand.EnumType[] blocks = BlockSand.EnumType.META_LOOKUP;
+		for (int i = 0; i < blocks.length; ++i) {
+			list.add(new ItemStack(item, 1, blocks[i].getMetadata()));
 		}
 
 	}
@@ -92,7 +93,7 @@ public class BlockSand extends BlockFalling {
 	public static enum EnumType implements IStringSerializable {
 		SAND(0, "sand", "default", MapColor.sandColor), RED_SAND(1, "red_sand", "red", MapColor.adobeColor);
 
-		private static final BlockSand.EnumType[] META_LOOKUP = new BlockSand.EnumType[values().length];
+		public static final BlockSand.EnumType[] META_LOOKUP = new BlockSand.EnumType[2];
 		private final int meta;
 		private final String name;
 		private final MapColor mapColor;
@@ -137,8 +138,9 @@ public class BlockSand extends BlockFalling {
 		}
 
 		static {
-			for (BlockSand.EnumType blocksand$enumtype : values()) {
-				META_LOOKUP[blocksand$enumtype.getMetadata()] = blocksand$enumtype;
+			BlockSand.EnumType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMetadata()] = types[i];
 			}
 
 		}

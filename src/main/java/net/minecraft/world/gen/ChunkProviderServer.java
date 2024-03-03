@@ -49,7 +49,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class ChunkProviderServer implements IChunkProvider {
-
 	private static final Logger logger = LogManager.getLogger();
 	private Set<Long> droppedChunksSet = Collections.newSetFromMap(new ConcurrentHashMap());
 	private Chunk dummyChunk;
@@ -64,7 +63,7 @@ public class ChunkProviderServer implements IChunkProvider {
 	 * map of chunk Id's to Chunk instances
 	 */
 	private LongHashMap<Chunk> id2ChunkMap = new LongHashMap();
-	private List<Chunk> loadedChunks = Lists.newArrayList();
+	private List<Chunk> loadedChunks = Lists.newLinkedList();
 	private WorldServer worldObj;
 
 	public ChunkProviderServer(WorldServer parWorldServer, IChunkLoader parIChunkLoader,
@@ -240,7 +239,7 @@ public class ChunkProviderServer implements IChunkProvider {
 		int i = 0;
 		ArrayList arraylist = Lists.newArrayList(this.loadedChunks);
 
-		for (int j = 0; j < arraylist.size(); ++j) {
+		for (int j = 0, l = arraylist.size(); j < l; ++j) {
 			Chunk chunk = (Chunk) arraylist.get(j);
 			if (flag) {
 				this.saveChunkExtraData(chunk);

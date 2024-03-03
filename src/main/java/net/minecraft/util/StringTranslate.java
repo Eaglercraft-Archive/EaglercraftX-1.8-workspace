@@ -74,7 +74,8 @@ public class StringTranslate {
 
 	public static void initServer(List<String> strs) {
 		instance.languageList.clear();
-		for (String s : strs) {
+		for (int i = 0, l = strs.size(); i < l; ++i) {
+			String s = strs.get(i);
 			if (!s.isEmpty() && s.charAt(0) != 35) {
 				String[] astring = (String[]) Iterables.toArray(equalSignSplitter.split(s), String.class);
 				if (astring != null && astring.length == 2) {

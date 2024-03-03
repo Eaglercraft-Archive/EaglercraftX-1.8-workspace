@@ -74,7 +74,9 @@ public class ItemFishFood extends ItemFood {
 	 * (eg: dye returns 16 items)
 	 */
 	public void getSubItems(Item var1, CreativeTabs var2, List<ItemStack> list) {
-		for (ItemFishFood.FishType itemfishfood$fishtype : ItemFishFood.FishType.values()) {
+		ItemFishFood.FishType[] types = ItemFishFood.FishType.values();
+		for (int i = 0; i < types.length; ++i) {
+			ItemFishFood.FishType itemfishfood$fishtype = types[i];
 			if (!this.cooked || itemfishfood$fishtype.canCook()) {
 				list.add(new ItemStack(this, 1, itemfishfood$fishtype.getMetadata()));
 			}
@@ -171,8 +173,9 @@ public class ItemFishFood extends ItemFood {
 		}
 
 		static {
-			for (ItemFishFood.FishType itemfishfood$fishtype : values()) {
-				META_LOOKUP.put(Integer.valueOf(itemfishfood$fishtype.getMetadata()), itemfishfood$fishtype);
+			ItemFishFood.FishType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP.put(Integer.valueOf(types[i].getMetadata()), types[i]);
 			}
 
 		}

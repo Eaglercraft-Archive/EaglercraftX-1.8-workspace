@@ -258,11 +258,13 @@ public class BlockPortal extends BlockBreakable {
 		if (!blockportal$size.func_150860_b()) {
 			return new BlockPattern.PatternHelper(parBlockPos, EnumFacing.NORTH, EnumFacing.UP, loadingcache, 1, 1, 1);
 		} else {
-			int[] aint = new int[EnumFacing.AxisDirection.values().length];
+			EnumFacing.AxisDirection[] axis = EnumFacing.AxisDirection._VALUES;
+			int[] aint = new int[axis.length];
 			EnumFacing enumfacing = blockportal$size.field_150866_c.rotateYCCW();
 			BlockPos blockpos = blockportal$size.field_150861_f.up(blockportal$size.func_181100_a() - 1);
 
-			for (EnumFacing.AxisDirection enumfacing$axisdirection : EnumFacing.AxisDirection.values()) {
+			for (int k = 0; k < axis.length; ++k) {
+				EnumFacing.AxisDirection enumfacing$axisdirection = axis[k];
 				BlockPattern.PatternHelper blockpattern$patternhelper = new BlockPattern.PatternHelper(
 						enumfacing.getAxisDirection() == enumfacing$axisdirection ? blockpos
 								: blockpos.offset(blockportal$size.field_150866_c,
@@ -283,7 +285,8 @@ public class BlockPortal extends BlockBreakable {
 
 			EnumFacing.AxisDirection enumfacing$axisdirection1 = EnumFacing.AxisDirection.POSITIVE;
 
-			for (EnumFacing.AxisDirection enumfacing$axisdirection2 : EnumFacing.AxisDirection.values()) {
+			for (int k = 0; k < axis.length; ++k) {
+				EnumFacing.AxisDirection enumfacing$axisdirection2 = axis[k];
 				if (aint[enumfacing$axisdirection2.ordinal()] < aint[enumfacing$axisdirection1.ordinal()]) {
 					enumfacing$axisdirection1 = enumfacing$axisdirection2;
 				}

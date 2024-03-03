@@ -40,7 +40,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class PlayerManager {
-
 	private static final Logger pmLogger = LogManager.getLogger();
 	private final WorldServer theWorldServer;
 	/**+
@@ -291,7 +290,9 @@ public class PlayerManager {
 		if (radius != this.playerViewRadius) {
 			int i = radius - this.playerViewRadius;
 
-			for (EntityPlayerMP entityplayermp : Lists.newArrayList(this.players)) {
+			List<EntityPlayerMP> playerz = Lists.newArrayList(this.players);
+			for (int m = 0, n = playerz.size(); m < n; ++m) {
+				EntityPlayerMP entityplayermp = playerz.get(m);
 				int j = (int) entityplayermp.posX >> 4;
 				int k = (int) entityplayermp.posZ >> 4;
 				if (i > 0) {

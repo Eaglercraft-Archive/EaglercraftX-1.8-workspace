@@ -12,8 +12,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.boss.EntityDragonPart;
-import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.IMob;
@@ -381,12 +379,13 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
 
 		if (this.rand.nextInt(10) == 0) {
 			float f = 32.0F;
-			List list = this.worldObj.getEntitiesWithinAABB(EntityEnderCrystal.class,
+			List<EntityEnderCrystal> list = this.worldObj.getEntitiesWithinAABB(EntityEnderCrystal.class,
 					this.getEntityBoundingBox().expand((double) f, (double) f, (double) f));
 			EntityEnderCrystal entityendercrystal = null;
 			double d0 = Double.MAX_VALUE;
 
-			for (EntityEnderCrystal entityendercrystal1 : (List<EntityEnderCrystal>) list) {
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				EntityEnderCrystal entityendercrystal1 = list.get(i);
 				double d1 = entityendercrystal1.getDistanceSqToEntity(this);
 				if (d1 < d0) {
 					d0 = d1;
@@ -409,7 +408,8 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
 		double d1 = (this.dragonPartBody.getEntityBoundingBox().minZ + this.dragonPartBody.getEntityBoundingBox().maxZ)
 				/ 2.0D;
 
-		for (Entity entity : parList) {
+		for (int i = 0, l = parList.size(); i < l; ++i) {
+			Entity entity = parList.get(i);
 			if (entity instanceof EntityLivingBase) {
 				double d2 = entity.posX - d0;
 				double d3 = entity.posZ - d1;
@@ -425,7 +425,7 @@ public class EntityDragon extends EntityLiving implements IBossDisplayData, IEnt
 	 * damage.
 	 */
 	private void attackEntitiesInList(List<Entity> parList) {
-		for (int i = 0; i < parList.size(); ++i) {
+		for (int i = 0, l = parList.size(); i < l; ++i) {
 			Entity entity = (Entity) parList.get(i);
 			if (entity instanceof EntityLivingBase) {
 				entity.attackEntityFrom(DamageSource.causeMobDamage(this), 10.0F);

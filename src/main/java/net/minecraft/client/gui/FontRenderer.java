@@ -680,8 +680,9 @@ public class FontRenderer implements IResourceManagerReloadListener {
 	 * wordwrap and with darker drop shadow color if flag is set
 	 */
 	private void renderSplitString(String str, int x, int y, int wrapWidth, boolean addShadow) {
-		for (String s : this.listFormattedStringToWidth(str, wrapWidth)) {
-			this.renderStringAligned(s, x, y, wrapWidth, this.textColor, addShadow);
+		List<String> lst = this.listFormattedStringToWidth(str, wrapWidth);
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			this.renderStringAligned(lst.get(i), x, y, wrapWidth, this.textColor, addShadow);
 			y += this.FONT_HEIGHT;
 		}
 

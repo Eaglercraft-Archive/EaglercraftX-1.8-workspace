@@ -447,7 +447,8 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 		height = stitcher.getCurrentHeight();
 
 		List<EaglerTextureAtlasSprite> spriteList = stitcher.getStichSlots();
-		for (EaglerTextureAtlasSprite textureatlassprite2 : spriteList) {
+		for (int l = 0, m = spriteList.size(); l < m; ++l) {
+			EaglerTextureAtlasSprite textureatlassprite2 = spriteList.get(l);
 			String s = textureatlassprite2.getIconName();
 			hashmap.remove(s);
 			this.mapUploadedSprites.put(s, textureatlassprite2);
@@ -506,23 +507,24 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 
 	public void updateAnimations() {
 		if (isEaglerPBRMode) {
-			for (EaglerTextureAtlasSprite textureatlassprite : this.listAnimatedSprites) {
-				textureatlassprite.updateAnimationPBR(copyColorFramebuffer, copyMaterialFramebuffer, height);
+			for (int i = 0, l = this.listAnimatedSprites.size(); i < l; ++i) {
+				this.listAnimatedSprites.get(i).updateAnimationPBR(copyColorFramebuffer, copyMaterialFramebuffer,
+						height);
 			}
 			_wglBindFramebuffer(_GL_FRAMEBUFFER, null);
 			return;
 		}
 
-		for (EaglerTextureAtlasSprite textureatlassprite : this.listAnimatedSprites) {
-			textureatlassprite.updateAnimation(copyColorFramebuffer);
+		for (int i = 0, l = this.listAnimatedSprites.size(); i < l; ++i) {
+			this.listAnimatedSprites.get(i).updateAnimation(copyColorFramebuffer);
 		}
 
 		_wglBindFramebuffer(_GL_FRAMEBUFFER, null);
 	}
 
 	private void destroyAnimationCaches() {
-		for (EaglerTextureAtlasSprite textureatlassprite : this.listAnimatedSprites) {
-			textureatlassprite.clearFramesTextureData();
+		for (int i = 0, l = this.listAnimatedSprites.size(); i < l; ++i) {
+			this.listAnimatedSprites.get(i).clearFramesTextureData();
 		}
 	}
 

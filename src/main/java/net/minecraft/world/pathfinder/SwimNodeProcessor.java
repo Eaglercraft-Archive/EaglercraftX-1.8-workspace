@@ -8,7 +8,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.pathfinder.NodeProcessor;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -31,7 +30,6 @@ import net.minecraft.world.pathfinder.NodeProcessor;
  * 
  */
 public class SwimNodeProcessor extends NodeProcessor {
-
 	public void initProcessor(IBlockAccess iblockaccess, Entity entity) {
 		super.initProcessor(iblockaccess, entity);
 	}
@@ -69,7 +67,9 @@ public class SwimNodeProcessor extends NodeProcessor {
 			float f) {
 		int i = 0;
 
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int j = 0; j < facings.length; ++j) {
+			EnumFacing enumfacing = facings[j];
 			PathPoint pathpoint2 = this.getSafePoint(entity, pathpoint.xCoord + enumfacing.getFrontOffsetX(),
 					pathpoint.yCoord + enumfacing.getFrontOffsetY(), pathpoint.zCoord + enumfacing.getFrontOffsetZ());
 			if (pathpoint2 != null && !pathpoint2.visited && pathpoint2.distanceTo(pathpoint1) < f) {

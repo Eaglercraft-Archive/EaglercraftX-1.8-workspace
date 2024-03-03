@@ -1,7 +1,5 @@
 package net.minecraft.util;
 
-import net.minecraft.util.StringTranslate;
-
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
  * 

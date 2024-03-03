@@ -55,8 +55,8 @@ public class ModelSquid extends ModelBase {
 	 * legs can swing at most.
 	 */
 	public void setRotationAngles(float var1, float var2, float f, float var4, float var5, float var6, Entity var7) {
-		for (ModelRenderer modelrenderer : this.squidTentacles) {
-			modelrenderer.rotateAngleX = f;
+		for (int i = 0; i < this.squidTentacles.length; ++i) {
+			this.squidTentacles[i].rotateAngleX = f;
 		}
 
 	}

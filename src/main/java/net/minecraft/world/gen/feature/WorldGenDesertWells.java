@@ -11,7 +11,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -34,7 +33,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  * 
  */
 public class WorldGenDesertWells extends WorldGenerator {
-
 	private static final BlockStateHelper field_175913_a = BlockStateHelper.forBlock(Blocks.sand)
 			.where(BlockSand.VARIANT, Predicates.equalTo(BlockSand.EnumType.SAND));
 	private final IBlockState field_175911_b = Blocks.stone_slab.getDefaultState()
@@ -69,8 +67,9 @@ public class WorldGenDesertWells extends WorldGenerator {
 
 			world.setBlockState(blockpos, this.field_175910_d, 2);
 
-			for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-				world.setBlockState(blockpos.offset(enumfacing), this.field_175910_d, 2);
+			EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+			for (int i = 0; i < facings.length; ++i) {
+				world.setBlockState(blockpos.offset(facings[i]), this.field_175910_d, 2);
 			}
 
 			for (int i1 = -2; i1 <= 2; ++i1) {

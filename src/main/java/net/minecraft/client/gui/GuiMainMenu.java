@@ -44,7 +44,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.demo.DemoWorldServer;
 import net.minecraft.world.storage.ISaveFormat;
 
 /**+
@@ -358,7 +357,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 			ISaveFormat isaveformat = this.mc.getSaveLoader();
 			isaveformat.deleteWorldDirectory("Demo World");
 			this.mc.displayGuiScreen(new GuiScreenIntegratedServerBusy(this, "singleplayer.busy.deleting",
-					"singleplayer.failed.deleting", () -> SingleplayerServerController.isReady()));
+					"singleplayer.failed.deleting", SingleplayerServerController::isReady));
 		} else {
 			this.mc.displayGuiScreen(this);
 		}

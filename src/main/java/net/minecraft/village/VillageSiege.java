@@ -11,7 +11,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import net.minecraft.village.Village;
 import net.minecraft.world.SpawnerAnimals;
 import net.minecraft.world.World;
 
@@ -36,7 +35,6 @@ import net.minecraft.world.World;
  * 
  */
 public class VillageSiege {
-
 	private World worldObj;
 	private boolean field_75535_b;
 	private int field_75536_c = -1;
@@ -122,7 +120,9 @@ public class VillageSiege {
 						this.field_75539_i = blockpos.getZ() + (int) ((double) (MathHelper.sin(f1) * f) * 0.9D);
 						flag = false;
 
-						for (Village village : this.worldObj.getVillageCollection().getVillageList()) {
+						List<Village> lst = this.worldObj.getVillageCollection().getVillageList();
+						for (int j = 0, l = lst.size(); j < l; ++j) {
+							Village village = lst.get(i);
 							if (village != this.theVillage && village.func_179866_a(
 									new BlockPos(this.field_75532_g, this.field_75538_h, this.field_75539_i))) {
 								flag = true;

@@ -35,7 +35,9 @@ public class RecipesBanners {
 	 * Adds the banner recipes to the CraftingManager.
 	 */
 	void addRecipes(CraftingManager parCraftingManager) {
-		for (EnumDyeColor enumdyecolor : EnumDyeColor.values()) {
+		EnumDyeColor[] colors = EnumDyeColor.META_LOOKUP;
+		for (int i = 0; i < colors.length; ++i) {
+			EnumDyeColor enumdyecolor = colors[i];
 			parCraftingManager.addRecipe(new ItemStack(Items.banner, 1, enumdyecolor.getDyeDamage()),
 					new Object[] { "###", "###", " | ", Character.valueOf('#'),
 							new ItemStack(Blocks.wool, 1, enumdyecolor.getMetadata()), Character.valueOf('|'),
@@ -140,8 +142,9 @@ public class RecipesBanners {
 		}
 
 		private TileEntityBanner.EnumBannerPattern func_179533_c(InventoryCrafting parInventoryCrafting) {
-			for (TileEntityBanner.EnumBannerPattern tileentitybanner$enumbannerpattern : TileEntityBanner.EnumBannerPattern
-					.values()) {
+			TileEntityBanner.EnumBannerPattern[] patterns = TileEntityBanner.EnumBannerPattern._VALUES;
+			for (int m = 0; m < patterns.length; ++m) {
+				TileEntityBanner.EnumBannerPattern tileentitybanner$enumbannerpattern = patterns[m];
 				if (tileentitybanner$enumbannerpattern.hasValidCrafting()) {
 					boolean flag = true;
 					if (tileentitybanner$enumbannerpattern.hasCraftingStack()) {

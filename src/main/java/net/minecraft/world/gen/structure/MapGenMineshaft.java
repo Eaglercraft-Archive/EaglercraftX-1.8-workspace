@@ -3,9 +3,6 @@ package net.minecraft.world.gen.structure;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.StructureMineshaftStart;
-import net.minecraft.world.gen.structure.StructureStart;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -28,7 +25,6 @@ import net.minecraft.world.gen.structure.StructureStart;
  * 
  */
 public class MapGenMineshaft extends MapGenStructure {
-
 	private double field_82673_e = 0.004D;
 
 	public MapGenMineshaft() {

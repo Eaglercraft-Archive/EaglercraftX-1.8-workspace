@@ -271,7 +271,8 @@ public abstract class Enchantment {
 	static {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (Enchantment enchantment : enchantmentsList) {
+		for (int i = 0; i < enchantmentsList.length; ++i) {
+			Enchantment enchantment = enchantmentsList[i];
 			if (enchantment != null) {
 				arraylist.add(enchantment);
 			}

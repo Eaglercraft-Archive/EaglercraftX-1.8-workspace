@@ -2,11 +2,7 @@ package net.minecraft.client.renderer.culling;
 
 import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 
-import net.lax1dude.eaglercraft.v1_8.internal.buffer.FloatBuffer;
-
-import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
-import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.util.MathHelper;
 
 /**+

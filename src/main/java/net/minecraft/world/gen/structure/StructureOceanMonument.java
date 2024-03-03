@@ -17,10 +17,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraft.world.gen.structure.StructureOceanMonumentPieces;
-import net.minecraft.world.gen.structure.StructureStart;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -43,7 +39,6 @@ import net.minecraft.world.gen.structure.StructureStart;
  * 
  */
 public class StructureOceanMonument extends MapGenStructure {
-
 	private int field_175800_f;
 	private int field_175801_g;
 	public static final List<BiomeGenBase> field_175802_d = Arrays.asList(new BiomeGenBase[] { BiomeGenBase.ocean,

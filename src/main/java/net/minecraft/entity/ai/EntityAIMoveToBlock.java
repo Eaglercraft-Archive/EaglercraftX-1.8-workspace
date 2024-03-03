@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
@@ -26,7 +25,6 @@ import net.minecraft.world.World;
  * 
  */
 public abstract class EntityAIMoveToBlock extends EntityAIBase {
-
 	private final EntityCreature theEntity;
 	private final double movementSpeed;
 	protected int runDelay;

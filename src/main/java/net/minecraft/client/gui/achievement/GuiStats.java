@@ -421,7 +421,8 @@ public class GuiStats extends GuiScreen implements IProgressMeter {
 			super(mcIn);
 			this.statsHolder = Lists.newArrayList();
 
-			for (StatCrafting statcrafting : StatList.objectMineStats) {
+			for (int m = 0, l = StatList.objectMineStats.size(); m < l; ++m) {
+				StatCrafting statcrafting = StatList.objectMineStats.get(m);
 				boolean flag = false;
 				int i = Item.getIdFromItem(statcrafting.func_150959_a());
 				if (GuiStats.this.field_146546_t.readStat(statcrafting) > 0) {
@@ -555,7 +556,8 @@ public class GuiStats extends GuiScreen implements IProgressMeter {
 			super(mcIn);
 			this.statsHolder = Lists.newArrayList();
 
-			for (StatCrafting statcrafting : StatList.itemStats) {
+			for (int m = 0, l = StatList.itemStats.size(); m < l; ++m) {
+				StatCrafting statcrafting = StatList.itemStats.get(m);
 				boolean flag = false;
 				int i = Item.getIdFromItem(statcrafting.func_150959_a());
 				if (GuiStats.this.field_146546_t.readStat(statcrafting) > 0) {

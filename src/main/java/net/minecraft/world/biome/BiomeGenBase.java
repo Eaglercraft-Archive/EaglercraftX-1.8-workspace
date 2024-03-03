@@ -611,7 +611,8 @@ public abstract class BiomeGenBase {
 
 		explorationBiomesList.clear();
 
-		for (BiomeGenBase biomegenbase : biomeList) {
+		for (int i = 0; i < biomeList.length; ++i) {
+			BiomeGenBase biomegenbase = biomeList[i];
 			if (biomegenbase != null) {
 				if (BIOME_ID_MAP.containsKey(biomegenbase.biomeName)) {
 					throw new Error("Biome \"" + biomegenbase.biomeName + "\" is defined as both ID "

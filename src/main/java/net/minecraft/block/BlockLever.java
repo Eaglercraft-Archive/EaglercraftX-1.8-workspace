@@ -75,7 +75,9 @@ public class BlockLever extends Block {
 	}
 
 	public boolean canPlaceBlockAt(World world, BlockPos blockpos) {
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			if (func_181090_a(world, blockpos, enumfacing)) {
 				return true;
 			}
@@ -99,7 +101,9 @@ public class BlockLever extends Block {
 			return iblockstate.withProperty(FACING,
 					BlockLever.EnumOrientation.forFacings(enumfacing, entitylivingbase.getHorizontalFacing()));
 		} else {
-			for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL) {
+			EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+			for (int i = 0; i < facings.length; ++i) {
+				EnumFacing enumfacing1 = facings[i];
 				if (enumfacing1 != enumfacing && func_181090_a(world, blockpos, enumfacing1.getOpposite())) {
 					return iblockstate.withProperty(FACING,
 							BlockLever.EnumOrientation.forFacings(enumfacing1, entitylivingbase.getHorizontalFacing()));
@@ -258,7 +262,7 @@ public class BlockLever extends Block {
 		SOUTH(3, "south", EnumFacing.SOUTH), NORTH(4, "north", EnumFacing.NORTH), UP_Z(5, "up_z", EnumFacing.UP),
 		UP_X(6, "up_x", EnumFacing.UP), DOWN_Z(7, "down_z", EnumFacing.DOWN);
 
-		private static final BlockLever.EnumOrientation[] META_LOOKUP = new BlockLever.EnumOrientation[values().length];
+		private static final BlockLever.EnumOrientation[] META_LOOKUP = new BlockLever.EnumOrientation[8];
 		private final int meta;
 		private final String name;
 		private final EnumFacing facing;
@@ -329,8 +333,9 @@ public class BlockLever extends Block {
 		}
 
 		static {
-			for (BlockLever.EnumOrientation blocklever$enumorientation : values()) {
-				META_LOOKUP[blocklever$enumorientation.getMetadata()] = blocklever$enumorientation;
+			BlockLever.EnumOrientation[] orientations = values();
+			for (int i = 0; i < orientations.length; ++i) {
+				META_LOOKUP[orientations[i].getMetadata()] = orientations[i];
 			}
 
 		}

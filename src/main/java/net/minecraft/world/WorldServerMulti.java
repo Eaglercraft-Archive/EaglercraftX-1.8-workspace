@@ -3,9 +3,6 @@ package net.minecraft.world;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.village.VillageCollection;
-import net.minecraft.world.MinecraftException;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.storage.DerivedWorldInfo;
@@ -32,7 +29,6 @@ import net.minecraft.world.storage.ISaveHandler;
  * 
  */
 public class WorldServerMulti extends WorldServer {
-
 	private WorldServer delegate;
 
 	public WorldServerMulti(MinecraftServer server, ISaveHandler saveHandlerIn, int dimensionId, WorldServer delegate,

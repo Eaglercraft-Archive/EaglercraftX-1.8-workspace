@@ -2,7 +2,6 @@ package net.minecraft.world.gen.structure;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -18,9 +17,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.MapGenStructureIO;
-import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraft.world.gen.structure.StructureComponent;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -43,7 +39,6 @@ import net.minecraft.world.gen.structure.StructureComponent;
  * 
  */
 public class StructureOceanMonumentPieces {
-
 	public static void registerOceanMonumentPieces() {
 		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.MonumentBuilding.class, "OMB");
 		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.MonumentCoreRoom.class, "OMCR");
@@ -777,7 +772,7 @@ public class StructureOceanMonumentPieces {
 					for (int j3 = 0; j3 < 3; ++j3) {
 						int i4 = func_175820_a(j2, j3, i3);
 						if (astructureoceanmonumentpieces$roomdefinition[i4] != null) {
-							for (EnumFacing enumfacing : EnumFacing.values()) {
+							for (EnumFacing enumfacing : EnumFacing._VALUES) {
 								int l = j2 + enumfacing.getFrontOffsetX();
 								int i1 = j3 + enumfacing.getFrontOffsetY();
 								int j1 = i3 + enumfacing.getFrontOffsetZ();

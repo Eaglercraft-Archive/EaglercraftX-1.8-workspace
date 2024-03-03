@@ -23,7 +23,6 @@ import net.minecraft.entity.EntityLiving;
  * 
  */
 public class EntityJumpHelper {
-
 	private EntityLiving entity;
 	protected boolean isJumping;
 

@@ -44,7 +44,7 @@ public class ResourcePackListEntryFound extends ResourcePackListEntry {
 	}
 
 	protected String func_148312_b() {
-		return this.field_148319_c.getResourcePackName();
+		return this.field_148319_c.getResourcePackEaglerDisplayName();
 	}
 
 	public ResourcePackRepository.Entry func_148318_i() {

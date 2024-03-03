@@ -100,13 +100,13 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
 							(double) this.worldObj.getHeight(), 0.0D);
 			List<EntityPlayer> list = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class, axisalignedbb);
 
-			for (EntityPlayer entityplayer : list) {
-				entityplayer.addPotionEffect(new PotionEffect(this.primaryEffect, 180, b0, true, true));
+			for (int m = 0, l = list.size(); m < l; ++m) {
+				list.get(m).addPotionEffect(new PotionEffect(this.primaryEffect, 180, b0, true, true));
 			}
 
 			if (this.levels >= 4 && this.primaryEffect != this.secondaryEffect && this.secondaryEffect > 0) {
-				for (EntityPlayer entityplayer1 : list) {
-					entityplayer1.addPotionEffect(new PotionEffect(this.secondaryEffect, 180, 0, true, true));
+				for (int m = 0, l = list.size(); m < l; ++m) {
+					list.get(m).addPotionEffect(new PotionEffect(this.secondaryEffect, 180, 0, true, true));
 				}
 			}
 		}
@@ -194,10 +194,11 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
 		}
 
 		if (!this.worldObj.isRemote && this.levels == 4 && i < this.levels) {
-			for (EntityPlayer entityplayer : this.worldObj.getEntitiesWithinAABB(EntityPlayer.class,
+			List<EntityPlayer> lst = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class,
 					(new AxisAlignedBB((double) j, (double) k, (double) l, (double) j, (double) (k - 4), (double) l))
-							.expand(10.0D, 5.0D, 10.0D))) {
-				entityplayer.triggerAchievement(AchievementList.fullBeacon);
+							.expand(10.0D, 5.0D, 10.0D));
+			for (int m = 0, n = lst.size(); m < n; ++m) {
+				lst.get(m).triggerAchievement(AchievementList.fullBeacon);
 			}
 		}
 

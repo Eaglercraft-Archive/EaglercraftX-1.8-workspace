@@ -20,18 +20,14 @@ import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.internal.EnumPlatformType;
 import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
-import net.lax1dude.eaglercraft.v1_8.opengl.OpenGlHelper;
 import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
@@ -284,7 +280,8 @@ public class GuiOverlayDebug extends Gui {
 				List<String> strs = SingleplayerServerController.getTPS();
 				int l;
 				boolean first = true;
-				for (String str : strs) {
+				for (int j = 0, m = strs.size(); j < m; ++j) {
+					String str = strs.get(j);
 					l = (int) (this.fontRenderer.getStringWidth(str) * (!first ? 0.5f : 1.0f));
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(parScaledResolution.getScaledWidth() - 2 - l, i + 2, 0.0f);

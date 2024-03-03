@@ -1,5 +1,7 @@
 package net.minecraft.entity;
 
+import java.util.List;
+
 import net.minecraft.block.BlockFence;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -117,8 +119,10 @@ public class EntityLeashKnot extends EntityHanging {
 		if (itemstack != null && itemstack.getItem() == Items.lead && !this.worldObj.isRemote) {
 			double d0 = 7.0D;
 
-			for (EntityLiving entityliving : this.worldObj.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(
-					this.posX - d0, this.posY - d0, this.posZ - d0, this.posX + d0, this.posY + d0, this.posZ + d0))) {
+			List<EntityLiving> entities = this.worldObj.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(
+					this.posX - d0, this.posY - d0, this.posZ - d0, this.posX + d0, this.posY + d0, this.posZ + d0));
+			for (int i = 0, l = entities.size(); i < l; ++i) {
+				EntityLiving entityliving = entities.get(i);
 				if (entityliving.getLeashed() && entityliving.getLeashedToEntity() == entityplayer) {
 					entityliving.setLeashedToEntity(this, true);
 					flag = true;
@@ -131,9 +135,11 @@ public class EntityLeashKnot extends EntityHanging {
 			if (entityplayer.capabilities.isCreativeMode) {
 				double d1 = 7.0D;
 
-				for (EntityLiving entityliving1 : this.worldObj.getEntitiesWithinAABB(EntityLiving.class,
+				List<EntityLiving> entities = this.worldObj.getEntitiesWithinAABB(EntityLiving.class,
 						new AxisAlignedBB(this.posX - d1, this.posY - d1, this.posZ - d1, this.posX + d1,
-								this.posY + d1, this.posZ + d1))) {
+								this.posY + d1, this.posZ + d1));
+				for (int i = 0, l = entities.size(); i < l; ++i) {
+					EntityLiving entityliving1 = entities.get(i);
 					if (entityliving1.getLeashed() && entityliving1.getLeashedToEntity() == this) {
 						entityliving1.clearLeashed(true, false);
 					}
@@ -163,9 +169,11 @@ public class EntityLeashKnot extends EntityHanging {
 		int j = pos.getY();
 		int k = pos.getZ();
 
-		for (EntityLeashKnot entityleashknot : worldIn.getEntitiesWithinAABB(EntityLeashKnot.class,
+		List<EntityLeashKnot> entities = worldIn.getEntitiesWithinAABB(EntityLeashKnot.class,
 				new AxisAlignedBB((double) i - 1.0D, (double) j - 1.0D, (double) k - 1.0D, (double) i + 1.0D,
-						(double) j + 1.0D, (double) k + 1.0D))) {
+						(double) j + 1.0D, (double) k + 1.0D));
+		for (int m = 0, l = entities.size(); m < l; ++m) {
+			EntityLeashKnot entityleashknot = entities.get(m);
 			if (entityleashknot.getHangingPosition().equals(pos)) {
 				return entityleashknot;
 			}

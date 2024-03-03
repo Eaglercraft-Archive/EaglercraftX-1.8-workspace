@@ -52,7 +52,8 @@ public class LanguageManager implements IResourceManagerReloadListener {
 	public void parseLanguageMetadata(List<IResourcePack> parList) {
 		this.languageMap.clear();
 
-		for (IResourcePack iresourcepack : parList) {
+		for (int i = 0, l = parList.size(); i < l; ++i) {
+			IResourcePack iresourcepack = parList.get(i);
 			try {
 				LanguageMetadataSection languagemetadatasection = (LanguageMetadataSection) iresourcepack
 						.getPackMetadata(this.theMetadataSerializer, "language");

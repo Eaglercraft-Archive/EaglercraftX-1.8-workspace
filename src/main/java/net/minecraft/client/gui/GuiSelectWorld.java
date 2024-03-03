@@ -13,14 +13,6 @@ import net.lax1dude.eaglercraft.v1_8.sp.gui.GuiScreenLANNotSupported;
 import net.lax1dude.eaglercraft.v1_8.sp.lan.LANServerController;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiCreateWorld;
-import net.minecraft.client.gui.GuiErrorScreen;
-import net.minecraft.client.gui.GuiRenameWorld;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiSlot;
-import net.minecraft.client.gui.GuiYesNo;
-import net.minecraft.client.gui.GuiYesNoCallback;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
@@ -110,7 +102,7 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback {
 			waitingForWorlds = true;
 			this.mc.getSaveLoader().flushCache();
 			this.mc.displayGuiScreen(new GuiScreenIntegratedServerBusy(this, "singleplayer.busy.listingworlds",
-					"singleplayer.failed.listingworlds", () -> SingleplayerServerController.isReady(), (t, u) -> {
+					"singleplayer.failed.listingworlds", SingleplayerServerController::isReady, (t, u) -> {
 						GuiScreenIntegratedServerBusy tt = (GuiScreenIntegratedServerBusy) t;
 						Minecraft.getMinecraft().displayGuiScreen(
 								GuiScreenIntegratedServerBusy.createException(parentScreen, tt.failMessage, u));
@@ -232,7 +224,7 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback {
 				ISaveFormat isaveformat = this.mc.getSaveLoader();
 				isaveformat.deleteWorldDirectory(this.func_146621_a(i));
 				this.mc.displayGuiScreen(new GuiScreenIntegratedServerBusy(this, "singleplayer.busy.deleting",
-						"singleplayer.failed.deleting", () -> SingleplayerServerController.isReady()));
+						"singleplayer.failed.deleting", SingleplayerServerController::isReady));
 			} else {
 				this.mc.displayGuiScreen(this);
 			}

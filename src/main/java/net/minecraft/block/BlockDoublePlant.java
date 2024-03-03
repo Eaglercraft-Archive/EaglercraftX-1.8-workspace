@@ -245,8 +245,9 @@ public class BlockDoublePlant extends BlockBush implements IGrowable {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (BlockDoublePlant.EnumPlantType blockdoubleplant$enumplanttype : BlockDoublePlant.EnumPlantType.values()) {
-			list.add(new ItemStack(item, 1, blockdoubleplant$enumplanttype.getMeta()));
+		BlockDoublePlant.EnumPlantType[] types = BlockDoublePlant.EnumPlantType.META_LOOKUP;
+		for (int i = 0; i < types.length; ++i) {
+			list.add(new ItemStack(item, 1, types[i].getMeta()));
 		}
 
 	}
@@ -334,7 +335,7 @@ public class BlockDoublePlant extends BlockBush implements IGrowable {
 		SUNFLOWER(0, "sunflower"), SYRINGA(1, "syringa"), GRASS(2, "double_grass", "grass"),
 		FERN(3, "double_fern", "fern"), ROSE(4, "double_rose", "rose"), PAEONIA(5, "paeonia");
 
-		private static final BlockDoublePlant.EnumPlantType[] META_LOOKUP = new BlockDoublePlant.EnumPlantType[values().length];
+		private static final BlockDoublePlant.EnumPlantType[] META_LOOKUP = new BlockDoublePlant.EnumPlantType[6];
 		private final int meta;
 		private final String name;
 		private final String unlocalizedName;
@@ -374,8 +375,9 @@ public class BlockDoublePlant extends BlockBush implements IGrowable {
 		}
 
 		static {
-			for (BlockDoublePlant.EnumPlantType blockdoubleplant$enumplanttype : values()) {
-				META_LOOKUP[blockdoubleplant$enumplanttype.getMeta()] = blockdoubleplant$enumplanttype;
+			BlockDoublePlant.EnumPlantType[] types = BlockDoublePlant.EnumPlantType.values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMeta()] = types[i];
 			}
 
 		}

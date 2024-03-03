@@ -8,14 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandResultStats;
-import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandManager;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerSelector;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
@@ -75,8 +67,8 @@ public class CommandHandler implements ICommandManager {
 				String s1 = astring[i];
 				sender.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, list.size());
 
-				for (Entity entity : (List<Entity>) list) {
-					astring[i] = entity.getUniqueID().toString();
+				for (int k = 0, l = list.size(); k < l; ++k) {
+					astring[i] = ((Entity) list.get(k)).getUniqueID().toString();
 					if (this.tryExecute(sender, astring, icommand, rawCommand)) {
 						++j;
 					}

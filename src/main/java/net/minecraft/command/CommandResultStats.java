@@ -1,8 +1,5 @@
 package net.minecraft.command;
 
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.EntityNotFoundException;
-import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.Score;
@@ -38,7 +35,7 @@ public class CommandResultStats {
 	/**+
 	 * The number of result command result types that are possible.
 	 */
-	private static final int NUM_RESULT_TYPES = CommandResultStats.Type.values().length;
+	private static final int NUM_RESULT_TYPES = CommandResultStats.Type._VALUES.length;
 	private static final String[] STRING_RESULT_TYPES = new String[NUM_RESULT_TYPES];
 	private String[] field_179675_c;
 	private String[] field_179673_d;
@@ -118,7 +115,9 @@ public class CommandResultStats {
 		if (tagcompound.hasKey("CommandStats", 10)) {
 			NBTTagCompound nbttagcompound = tagcompound.getCompoundTag("CommandStats");
 
-			for (CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values()) {
+			CommandResultStats.Type[] types = CommandResultStats.Type.values();
+			for (int i = 0; i < types.length; ++i) {
+				CommandResultStats.Type commandresultstats$type = types[i];
 				String s = commandresultstats$type.getTypeName() + "Name";
 				String s1 = commandresultstats$type.getTypeName() + "Objective";
 				if (nbttagcompound.hasKey(s, 8) && nbttagcompound.hasKey(s1, 8)) {
@@ -134,7 +133,9 @@ public class CommandResultStats {
 	public void writeStatsToNBT(NBTTagCompound tagcompound) {
 		NBTTagCompound nbttagcompound = new NBTTagCompound();
 
-		for (CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values()) {
+		CommandResultStats.Type[] types = CommandResultStats.Type.values();
+		for (int i = 0; i < types.length; ++i) {
+			CommandResultStats.Type commandresultstats$type = types[i];
 			String s = this.field_179675_c[commandresultstats$type.getTypeID()];
 			String s1 = this.field_179673_d[commandresultstats$type.getTypeID()];
 			if (s != null && s1 != null) {
@@ -171,7 +172,9 @@ public class CommandResultStats {
 			resultStatsIn.field_179673_d[resultTypeIn.getTypeID()] = null;
 			boolean flag = true;
 
-			for (CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values()) {
+			CommandResultStats.Type[] types = CommandResultStats.Type.values();
+			for (int i = 0; i < types.length; ++i) {
+				CommandResultStats.Type commandresultstats$type = types[i];
 				if (resultStatsIn.field_179675_c[commandresultstats$type.getTypeID()] != null
 						&& resultStatsIn.field_179673_d[commandresultstats$type.getTypeID()] != null) {
 					flag = false;
@@ -188,7 +191,9 @@ public class CommandResultStats {
 	}
 
 	public void func_179671_a(CommandResultStats resultStatsIn) {
-		for (CommandResultStats.Type commandresultstats$type : CommandResultStats.Type.values()) {
+		CommandResultStats.Type[] types = CommandResultStats.Type.values();
+		for (int i = 0; i < types.length; ++i) {
+			CommandResultStats.Type commandresultstats$type = types[i];
 			func_179667_a(this, commandresultstats$type,
 					resultStatsIn.field_179675_c[commandresultstats$type.getTypeID()],
 					resultStatsIn.field_179673_d[commandresultstats$type.getTypeID()]);
@@ -199,6 +204,8 @@ public class CommandResultStats {
 	public static enum Type {
 		SUCCESS_COUNT(0, "SuccessCount"), AFFECTED_BLOCKS(1, "AffectedBlocks"),
 		AFFECTED_ENTITIES(2, "AffectedEntities"), AFFECTED_ITEMS(3, "AffectedItems"), QUERY_RESULT(4, "QueryResult");
+
+		public static final Type[] _VALUES = values();
 
 		final int typeID;
 		final String typeName;
@@ -217,18 +224,21 @@ public class CommandResultStats {
 		}
 
 		public static String[] getTypeNames() {
-			String[] astring = new String[values().length];
+			String[] astring = new String[_VALUES.length];
 			int i = 0;
 
-			for (CommandResultStats.Type commandresultstats$type : values()) {
-				astring[i++] = commandresultstats$type.getTypeName();
+			CommandResultStats.Type[] types = _VALUES;
+			for (int j = 0; j < types.length; ++j) {
+				astring[i++] = types[j].getTypeName();
 			}
 
 			return astring;
 		}
 
 		public static CommandResultStats.Type getTypeByName(String name) {
-			for (CommandResultStats.Type commandresultstats$type : values()) {
+			CommandResultStats.Type[] types = _VALUES;
+			for (int i = 0; i < types.length; ++i) {
+				CommandResultStats.Type commandresultstats$type = types[i];
 				if (commandresultstats$type.getTypeName().equals(name)) {
 					return commandresultstats$type;
 				}

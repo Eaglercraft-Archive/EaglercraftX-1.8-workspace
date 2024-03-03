@@ -45,7 +45,8 @@ public class GuiKeyBindingList extends GuiListExtended {
 		int i = 0;
 		String s = null;
 
-		for (KeyBinding keybinding : akeybinding) {
+		for (int l = 0; l < akeybinding.length; ++l) {
+			KeyBinding keybinding = akeybinding[l];
 			String s1 = keybinding.getKeyCategory();
 			if (!s1.equals(s)) {
 				s = s1;
@@ -138,7 +139,9 @@ public class GuiKeyBindingList extends GuiListExtended {
 			this.btnChangeKeyBinding.displayString = GameSettings.getKeyDisplayString(this.keybinding.getKeyCode());
 			boolean flag1 = false;
 			if (this.keybinding.getKeyCode() != 0) {
-				for (KeyBinding keybindingx : GuiKeyBindingList.this.mc.gameSettings.keyBindings) {
+				KeyBinding[] kb = GuiKeyBindingList.this.mc.gameSettings.keyBindings;
+				for (int m = 0; m < kb.length; ++m) {
+					KeyBinding keybindingx = kb[m];
 					if (keybindingx != this.keybinding && keybindingx.getKeyCode() == this.keybinding.getKeyCode()) {
 						flag1 = true;
 						break;

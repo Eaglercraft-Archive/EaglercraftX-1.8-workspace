@@ -27,7 +27,6 @@ import net.minecraft.util.Vec3i;
  * 
  */
 public class StructureBoundingBox {
-
 	public int minX;
 	public int minY;
 	public int minZ;

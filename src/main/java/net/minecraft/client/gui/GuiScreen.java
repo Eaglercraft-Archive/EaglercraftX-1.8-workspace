@@ -92,11 +92,11 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 	 * mouseY, renderPartialTicks
 	 */
 	public void drawScreen(int i, int j, float var3) {
-		for (int k = 0; k < this.buttonList.size(); ++k) {
+		for (int k = 0, l = this.buttonList.size(); k < l; ++k) {
 			((GuiButton) this.buttonList.get(k)).drawButton(this.mc, i, j);
 		}
 
-		for (int l = 0; l < this.labelList.size(); ++l) {
+		for (int l = 0, m = this.labelList.size(); l < m; ++l) {
 			((GuiLabel) this.labelList.get(l)).drawLabel(this.mc, i, j);
 		}
 
@@ -178,7 +178,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 	protected void renderToolTip(ItemStack itemstack, int i, int j) {
 		List list = itemstack.getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips);
 
-		for (int k = 0; k < list.size(); ++k) {
+		for (int k = 0, l = list.size(); k < l; ++k) {
 			if (k == 0) {
 				list.set(k, itemstack.getRarity().rarityColor + (String) list.get(k));
 			} else {
@@ -210,8 +210,8 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 			GlStateManager.disableDepth();
 			int k = 0;
 
-			for (String s : list) {
-				int l = this.fontRendererObj.getStringWidth(s);
+			for (int m = 0, n = list.size(); m < n; ++m) {
+				int l = this.fontRendererObj.getStringWidth(list.get(m));
 				if (l > k) {
 					k = l;
 				}

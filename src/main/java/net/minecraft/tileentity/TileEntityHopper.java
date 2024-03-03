@@ -251,8 +251,8 @@ public class TileEntityHopper extends TileEntityLockable implements IHopper, ITi
 	}
 
 	private boolean isEmpty() {
-		for (ItemStack itemstack : this.inventory) {
-			if (itemstack != null) {
+		for (int i = 0; i < this.inventory.length; ++i) {
+			if (this.inventory[i] != null) {
 				return false;
 			}
 		}
@@ -261,7 +261,8 @@ public class TileEntityHopper extends TileEntityLockable implements IHopper, ITi
 	}
 
 	private boolean isFull() {
-		for (ItemStack itemstack : this.inventory) {
+		for (int i = 0; i < this.inventory.length; ++i) {
+			ItemStack itemstack = this.inventory[i];
 			if (itemstack == null || itemstack.stackSize != itemstack.getMaxStackSize()) {
 				return false;
 			}
@@ -379,9 +380,10 @@ public class TileEntityHopper extends TileEntityLockable implements IHopper, ITi
 				}
 			}
 		} else {
-			for (EntityItem entityitem : func_181556_a(parIHopper.getWorld(), parIHopper.getXPos(),
-					parIHopper.getYPos() + 1.0D, parIHopper.getZPos())) {
-				if (putDropInInventoryAllSlots(parIHopper, entityitem)) {
+			List<EntityItem> list = func_181556_a(parIHopper.getWorld(), parIHopper.getXPos(),
+					parIHopper.getYPos() + 1.0D, parIHopper.getZPos());
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				if (putDropInInventoryAllSlots(parIHopper, list.get(i))) {
 					return true;
 				}
 			}

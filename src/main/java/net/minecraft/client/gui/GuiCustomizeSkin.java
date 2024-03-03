@@ -40,7 +40,9 @@ public class GuiCustomizeSkin extends GuiScreen {
 		int i = 0;
 		this.title = I18n.format("options.skinCustomisation.title", new Object[0]);
 
-		for (EnumPlayerModelParts enumplayermodelparts : EnumPlayerModelParts.values()) {
+		EnumPlayerModelParts[] parts = EnumPlayerModelParts._VALUES;
+		for (int k = 0; k < parts.length; ++k) {
+			EnumPlayerModelParts enumplayermodelparts = parts[k];
 			this.buttonList.add(new GuiCustomizeSkin.ButtonPart(enumplayermodelparts.getPartId(),
 					this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150, 20,
 					enumplayermodelparts));

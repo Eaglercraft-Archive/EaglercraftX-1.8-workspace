@@ -10,11 +10,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.IOUtils;
-import net.lax1dude.eaglercraft.v1_8.vfs.FolderResourcePack;
-import net.lax1dude.eaglercraft.v1_8.vfs.SYS;
 import net.lax1dude.eaglercraft.v1_8.futures.ListenableFuture;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
 import net.lax1dude.eaglercraft.v1_8.opengl.ImageData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -58,13 +57,20 @@ public class ResourcePackRepository {
 			GameSettings settings) {
 		this.rprDefaultResourcePack = rprDefaultResourcePackIn;
 		this.rprMetadataSerializer = rprMetadataSerializerIn;
+		reconstruct(settings);
+	}
+
+	public void reconstruct(GameSettings settings) {
+		this.repositoryEntriesAll.clear();
+		this.repositoryEntries.clear();
 		this.updateRepositoryEntriesAll();
 		Iterator iterator = settings.resourcePacks.iterator();
 
 		while (iterator.hasNext()) {
 			String s = (String) iterator.next();
 
-			for (ResourcePackRepository.Entry resourcepackrepository$entry : this.repositoryEntriesAll) {
+			for (int i = 0, l = this.repositoryEntriesAll.size(); i < l; ++i) {
+				ResourcePackRepository.Entry resourcepackrepository$entry = this.repositoryEntriesAll.get(i);
 				if (resourcepackrepository$entry.getResourcePackName().equals(s)) {
 					if (resourcepackrepository$entry.func_183027_f() == 1
 							|| settings.field_183018_l.contains(resourcepackrepository$entry.getResourcePackName())) {
@@ -82,13 +88,12 @@ public class ResourcePackRepository {
 	}
 
 	public void updateRepositoryEntriesAll() {
-		if (SYS.VFS == null)
-			return;
-
 		List<ResourcePackRepository.Entry> list = Lists.<ResourcePackRepository.Entry>newArrayList();
 
-		for (String file1 : SYS.getResourcePackNames()) {
-			ResourcePackRepository.Entry resourcepackrepository$entry = new ResourcePackRepository.Entry(file1);
+		List<EaglerFolderResourcePack> list2 = EaglerFolderResourcePack
+				.getFolderResourcePacks(EaglerFolderResourcePack.RESOURCE_PACKS);
+		for (int j = 0, l = list2.size(); j < l; ++j) {
+			ResourcePackRepository.Entry resourcepackrepository$entry = new ResourcePackRepository.Entry(list2.get(j));
 
 			if (!this.repositoryEntriesAll.contains(resourcepackrepository$entry)) {
 				try {
@@ -96,7 +101,7 @@ public class ResourcePackRepository {
 					list.add(resourcepackrepository$entry);
 				} catch (Exception var6) {
 					logger.error("Failed to call \"updateResourcePack\" for resource pack \"{}\"",
-							resourcepackrepository$entry.resourcePackFile);
+							resourcepackrepository$entry.reResourcePack.resourcePackFile);
 					logger.error(var6);
 					list.remove(resourcepackrepository$entry);
 				}
@@ -111,8 +116,8 @@ public class ResourcePackRepository {
 
 		this.repositoryEntriesAll.removeAll(list);
 
-		for (ResourcePackRepository.Entry resourcepackrepository$entry1 : this.repositoryEntriesAll) {
-			resourcepackrepository$entry1.closeResourcePack();
+		for (int i = 0, l = this.repositoryEntriesAll.size(); i < l; ++i) {
+			this.repositoryEntriesAll.get(i).closeResourcePack();
 		}
 
 		this.repositoryEntriesAll = list;
@@ -132,9 +137,9 @@ public class ResourcePackRepository {
 	}
 
 	public void downloadResourcePack(String s1, String s2, Consumer<Boolean> cb) {
-		SYS.loadRemoteResourcePack(s1, s2, res -> {
+		EaglerFolderResourcePack.loadRemoteResourcePack(s1, s2, res -> {
 			if (res != null) {
-				ResourcePackRepository.this.resourcePackInstance = new FolderResourcePack(res, "srp/");
+				ResourcePackRepository.this.resourcePackInstance = res;
 				Minecraft.getMinecraft().scheduleResourcesRefresh();
 				cb.accept(true);
 				return;
@@ -164,28 +169,24 @@ public class ResourcePackRepository {
 	}
 
 	public class Entry {
-		private final String resourcePackFile;
-		private IResourcePack reResourcePack;
+		private EaglerFolderResourcePack reResourcePack;
 		private PackMetadataSection rePackMetadataSection;
 		private ImageData texturePackIcon;
 		private ResourceLocation locationTexturePackIcon;
 		private TextureManager iconTextureManager;
 
-		private Entry(String resourcePackFileIn) {
-			this.resourcePackFile = resourcePackFileIn;
+		private Entry(EaglerFolderResourcePack resourcePackFileIn) {
+			this.reResourcePack = resourcePackFileIn;
 		}
 
 		public void updateResourcePack() throws IOException {
-			if (SYS.VFS == null)
-				return;
-			this.reResourcePack = (IResourcePack) new FolderResourcePack(this.resourcePackFile, "resourcepacks/");
 			this.rePackMetadataSection = (PackMetadataSection) this.reResourcePack
 					.getPackMetadata(ResourcePackRepository.this.rprMetadataSerializer, "pack");
 
 			try {
 				this.texturePackIcon = this.reResourcePack.getPackImage();
 			} catch (IOException var2) {
-				logger.error("Failed to load resource pack icon for \"{}\"!", resourcePackFile);
+				logger.error("Failed to load resource pack icon for \"{}\"!", reResourcePack.resourcePackFile);
 				logger.error(var2);
 			}
 
@@ -225,6 +226,10 @@ public class ResourcePackRepository {
 			return this.reResourcePack.getPackName();
 		}
 
+		public String getResourcePackEaglerDisplayName() {
+			return this.reResourcePack.getDisplayName();
+		}
+
 		public String getTexturePackDescription() {
 			return this.rePackMetadataSection == null
 					? EnumChatFormatting.RED + "Invalid pack.mcmeta (or missing \'pack\' section)"
@@ -246,7 +251,7 @@ public class ResourcePackRepository {
 		}
 
 		public String toString() {
-			return this.resourcePackFile;
+			return this.reResourcePack.resourcePackFile;
 		}
 	}
 }

@@ -6,11 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandResultStats;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
@@ -174,7 +169,9 @@ public class CommandClone extends CommandBase {
 							arraylist3.addAll(arraylist2);
 							List list = Lists.reverse(arraylist3);
 
-							for (CommandClone.StaticCloneData commandclone$staticclonedata : (List<CommandClone.StaticCloneData>) list) {
+							for (int k = 0, l = list.size(); k < l; ++k) {
+								CommandClone.StaticCloneData commandclone$staticclonedata = (CommandClone.StaticCloneData) list
+										.get(k);
 								TileEntity tileentity2 = world
 										.getTileEntity(commandclone$staticclonedata.field_179537_a);
 								if (tileentity2 instanceof IInventory) {
@@ -187,14 +184,18 @@ public class CommandClone extends CommandBase {
 
 							i = 0;
 
-							for (CommandClone.StaticCloneData commandclone$staticclonedata1 : (ArrayList<CommandClone.StaticCloneData>) arraylist3) {
+							for (int k = 0, l = arraylist3.size(); k < l; ++k) {
+								CommandClone.StaticCloneData commandclone$staticclonedata1 = (CommandClone.StaticCloneData) arraylist3
+										.get(k);
 								if (world.setBlockState(commandclone$staticclonedata1.field_179537_a,
 										commandclone$staticclonedata1.blockState, 2)) {
 									++i;
 								}
 							}
 
-							for (CommandClone.StaticCloneData commandclone$staticclonedata2 : (ArrayList<CommandClone.StaticCloneData>) arraylist1) {
+							for (int k = 0, l = arraylist1.size(); k < l; ++k) {
+								CommandClone.StaticCloneData commandclone$staticclonedata2 = (CommandClone.StaticCloneData) arraylist1
+										.get(k);
 								TileEntity tileentity3 = world
 										.getTileEntity(commandclone$staticclonedata2.field_179537_a);
 								if (commandclone$staticclonedata2.field_179536_c != null && tileentity3 != null) {
@@ -212,14 +213,17 @@ public class CommandClone extends CommandBase {
 										commandclone$staticclonedata2.blockState, 2);
 							}
 
-							for (CommandClone.StaticCloneData commandclone$staticclonedata3 : (List<CommandClone.StaticCloneData>) list) {
+							for (int k = 0, l = list.size(); k < l; ++k) {
+								CommandClone.StaticCloneData commandclone$staticclonedata3 = (CommandClone.StaticCloneData) list
+										.get(k);
 								world.notifyNeighborsRespectDebug(commandclone$staticclonedata3.field_179537_a,
 										commandclone$staticclonedata3.blockState.getBlock());
 							}
 
 							List list1 = world.func_175712_a(structureboundingbox, false);
 							if (list1 != null) {
-								for (NextTickListEntry nextticklistentry : (List<NextTickListEntry>) list1) {
+								for (int k = 0, l = list1.size(); k < l; ++k) {
+									NextTickListEntry nextticklistentry = (NextTickListEntry) list1.get(k);
 									if (structureboundingbox.isVecInside(nextticklistentry.position)) {
 										BlockPos blockpos8 = nextticklistentry.position.add(blockpos3);
 										world.scheduleBlockUpdate(blockpos8, nextticklistentry.getBlock(),

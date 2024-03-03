@@ -6,7 +6,6 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.storage.WorldInfo;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -29,7 +28,6 @@ import net.minecraft.world.storage.WorldInfo;
  * 
  */
 public class DerivedWorldInfo extends WorldInfo {
-
 	private final WorldInfo theWorldInfo;
 
 	public DerivedWorldInfo(WorldInfo parWorldInfo) {

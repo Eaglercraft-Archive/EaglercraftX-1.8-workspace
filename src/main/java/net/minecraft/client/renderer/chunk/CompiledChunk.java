@@ -43,8 +43,8 @@ public class CompiledChunk {
 			return true;
 		}
 	};
-	private final boolean[] layersUsed = new boolean[EnumWorldBlockLayer.values().length];
-	private final boolean[] layersStarted = new boolean[EnumWorldBlockLayer.values().length];
+	private final boolean[] layersUsed = new boolean[EnumWorldBlockLayer._VALUES.length];
+	private final boolean[] layersStarted = new boolean[EnumWorldBlockLayer._VALUES.length];
 	private boolean empty = true;
 	private final List<TileEntity> tileEntities = Lists.newArrayList();
 	private SetVisibility setVisibility = new SetVisibility();

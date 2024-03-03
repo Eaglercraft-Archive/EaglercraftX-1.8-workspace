@@ -3,12 +3,10 @@ package net.minecraft.client.gui.spectator;
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.network.play.client.C18PacketSpectate;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
-import net.minecraft.util.ResourceLocation;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.

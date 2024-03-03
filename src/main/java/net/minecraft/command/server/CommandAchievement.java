@@ -80,15 +80,16 @@ public class CommandAchievement extends CommandBase {
 				if (flag || flag1) {
 					if (statbase == null) {
 						if (flag) {
-							for (Achievement achievement4 : AchievementList.achievementList) {
-								entityplayermp.triggerAchievement(achievement4);
+							for (int i = 0, l = AchievementList.achievementList.size(); i < l; ++i) {
+								entityplayermp.triggerAchievement(AchievementList.achievementList.get(i));
 							}
 
 							notifyOperators(parICommandSender, this, "commands.achievement.give.success.all",
 									new Object[] { entityplayermp.getName() });
 						} else if (flag1) {
-							for (Achievement achievement5 : Lists.reverse(AchievementList.achievementList)) {
-								entityplayermp.func_175145_a(achievement5);
+							List<Achievement> ach = Lists.reverse(AchievementList.achievementList);
+							for (int i = 0, l = ach.size(); i < l; ++i) {
+								entityplayermp.func_175145_a(ach.get(i));
 							}
 
 							notifyOperators(parICommandSender, this, "commands.achievement.take.success.all",
@@ -111,8 +112,9 @@ public class CommandAchievement extends CommandBase {
 									arraylist.add(achievement.parentAchievement);
 								}
 
-								for (Achievement achievement1 : (List<Achievement>) Lists.reverse(arraylist)) {
-									entityplayermp.triggerAchievement(achievement1);
+								List<Achievement> ach = Lists.reverse(AchievementList.achievementList);
+								for (int i = 0, l = ach.size(); i < l; ++i) {
+									entityplayermp.triggerAchievement(ach.get(i));
 								}
 							} else if (flag1) {
 								if (!entityplayermp.getStatFile().hasAchievementUnlocked(achievement)) {
@@ -129,7 +131,8 @@ public class CommandAchievement extends CommandBase {
 										}));
 								ArrayList arraylist2 = Lists.newArrayList(arraylist1);
 
-								for (Achievement achievement2 : (ArrayList<Achievement>) arraylist1) {
+								for (int i = 0, l = arraylist1.size(); i < l; ++i) {
+									Achievement achievement2 = (Achievement) arraylist1.get(i);
 									Achievement achievement3 = achievement2;
 
 									boolean flag2;
@@ -146,8 +149,8 @@ public class CommandAchievement extends CommandBase {
 									}
 								}
 
-								for (Achievement achievement6 : (ArrayList<Achievement>) arraylist2) {
-									entityplayermp.func_175145_a(achievement6);
+								for (int i = 0, l = arraylist2.size(); i < l; ++i) {
+									entityplayermp.func_175145_a((Achievement) arraylist2.get(i));
 								}
 							}
 						}
@@ -181,8 +184,8 @@ public class CommandAchievement extends CommandBase {
 		} else {
 			ArrayList arraylist = Lists.newArrayList();
 
-			for (StatBase statbase : StatList.allStats) {
-				arraylist.add(statbase.statId);
+			for (int i = 0, l = StatList.allStats.size(); i < l; ++i) {
+				arraylist.add(StatList.allStats.get(i).statId);
 			}
 
 			return getListOfStringsMatchingLastWord(astring, arraylist);

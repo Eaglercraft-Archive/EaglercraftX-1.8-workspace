@@ -3,7 +3,6 @@ package net.minecraft.entity.ai;
 import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.profiler.Profiler;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
@@ -29,7 +28,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class EntityAITasks {
-
 	private static final Logger logger = LogManager.getLogger();
 	/**+
 	 * A list of EntityAITaskEntrys in EntityAITasks.
@@ -125,8 +123,8 @@ public class EntityAITasks {
 		this.theProfiler.endSection();
 		this.theProfiler.startSection("goalTick");
 
-		for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry2 : this.executingTaskEntries) {
-			entityaitasks$entityaitaskentry2.action.updateTask();
+		for (int i = 0, l = this.executingTaskEntries.size(); i < l; ++i) {
+			this.executingTaskEntries.get(i).action.updateTask();
 		}
 
 		this.theProfiler.endSection();
@@ -148,7 +146,8 @@ public class EntityAITasks {
 	 * interrupted.
 	 */
 	private boolean canUse(EntityAITasks.EntityAITaskEntry taskEntry) {
-		for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry : this.taskEntries) {
+		for (int i = 0, l = this.taskEntries.size(); i < l; ++i) {
+			EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry = this.taskEntries.get(i);
 			if (entityaitasks$entityaitaskentry != taskEntry) {
 				if (taskEntry.priority >= entityaitasks$entityaitaskentry.priority) {
 					if (!this.areTasksCompatible(taskEntry, entityaitasks$entityaitaskentry)

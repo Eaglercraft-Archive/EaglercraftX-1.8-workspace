@@ -6,9 +6,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.init.Blocks;
-import net.minecraft.pathfinding.PathFinder;
-import net.minecraft.pathfinding.PathNavigate;
-import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -36,7 +33,6 @@ import net.minecraft.world.pathfinder.WalkNodeProcessor;
  * 
  */
 public class PathNavigateGround extends PathNavigate {
-
 	protected WalkNodeProcessor nodeProcessor;
 	private boolean shouldAvoidSun;
 

@@ -1,13 +1,12 @@
 package net.minecraft.client.multiplayer;
 
-import java.io.ByteArrayOutputStream;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.EaglerInputStream;
+import net.lax1dude.eaglercraft.v1_8.EaglerOutputStream;
 import net.lax1dude.eaglercraft.v1_8.internal.EnumServerRateLimit;
 import net.lax1dude.eaglercraft.v1_8.internal.IClientConfigAdapter.DefaultServer;
 import net.lax1dude.eaglercraft.v1_8.internal.QueryResponse;
@@ -16,7 +15,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.lax1dude.eaglercraft.v1_8.socket.AddressResolver;
 import net.lax1dude.eaglercraft.v1_8.socket.RateLimitTracker;
 import net.lax1dude.eaglercraft.v1_8.socket.ServerQueryDispatch;
-import net.lax1dude.eaglercraft.v1_8.sp.relay.RelayManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -74,6 +72,15 @@ public class ServerList {
 	 * found in the "servers" tag list.
 	 */
 	public void loadServerList() {
+		loadServerList(EagRuntime.getStorage("s"));
+	}
+
+	/**+
+	 * Loads a list of servers from servers.dat, by running
+	 * ServerData.getServerDataFromNBTCompound on each NBT compound
+	 * found in the "servers" tag list.
+	 */
+	public void loadServerList(byte[] localStorage) {
 		try {
 			freeServerIcons();
 
@@ -83,8 +90,6 @@ public class ServerList {
 				dat.isDefault = true;
 				this.allServers.add(dat);
 			}
-
-			byte[] localStorage = EagRuntime.getStorage("s");
 
 			if (localStorage != null) {
 				NBTTagCompound nbttagcompound = CompressedStreamTools
@@ -115,10 +120,18 @@ public class ServerList {
 	 * servers.dat.
 	 */
 	public void saveServerList() {
+		byte[] data = writeServerList();
+		if (data != null) {
+			EagRuntime.setStorage("s", data);
+		}
+	}
+
+	public byte[] writeServerList() {
 		try {
 			NBTTagList nbttaglist = new NBTTagList();
 
-			for (ServerData serverdata : this.servers) {
+			for (int i = 0, l = this.servers.size(); i < l; ++i) {
+				ServerData serverdata = this.servers.get(i);
 				if (!serverdata.isDefault) {
 					nbttaglist.appendTag(serverdata.getNBTCompound());
 				}
@@ -127,12 +140,13 @@ public class ServerList {
 			NBTTagCompound nbttagcompound = new NBTTagCompound();
 			nbttagcompound.setTag("servers", nbttaglist);
 
-			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			EaglerOutputStream bao = new EaglerOutputStream();
 			CompressedStreamTools.writeCompressed(nbttagcompound, bao);
-			EagRuntime.setStorage("s", bao.toByteArray());
+			return bao.toByteArray();
 
 		} catch (Exception exception) {
 			logger.error("Couldn\'t save server list", exception);
+			return null;
 		}
 
 	}
@@ -215,7 +229,8 @@ public class ServerList {
 	public void refreshServerPing() {
 		this.servers.clear();
 		this.servers.addAll(this.allServers);
-		for (ServerData dat : servers) {
+		for (int i = 0, l = this.servers.size(); i < l; ++i) {
+			ServerData dat = this.servers.get(i);
 			if (dat.currentQuery != null) {
 				if (dat.currentQuery.isOpen()) {
 					dat.currentQuery.close();
@@ -229,9 +244,8 @@ public class ServerList {
 
 	public void updateServerPing() {
 		int total = 0;
-		Iterator<ServerData> itr = servers.iterator();
-		while (itr.hasNext()) {
-			ServerData dat = itr.next();
+		for (int i = 0, l = this.servers.size(); i < l; ++i) {
+			ServerData dat = this.servers.get(i);
 			if (dat.pingSentTime <= 0l) {
 				dat.pingSentTime = System.currentTimeMillis();
 				if (RateLimitTracker.isLockedOut(dat.serverIP)) {

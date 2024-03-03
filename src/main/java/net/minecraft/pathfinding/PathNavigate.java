@@ -5,8 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.pathfinding.PathEntity;
-import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
@@ -35,7 +33,6 @@ import net.minecraft.world.World;
  * 
  */
 public abstract class PathNavigate {
-
 	protected EntityLiving theEntity;
 	protected World worldObj;
 	protected PathEntity currentPath;
@@ -201,12 +198,13 @@ public abstract class PathNavigate {
 				if (vec32 != null) {
 					AxisAlignedBB axisalignedbb1 = (new AxisAlignedBB(vec32.xCoord, vec32.yCoord, vec32.zCoord,
 							vec32.xCoord, vec32.yCoord, vec32.zCoord)).expand(0.5D, 0.5D, 0.5D);
-					List list = this.worldObj.getCollidingBoundingBoxes(this.theEntity,
+					List<AxisAlignedBB> list = this.worldObj.getCollidingBoundingBoxes(this.theEntity,
 							axisalignedbb1.addCoord(0.0D, -1.0D, 0.0D));
 					double d0 = -1.0D;
 					axisalignedbb1 = axisalignedbb1.offset(0.0D, 1.0D, 0.0D);
 
-					for (AxisAlignedBB axisalignedbb : (List<AxisAlignedBB>) list) {
+					for (int i = 0, l = list.size(); i < l; ++i) {
+						AxisAlignedBB axisalignedbb = list.get(i);
 						d0 = axisalignedbb.calculateYOffset(axisalignedbb1, d0);
 					}
 

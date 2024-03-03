@@ -1,5 +1,7 @@
 package net.minecraft.util;
 
+import java.util.List;
+
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
  * 
@@ -54,8 +56,9 @@ public class ChatComponentText extends ChatComponentStyle {
 		ChatComponentText chatcomponenttext = new ChatComponentText(this.text);
 		chatcomponenttext.setChatStyle(this.getChatStyle().createShallowCopy());
 
-		for (IChatComponent ichatcomponent : this.getSiblings()) {
-			chatcomponenttext.appendSibling(ichatcomponent.createCopy());
+		List<IChatComponent> lst = this.getSiblings();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			chatcomponenttext.appendSibling(lst.get(i).createCopy());
 		}
 
 		return chatcomponenttext;

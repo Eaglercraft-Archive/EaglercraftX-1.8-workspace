@@ -24,7 +24,7 @@ public enum EnumDifficulty {
 	PEACEFUL(0, "options.difficulty.peaceful"), EASY(1, "options.difficulty.easy"),
 	NORMAL(2, "options.difficulty.normal"), HARD(3, "options.difficulty.hard");
 
-	private static final EnumDifficulty[] difficultyEnums = new EnumDifficulty[values().length];
+	private static final EnumDifficulty[] difficultyEnums = new EnumDifficulty[4];
 	private final int difficultyId;
 	private final String difficultyResourceKey;
 
@@ -46,8 +46,9 @@ public enum EnumDifficulty {
 	}
 
 	static {
-		for (EnumDifficulty enumdifficulty : values()) {
-			difficultyEnums[enumdifficulty.difficultyId] = enumdifficulty;
+		EnumDifficulty[] types = values();
+		for (int i = 0; i < types.length; ++i) {
+			difficultyEnums[types[i].difficultyId] = types[i];
 		}
 
 	}

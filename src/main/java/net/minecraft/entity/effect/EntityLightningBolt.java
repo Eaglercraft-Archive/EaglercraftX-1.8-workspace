@@ -3,7 +3,6 @@ package net.minecraft.entity.effect;
 import java.util.List;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;

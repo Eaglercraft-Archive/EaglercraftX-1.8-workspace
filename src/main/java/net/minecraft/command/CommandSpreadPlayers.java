@@ -10,14 +10,6 @@ import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.HString;
 import net.minecraft.block.material.Material;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandResultStats;
-import net.minecraft.command.EntityNotFoundException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerNotFoundException;
-import net.minecraft.command.PlayerSelector;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -147,7 +139,8 @@ public class CommandSpreadPlayers extends CommandBase {
 	private int func_110667_a(List<Entity> parList) {
 		HashSet hashset = Sets.newHashSet();
 
-		for (Entity entity : parList) {
+		for (int i = 0, l = parList.size(); i < l; ++i) {
+			Entity entity = parList.get(i);
 			if (entity instanceof EntityPlayer) {
 				hashset.add(((EntityPlayer) entity).getTeam());
 			} else {
@@ -210,10 +203,9 @@ public class CommandSpreadPlayers extends CommandBase {
 			}
 
 			if (!flag) {
-				for (CommandSpreadPlayers.Position commandspreadplayers$position3 : parArrayOfPosition) {
-					if (!commandspreadplayers$position3.func_111098_b(parWorld)) {
-						commandspreadplayers$position3.func_111097_a(parRandom, parDouble2, parDouble3, parDouble4,
-								parDouble5);
+				for (int k = 0; k < parArrayOfPosition.length; ++k) {
+					if (!parArrayOfPosition[k].func_111098_b(parWorld)) {
+						parArrayOfPosition[k].func_111097_a(parRandom, parDouble2, parDouble3, parDouble4, parDouble5);
 						flag = true;
 					}
 				}

@@ -1,8 +1,5 @@
 package net.minecraft.command;
 
-import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandSender;
-
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
  * 

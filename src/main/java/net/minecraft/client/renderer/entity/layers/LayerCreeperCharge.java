@@ -9,7 +9,6 @@ import net.lax1dude.eaglercraft.v1_8.vector.Matrix4f;
 import net.minecraft.client.model.ModelCreeper;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.entity.RenderCreeper;
-import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.util.ResourceLocation;
 

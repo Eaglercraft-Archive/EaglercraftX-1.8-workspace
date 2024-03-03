@@ -7,7 +7,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -30,11 +29,12 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  * 
  */
 public class WorldGenVines extends WorldGenerator {
-
 	public boolean generate(World world, EaglercraftRandom random, BlockPos blockpos) {
 		for (; blockpos.getY() < 128; blockpos = blockpos.up()) {
 			if (world.isAirBlock(blockpos)) {
-				for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL.facings()) {
+				EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+				for (int i = 0; i < facings.length; ++i) {
+					EnumFacing enumfacing = facings[i];
 					if (Blocks.vine.canPlaceBlockOnSide(world, blockpos, enumfacing)) {
 						IBlockState iblockstate = Blocks.vine.getDefaultState()
 								.withProperty(BlockVine.NORTH, Boolean.valueOf(enumfacing == EnumFacing.NORTH))

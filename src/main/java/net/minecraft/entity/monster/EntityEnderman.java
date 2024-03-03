@@ -98,9 +98,9 @@ public class EntityEnderman extends EntityMob {
 
 	protected void entityInit() {
 		super.entityInit();
-		this.dataWatcher.addObject(16, new Short((short) 0));
-		this.dataWatcher.addObject(17, new Byte((byte) 0));
-		this.dataWatcher.addObject(18, new Byte((byte) 0));
+		this.dataWatcher.addObject(16, Short.valueOf((short) 0));
+		this.dataWatcher.addObject(17, Byte.valueOf((byte) 0));
+		this.dataWatcher.addObject(18, Byte.valueOf((byte) 0));
 	}
 
 	/**+

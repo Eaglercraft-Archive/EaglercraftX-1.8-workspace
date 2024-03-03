@@ -25,7 +25,6 @@ import net.minecraft.util.MathHelper;
  * 
  */
 public class EntityMoveHelper {
-
 	protected EntityLiving entity;
 	protected double posX;
 	protected double posY;

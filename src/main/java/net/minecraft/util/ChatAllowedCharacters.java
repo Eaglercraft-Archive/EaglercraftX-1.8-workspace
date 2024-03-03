@@ -39,7 +39,9 @@ public class ChatAllowedCharacters {
 	public static String filterAllowedCharacters(String input) {
 		StringBuilder stringbuilder = new StringBuilder();
 
-		for (char c0 : input.toCharArray()) {
+		char[] chars = input.toCharArray();
+		for (int i = 0; i < chars.length; ++i) {
+			char c0 = chars[i];
 			if (isAllowedCharacter(c0)) {
 				stringbuilder.append(c0);
 			}

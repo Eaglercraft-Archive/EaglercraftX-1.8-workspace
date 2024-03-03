@@ -47,7 +47,8 @@ public class ScreenChatOptions extends GuiScreen {
 		int i = 0;
 		this.field_146401_i = I18n.format("options.chat.title", new Object[0]);
 
-		for (GameSettings.Options gamesettings$options : field_146399_a) {
+		for (int j = 0; j < field_146399_a.length; ++j) {
+			GameSettings.Options gamesettings$options = field_146399_a[j];
 			if (gamesettings$options.getEnumFloat()) {
 				this.buttonList.add(new GuiOptionSlider(gamesettings$options.returnEnumOrdinal(),
 						this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), gamesettings$options));

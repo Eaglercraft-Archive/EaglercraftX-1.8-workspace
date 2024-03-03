@@ -10,12 +10,6 @@ import net.lax1dude.eaglercraft.v1_8.Keyboard;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
 import net.minecraft.block.BlockTallGrass;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiCreateFlatWorld;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiSlot;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -189,8 +183,8 @@ public class GuiFlatPresets extends GuiScreen {
 		flatgeneratorinfo.setBiome(parBiomeGenBase.biomeID);
 		flatgeneratorinfo.func_82645_d();
 		if (parList != null) {
-			for (String s : parList) {
-				flatgeneratorinfo.getWorldFeatures().put(s, Maps.newHashMap());
+			for (int i = 0, l = parList.size(); i < l; ++i) {
+				flatgeneratorinfo.getWorldFeatures().put(parList.get(i), Maps.newHashMap());
 			}
 		}
 

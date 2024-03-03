@@ -8,8 +8,6 @@ import net.minecraft.network.play.server.S28PacketEffect;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.IWorldAccess;
-import net.minecraft.world.WorldServer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -32,7 +30,6 @@ import net.minecraft.world.WorldServer;
  * 
  */
 public class WorldManager implements IWorldAccess {
-
 	private MinecraftServer mcServer;
 	private WorldServer theWorldServer;
 

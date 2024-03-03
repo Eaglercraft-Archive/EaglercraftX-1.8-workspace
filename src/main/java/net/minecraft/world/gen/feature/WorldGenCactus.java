@@ -4,7 +4,6 @@ import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -27,7 +26,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  * 
  */
 public class WorldGenCactus extends WorldGenerator {
-
 	public boolean generate(World world, EaglercraftRandom random, BlockPos blockpos) {
 		for (int i = 0; i < 10; ++i) {
 			BlockPos blockpos1 = blockpos.add(random.nextInt(8) - random.nextInt(8),

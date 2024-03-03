@@ -70,7 +70,8 @@ public class S22PacketMultiBlockChange implements Packet<INetHandlerPlayClient> 
 		parPacketBuffer.writeInt(this.chunkPosCoord.chunkZPos);
 		parPacketBuffer.writeVarIntToBuffer(this.changedBlocks.length);
 
-		for (S22PacketMultiBlockChange.BlockUpdateData s22packetmultiblockchange$blockupdatedata : this.changedBlocks) {
+		for (int i = 0; i < this.changedBlocks.length; ++i) {
+			S22PacketMultiBlockChange.BlockUpdateData s22packetmultiblockchange$blockupdatedata = this.changedBlocks[i];
 			parPacketBuffer.writeShort(s22packetmultiblockchange$blockupdatedata.func_180089_b());
 			parPacketBuffer.writeVarIntToBuffer(
 					Block.BLOCK_STATE_IDS.get(s22packetmultiblockchange$blockupdatedata.getBlockState()));

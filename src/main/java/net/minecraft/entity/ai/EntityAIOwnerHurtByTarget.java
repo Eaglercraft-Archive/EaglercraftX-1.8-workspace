@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAITarget;
 import net.minecraft.entity.passive.EntityTameable;
 
 /**+
@@ -25,7 +24,6 @@ import net.minecraft.entity.passive.EntityTameable;
  * 
  */
 public class EntityAIOwnerHurtByTarget extends EntityAITarget {
-
 	EntityTameable theDefendingTameable;
 	EntityLivingBase theOwnerAttacker;
 	private int field_142051_e;

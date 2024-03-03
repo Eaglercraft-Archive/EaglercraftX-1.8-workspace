@@ -1,8 +1,6 @@
 package net.minecraft.pathfinding;
 
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.pathfinding.PathFinder;
-import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -29,7 +27,6 @@ import net.minecraft.world.pathfinder.SwimNodeProcessor;
  * 
  */
 public class PathNavigateSwimmer extends PathNavigate {
-
 	public PathNavigateSwimmer(EntityLiving entitylivingIn, World worldIn) {
 		super(entitylivingIn, worldIn);
 	}

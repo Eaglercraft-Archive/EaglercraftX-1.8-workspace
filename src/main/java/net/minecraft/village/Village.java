@@ -1,11 +1,9 @@
 package net.minecraft.village;
 
 import com.google.common.collect.Lists;
-import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
-import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDoor;
 import net.minecraft.block.material.Material;
@@ -15,12 +13,10 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import net.minecraft.village.VillageDoorInfo;
 import net.minecraft.world.World;
 
 /**+
@@ -44,7 +40,6 @@ import net.minecraft.world.World;
  * 
  */
 public class Village {
-
 	private World worldObj;
 	/**+
 	 * list of VillageDoorInfo objects
@@ -202,7 +197,8 @@ public class Village {
 		VillageDoorInfo villagedoorinfo = null;
 		int i = Integer.MAX_VALUE;
 
-		for (VillageDoorInfo villagedoorinfo1 : this.villageDoorInfoList) {
+		for (int m = 0, n = this.villageDoorInfoList.size(); m < n; ++m) {
+			VillageDoorInfo villagedoorinfo1 = this.villageDoorInfoList.get(m);
 			int j = villagedoorinfo1.getDistanceToDoorBlockSq(pos);
 			if (j < i) {
 				villagedoorinfo = villagedoorinfo1;
@@ -221,7 +217,8 @@ public class Village {
 		VillageDoorInfo villagedoorinfo = null;
 		int i = Integer.MAX_VALUE;
 
-		for (VillageDoorInfo villagedoorinfo1 : this.villageDoorInfoList) {
+		for (int m = 0, n = this.villageDoorInfoList.size(); m < n; ++m) {
+			VillageDoorInfo villagedoorinfo1 = this.villageDoorInfoList.get(m);
 			int j = villagedoorinfo1.getDistanceToDoorBlockSq(pos);
 			if (j > 256) {
 				j = j * 1000;
@@ -245,7 +242,8 @@ public class Village {
 		if (this.center.distanceSq(doorBlock) > (double) (this.villageRadius * this.villageRadius)) {
 			return null;
 		} else {
-			for (VillageDoorInfo villagedoorinfo : this.villageDoorInfoList) {
+			for (int m = 0, n = this.villageDoorInfoList.size(); m < n; ++m) {
+				VillageDoorInfo villagedoorinfo = this.villageDoorInfoList.get(m);
 				if (villagedoorinfo.getDoorBlockPos().getX() == doorBlock.getX()
 						&& villagedoorinfo.getDoorBlockPos().getZ() == doorBlock.getZ()
 						&& Math.abs(villagedoorinfo.getDoorBlockPos().getY() - doorBlock.getY()) <= 1) {
@@ -273,7 +271,8 @@ public class Village {
 	}
 
 	public void addOrRenewAgressor(EntityLivingBase entitylivingbaseIn) {
-		for (Village.VillageAggressor village$villageaggressor : this.villageAgressors) {
+		for (int i = 0, l = this.villageAgressors.size(); i < l; ++i) {
+			Village.VillageAggressor village$villageaggressor = this.villageAgressors.get(i);
 			if (village$villageaggressor.agressor == entitylivingbaseIn) {
 				village$villageaggressor.agressionTime = this.tickCounter;
 				return;
@@ -374,8 +373,8 @@ public class Village {
 					this.centerHelper.getZ() / i);
 			int j = 0;
 
-			for (VillageDoorInfo villagedoorinfo : this.villageDoorInfoList) {
-				j = Math.max(villagedoorinfo.getDistanceToDoorBlockSq(this.center), j);
+			for (int m = 0, n = this.villageDoorInfoList.size(); m < n; ++m) {
+				j = Math.max(this.villageDoorInfoList.get(m).getDistanceToDoorBlockSq(this.center), j);
 			}
 
 			this.villageRadius = Math.max(32, (int) Math.sqrt((double) j) + 1);
@@ -464,7 +463,8 @@ public class Village {
 		parNBTTagCompound.setInteger("ACZ", this.centerHelper.getZ());
 		NBTTagList nbttaglist = new NBTTagList();
 
-		for (VillageDoorInfo villagedoorinfo : this.villageDoorInfoList) {
+		for (int m = 0, n = this.villageDoorInfoList.size(); m < n; ++m) {
+			VillageDoorInfo villagedoorinfo = this.villageDoorInfoList.get(m);
 			NBTTagCompound nbttagcompound = new NBTTagCompound();
 			nbttagcompound.setInteger("X", villagedoorinfo.getDoorBlockPos().getX());
 			nbttagcompound.setInteger("Y", villagedoorinfo.getDoorBlockPos().getY());

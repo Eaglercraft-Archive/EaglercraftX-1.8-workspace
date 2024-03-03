@@ -11,7 +11,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -34,7 +33,6 @@ import net.minecraft.world.gen.feature.WorldGenAbstractTree;
  * 
  */
 public class WorldGenTaiga1 extends WorldGenAbstractTree {
-
 	private static final IBlockState field_181636_a = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT,
 			BlockPlanks.EnumType.SPRUCE);
 	private static final IBlockState field_181637_b = Blocks.leaves.getDefaultState()

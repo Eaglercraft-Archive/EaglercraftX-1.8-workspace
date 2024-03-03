@@ -181,7 +181,8 @@ public class EffectRenderer {
 
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (EntityParticleEmitter entityparticleemitter : this.particleEmitters) {
+		for (int i = 0, l = this.particleEmitters.size(); i < l; ++i) {
+			EntityParticleEmitter entityparticleemitter = this.particleEmitters.get(i);
 			entityparticleemitter.onUpdate();
 			if (entityparticleemitter.isDead) {
 				arraylist.add(entityparticleemitter);

@@ -24,7 +24,6 @@ import net.minecraft.util.EnumFacing;
  * 
  */
 public class VillageDoorInfo {
-
 	private final BlockPos doorBlockPos;
 	private final BlockPos insideBlock;
 	private final EnumFacing insideDirection;

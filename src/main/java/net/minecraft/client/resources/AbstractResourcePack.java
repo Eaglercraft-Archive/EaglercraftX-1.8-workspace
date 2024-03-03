@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import net.lax1dude.eaglercraft.v1_8.vfs.SYS;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,6 +11,7 @@ import net.lax1dude.eaglercraft.v1_8.IOUtils;
 import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
 import net.lax1dude.eaglercraft.v1_8.opengl.ImageData;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.data.IMetadataSection;
@@ -73,8 +73,8 @@ public abstract class AbstractResourcePack implements IResourcePack {
 		try {
 			return readMetadata(parIMetadataSerializer, this.getInputStreamByName("pack.mcmeta"), parString1);
 		} catch (JSONException e) {
-			if (SYS.VFS != null) {
-				SYS.deleteResourcePack(this.resourcePackFile);
+			if (this instanceof EaglerFolderResourcePack) {
+				EaglerFolderResourcePack.deleteResourcePack((EaglerFolderResourcePack) this);
 			}
 			throw e;
 		}

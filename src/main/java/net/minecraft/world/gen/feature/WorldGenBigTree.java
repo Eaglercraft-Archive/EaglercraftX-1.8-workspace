@@ -12,7 +12,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -35,7 +34,6 @@ import net.minecraft.world.gen.feature.WorldGenAbstractTree;
  * 
  */
 public class WorldGenBigTree extends WorldGenAbstractTree {
-
 	private EaglercraftRandom rand;
 	private World world;
 	private BlockPos basePos = BlockPos.ORIGIN;
@@ -206,8 +204,8 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
 	 * leafNodes list.
 	 */
 	void generateLeaves() {
-		for (WorldGenBigTree.FoliageCoordinates worldgenbigtree$foliagecoordinates : this.field_175948_j) {
-			this.generateLeafNode(worldgenbigtree$foliagecoordinates);
+		for (int i = 0, l = this.field_175948_j.size(); i < l; ++i) {
+			this.generateLeafNode(this.field_175948_j.get(i));
 		}
 
 	}
@@ -243,7 +241,8 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
 	 * different leaf nodes that would otherwise degrade.
 	 */
 	void generateLeafNodeBases() {
-		for (WorldGenBigTree.FoliageCoordinates worldgenbigtree$foliagecoordinates : this.field_175948_j) {
+		for (int j = 0, l = this.field_175948_j.size(); j < l; ++j) {
+			WorldGenBigTree.FoliageCoordinates worldgenbigtree$foliagecoordinates = this.field_175948_j.get(j);
 			int i = worldgenbigtree$foliagecoordinates.func_177999_q();
 			BlockPos blockpos = new BlockPos(this.basePos.getX(), i, this.basePos.getZ());
 			if (!blockpos.equals(worldgenbigtree$foliagecoordinates)

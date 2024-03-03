@@ -91,8 +91,8 @@ public class BiomeGenForest extends BiomeGenBase {
 			double d0 = MathHelper.clamp_double((1.0D + GRASS_COLOR_NOISE
 					.func_151601_a((double) blockpos.getX() / 48.0D, (double) blockpos.getZ() / 48.0D)) / 2.0D, 0.0D,
 					0.9999D);
-			BlockFlower.EnumFlowerType blockflower$enumflowertype = BlockFlower.EnumFlowerType
-					.values()[(int) (d0 * (double) BlockFlower.EnumFlowerType.values().length)];
+			BlockFlower.EnumFlowerType blockflower$enumflowertype = BlockFlower.EnumFlowerType._VALUES[(int) (d0
+					* (double) BlockFlower.EnumFlowerType._VALUES.length)];
 			return blockflower$enumflowertype == BlockFlower.EnumFlowerType.BLUE_ORCHID
 					? BlockFlower.EnumFlowerType.POPPY
 					: blockflower$enumflowertype;

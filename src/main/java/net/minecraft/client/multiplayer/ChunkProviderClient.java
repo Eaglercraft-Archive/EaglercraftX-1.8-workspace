@@ -126,8 +126,8 @@ public class ChunkProviderClient implements IChunkProvider {
 	public boolean unloadQueuedChunks() {
 		long i = System.currentTimeMillis();
 
-		for (Chunk chunk : this.chunkListing) {
-			chunk.func_150804_b(System.currentTimeMillis() - i > 5L);
+		for (int j = 0, k = this.chunkListing.size(); j < k; ++j) {
+			this.chunkListing.get(j).func_150804_b(System.currentTimeMillis() - i > 5L);
 		}
 
 		if (System.currentTimeMillis() - i > 100L) {

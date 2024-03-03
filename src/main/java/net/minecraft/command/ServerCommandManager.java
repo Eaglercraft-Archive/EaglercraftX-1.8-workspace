@@ -14,10 +14,12 @@ import net.minecraft.command.server.CommandSummon;
 import net.minecraft.command.server.CommandTeleport;
 import net.minecraft.command.server.CommandTestFor;
 import net.minecraft.command.server.CommandTestForBlock;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
+
+import java.util.List;
 
 import net.lax1dude.eaglercraft.v1_8.sp.server.ClientCommandDummy;
 
@@ -109,7 +111,9 @@ public class ServerCommandManager extends CommandHandler implements IAdminComman
 		chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.GRAY);
 		chatcomponenttranslation.getChatStyle().setItalic(Boolean.valueOf(true));
 		if (flag) {
-			for (EntityPlayer entityplayer : minecraftserver.getConfigurationManager().func_181057_v()) {
+			List<EntityPlayerMP> players = minecraftserver.getConfigurationManager().func_181057_v();
+			for (int i = 0, l = players.size(); i < l; ++i) {
+				EntityPlayerMP entityplayer = players.get(i);
 				if (entityplayer != sender
 						&& minecraftserver.getConfigurationManager().canSendCommands(entityplayer.getGameProfile())
 						&& command.canCommandSenderUseCommand(sender)) {

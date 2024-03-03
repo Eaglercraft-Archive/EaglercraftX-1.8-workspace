@@ -346,7 +346,8 @@ public class PotionHelper {
 	public static List<PotionEffect> getPotionEffects(int parInt1, boolean parFlag) {
 		ArrayList arraylist = null;
 
-		for (Potion potion : Potion.potionTypes) {
+		for (int k = 0; k < Potion.potionTypes.length; ++k) {
+			Potion potion = Potion.potionTypes[k];
 			if (potion != null && (!potion.isUsable() || parFlag)) {
 				String s = (String) potionRequirements.get(Integer.valueOf(potion.getId()));
 				if (s != null) {

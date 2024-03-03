@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathNavigateGround;
 
 /**+
@@ -25,7 +24,6 @@ import net.minecraft.pathfinding.PathNavigateGround;
  * 
  */
 public class EntityAISwimming extends EntityAIBase {
-
 	private EntityLiving theEntity;
 
 	public EntityAISwimming(EntityLiving entitylivingIn) {

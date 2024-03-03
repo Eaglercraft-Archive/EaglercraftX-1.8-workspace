@@ -312,7 +312,8 @@ public class JsonToNBT {
 		public NBTBase parse() throws NBTException {
 			NBTTagCompound nbttagcompound = new NBTTagCompound();
 
-			for (JsonToNBT.Any jsontonbt$any : this.field_150491_b) {
+			for (int i = 0, l = this.field_150491_b.size(); i < l; ++i) {
+				JsonToNBT.Any jsontonbt$any = this.field_150491_b.get(i);
 				nbttagcompound.setTag(jsontonbt$any.json, jsontonbt$any.parse());
 			}
 
@@ -330,8 +331,8 @@ public class JsonToNBT {
 		public NBTBase parse() throws NBTException {
 			NBTTagList nbttaglist = new NBTTagList();
 
-			for (JsonToNBT.Any jsontonbt$any : this.field_150492_b) {
-				nbttaglist.appendTag(jsontonbt$any.parse());
+			for (int i = 0, l = this.field_150492_b.size(); i < l; ++i) {
+				nbttaglist.appendTag(this.field_150492_b.get(i).parse());
 			}
 
 			return nbttaglist;

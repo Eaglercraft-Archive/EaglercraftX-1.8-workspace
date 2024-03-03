@@ -4,7 +4,6 @@ import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerTextureAtlasSprite;
 
@@ -487,7 +486,8 @@ public class GuiIngame extends Gui {
 
 		int i = this.getFontRenderer().getStringWidth(parScoreObjective.getDisplayName());
 
-		for (Score score : (List<Score>) arraylist1) {
+		for (int m = 0, n = arraylist1.size(); m < n; ++m) {
+			Score score = (Score) arraylist1.get(m);
 			ScorePlayerTeam scoreplayerteam = scoreboard.getPlayersTeam(score.getPlayerName());
 			String s = ScorePlayerTeam.formatPlayerName(scoreplayerteam, score.getPlayerName()) + ": "
 					+ EnumChatFormatting.RED + score.getScorePoints();
@@ -500,7 +500,8 @@ public class GuiIngame extends Gui {
 		int k1 = parScaledResolution.getScaledWidth() - i - b0;
 		int j = 0;
 
-		for (Score score1 : (List<Score>) arraylist1) {
+		for (int m = 0, n = arraylist1.size(); m < n; ++m) {
+			Score score1 = (Score) arraylist1.get(m);
 			++j;
 			ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score1.getPlayerName());
 			String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score1.getPlayerName());

@@ -7,7 +7,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.MapGenBase;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -30,7 +29,6 @@ import net.minecraft.world.gen.MapGenBase;
  * 
  */
 public class MapGenRavine extends MapGenBase {
-
 	private float[] field_75046_d = new float[1024];
 
 	protected void func_180707_a(long parLong1, int parInt1, int parInt2, ChunkPrimer parChunkPrimer, double parDouble1,

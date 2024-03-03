@@ -7,9 +7,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.MapGenStructureIO;
-import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraft.world.gen.structure.StructureComponent;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -32,7 +29,6 @@ import net.minecraft.world.gen.structure.StructureComponent;
  * 
  */
 public abstract class StructureStart {
-
 	/**+
 	 * List of all StructureComponents that are part of this
 	 * structure

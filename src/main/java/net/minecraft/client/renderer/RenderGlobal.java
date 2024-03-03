@@ -524,7 +524,9 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 
 			this.theWorld.theProfiler.endStartSection("entities");
 
-			label738: for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation : this.renderInfos) {
+			label738: for (int ii = 0, ll = this.renderInfos.size(); ii < ll; ++ii) {
+				RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation = this.renderInfos
+						.get(ii);
 				Chunk chunk = this.theWorld.getChunkFromBlockCoords(
 						renderglobal$containerlocalrenderinformation.renderChunk.getPosition());
 				ClassInheritanceMultiMap classinheritancemultimap = chunk
@@ -574,12 +576,15 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 			this.theWorld.theProfiler.endStartSection("blockentities");
 			RenderHelper.enableStandardItemLighting();
 
-			for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation1 : this.renderInfos) {
+			for (int ii = 0, ll = this.renderInfos.size(); ii < ll; ++ii) {
+				RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation1 = this.renderInfos
+						.get(ii);
 				List list1 = renderglobal$containerlocalrenderinformation1.renderChunk.getCompiledChunk()
 						.getTileEntities();
 				if (!list1.isEmpty()) {
-					for (TileEntity tileentity2 : (List<TileEntity>) list1) {
-						TileEntityRendererDispatcher.instance.renderTileEntity(tileentity2, partialTicks, -1);
+					for (int m = 0, n = list1.size(); m < n; ++m) {
+						TileEntityRendererDispatcher.instance.renderTileEntity((TileEntity) list1.get(m), partialTicks,
+								-1);
 					}
 				}
 			}
@@ -786,7 +791,9 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 		int i = this.viewFrustum.renderChunks.length;
 		int j = 0;
 
-		for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation : this.renderInfos) {
+		for (int ii = 0, ll = this.renderInfos.size(); ii < ll; ++ii) {
+			RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation = this.renderInfos
+					.get(ii);
 			CompiledChunk compiledchunk = renderglobal$containerlocalrenderinformation.renderChunk.compiledChunk;
 			if (compiledchunk != CompiledChunk.DUMMY && !compiledchunk.isEmpty()) {
 				++j;
@@ -912,7 +919,9 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 				EnumFacing enumfacing2 = renderglobal$containerlocalrenderinformation1.facing;
 				BlockPos blockpos2 = renderchunk3.getPosition();
 				this.renderInfos.add(renderglobal$containerlocalrenderinformation1);
-				for (EnumFacing enumfacing1 : EnumFacing.values()) {
+				EnumFacing[] facings = EnumFacing._VALUES;
+				for (int i = 0; i < facings.length; ++i) {
+					EnumFacing enumfacing1 = facings[i];
 					RenderChunk renderchunk2 = this.func_181562_a(blockpos, renderchunk3, enumfacing1);
 					if ((!flag1 || !renderglobal$containerlocalrenderinformation1.setFacing // TODO:
 							.contains(enumfacing1.getOpposite()))
@@ -940,7 +949,9 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 		Set set = this.chunksToUpdate;
 		this.chunksToUpdate = Sets.newLinkedHashSet();
 
-		for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation2 : this.renderInfos) {
+		for (int ii = 0, ll = this.renderInfos.size(); ii < ll; ++ii) {
+			RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation2 = this.renderInfos
+					.get(ii);
 			RenderChunk renderchunk4 = renderglobal$containerlocalrenderinformation2.renderChunk;
 			if (renderchunk4.isNeedsUpdate() || set.contains(renderchunk4)) {
 				this.displayListEntitiesDirty = true;
@@ -1065,7 +1076,9 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 				this.prevRenderSortZ = entityIn.posZ;
 				int k = 0;
 
-				for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation : this.renderInfos) {
+				for (int ii = 0, ll = this.renderInfos.size(); ii < ll; ++ii) {
+					RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation = this.renderInfos
+							.get(ii);
 					if (renderglobal$containerlocalrenderinformation.renderChunk.compiledChunk
 							.isLayerStarted(blockLayerIn) && k++ < 15) {
 						this.renderDispatcher
@@ -2488,7 +2501,9 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 		int j = 0;
 		int k = 0;
 
-		for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation : this.renderInfos) {
+		for (int ii = 0, ll = this.renderInfos.size(); ii < ll; ++ii) {
+			RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation = this.renderInfos
+					.get(ii);
 			CompiledChunk compiledchunk = renderglobal$containerlocalrenderinformation.renderChunk.compiledChunk;
 			if (compiledchunk != CompiledChunk.DUMMY && !compiledchunk.isEmpty()) {
 				++j;

@@ -1,11 +1,6 @@
 package net.minecraft.command;
 
 import java.util.List;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.NumberInvalidException;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
@@ -102,7 +97,7 @@ public class CommandGameMode extends CommandBase {
 																&& !parString1.equalsIgnoreCase("sp")
 																		? WorldSettings.getGameTypeById(parseInt(
 																				parString1, 0,
-																				WorldSettings.GameType.values().length
+																				WorldSettings.GameType._VALUES.length
 																						- 2))
 																		: WorldSettings.GameType.SPECTATOR)
 														: WorldSettings.GameType.ADVENTURE)

@@ -103,7 +103,9 @@ public class BlockLadder extends Block {
 		if (enumfacing.getAxis().isHorizontal() && this.canBlockStay(world, blockpos, enumfacing)) {
 			return this.getDefaultState().withProperty(FACING, enumfacing);
 		} else {
-			for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL) {
+			EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+			for (int i = 0; i < facings.length; ++i) {
+				EnumFacing enumfacing1 = facings[i];
 				if (this.canBlockStay(world, blockpos, enumfacing1)) {
 					return this.getDefaultState().withProperty(FACING, enumfacing1);
 				}

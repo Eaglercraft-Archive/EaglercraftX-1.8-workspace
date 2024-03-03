@@ -110,8 +110,9 @@ public class HoverEvent {
 		}
 
 		static {
-			for (HoverEvent.Action hoverevent$action : values()) {
-				nameMapping.put(hoverevent$action.getCanonicalName(), hoverevent$action);
+			HoverEvent.Action[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				nameMapping.put(types[i].getCanonicalName(), types[i]);
 			}
 
 		}

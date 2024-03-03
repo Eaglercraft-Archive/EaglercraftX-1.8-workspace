@@ -1,13 +1,8 @@
 package net.minecraft.client.gui;
 
-import java.io.IOException;
-
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
 import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
 import net.lax1dude.eaglercraft.v1_8.sp.gui.GuiScreenIntegratedServerBusy;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.WorldInfo;
@@ -101,13 +96,13 @@ public class GuiRenameWorld extends GuiScreen {
 					SingleplayerServerController.duplicateWorld(this.saveName, this.field_146583_f.getText().trim());
 					this.mc.displayGuiScreen(
 							new GuiScreenIntegratedServerBusy(this.parentScreen, "singleplayer.busy.duplicating",
-									"singleplayer.failed.duplicating", () -> SingleplayerServerController.isReady()));
+									"singleplayer.failed.duplicating", SingleplayerServerController::isReady));
 				} else {
 					ISaveFormat isaveformat = this.mc.getSaveLoader();
 					isaveformat.renameWorld(this.saveName, this.field_146583_f.getText().trim());
 					this.mc.displayGuiScreen(
 							new GuiScreenIntegratedServerBusy(this.parentScreen, "singleplayer.busy.renaming",
-									"singleplayer.failed.renaming", () -> SingleplayerServerController.isReady()));
+									"singleplayer.failed.renaming", SingleplayerServerController::isReady));
 				}
 			}
 		}

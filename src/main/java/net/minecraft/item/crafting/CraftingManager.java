@@ -445,7 +445,8 @@ public class CraftingManager {
 	public void addShapelessRecipe(ItemStack stack, Object... recipeComponents) {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (Object object : recipeComponents) {
+		for (int i = 0; i < recipeComponents.length; ++i) {
+			Object object = recipeComponents[i];
 			if (object instanceof ItemStack) {
 				arraylist.add(((ItemStack) object).copy());
 			} else if (object instanceof Item) {
@@ -474,7 +475,8 @@ public class CraftingManager {
 	 * Retrieves an ItemStack that has multiple recipes for it.
 	 */
 	public ItemStack findMatchingRecipe(InventoryCrafting worldIn, World parWorld) {
-		for (IRecipe irecipe : this.recipes) {
+		for (int i = 0, l = this.recipes.size(); i < l; ++i) {
+			IRecipe irecipe = this.recipes.get(i);
 			if (irecipe.matches(worldIn, parWorld)) {
 				return irecipe.getCraftingResult(worldIn);
 			}
@@ -484,7 +486,8 @@ public class CraftingManager {
 	}
 
 	public ItemStack[] func_180303_b(InventoryCrafting worldIn, World parWorld) {
-		for (IRecipe irecipe : this.recipes) {
+		for (int i = 0, l = this.recipes.size(); i < l; ++i) {
+			IRecipe irecipe = this.recipes.get(i);
 			if (irecipe.matches(worldIn, parWorld)) {
 				return irecipe.getRemainingItems(worldIn);
 			}

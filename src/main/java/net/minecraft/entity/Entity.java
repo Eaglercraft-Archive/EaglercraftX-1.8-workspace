@@ -525,24 +525,25 @@ public abstract class Entity implements ICommandSender {
 				}
 			}
 
-			List list1 = this.worldObj.getCollidingBoundingBoxes(this, this.getEntityBoundingBox().addCoord(x, y, z));
+			List<AxisAlignedBB> list1 = this.worldObj.getCollidingBoundingBoxes(this,
+					this.getEntityBoundingBox().addCoord(x, y, z));
 			AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
 
-			for (AxisAlignedBB axisalignedbb1 : (List<AxisAlignedBB>) list1) {
-				y = axisalignedbb1.calculateYOffset(this.getEntityBoundingBox(), y);
+			for (int i = 0, l = list1.size(); i < l; ++i) {
+				y = list1.get(i).calculateYOffset(this.getEntityBoundingBox(), y);
 			}
 
 			this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, y, 0.0D));
 			boolean flag1 = this.onGround || d4 != y && d4 < 0.0D;
 
-			for (AxisAlignedBB axisalignedbb2 : (List<AxisAlignedBB>) list1) {
-				x = axisalignedbb2.calculateXOffset(this.getEntityBoundingBox(), x);
+			for (int i = 0, l = list1.size(); i < l; ++i) {
+				x = list1.get(i).calculateXOffset(this.getEntityBoundingBox(), x);
 			}
 
 			this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, 0.0D, 0.0D));
 
-			for (AxisAlignedBB axisalignedbb13 : (List<AxisAlignedBB>) list1) {
-				z = axisalignedbb13.calculateZOffset(this.getEntityBoundingBox(), z);
+			for (int i = 0, l = list1.size(); i < l; ++i) {
+				z = list1.get(i).calculateZOffset(this.getEntityBoundingBox(), z);
 			}
 
 			this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, 0.0D, z));
@@ -553,50 +554,50 @@ public abstract class Entity implements ICommandSender {
 				AxisAlignedBB axisalignedbb3 = this.getEntityBoundingBox();
 				this.setEntityBoundingBox(axisalignedbb);
 				y = (double) this.stepHeight;
-				List list = this.worldObj.getCollidingBoundingBoxes(this,
+				List<AxisAlignedBB> list = this.worldObj.getCollidingBoundingBoxes(this,
 						this.getEntityBoundingBox().addCoord(d3, y, d5));
 				AxisAlignedBB axisalignedbb4 = this.getEntityBoundingBox();
 				AxisAlignedBB axisalignedbb5 = axisalignedbb4.addCoord(d3, 0.0D, d5);
 				double d9 = y;
 
-				for (AxisAlignedBB axisalignedbb6 : (List<AxisAlignedBB>) list) {
-					d9 = axisalignedbb6.calculateYOffset(axisalignedbb5, d9);
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					d9 = list.get(i).calculateYOffset(axisalignedbb5, d9);
 				}
 
 				axisalignedbb4 = axisalignedbb4.offset(0.0D, d9, 0.0D);
 				double d15 = d3;
 
-				for (AxisAlignedBB axisalignedbb7 : (List<AxisAlignedBB>) list) {
-					d15 = axisalignedbb7.calculateXOffset(axisalignedbb4, d15);
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					d15 = list.get(i).calculateXOffset(axisalignedbb4, d15);
 				}
 
 				axisalignedbb4 = axisalignedbb4.offset(d15, 0.0D, 0.0D);
 				double d16 = d5;
 
-				for (AxisAlignedBB axisalignedbb8 : (List<AxisAlignedBB>) list) {
-					d16 = axisalignedbb8.calculateZOffset(axisalignedbb4, d16);
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					d16 = list.get(i).calculateZOffset(axisalignedbb4, d16);
 				}
 
 				axisalignedbb4 = axisalignedbb4.offset(0.0D, 0.0D, d16);
 				AxisAlignedBB axisalignedbb14 = this.getEntityBoundingBox();
 				double d17 = y;
 
-				for (AxisAlignedBB axisalignedbb9 : (List<AxisAlignedBB>) list) {
-					d17 = axisalignedbb9.calculateYOffset(axisalignedbb14, d17);
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					d17 = list.get(i).calculateYOffset(axisalignedbb14, d17);
 				}
 
 				axisalignedbb14 = axisalignedbb14.offset(0.0D, d17, 0.0D);
 				double d18 = d3;
 
-				for (AxisAlignedBB axisalignedbb10 : (List<AxisAlignedBB>) list) {
-					d18 = axisalignedbb10.calculateXOffset(axisalignedbb14, d18);
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					d18 = list.get(i).calculateXOffset(axisalignedbb14, d18);
 				}
 
 				axisalignedbb14 = axisalignedbb14.offset(d18, 0.0D, 0.0D);
 				double d19 = d5;
 
-				for (AxisAlignedBB axisalignedbb11 : (List<AxisAlignedBB>) list) {
-					d19 = axisalignedbb11.calculateZOffset(axisalignedbb14, d19);
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					d19 = list.get(i).calculateZOffset(axisalignedbb14, d19);
 				}
 
 				axisalignedbb14 = axisalignedbb14.offset(0.0D, 0.0D, d19);
@@ -614,8 +615,8 @@ public abstract class Entity implements ICommandSender {
 					this.setEntityBoundingBox(axisalignedbb14);
 				}
 
-				for (AxisAlignedBB axisalignedbb12 : (List<AxisAlignedBB>) list) {
-					y = axisalignedbb12.calculateYOffset(this.getEntityBoundingBox(), y);
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					y = list.get(i).calculateYOffset(this.getEntityBoundingBox(), y);
 				}
 
 				this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, y, 0.0D));
@@ -1454,8 +1455,8 @@ public abstract class Entity implements ICommandSender {
 	protected NBTTagList newDoubleNBTList(double... numbers) {
 		NBTTagList nbttaglist = new NBTTagList();
 
-		for (double d0 : numbers) {
-			nbttaglist.appendTag(new NBTTagDouble(d0));
+		for (int i = 0; i < numbers.length; ++i) {
+			nbttaglist.appendTag(new NBTTagDouble(numbers[i]));
 		}
 
 		return nbttaglist;
@@ -1467,8 +1468,8 @@ public abstract class Entity implements ICommandSender {
 	protected NBTTagList newFloatNBTList(float... numbers) {
 		NBTTagList nbttaglist = new NBTTagList();
 
-		for (float f : numbers) {
-			nbttaglist.appendTag(new NBTTagFloat(f));
+		for (int i = 0; i < numbers.length; ++i) {
+			nbttaglist.appendTag(new NBTTagFloat(numbers[i]));
 		}
 
 		return nbttaglist;

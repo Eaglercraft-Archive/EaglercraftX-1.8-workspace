@@ -241,6 +241,8 @@ public class TileEntityBanner extends TileEntity {
 				() -> new ItemStack(Blocks.red_flower, 1, BlockFlower.EnumFlowerType.OXEYE_DAISY.getMeta())),
 		MOJANG("mojang", "moj", () -> new ItemStack(Items.golden_apple, 1, 1));
 
+		public static final EnumBannerPattern[] _VALUES = values();
+
 		private String patternName;
 		private String patternID;
 		private String[] craftingLayers;
@@ -293,7 +295,9 @@ public class TileEntityBanner extends TileEntity {
 		}
 
 		public static TileEntityBanner.EnumBannerPattern getPatternByID(String id) {
-			for (TileEntityBanner.EnumBannerPattern tileentitybanner$enumbannerpattern : values()) {
+			TileEntityBanner.EnumBannerPattern[] arr = _VALUES;
+			for (int i = 0; i < arr.length; ++i) {
+				TileEntityBanner.EnumBannerPattern tileentitybanner$enumbannerpattern = arr[i];
 				if (tileentitybanner$enumbannerpattern.patternID.equals(id)) {
 					return tileentitybanner$enumbannerpattern;
 				}

@@ -6,7 +6,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.NibbleArray;
-import net.minecraft.world.chunk.storage.NibbleArrayReader;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -29,7 +28,6 @@ import net.minecraft.world.chunk.storage.NibbleArrayReader;
  * 
  */
 public class ChunkLoader {
-
 	public static ChunkLoader.AnvilConverterData load(NBTTagCompound nbt) {
 		int i = nbt.getInteger("xPos");
 		int j = nbt.getInteger("zPos");

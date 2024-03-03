@@ -1,8 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraft.village.Village;
@@ -29,7 +27,6 @@ import net.minecraft.village.VillageDoorInfo;
  * 
  */
 public class EntityAIMoveIndoors extends EntityAIBase {
-
 	private EntityCreature entityObj;
 	private VillageDoorInfo doorInfo;
 	private int insidePosX = -1;

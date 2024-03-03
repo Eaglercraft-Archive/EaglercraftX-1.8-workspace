@@ -10,8 +10,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.village.Village;
-import net.minecraft.village.VillageDoorInfo;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldSavedData;
@@ -37,7 +35,6 @@ import net.minecraft.world.WorldSavedData;
  * 
  */
 public class VillageCollection extends WorldSavedData {
-
 	private World worldObj;
 	/**+
 	 * This is a black hole. You can add data to this list through a
@@ -62,8 +59,8 @@ public class VillageCollection extends WorldSavedData {
 	public void setWorldsForAll(World worldIn) {
 		this.worldObj = worldIn;
 
-		for (Village village : this.villageList) {
-			village.setWorld(worldIn);
+		for (int i = 0, l = this.villageList.size(); i < l; ++i) {
+			this.villageList.get(i).setWorld(worldIn);
 		}
 
 	}
@@ -83,8 +80,8 @@ public class VillageCollection extends WorldSavedData {
 	public void tick() {
 		++this.tickCounter;
 
-		for (Village village : this.villageList) {
-			village.tick(this.tickCounter);
+		for (int i = 0, l = this.villageList.size(); i < l; ++i) {
+			this.villageList.get(i).tick(this.tickCounter);
 		}
 
 		this.removeAnnihilatedVillages();
@@ -120,7 +117,8 @@ public class VillageCollection extends WorldSavedData {
 		Village village = null;
 		double d0 = 3.4028234663852886E38D;
 
-		for (Village village1 : this.villageList) {
+		for (int i = 0, l = this.villageList.size(); i < l; ++i) {
+			Village village1 = this.villageList.get(i);
 			double d1 = village1.getCenter().distanceSq(doorBlock);
 			if (d1 < d0) {
 				float f = (float) (radius + village1.getVillageRadius());
@@ -184,7 +182,8 @@ public class VillageCollection extends WorldSavedData {
 	 * the newDoor list, otherwise returns null
 	 */
 	private VillageDoorInfo checkDoorExistence(BlockPos doorBlock) {
-		for (VillageDoorInfo villagedoorinfo : this.newDoors) {
+		for (int i = 0, l = this.newDoors.size(); i < l; ++i) {
+			VillageDoorInfo villagedoorinfo = this.newDoors.get(i);
 			if (villagedoorinfo.getDoorBlockPos().getX() == doorBlock.getX()
 					&& villagedoorinfo.getDoorBlockPos().getZ() == doorBlock.getZ()
 					&& Math.abs(villagedoorinfo.getDoorBlockPos().getY() - doorBlock.getY()) <= 1) {
@@ -192,8 +191,8 @@ public class VillageCollection extends WorldSavedData {
 			}
 		}
 
-		for (Village village : this.villageList) {
-			VillageDoorInfo villagedoorinfo1 = village.getExistedDoor(doorBlock);
+		for (int i = 0, l = this.villageList.size(); i < l; ++i) {
+			VillageDoorInfo villagedoorinfo1 = this.villageList.get(i).getExistedDoor(doorBlock);
 			if (villagedoorinfo1 != null) {
 				return villagedoorinfo1;
 			}
@@ -233,8 +232,8 @@ public class VillageCollection extends WorldSavedData {
 	}
 
 	private boolean positionInList(BlockPos pos) {
-		for (BlockPos blockpos : this.villagerPositionsList) {
-			if (blockpos.equals(pos)) {
+		for (int i = 0, l = this.villagerPositionsList.size(); i < l; ++i) {
+			if (this.villagerPositionsList.get(i).equals(pos)) {
 				return true;
 			}
 		}
@@ -271,9 +270,9 @@ public class VillageCollection extends WorldSavedData {
 		nbttagcompound.setInteger("Tick", this.tickCounter);
 		NBTTagList nbttaglist = new NBTTagList();
 
-		for (Village village : this.villageList) {
+		for (int i = 0, l = this.villageList.size(); i < l; ++i) {
 			NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-			village.writeVillageDataToNBT(nbttagcompound1);
+			this.villageList.get(i).writeVillageDataToNBT(nbttagcompound1);
 			nbttaglist.appendTag(nbttagcompound1);
 		}
 

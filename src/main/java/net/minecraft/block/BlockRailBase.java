@@ -184,7 +184,7 @@ public abstract class BlockRailBase extends Block {
 		ASCENDING_SOUTH(5, "ascending_south"), SOUTH_EAST(6, "south_east"), SOUTH_WEST(7, "south_west"),
 		NORTH_WEST(8, "north_west"), NORTH_EAST(9, "north_east");
 
-		private static final BlockRailBase.EnumRailDirection[] META_LOOKUP = new BlockRailBase.EnumRailDirection[values().length];
+		private static final BlockRailBase.EnumRailDirection[] META_LOOKUP = new BlockRailBase.EnumRailDirection[10];
 		private final int meta;
 		private final String name;
 
@@ -219,8 +219,9 @@ public abstract class BlockRailBase extends Block {
 		}
 
 		static {
-			for (BlockRailBase.EnumRailDirection blockrailbase$enumraildirection : values()) {
-				META_LOOKUP[blockrailbase$enumraildirection.getMetadata()] = blockrailbase$enumraildirection;
+			BlockRailBase.EnumRailDirection[] directions = values();
+			for (int i = 0; i < directions.length; ++i) {
+				META_LOOKUP[directions[i].getMetadata()] = directions[i];
 			}
 
 		}
@@ -345,8 +346,10 @@ public abstract class BlockRailBase extends Block {
 		protected int countAdjacentRails() {
 			int i = 0;
 
-			for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-				if (this.hasRailAt(this.pos.offset(enumfacing))) {
+			EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+			BlockPos tmp = new BlockPos(0, 0, 0);
+			for (int j = 0; j < facings.length; ++j) {
+				if (this.hasRailAt(this.pos.offsetEvenFaster(facings[j], tmp))) {
 					++i;
 				}
 			}

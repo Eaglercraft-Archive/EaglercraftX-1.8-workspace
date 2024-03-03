@@ -25,10 +25,6 @@ import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
-import net.minecraft.world.gen.structure.MapGenStructureIO;
-import net.minecraft.world.gen.structure.MapGenVillage;
-import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraft.world.gen.structure.StructureComponent;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -51,7 +47,6 @@ import net.minecraft.world.gen.structure.StructureComponent;
  * 
  */
 public class StructureVillagePieces {
-
 	public static void registerVillagePieces() {
 		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.House1.class, "ViBH");
 		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Field1.class, "ViDF");

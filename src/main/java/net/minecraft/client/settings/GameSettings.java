@@ -1,7 +1,6 @@
 package net.minecraft.client.settings;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -10,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.lax1dude.eaglercraft.v1_8.sp.relay.RelayManager;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
 import org.json.JSONArray;
 
 import com.google.common.collect.ImmutableSet;
@@ -22,6 +19,7 @@ import com.google.common.collect.Sets;
 import net.lax1dude.eaglercraft.v1_8.ArrayUtils;
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.EaglerInputStream;
+import net.lax1dude.eaglercraft.v1_8.EaglerOutputStream;
 import net.lax1dude.eaglercraft.v1_8.EaglerZLIB;
 import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
@@ -116,7 +114,7 @@ public class GameSettings {
 	 * Whether to pause when the game loses focus, toggled by F3+P
 	 */
 	public boolean pauseOnLostFocus = true;
-	private final Set<EnumPlayerModelParts> setModelParts = Sets.newHashSet(EnumPlayerModelParts.values());
+	private final Set<EnumPlayerModelParts> setModelParts = Sets.newHashSet(EnumPlayerModelParts._VALUES);
 	public boolean touchscreen;
 	public int overrideWidth;
 	public int overrideHeight;
@@ -641,14 +639,21 @@ public class GameSettings {
 	 * has replaced the previous 'loadOptions'
 	 */
 	public void loadOptions() {
-		try {
-			byte[] options = EagRuntime.getStorage("g");
-			if (options == null) {
-				return;
-			}
+		byte[] options = EagRuntime.getStorage("g");
+		if (options == null) {
+			return;
+		}
+		loadOptions(options);
+	}
 
+	/**+
+	 * Loads the options from the options file. It appears that this
+	 * has replaced the previous 'loadOptions'
+	 */
+	public void loadOptions(byte[] data) {
+		try {
 			BufferedReader bufferedreader = new BufferedReader(
-					new InputStreamReader(EaglerZLIB.newGZIPInputStream(new EaglerInputStream(options))));
+					new InputStreamReader(EaglerZLIB.newGZIPInputStream(new EaglerInputStream(data))));
 			String s = "";
 			this.mapSoundLevels.clear();
 
@@ -929,13 +934,13 @@ public class GameSettings {
 
 					Keyboard.setFunctionKeyModifier(keyBindFunction.getKeyCode());
 
-					for (SoundCategory soundcategory : SoundCategory.values()) {
+					for (SoundCategory soundcategory : SoundCategory._VALUES) {
 						if (astring[0].equals("soundCategory_" + soundcategory.getCategoryName())) {
 							this.mapSoundLevels.put(soundcategory, Float.valueOf(this.parseFloat(astring[1])));
 						}
 					}
 
-					for (EnumPlayerModelParts enumplayermodelparts : EnumPlayerModelParts.values()) {
+					for (EnumPlayerModelParts enumplayermodelparts : EnumPlayerModelParts._VALUES) {
 						if (astring[0].equals("modelPart_" + enumplayermodelparts.getPartName())) {
 							this.setModelPartEnabled(enumplayermodelparts, astring[1].equals("true"));
 						}
@@ -965,8 +970,17 @@ public class GameSettings {
 	 * Saves the options to the options file.
 	 */
 	public void saveOptions() {
+		byte[] data = writeOptions();
+		if (data != null) {
+			EagRuntime.setStorage("g", data);
+		}
+		RelayManager.relayManager.save();
+		this.sendSettingsToServer();
+	}
+
+	public byte[] writeOptions() {
 		try {
-			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			EaglerOutputStream bao = new EaglerOutputStream();
 			PrintWriter printwriter = new PrintWriter(new OutputStreamWriter(EaglerZLIB.newGZIPOutputStream(bao)));
 			printwriter.println("invertYMouse:" + this.invertMouse);
 			printwriter.println("mouseSensitivity:" + this.mouseSensitivity);
@@ -1044,12 +1058,12 @@ public class GameSettings {
 
 			Keyboard.setFunctionKeyModifier(keyBindFunction.getKeyCode());
 
-			for (SoundCategory soundcategory : SoundCategory.values()) {
+			for (SoundCategory soundcategory : SoundCategory._VALUES) {
 				printwriter.println(
 						"soundCategory_" + soundcategory.getCategoryName() + ":" + this.getSoundLevel(soundcategory));
 			}
 
-			for (EnumPlayerModelParts enumplayermodelparts : EnumPlayerModelParts.values()) {
+			for (EnumPlayerModelParts enumplayermodelparts : EnumPlayerModelParts._VALUES) {
 				printwriter.println("modelPart_" + enumplayermodelparts.getPartName() + ":"
 						+ this.setModelParts.contains(enumplayermodelparts));
 			}
@@ -1057,15 +1071,12 @@ public class GameSettings {
 			deferredShaderConf.writeOptions(printwriter);
 
 			printwriter.close();
-
-			EagRuntime.setStorage("g", bao.toByteArray());
-
-			RelayManager.relayManager.save();
+			return bao.toByteArray();
 		} catch (Exception exception) {
 			logger.error("Failed to save options", exception);
+			return null;
 		}
 
-		this.sendSettingsToServer();
 	}
 
 	public float getSoundLevel(SoundCategory parSoundCategory) {

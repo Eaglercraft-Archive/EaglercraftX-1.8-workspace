@@ -2,7 +2,6 @@ package net.minecraft.stats;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,11 +12,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S37PacketStatistics;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.stats.Achievement;
-import net.minecraft.stats.AchievementList;
-import net.minecraft.stats.StatBase;
-import net.minecraft.stats.StatFileWriter;
-import net.minecraft.stats.StatList;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IJsonSerializable;
 import net.minecraft.util.TupleIntJsonSerializable;
@@ -49,7 +43,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class StatisticsFile extends StatFileWriter {
-
 	private static final Logger logger = LogManager.getLogger();
 	private final MinecraftServer mcServer;
 	private final VFile2 statsFile;
@@ -211,7 +204,8 @@ public class StatisticsFile extends StatFileWriter {
 	public void sendAchievements(EntityPlayerMP player) {
 		HashMap hashmap = Maps.newHashMap();
 
-		for (Achievement achievement : AchievementList.achievementList) {
+		for (int i = 0, l = AchievementList.achievementList.size(); i < l; ++i) {
+			Achievement achievement = AchievementList.achievementList.get(i);
 			if (this.hasAchievementUnlocked(achievement)) {
 				hashmap.put(achievement, Integer.valueOf(this.readStat(achievement)));
 				this.field_150888_e.remove(achievement);

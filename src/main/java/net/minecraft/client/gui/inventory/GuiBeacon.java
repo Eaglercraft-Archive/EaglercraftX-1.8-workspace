@@ -175,7 +175,8 @@ public class GuiBeacon extends GuiContainer {
 		this.drawCenteredString(this.fontRendererObj, I18n.format("tile.beacon.secondary", new Object[0]), 169, 10,
 				14737632);
 
-		for (GuiButton guibutton : this.buttonList) {
+		for (int k = 0, l = this.buttonList.size(); k < l; ++k) {
+			GuiButton guibutton = this.buttonList.get(k);
 			if (guibutton.isMouseOver()) {
 				guibutton.drawButtonForegroundLayer(i - this.guiLeft, j - this.guiTop);
 				break;

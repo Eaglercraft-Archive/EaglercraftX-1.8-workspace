@@ -4,11 +4,7 @@ import com.google.common.collect.Lists;
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -26,7 +22,6 @@ import net.minecraft.command.ServerCommandManager;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S03PacketTimeUpdate;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -36,7 +31,6 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.IThreadListener;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Util;
 import net.minecraft.util.Vec3;
@@ -47,13 +41,10 @@ import net.minecraft.world.WorldManager;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.demo.DemoWorldServer;
-import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import org.apache.commons.lang3.Validate;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 
@@ -78,7 +69,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public abstract class MinecraftServer implements Runnable, ICommandSender, IThreadListener {
-
 	private static final Logger logger = LogManager.getLogger();
 	private static MinecraftServer mcServer;
 	/**+
@@ -305,7 +295,8 @@ public abstract class MinecraftServer implements Runnable, ICommandSender, IThre
 	 */
 	public void saveAllWorlds(boolean dontLog) {
 		if (!this.worldIsBeingDeleted) {
-			for (WorldServer worldserver : this.worldServers) {
+			for (int i = 0; i < this.worldServers.length; ++i) {
+				WorldServer worldserver = this.worldServers[i];
 				if (worldserver != null) {
 					if (!dontLog) {
 						logger.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
@@ -659,9 +650,10 @@ public abstract class MinecraftServer implements Runnable, ICommandSender, IThre
 		if (input.startsWith("/")) {
 			input = input.substring(1);
 			boolean flag = !input.contains(" ");
-			List list = this.commandManager.getTabCompletionOptions(sender, input, pos);
+			List<String> list = this.commandManager.getTabCompletionOptions(sender, input, pos);
 			if (list != null) {
-				for (String s2 : (List<String>) list) {
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					String s2 = list.get(i);
 					if (flag) {
 						arraylist.add("/" + s2);
 					} else {
@@ -674,8 +666,9 @@ public abstract class MinecraftServer implements Runnable, ICommandSender, IThre
 		} else {
 			String[] astring = input.split(" ", -1);
 			String s = astring[astring.length - 1];
-
-			for (String s1 : this.serverConfigManager.getAllUsernames()) {
+			String[] unames = this.serverConfigManager.getAllUsernames();
+			for (int i = 0; i < unames.length; ++i) {
+				String s1 = unames[i];
 				if (CommandBase.doesStringStartWith(s, s1)) {
 					arraylist.add(s1);
 				}
@@ -989,7 +982,8 @@ public abstract class MinecraftServer implements Runnable, ICommandSender, IThre
 	}
 
 	public Entity getEntityFromUuid(EaglercraftUUID uuid) {
-		for (WorldServer worldserver : this.worldServers) {
+		for (int i = 0; i < this.worldServers.length; ++i) {
+			WorldServer worldserver = this.worldServers[i];
 			if (worldserver != null) {
 				Entity entity = worldserver.getEntityFromUuid(uuid);
 				if (entity != null) {

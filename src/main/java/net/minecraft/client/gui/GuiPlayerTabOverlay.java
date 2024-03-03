@@ -90,7 +90,8 @@ public class GuiPlayerTabOverlay extends Gui {
 		int i = 0;
 		int j = 0;
 
-		for (NetworkPlayerInfo networkplayerinfo : (List<NetworkPlayerInfo>) list) {
+		for (int m = 0, n = list.size(); m < n; ++m) {
+			NetworkPlayerInfo networkplayerinfo = (NetworkPlayerInfo) list.get(m);
 			int k = this.mc.fontRendererObj.getStringWidth(this.getPlayerName(networkplayerinfo));
 			i = Math.max(i, k);
 			if (scoreObjectiveIn != null
@@ -127,21 +128,21 @@ public class GuiPlayerTabOverlay extends Gui {
 		int j1 = width / 2 - (i1 * j4 + (j4 - 1) * 5) / 2;
 		int k1 = 10;
 		int l1 = i1 * j4 + (j4 - 1) * 5;
-		List list1 = null;
-		List list2 = null;
+		List<String> list1 = null;
+		List<String> list2 = null;
 		if (this.header != null) {
 			list1 = this.mc.fontRendererObj.listFormattedStringToWidth(this.header.getFormattedText(), width - 50);
 
-			for (String s : (List<String>) list1) {
-				l1 = Math.max(l1, this.mc.fontRendererObj.getStringWidth(s));
+			for (int m = 0, n = list1.size(); m < n; ++m) {
+				l1 = Math.max(l1, this.mc.fontRendererObj.getStringWidth(list1.get(m)));
 			}
 		}
 
 		if (this.footer != null) {
 			list2 = this.mc.fontRendererObj.listFormattedStringToWidth(this.footer.getFormattedText(), width - 50);
 
-			for (String s2 : (List<String>) list2) {
-				l1 = Math.max(l1, this.mc.fontRendererObj.getStringWidth(s2));
+			for (int m = 0, n = list2.size(); m < n; ++m) {
+				l1 = Math.max(l1, this.mc.fontRendererObj.getStringWidth(list2.get(m)));
 			}
 		}
 
@@ -149,7 +150,8 @@ public class GuiPlayerTabOverlay extends Gui {
 			drawRect(width / 2 - l1 / 2 - 1, k1 - 1, width / 2 + l1 / 2 + 1,
 					k1 + list1.size() * this.mc.fontRendererObj.FONT_HEIGHT, Integer.MIN_VALUE);
 
-			for (String s3 : (List<String>) list1) {
+			for (int m = 0, n = list1.size(); m < n; ++m) {
+				String s3 = list1.get(m);
 				int i2 = this.mc.fontRendererObj.getStringWidth(s3);
 				this.mc.fontRendererObj.drawStringWithShadow(s3, (float) (width / 2 - i2 / 2), (float) k1, -1);
 				k1 += this.mc.fontRendererObj.FONT_HEIGHT;
@@ -216,7 +218,8 @@ public class GuiPlayerTabOverlay extends Gui {
 			drawRect(width / 2 - l1 / 2 - 1, k1 - 1, width / 2 + l1 / 2 + 1,
 					k1 + list2.size() * this.mc.fontRendererObj.FONT_HEIGHT, Integer.MIN_VALUE);
 
-			for (String s4 : (List<String>) list2) {
+			for (int m = 0, n = list2.size(); m < n; ++m) {
+				String s4 = list2.get(m);
 				int j5 = this.mc.fontRendererObj.getStringWidth(s4);
 				this.mc.fontRendererObj.drawStringWithShadow(s4, (float) (width / 2 - j5 / 2), (float) k1, -1);
 				k1 += this.mc.fontRendererObj.FONT_HEIGHT;

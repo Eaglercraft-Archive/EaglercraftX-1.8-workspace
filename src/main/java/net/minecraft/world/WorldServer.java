@@ -55,17 +55,6 @@ import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.village.VillageCollection;
 import net.minecraft.village.VillageSiege;
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.MinecraftException;
-import net.minecraft.world.NextTickListEntry;
-import net.minecraft.world.SpawnerAnimals;
-import net.minecraft.world.Teleporter;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.Chunk;
@@ -102,7 +91,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class WorldServer extends World implements IThreadListener {
-
 	private static final Logger logger = LogManager.getLogger();
 	private final MinecraftServer mcServer;
 	private final EntityTracker theEntityTracker;
@@ -263,7 +251,8 @@ public class WorldServer extends World implements IThreadListener {
 			int i = 0;
 			int j = 0;
 
-			for (EntityPlayer entityplayer : this.playerEntities) {
+			for (int k = 0, l = this.playerEntities.size(); k < l; ++k) {
+				EntityPlayer entityplayer = this.playerEntities.get(k);
 				if (entityplayer.isSpectator()) {
 					++i;
 				} else if (entityplayer.isPlayerSleeping()) {
@@ -279,7 +268,8 @@ public class WorldServer extends World implements IThreadListener {
 	protected void wakeAllPlayers() {
 		this.allPlayersSleeping = false;
 
-		for (EntityPlayer entityplayer : this.playerEntities) {
+		for (int k = 0, l = this.playerEntities.size(); k < l; ++k) {
+			EntityPlayer entityplayer = this.playerEntities.get(k);
 			if (entityplayer.isPlayerSleeping()) {
 				entityplayer.wakeUpPlayer(false, false, true);
 			}
@@ -297,7 +287,8 @@ public class WorldServer extends World implements IThreadListener {
 
 	public boolean areAllPlayersAsleep() {
 		if (this.allPlayersSleeping) {
-			for (EntityPlayer entityplayer : this.playerEntities) {
+			for (int k = 0, l = this.playerEntities.size(); k < l; ++k) {
+				EntityPlayer entityplayer = this.playerEntities.get(k);
 				if (entityplayer.isSpectator() || !entityplayer.isPlayerFullyAsleep()) {
 					return false;
 				}
@@ -390,7 +381,9 @@ public class WorldServer extends World implements IThreadListener {
 				this.theProfiler.endStartSection("tickBlocks");
 				int l2 = this.getGameRules().getInt("randomTickSpeed");
 				if (l2 > 0) {
-					for (ExtendedBlockStorage extendedblockstorage : chunk.getBlockStorageArray()) {
+					ExtendedBlockStorage[] vigg = chunk.getBlockStorageArray();
+					for (int m = 0; m < vigg.length; ++m) {
+						ExtendedBlockStorage extendedblockstorage = vigg[m];
 						if (extendedblockstorage != null && extendedblockstorage.getNeedsRandomTick()) {
 							for (int j1 = 0; j1 < l2; ++j1) {
 								this.updateLCG = this.updateLCG * 3 + 1013904223;
@@ -808,7 +801,9 @@ public class WorldServer extends World implements IThreadListener {
 
 			this.chunkProvider.saveChunks(progressCallback, parIProgressUpdate);
 
-			for (Chunk chunk : Lists.newArrayList(this.theChunkProviderServer.func_152380_a())) {
+			List<Chunk> lst = Lists.newArrayList(this.theChunkProviderServer.func_152380_a());
+			for (int i = 0, l = lst.size(); i < l; ++i) {
+				Chunk chunk = lst.get(i);
 				if (chunk != null && !this.thePlayerManager.hasPlayerInstance(chunk.xPosition, chunk.zPosition)) {
 					this.theChunkProviderServer.dropChunk(chunk.xPosition, chunk.zPosition);
 				}
@@ -907,7 +902,9 @@ public class WorldServer extends World implements IThreadListener {
 			explosion.func_180342_d();
 		}
 
-		for (EntityPlayer entityplayer : this.playerEntities) {
+		List<EntityPlayer> lst = this.playerEntities;
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			EntityPlayer entityplayer = lst.get(i);
 			if (entityplayer.getDistanceSq(d0, d1, d2) < 4096.0D) {
 				((EntityPlayerMP) entityplayer).playerNetServerHandler
 						.sendPacket(new S27PacketExplosion(d0, d1, d2, f, explosion.getAffectedBlockPositions(),
@@ -921,8 +918,9 @@ public class WorldServer extends World implements IThreadListener {
 	public void addBlockEvent(BlockPos blockpos, Block block, int i, int j) {
 		BlockEventData blockeventdata = new BlockEventData(blockpos, block, i, j);
 
-		for (BlockEventData blockeventdata1 : this.field_147490_S[this.blockEventCacheIndex]) {
-			if (blockeventdata1.equals(blockeventdata)) {
+		ServerBlockEventList lst = this.field_147490_S[this.blockEventCacheIndex];
+		for (int k = 0, l = lst.size(); k < l; ++k) {
+			if (lst.get(k).equals(blockeventdata)) {
 				return;
 			}
 		}
@@ -935,7 +933,9 @@ public class WorldServer extends World implements IThreadListener {
 			int i = this.blockEventCacheIndex;
 			this.blockEventCacheIndex ^= 1;
 
-			for (BlockEventData blockeventdata : this.field_147490_S[i]) {
+			ServerBlockEventList lst = this.field_147490_S[i];
+			for (int k = 0, l = lst.size(); k < l; ++k) {
+				BlockEventData blockeventdata = lst.get(k);
 				if (this.fireBlockEvent(blockeventdata)) {
 					this.mcServer.getConfigurationManager().sendToAllNear((double) blockeventdata.getPosition().getX(),
 							(double) blockeventdata.getPosition().getY(), (double) blockeventdata.getPosition().getZ(),

@@ -1,14 +1,8 @@
 package net.minecraft.client.gui;
 
-import java.io.IOException;
 import java.util.Random;
 
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiCreateFlatWorld;
-import net.minecraft.client.gui.GuiCustomizeWorldScreen;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.world.WorldSettings;
@@ -130,8 +124,8 @@ public class GuiCreateWorld extends GuiScreen {
 	private void func_146314_g() {
 		this.field_146336_i = this.field_146333_g.getText().trim();
 
-		for (char c0 : ChatAllowedCharacters.allowedCharactersArray) {
-			this.field_146336_i = this.field_146336_i.replace(c0, '_');
+		for (int i = 0; i < ChatAllowedCharacters.allowedCharactersArray.length; ++i) {
+			this.field_146336_i = this.field_146336_i.replace(ChatAllowedCharacters.allowedCharactersArray[i], '_');
 		}
 
 		if (StringUtils.isEmpty(this.field_146336_i)) {
@@ -180,8 +174,8 @@ public class GuiCreateWorld extends GuiScreen {
 	public static String func_146317_a(ISaveFormat parISaveFormat, String parString1) {
 		parString1 = parString1.replaceAll("[\\./\"]", "_");
 
-		for (String s : disallowedFilenames) {
-			if (parString1.equalsIgnoreCase(s)) {
+		for (int i = 0; i < disallowedFilenames.length; ++i) {
+			if (parString1.equalsIgnoreCase(disallowedFilenames[i])) {
 				parString1 = "_" + parString1 + "_";
 			}
 		}

@@ -11,9 +11,7 @@ import net.minecraft.client.model.ModelSlime;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderSlime;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.monster.EntitySlime;
-import net.minecraft.util.MathHelper;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.

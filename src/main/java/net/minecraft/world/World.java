@@ -2305,7 +2305,9 @@ public abstract class World implements IBlockAccess {
 			} else if (i >= 14) {
 				return i;
 			} else {
-				for (EnumFacing enumfacing : EnumFacing.values()) {
+				EnumFacing[] facings = EnumFacing._VALUES;
+				for (int m = 0; m < facings.length; ++m) {
+					EnumFacing enumfacing = facings[m];
 					BlockPos blockpos = pos.offset(enumfacing);
 					int k = this.getLightFor(lightType, blockpos) - j;
 					if (k > i) {
@@ -2356,7 +2358,9 @@ public abstract class World implements IBlockAccess {
 							if (j3 + k3 + l3 < 17) {
 								BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
-								for (EnumFacing enumfacing : EnumFacing.values()) {
+								EnumFacing[] facings = EnumFacing._VALUES;
+								for (int m = 0; m < facings.length; ++m) {
+									EnumFacing enumfacing = facings[m];
 									int i4 = i2 + enumfacing.getFrontOffsetX();
 									int j4 = j2 + enumfacing.getFrontOffsetY();
 									int k4 = k2 + enumfacing.getFrontOffsetZ();
@@ -2485,7 +2489,8 @@ public abstract class World implements IBlockAccess {
 	public <T extends Entity> List<T> getEntities(Class<? extends T> entityType, Predicate<? super T> filter) {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (Entity entity : this.loadedEntityList) {
+		for (int i = 0, l = this.loadedEntityList.size(); i < l; ++i) {
+			Entity entity = this.loadedEntityList.get(i);
 			if (entityType.isAssignableFrom(entity.getClass()) && filter.apply((T) entity)) {
 				arraylist.add(entity);
 			}
@@ -2497,7 +2502,8 @@ public abstract class World implements IBlockAccess {
 	public <T extends Entity> List<T> getPlayers(Class<? extends T> playerType, Predicate<? super T> filter) {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (Entity entity : this.playerEntities) {
+		for (int i = 0, l = this.playerEntities.size(); i < l; ++i) {
+			Entity entity = this.playerEntities.get(i);
 			if (playerType.isAssignableFrom(entity.getClass()) && filter.apply((T) entity)) {
 				arraylist.add(entity);
 			}
@@ -2578,7 +2584,8 @@ public abstract class World implements IBlockAccess {
 	public int countEntities(Class<?> entityType) {
 		int i = 0;
 
-		for (Entity entity : this.loadedEntityList) {
+		for (int j = 0, l = this.loadedEntityList.size(); j < l; ++j) {
+			Entity entity = this.loadedEntityList.get(j);
 			if ((!(entity instanceof EntityLiving) || !((EntityLiving) entity).isNoDespawnRequired())
 					&& entityType.isAssignableFrom(entity.getClass())) {
 				++i;
@@ -2693,7 +2700,9 @@ public abstract class World implements IBlockAccess {
 	public int isBlockIndirectlyGettingPowered(BlockPos pos) {
 		int i = 0;
 
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int k = 0; k < facings.length; ++k) {
+			EnumFacing enumfacing = facings[k];
 			int j = this.getRedstonePower(pos.offset(enumfacing), enumfacing);
 			if (j >= 15) {
 				return 15;
@@ -3125,7 +3134,9 @@ public abstract class World implements IBlockAccess {
 	}
 
 	public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {
-		for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+		EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			BlockPos blockpos = pos.offset(enumfacing);
 			if (this.isBlockLoaded(blockpos)) {
 				IBlockState iblockstate = this.getBlockState(blockpos);

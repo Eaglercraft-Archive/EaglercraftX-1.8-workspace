@@ -148,8 +148,9 @@ public class BlockWall extends Block {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (BlockWall.EnumType blockwall$enumtype : BlockWall.EnumType.values()) {
-			list.add(new ItemStack(item, 1, blockwall$enumtype.getMetadata()));
+		BlockWall.EnumType[] types = BlockWall.EnumType.META_LOOKUP;
+		for (int i = 0; i < types.length; ++i) {
+			list.add(new ItemStack(item, 1, types[i].getMetadata()));
 		}
 
 	}
@@ -202,7 +203,7 @@ public class BlockWall extends Block {
 	public static enum EnumType implements IStringSerializable {
 		NORMAL(0, "cobblestone", "normal"), MOSSY(1, "mossy_cobblestone", "mossy");
 
-		private static final BlockWall.EnumType[] META_LOOKUP = new BlockWall.EnumType[values().length];
+		public static final BlockWall.EnumType[] META_LOOKUP = new BlockWall.EnumType[2];
 		private final int meta;
 		private final String name;
 		private String unlocalizedName;
@@ -238,8 +239,9 @@ public class BlockWall extends Block {
 		}
 
 		static {
-			for (BlockWall.EnumType blockwall$enumtype : values()) {
-				META_LOOKUP[blockwall$enumtype.getMetadata()] = blockwall$enumtype;
+			BlockWall.EnumType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMetadata()] = types[i];
 			}
 
 		}

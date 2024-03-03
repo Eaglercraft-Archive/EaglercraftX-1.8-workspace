@@ -93,7 +93,7 @@ public class S21PacketChunkData implements Packet<INetHandlerPlayClient> {
 			int parInt1) {
 		ExtendedBlockStorage[] aextendedblockstorage = parChunk.getBlockStorageArray();
 		S21PacketChunkData.Extracted s21packetchunkdata$extracted = new S21PacketChunkData.Extracted();
-		ArrayList arraylist = Lists.newArrayList();
+		ArrayList<ExtendedBlockStorage> arraylist = Lists.newArrayList();
 
 		for (int i = 0; i < aextendedblockstorage.length; ++i) {
 			ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[i];
@@ -107,25 +107,24 @@ public class S21PacketChunkData implements Packet<INetHandlerPlayClient> {
 		s21packetchunkdata$extracted.data = new byte[func_180737_a(
 				Integer.bitCount(s21packetchunkdata$extracted.dataSize), parFlag2, parFlag)];
 		int j = 0;
+		int l = arraylist.size();
+		for (int k = 0; k < l; ++k) {
+			char[] achar = arraylist.get(k).getData();
 
-		for (ExtendedBlockStorage extendedblockstorage1 : (ArrayList<ExtendedBlockStorage>) arraylist) {
-			char[] achar = extendedblockstorage1.getData();
-
-			for (char c0 : achar) {
+			for (int m = 0; m < achar.length; ++m) {
+				char c0 = achar[m];
 				s21packetchunkdata$extracted.data[j++] = (byte) (c0 & 255);
 				s21packetchunkdata$extracted.data[j++] = (byte) (c0 >> 8 & 255);
 			}
 		}
 
-		for (ExtendedBlockStorage extendedblockstorage2 : (ArrayList<ExtendedBlockStorage>) arraylist) {
-			j = func_179757_a(extendedblockstorage2.getBlocklightArray().getData(), s21packetchunkdata$extracted.data,
-					j);
+		for (int k = 0; k < l; ++k) {
+			j = func_179757_a(arraylist.get(k).getBlocklightArray().getData(), s21packetchunkdata$extracted.data, j);
 		}
 
 		if (parFlag2) {
-			for (ExtendedBlockStorage extendedblockstorage3 : (ArrayList<ExtendedBlockStorage>) arraylist) {
-				j = func_179757_a(extendedblockstorage3.getSkylightArray().getData(), s21packetchunkdata$extracted.data,
-						j);
+			for (int k = 0; k < l; ++k) {
+				j = func_179757_a(arraylist.get(k).getSkylightArray().getData(), s21packetchunkdata$extracted.data, j);
 			}
 		}
 

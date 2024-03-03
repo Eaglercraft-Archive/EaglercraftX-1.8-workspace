@@ -187,11 +187,14 @@ public class BlockVine extends Block {
 	private boolean recheckGrownSides(World worldIn, BlockPos pos, IBlockState state) {
 		IBlockState iblockstate = state;
 
-		for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+		BlockPos tmp = new BlockPos(0, 0, 0);
+		EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			PropertyBool propertybool = getPropertyFor(enumfacing);
 			if (((Boolean) state.getValue(propertybool)).booleanValue()
-					&& !this.canPlaceOn(worldIn.getBlockState(pos.offset(enumfacing)).getBlock())) {
-				IBlockState iblockstate1 = worldIn.getBlockState(pos.up());
+					&& !this.canPlaceOn(worldIn.getBlockState(pos.offsetEvenFaster(enumfacing, tmp)).getBlock())) {
+				IBlockState iblockstate1 = worldIn.getBlockState(pos.offsetEvenFaster(EnumFacing.UP, tmp));
 				if (iblockstate1.getBlock() != this
 						|| !((Boolean) iblockstate1.getValue(propertybool)).booleanValue()) {
 					state = state.withProperty(propertybool, Boolean.valueOf(false));
@@ -256,13 +259,16 @@ public class BlockVine extends Block {
 
 				EnumFacing enumfacing1 = EnumFacing.random(random);
 				BlockPos blockpos2 = blockpos.up();
+				BlockPos tmp = new BlockPos(0, 0, 0);
 				if (enumfacing1 == EnumFacing.UP && blockpos.getY() < 255 && world.isAirBlock(blockpos2)) {
 					if (!flag) {
 						IBlockState iblockstate3 = iblockstate;
 
-						for (EnumFacing enumfacing3 : EnumFacing.Plane.HORIZONTAL) {
-							if (random.nextBoolean() || !this
-									.canPlaceOn(world.getBlockState(blockpos2.offset(enumfacing3)).getBlock())) {
+						EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+						for (int j = 0; j < facings.length; ++j) {
+							EnumFacing enumfacing3 = facings[j];
+							if (random.nextBoolean() || !this.canPlaceOn(
+									world.getBlockState(blockpos2.offsetEvenFaster(enumfacing3, tmp)).getBlock())) {
 								iblockstate3 = iblockstate3.withProperty(getPropertyFor(enumfacing3),
 										Boolean.valueOf(false));
 							}
@@ -296,12 +302,12 @@ public class BlockVine extends Block {
 							} else if (flag2 && this.canPlaceOn(world.getBlockState(blockpos1).getBlock())) {
 								world.setBlockState(blockpos4, this.getDefaultState()
 										.withProperty(getPropertyFor(enumfacing4), Boolean.valueOf(true)), 2);
-							} else if (flag1 && world.isAirBlock(blockpos5)
-									&& this.canPlaceOn(world.getBlockState(blockpos.offset(enumfacing2)).getBlock())) {
+							} else if (flag1 && world.isAirBlock(blockpos5) && this.canPlaceOn(
+									world.getBlockState(blockpos.offsetEvenFaster(enumfacing2, tmp)).getBlock())) {
 								world.setBlockState(blockpos5, this.getDefaultState().withProperty(
 										getPropertyFor(enumfacing1.getOpposite()), Boolean.valueOf(true)), 2);
-							} else if (flag2 && world.isAirBlock(blockpos1)
-									&& this.canPlaceOn(world.getBlockState(blockpos.offset(enumfacing4)).getBlock())) {
+							} else if (flag2 && world.isAirBlock(blockpos1) && this.canPlaceOn(
+									world.getBlockState(blockpos.offsetEvenFaster(enumfacing4, tmp)).getBlock())) {
 								world.setBlockState(blockpos1, this.getDefaultState().withProperty(
 										getPropertyFor(enumfacing1.getOpposite()), Boolean.valueOf(true)), 2);
 							} else if (this.canPlaceOn(world.getBlockState(blockpos4.up()).getBlock())) {
@@ -318,12 +324,13 @@ public class BlockVine extends Block {
 						BlockPos blockpos3 = blockpos.down();
 						IBlockState iblockstate1 = world.getBlockState(blockpos3);
 						Block block = iblockstate1.getBlock();
+						EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
 						if (block.blockMaterial == Material.air) {
 							IBlockState iblockstate2 = iblockstate;
 
-							for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+							for (int j = 0; j < facings.length; ++j) {
 								if (random.nextBoolean()) {
-									iblockstate2 = iblockstate2.withProperty(getPropertyFor(enumfacing),
+									iblockstate2 = iblockstate2.withProperty(getPropertyFor(facings[j]),
 											Boolean.valueOf(false));
 								}
 							}
@@ -337,8 +344,8 @@ public class BlockVine extends Block {
 						} else if (block == this) {
 							IBlockState iblockstate4 = iblockstate1;
 
-							for (EnumFacing enumfacing5 : EnumFacing.Plane.HORIZONTAL) {
-								PropertyBool propertybool = getPropertyFor(enumfacing5);
+							for (int j = 0; j < facings.length; ++j) {
+								PropertyBool propertybool = getPropertyFor(facings[j]);
 								if (random.nextBoolean()
 										&& ((Boolean) iblockstate.getValue(propertybool)).booleanValue()) {
 									iblockstate4 = iblockstate4.withProperty(propertybool, Boolean.valueOf(true));
@@ -459,8 +466,8 @@ public class BlockVine extends Block {
 	public static int getNumGrownFaces(IBlockState state) {
 		int i = 0;
 
-		for (PropertyBool propertybool : ALL_FACES) {
-			if (((Boolean) state.getValue(propertybool)).booleanValue()) {
+		for (int j = 0; j < ALL_FACES.length; ++j) {
+			if (((Boolean) state.getValue(ALL_FACES[j])).booleanValue()) {
 				++i;
 			}
 		}

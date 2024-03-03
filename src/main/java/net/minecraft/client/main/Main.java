@@ -26,8 +26,7 @@ import net.minecraft.util.Session;
  */
 public class Main {
 	public static void appMain(String[] astring) {
-		System.setProperty("java.net.preferIPv4Stack", "true");
-
+		System.setProperty("java.net.preferIPv6Addresses", "true");
 		GameConfiguration gameconfiguration = new GameConfiguration(
 				new GameConfiguration.UserInformation(new Session()),
 				new GameConfiguration.DisplayInformation(854, 480, false, true),

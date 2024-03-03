@@ -17,10 +17,6 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.GeneratorBushFeature;
-import net.minecraft.world.gen.MapGenBase;
-import net.minecraft.world.gen.MapGenCavesHell;
-import net.minecraft.world.gen.NoiseGeneratorOctaves;
 import net.minecraft.world.gen.feature.WorldGenFire;
 import net.minecraft.world.gen.feature.WorldGenGlowStone1;
 import net.minecraft.world.gen.feature.WorldGenGlowStone2;
@@ -50,7 +46,6 @@ import net.minecraft.world.gen.structure.MapGenNetherBridge;
  * 
  */
 public class ChunkProviderHell implements IChunkProvider {
-
 	private final World worldObj;
 	private final boolean field_177466_i;
 	private final EaglercraftRandom hellRNG;

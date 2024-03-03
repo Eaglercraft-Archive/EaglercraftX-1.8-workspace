@@ -13,18 +13,12 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.MapGenBase;
-import net.minecraft.world.gen.structure.MapGenStructureData;
-import net.minecraft.world.gen.structure.MapGenStructureIO;
-import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraft.world.gen.structure.StructureComponent;
-import net.minecraft.world.gen.structure.StructureStart;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -47,7 +41,6 @@ import net.minecraft.world.gen.structure.StructureStart;
  * 
  */
 public abstract class MapGenStructure extends MapGenBase {
-
 	private MapGenStructureData structureData;
 	protected Map<Long, StructureStart> structureMap = Maps.newHashMap();
 
@@ -182,11 +175,12 @@ public abstract class MapGenStructure extends MapGenBase {
 		if (blockpos != null) {
 			return blockpos;
 		} else {
-			List list = this.getCoordList();
+			List<BlockPos> list = this.getCoordList();
 			if (list != null) {
 				BlockPos blockpos2 = null;
 
-				for (BlockPos blockpos3 : (List<BlockPos>) list) {
+				for (int m = 0, n = list.size(); m < n; ++m) {
+					BlockPos blockpos3 = list.get(m);
 					double d2 = blockpos3.distanceSq(pos);
 					if (d2 < d0) {
 						d0 = d2;

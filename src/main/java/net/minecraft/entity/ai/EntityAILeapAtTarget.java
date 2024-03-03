@@ -2,7 +2,6 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.MathHelper;
 
 /**+
@@ -26,7 +25,6 @@ import net.minecraft.util.MathHelper;
  * 
  */
 public class EntityAILeapAtTarget extends EntityAIBase {
-
 	EntityLiving leaper;
 	EntityLivingBase leapTarget;
 	float leapMotionY;

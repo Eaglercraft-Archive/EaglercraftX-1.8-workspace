@@ -1,6 +1,5 @@
 package net.minecraft.entity.ai;
 
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -28,7 +27,6 @@ import net.minecraft.world.World;
  * 
  */
 public class EntityAIBeg extends EntityAIBase {
-
 	private EntityWolf theWolf;
 	private EntityPlayer thePlayer;
 	private World worldObject;

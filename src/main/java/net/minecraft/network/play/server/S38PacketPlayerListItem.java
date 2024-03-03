@@ -43,7 +43,8 @@ public class S38PacketPlayerListItem implements Packet<INetHandlerPlayClient> {
 	public S38PacketPlayerListItem(S38PacketPlayerListItem.Action actionIn, EntityPlayerMP... players) {
 		this.action = actionIn;
 
-		for (EntityPlayerMP entityplayermp : players) {
+		for (int i = 0; i < players.length; ++i) {
+			EntityPlayerMP entityplayermp = players[i];
 			this.players.add(new S38PacketPlayerListItem.AddPlayerData(entityplayermp.getGameProfile(),
 					entityplayermp.ping, entityplayermp.theItemInWorldManager.getGameType(),
 					entityplayermp.getTabListDisplayName()));
@@ -129,7 +130,8 @@ public class S38PacketPlayerListItem implements Packet<INetHandlerPlayClient> {
 		parPacketBuffer.writeEnumValue(this.action);
 		parPacketBuffer.writeVarIntToBuffer(this.players.size());
 
-		for (S38PacketPlayerListItem.AddPlayerData s38packetplayerlistitem$addplayerdata : this.players) {
+		for (int i = 0, l = this.players.size(); i < l; ++i) {
+			S38PacketPlayerListItem.AddPlayerData s38packetplayerlistitem$addplayerdata = this.players.get(i);
 			switch (this.action) {
 			case ADD_PLAYER:
 				parPacketBuffer.writeUuid(s38packetplayerlistitem$addplayerdata.getProfile().getId());

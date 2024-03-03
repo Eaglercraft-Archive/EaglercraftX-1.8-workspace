@@ -15,7 +15,6 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.NoiseGeneratorOctaves;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -38,7 +37,6 @@ import net.minecraft.world.gen.NoiseGeneratorOctaves;
  * 
  */
 public class ChunkProviderEnd implements IChunkProvider {
-
 	private EaglercraftRandom endRNG;
 	private NoiseGeneratorOctaves noiseGen1;
 	private NoiseGeneratorOctaves noiseGen2;

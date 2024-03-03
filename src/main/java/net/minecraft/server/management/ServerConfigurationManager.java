@@ -44,8 +44,6 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ItemInWorldManager;
-import net.minecraft.server.management.PlayerManager;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsFile;
 import net.minecraft.util.BlockPos;
@@ -87,7 +85,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public abstract class ServerConfigurationManager {
-
 	private static final Logger logger = LogManager.getLogger();
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
 	private final MinecraftServer mcServer;
@@ -181,7 +178,8 @@ public abstract class ServerConfigurationManager {
 		}
 
 		if (EagRuntime.getConfiguration().allowUpdateSvc()) {
-			for (EntityPlayerMP playerItr : playerEntityList) {
+			for (int i = 0, l = playerEntityList.size(); i < l; ++i) {
+				EntityPlayerMP playerItr = playerEntityList.get(i);
 				if (playerItr != playerIn && playerItr.updateCertificate != null) {
 					nethandlerplayserver
 							.sendPacket(new S3FPacketCustomPayload("EAG|UpdateCert-1.8",
@@ -203,8 +201,9 @@ public abstract class ServerConfigurationManager {
 		for (int i = 0; i < 19; ++i) {
 			ScoreObjective scoreobjective = scoreboardIn.getObjectiveInDisplaySlot(i);
 			if (scoreobjective != null && !hashset.contains(scoreobjective)) {
-				for (Packet packet : scoreboardIn.func_96550_d(scoreobjective)) {
-					playerIn.playerNetServerHandler.sendPacket(packet);
+				List<Packet> lst = scoreboardIn.func_96550_d(scoreobjective);
+				for (int j = 0, l = lst.size(); j < l; ++j) {
+					playerIn.playerNetServerHandler.sendPacket(lst.get(j));
 				}
 
 				hashset.add(scoreobjective);
@@ -365,7 +364,8 @@ public abstract class ServerConfigurationManager {
 	}
 
 	private boolean doesPlayerAlreadyExist(GameProfile gameprofile) {
-		for (EntityPlayerMP player : this.playerEntityList) {
+		for (int i = 0, l = playerEntityList.size(); i < l; ++i) {
+			EntityPlayerMP player = playerEntityList.get(i);
 			if (player.getName().equalsIgnoreCase(gameprofile.getName())
 					|| player.getUniqueID().equals(gameprofile.getId())) {
 				return true;
@@ -379,9 +379,9 @@ public abstract class ServerConfigurationManager {
 	 */
 	public EntityPlayerMP createPlayerForUser(GameProfile profile) {
 		EaglercraftUUID uuid = EntityPlayer.getUUID(profile);
-		ArrayList arraylist = Lists.newArrayList();
+		ArrayList<EntityPlayerMP> arraylist = Lists.newArrayList();
 
-		for (int i = 0; i < this.playerEntityList.size(); ++i) {
+		for (int i = 0, l = this.playerEntityList.size(); i < l; ++i) {
 			EntityPlayerMP entityplayermp = (EntityPlayerMP) this.playerEntityList.get(i);
 			if (entityplayermp.getUniqueID().equals(uuid)
 					|| entityplayermp.getName().equalsIgnoreCase(profile.getName())) {
@@ -394,8 +394,8 @@ public abstract class ServerConfigurationManager {
 			arraylist.add(entityplayermp2);
 		}
 
-		for (EntityPlayerMP entityplayermp1 : (ArrayList<EntityPlayerMP>) arraylist) {
-			entityplayermp1.playerNetServerHandler.kickPlayerFromServer("You logged in from another location");
+		for (int i = 0, l = arraylist.size(); i < l; ++i) {
+			arraylist.get(i).playerNetServerHandler.kickPlayerFromServer("You logged in from another location");
 		}
 
 		Object object;
@@ -613,7 +613,7 @@ public abstract class ServerConfigurationManager {
 		if (team == null) {
 			this.sendChatMsg(message);
 		} else {
-			for (int i = 0; i < this.playerEntityList.size(); ++i) {
+			for (int i = 0, l = this.playerEntityList.size(); i < l; ++i) {
 				EntityPlayerMP entityplayermp = (EntityPlayerMP) this.playerEntityList.get(i);
 				if (entityplayermp.getTeam() != team) {
 					entityplayermp.addChatMessage(message);
@@ -648,7 +648,7 @@ public abstract class ServerConfigurationManager {
 	public String[] getAllUsernames() {
 		String[] astring = new String[this.playerEntityList.size()];
 
-		for (int i = 0; i < this.playerEntityList.size(); ++i) {
+		for (int i = 0; i < astring.length; ++i) {
 			astring[i] = ((EntityPlayerMP) this.playerEntityList.get(i)).getName();
 		}
 
@@ -658,7 +658,7 @@ public abstract class ServerConfigurationManager {
 	public GameProfile[] getAllProfiles() {
 		GameProfile[] agameprofile = new GameProfile[this.playerEntityList.size()];
 
-		for (int i = 0; i < this.playerEntityList.size(); ++i) {
+		for (int i = 0; i < agameprofile.length; ++i) {
 			agameprofile[i] = ((EntityPlayerMP) this.playerEntityList.get(i)).getGameProfile();
 		}
 
@@ -701,7 +701,7 @@ public abstract class ServerConfigurationManager {
 	 */
 	public void sendToAllNearExcept(EntityPlayer x, double y, double z, double radius, double dimension, int parInt1,
 			Packet parPacket) {
-		for (int i = 0; i < this.playerEntityList.size(); ++i) {
+		for (int i = 0, l = this.playerEntityList.size(); i < l; ++i) {
 			EntityPlayerMP entityplayermp = (EntityPlayerMP) this.playerEntityList.get(i);
 			if (entityplayermp != x && entityplayermp.dimension == parInt1) {
 				double d0 = y - entityplayermp.posX;
@@ -719,7 +719,7 @@ public abstract class ServerConfigurationManager {
 	 * Saves all of the players' current states.
 	 */
 	public void saveAllPlayerData() {
-		for (int i = 0; i < this.playerEntityList.size(); ++i) {
+		for (int i = 0, l = this.playerEntityList.size(); i < l; ++i) {
 			this.writePlayerData((EntityPlayerMP) this.playerEntityList.get(i));
 		}
 
@@ -782,7 +782,8 @@ public abstract class ServerConfigurationManager {
 	public List<EntityPlayerMP> getPlayersMatchingAddress(String address) {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (EntityPlayerMP entityplayermp : this.playerEntityList) {
+		for (int i = 0, l = playerEntityList.size(); i < l; ++i) {
+			EntityPlayerMP entityplayermp = playerEntityList.get(i);
 			if (entityplayermp.getPlayerIP().equals(address)) {
 				arraylist.add(entityplayermp);
 			}
@@ -841,7 +842,7 @@ public abstract class ServerConfigurationManager {
 	 * Kicks everyone with "Server closed" as reason.
 	 */
 	public void removeAllPlayers() {
-		for (int i = 0; i < this.playerEntityList.size(); ++i) {
+		for (int i = 0, l = this.playerEntityList.size(); i < l; ++i) {
 			((EntityPlayerMP) this.playerEntityList.get(i)).playerNetServerHandler
 					.kickPlayerFromServer("Server closed");
 		}
@@ -879,7 +880,9 @@ public abstract class ServerConfigurationManager {
 	public void setViewDistance(int distance) {
 		this.viewDistance = distance;
 		if (this.mcServer.worldServers != null) {
-			for (WorldServer worldserver : this.mcServer.worldServers) {
+			WorldServer[] srv = this.mcServer.worldServers;
+			for (int i = 0; i < srv.length; ++i) {
+				WorldServer worldserver = srv[i];
 				if (worldserver != null) {
 					worldserver.getPlayerManager().setPlayerViewRadius(distance);
 				}

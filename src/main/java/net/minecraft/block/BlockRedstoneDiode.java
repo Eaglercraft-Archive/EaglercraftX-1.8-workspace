@@ -109,8 +109,10 @@ public abstract class BlockRedstoneDiode extends BlockDirectional {
 			this.dropBlockAsItem(world, blockpos, iblockstate, 0);
 			world.setBlockToAir(blockpos);
 
-			for (EnumFacing enumfacing : EnumFacing.values()) {
-				world.notifyNeighborsOfStateChange(blockpos.offset(enumfacing), this);
+			EnumFacing[] facings = EnumFacing._VALUES;
+			BlockPos tmp = new BlockPos(0, 0, 0);
+			for (int i = 0; i < facings.length; ++i) {
+				world.notifyNeighborsOfStateChange(blockpos.offsetEvenFaster(facings[i], tmp), this);
 			}
 
 		}
@@ -219,8 +221,10 @@ public abstract class BlockRedstoneDiode extends BlockDirectional {
 	 */
 	public void onBlockDestroyedByPlayer(World world, BlockPos blockpos, IBlockState iblockstate) {
 		if (this.isRepeaterPowered) {
-			for (EnumFacing enumfacing : EnumFacing.values()) {
-				world.notifyNeighborsOfStateChange(blockpos.offset(enumfacing), this);
+			EnumFacing[] facings = EnumFacing._VALUES;
+			BlockPos tmp = new BlockPos(0, 0, 0);
+			for (int i = 0; i < facings.length; ++i) {
+				world.notifyNeighborsOfStateChange(blockpos.offsetEvenFaster(facings[i], tmp), this);
 			}
 		}
 

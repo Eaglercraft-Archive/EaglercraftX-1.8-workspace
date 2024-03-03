@@ -105,8 +105,9 @@ public class BlockSilverfish extends Block {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (BlockSilverfish.EnumType blocksilverfish$enumtype : BlockSilverfish.EnumType.values()) {
-			list.add(new ItemStack(item, 1, blocksilverfish$enumtype.getMetadata()));
+		BlockSilverfish.EnumType[] types = BlockSilverfish.EnumType.META_LOOKUP;
+		for (int i = 0; i < types.length; ++i) {
+			list.add(new ItemStack(item, 1, types[i].getMetadata()));
 		}
 
 	}
@@ -165,7 +166,7 @@ public class BlockSilverfish extends Block {
 			}
 		};
 
-		private static final BlockSilverfish.EnumType[] META_LOOKUP = new BlockSilverfish.EnumType[values().length];
+		public static final BlockSilverfish.EnumType[] META_LOOKUP = new BlockSilverfish.EnumType[6];
 		private final int meta;
 		private final String name;
 		private final String unlocalizedName;
@@ -207,7 +208,9 @@ public class BlockSilverfish extends Block {
 		public abstract IBlockState getModelBlock();
 
 		public static BlockSilverfish.EnumType forModelBlock(IBlockState model) {
-			for (BlockSilverfish.EnumType blocksilverfish$enumtype : values()) {
+			BlockSilverfish.EnumType[] types = BlockSilverfish.EnumType.META_LOOKUP;
+			for (int i = 0; i < types.length; ++i) {
+				BlockSilverfish.EnumType blocksilverfish$enumtype = types[i];
 				if (model == blocksilverfish$enumtype.getModelBlock()) {
 					return blocksilverfish$enumtype;
 				}
@@ -217,8 +220,9 @@ public class BlockSilverfish extends Block {
 		}
 
 		static {
-			for (BlockSilverfish.EnumType blocksilverfish$enumtype : values()) {
-				META_LOOKUP[blocksilverfish$enumtype.getMetadata()] = blocksilverfish$enumtype;
+			BlockSilverfish.EnumType[] types = BlockSilverfish.EnumType.values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMetadata()] = types[i];
 			}
 
 		}

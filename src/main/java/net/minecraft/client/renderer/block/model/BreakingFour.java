@@ -3,7 +3,6 @@ package net.minecraft.client.renderer.block.model;
 import java.util.Arrays;
 
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerTextureAtlasSprite;
-import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.

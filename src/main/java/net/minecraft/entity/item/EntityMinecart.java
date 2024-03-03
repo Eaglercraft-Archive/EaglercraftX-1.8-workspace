@@ -1,5 +1,6 @@
 package net.minecraft.entity.item;
 
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -108,11 +109,11 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 	}
 
 	protected void entityInit() {
-		this.dataWatcher.addObject(17, new Integer(0));
-		this.dataWatcher.addObject(18, new Integer(1));
-		this.dataWatcher.addObject(19, new Float(0.0F));
-		this.dataWatcher.addObject(20, new Integer(0));
-		this.dataWatcher.addObject(21, new Integer(6));
+		this.dataWatcher.addObject(17, Integer.valueOf(0));
+		this.dataWatcher.addObject(18, Integer.valueOf(1));
+		this.dataWatcher.addObject(19, Float.valueOf(0.0F));
+		this.dataWatcher.addObject(20, Integer.valueOf(0));
+		this.dataWatcher.addObject(21, Integer.valueOf(6));
 		this.dataWatcher.addObject(22, Byte.valueOf((byte) 0));
 	}
 
@@ -344,8 +345,10 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
 			this.setRotation(this.rotationYaw, this.rotationPitch);
 
-			for (Entity entity : this.worldObj.getEntitiesWithinAABBExcludingEntity(this,
-					this.getEntityBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D))) {
+			List<Entity> lst = this.worldObj.getEntitiesWithinAABBExcludingEntity(this,
+					this.getEntityBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
+			for (int i = 0, m = lst.size(); i < m; ++i) {
+				Entity entity = lst.get(i);
 				if (entity != this.riddenByEntity && entity.canBePushed() && entity instanceof EntityMinecart) {
 					entity.applyEntityCollision(this);
 				}
@@ -1002,9 +1005,9 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 		}
 
 		static {
-			for (EntityMinecart.EnumMinecartType entityminecart$enumminecarttype : values()) {
-				ID_LOOKUP.put(Integer.valueOf(entityminecart$enumminecarttype.getNetworkID()),
-						entityminecart$enumminecarttype);
+			EntityMinecart.EnumMinecartType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				ID_LOOKUP.put(Integer.valueOf(types[i].getNetworkID()), types[i]);
 			}
 
 		}

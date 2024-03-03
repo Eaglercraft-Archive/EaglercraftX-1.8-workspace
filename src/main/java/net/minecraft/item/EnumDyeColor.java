@@ -42,8 +42,8 @@ public enum EnumDyeColor implements IStringSerializable {
 	RED(14, 1, "red", "red", MapColor.redColor, EnumChatFormatting.DARK_RED),
 	BLACK(15, 0, "black", "black", MapColor.blackColor, EnumChatFormatting.BLACK);
 
-	private static final EnumDyeColor[] META_LOOKUP = new EnumDyeColor[values().length];
-	private static final EnumDyeColor[] DYE_DMG_LOOKUP = new EnumDyeColor[values().length];
+	public static final EnumDyeColor[] META_LOOKUP = new EnumDyeColor[16];
+	public static final EnumDyeColor[] DYE_DMG_LOOKUP = new EnumDyeColor[16];
 	private final int meta;
 	private final int dyeDamage;
 	private final String name;
@@ -102,7 +102,9 @@ public enum EnumDyeColor implements IStringSerializable {
 	}
 
 	static {
-		for (EnumDyeColor enumdyecolor : values()) {
+		EnumDyeColor[] colors = values();
+		for (int i = 0; i < colors.length; ++i) {
+			EnumDyeColor enumdyecolor = colors[i];
 			META_LOOKUP[enumdyecolor.getMetadata()] = enumdyecolor;
 			DYE_DMG_LOOKUP[enumdyecolor.getDyeDamage()] = enumdyecolor;
 		}

@@ -181,7 +181,7 @@ public class BlockTallGrass extends BlockBush implements IGrowable {
 	public static enum EnumType implements IStringSerializable {
 		DEAD_BUSH(0, "dead_bush"), GRASS(1, "tall_grass"), FERN(2, "fern");
 
-		private static final BlockTallGrass.EnumType[] META_LOOKUP = new BlockTallGrass.EnumType[values().length];
+		private static final BlockTallGrass.EnumType[] META_LOOKUP = new BlockTallGrass.EnumType[3];
 		private final int meta;
 		private final String name;
 
@@ -211,8 +211,9 @@ public class BlockTallGrass extends BlockBush implements IGrowable {
 		}
 
 		static {
-			for (BlockTallGrass.EnumType blocktallgrass$enumtype : values()) {
-				META_LOOKUP[blocktallgrass$enumtype.getMeta()] = blocktallgrass$enumtype;
+			BlockTallGrass.EnumType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMeta()] = types[i];
 			}
 
 		}

@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAITarget;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.village.Village;
@@ -27,7 +26,6 @@ import net.minecraft.village.Village;
  * 
  */
 public class EntityAIDefendVillage extends EntityAITarget {
-
 	EntityIronGolem irongolem;
 	EntityLivingBase villageAgressorTarget;
 

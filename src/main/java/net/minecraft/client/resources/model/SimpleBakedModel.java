@@ -94,8 +94,9 @@ public class SimpleBakedModel implements IBakedModel {
 					parIBakedModel.getItemCameraTransforms());
 			this.builderTexture = parIBakedModel.getParticleTexture();
 
-			for (EnumFacing enumfacing : EnumFacing.values()) {
-				this.addFaceBreakingFours(parIBakedModel, parTextureAtlasSprite, enumfacing);
+			EnumFacing[] facings = EnumFacing._VALUES;
+			for (int i = 0; i < facings.length; ++i) {
+				this.addFaceBreakingFours(parIBakedModel, parTextureAtlasSprite, facings[i]);
 			}
 
 			this.addGeneralBreakingFours(parIBakedModel, parTextureAtlasSprite);
@@ -103,16 +104,18 @@ public class SimpleBakedModel implements IBakedModel {
 
 		private void addFaceBreakingFours(IBakedModel parIBakedModel, EaglerTextureAtlasSprite parTextureAtlasSprite,
 				EnumFacing parEnumFacing) {
-			for (BakedQuad bakedquad : parIBakedModel.getFaceQuads(parEnumFacing)) {
-				this.addFaceQuad(parEnumFacing, new BreakingFour(bakedquad, parTextureAtlasSprite));
+			List<BakedQuad> quads = parIBakedModel.getFaceQuads(parEnumFacing);
+			for (int i = 0, l = quads.size(); i < l; ++i) {
+				this.addFaceQuad(parEnumFacing, new BreakingFour(quads.get(i), parTextureAtlasSprite));
 			}
 
 		}
 
 		private void addGeneralBreakingFours(IBakedModel parIBakedModel,
 				EaglerTextureAtlasSprite parTextureAtlasSprite) {
-			for (BakedQuad bakedquad : parIBakedModel.getGeneralQuads()) {
-				this.addGeneralQuad(new BreakingFour(bakedquad, parTextureAtlasSprite));
+			List<BakedQuad> quads = parIBakedModel.getGeneralQuads();
+			for (int i = 0, l = quads.size(); i < l; ++i) {
+				this.addGeneralQuad(new BreakingFour(quads.get(i), parTextureAtlasSprite));
 			}
 
 		}
@@ -121,7 +124,7 @@ public class SimpleBakedModel implements IBakedModel {
 			this.builderGeneralQuads = Lists.newArrayList();
 			this.builderFaceQuads = Lists.newArrayListWithCapacity(6);
 
-			for (EnumFacing enumfacing : EnumFacing.values()) {
+			for (int i = 0, l = EnumFacing._VALUES.length; i < l; ++i) {
 				this.builderFaceQuads.add(Lists.newArrayList());
 			}
 

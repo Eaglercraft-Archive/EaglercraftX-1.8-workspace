@@ -24,7 +24,7 @@ import net.minecraft.util.EnumWorldBlockLayer;
  * 
  */
 public class RegionRenderCacheBuilder {
-	private final WorldRenderer[] worldRenderers = new WorldRenderer[EnumWorldBlockLayer.values().length];
+	private final WorldRenderer[] worldRenderers = new WorldRenderer[EnumWorldBlockLayer._VALUES.length];
 
 	public RegionRenderCacheBuilder() {
 		this.worldRenderers[EnumWorldBlockLayer.SOLID.ordinal()] = new WorldRenderer(2097152);

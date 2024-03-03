@@ -8,7 +8,6 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAITarget;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EntitySelectors;
 
@@ -33,7 +32,6 @@ import net.minecraft.util.EntitySelectors;
  * 
  */
 public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends EntityAITarget {
-
 	protected final Class<T> targetClass;
 	private final int targetChance;
 	protected final EntityAINearestAttackableTarget.Sorter theNearestAttackableTargetSorter;

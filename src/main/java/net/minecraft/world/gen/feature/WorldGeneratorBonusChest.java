@@ -10,7 +10,6 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -33,7 +32,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  * 
  */
 public class WorldGeneratorBonusChest extends WorldGenerator {
-
 	private final List<WeightedRandomChestContent> chestItems;
 	private final int itemsToGenerateInBonusChest;
 

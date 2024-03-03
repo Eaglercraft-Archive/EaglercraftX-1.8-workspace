@@ -105,7 +105,7 @@ public class FaceBakery {
 	}
 
 	private float[] getPositionsDiv16(Vector3f pos1, Vector3f pos2) {
-		float[] afloat = new float[EnumFacing.values().length];
+		float[] afloat = new float[EnumFacing._VALUES.length];
 		afloat[EnumFaceDirection.Constants.WEST_INDEX] = pos1.x / 16.0F;
 		afloat[EnumFaceDirection.Constants.DOWN_INDEX] = pos1.y / 16.0F;
 		afloat[EnumFaceDirection.Constants.NORTH_INDEX] = pos1.z / 16.0F;
@@ -252,7 +252,9 @@ public class FaceBakery {
 		EnumFacing enumfacing = null;
 		float f1 = 0.0F;
 
-		for (EnumFacing enumfacing1 : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing1 = facings[i];
 			Vec3i vec3i = enumfacing1.getDirectionVec();
 			Vector3f vector3f6 = new Vector3f((float) vec3i.getX(), (float) vec3i.getY(), (float) vec3i.getZ());
 			float f2 = Vector3f.dot(normal, vector3f6);
@@ -280,7 +282,7 @@ public class FaceBakery {
 	private void func_178408_a(int[] parArrayOfInt, EnumFacing parEnumFacing) {
 		int[] aint = new int[parArrayOfInt.length];
 		System.arraycopy(parArrayOfInt, 0, aint, 0, parArrayOfInt.length);
-		float[] afloat = new float[EnumFacing.values().length];
+		float[] afloat = new float[EnumFacing._VALUES.length];
 		afloat[EnumFaceDirection.Constants.WEST_INDEX] = 999.0F;
 		afloat[EnumFaceDirection.Constants.DOWN_INDEX] = 999.0F;
 		afloat[EnumFaceDirection.Constants.NORTH_INDEX] = 999.0F;

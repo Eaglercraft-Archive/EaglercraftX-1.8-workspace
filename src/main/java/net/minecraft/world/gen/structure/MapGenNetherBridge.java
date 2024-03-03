@@ -9,10 +9,6 @@ import net.minecraft.entity.monster.EntityPigZombie;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.StructureComponent;
-import net.minecraft.world.gen.structure.StructureNetherBridgePieces;
-import net.minecraft.world.gen.structure.StructureStart;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -35,7 +31,6 @@ import net.minecraft.world.gen.structure.StructureStart;
  * 
  */
 public class MapGenNetherBridge extends MapGenStructure {
-
 	private List<BiomeGenBase.SpawnListEntry> spawnList = Lists.newArrayList();
 
 	public MapGenNetherBridge() {

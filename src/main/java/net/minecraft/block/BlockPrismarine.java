@@ -108,7 +108,7 @@ public class BlockPrismarine extends Block {
 	public static enum EnumType implements IStringSerializable {
 		ROUGH(0, "prismarine", "rough"), BRICKS(1, "prismarine_bricks", "bricks"), DARK(2, "dark_prismarine", "dark");
 
-		private static final BlockPrismarine.EnumType[] META_LOOKUP = new BlockPrismarine.EnumType[values().length];
+		private static final BlockPrismarine.EnumType[] META_LOOKUP = new BlockPrismarine.EnumType[3];
 		private final int meta;
 		private final String name;
 		private final String unlocalizedName;
@@ -144,8 +144,9 @@ public class BlockPrismarine extends Block {
 		}
 
 		static {
-			for (BlockPrismarine.EnumType blockprismarine$enumtype : values()) {
-				META_LOOKUP[blockprismarine$enumtype.getMetadata()] = blockprismarine$enumtype;
+			BlockPrismarine.EnumType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMetadata()] = types[i];
 			}
 
 		}

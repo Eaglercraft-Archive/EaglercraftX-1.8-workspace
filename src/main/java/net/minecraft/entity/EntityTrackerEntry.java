@@ -5,11 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.block.Block;
-import net.minecraft.entity.DataWatcher;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLeashKnot;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityBoat;
@@ -85,7 +80,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class EntityTrackerEntry {
-
 	private static final Logger logger = LogManager.getLogger();
 	public Entity trackedEntity;
 	public int trackingDistanceThreshold;
@@ -166,8 +160,8 @@ public class EntityTrackerEntry {
 			if (itemstack != null && itemstack.getItem() instanceof ItemMap) {
 				MapData mapdata = Items.filled_map.getMapData(itemstack, this.trackedEntity.worldObj);
 
-				for (EntityPlayer entityplayer : parList) {
-					EntityPlayerMP entityplayermp = (EntityPlayerMP) entityplayer;
+				for (int i = 0, l = parList.size(); i < l; ++i) {
+					EntityPlayerMP entityplayermp = (EntityPlayerMP) parList.get(i);
 					mapdata.updateVisiblePlayers(entityplayermp, itemstack);
 					Packet packet = Items.filled_map.createMapDataPacket(itemstack, this.trackedEntity.worldObj,
 							entityplayermp);

@@ -21,9 +21,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.MapGenStructureIO;
-import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraft.world.gen.structure.StructureComponent;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -46,7 +43,6 @@ import net.minecraft.world.gen.structure.StructureComponent;
  * 
  */
 public class ComponentScatteredFeaturePieces {
-
 	public static void registerScatteredFeaturePieces() {
 		MapGenStructureIO.registerStructureComponent(ComponentScatteredFeaturePieces.DesertPyramid.class, "TeDP");
 		MapGenStructureIO.registerStructureComponent(ComponentScatteredFeaturePieces.JunglePyramid.class, "TeJP");
@@ -444,7 +440,9 @@ public class ComponentScatteredFeaturePieces {
 			this.setBlockState(world, Blocks.sandstone.getStateFromMeta(BlockSandStone.EnumType.SMOOTH.getMetadata()),
 					10, -11, 13, structureboundingbox);
 
-			for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+			EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+			for (int m = 0; m < facings.length; ++m) {
+				EnumFacing enumfacing = facings[m];
 				if (!this.field_74940_h[enumfacing.getHorizontalIndex()]) {
 					int k1 = enumfacing.getFrontOffsetX() * 2;
 					int l1 = enumfacing.getFrontOffsetZ() * 2;

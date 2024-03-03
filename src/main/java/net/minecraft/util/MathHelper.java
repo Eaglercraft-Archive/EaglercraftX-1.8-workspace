@@ -181,8 +181,8 @@ public class MathHelper {
 	public static double average(long[] values) {
 		long i = 0L;
 
-		for (long j : values) {
-			i += j;
+		for (int j = 0; j < values.length; ++j) {
+			i += values[j];
 		}
 
 		return (double) i / (double) values.length;

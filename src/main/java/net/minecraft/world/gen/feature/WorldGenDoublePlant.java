@@ -5,7 +5,6 @@ import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -28,7 +27,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  * 
  */
 public class WorldGenDoublePlant extends WorldGenerator {
-
 	private BlockDoublePlant.EnumPlantType field_150549_a;
 
 	public void setPlantType(BlockDoublePlant.EnumPlantType parEnumPlantType) {

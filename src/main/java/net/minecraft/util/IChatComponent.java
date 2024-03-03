@@ -84,8 +84,8 @@ public interface IChatComponent extends Iterable<IChatComponent> {
 					JSONArray jsonarray1 = (JSONArray) parJsonElement;
 					IChatComponent ichatcomponent = null;
 
-					for (Object jsonelement : jsonarray1) {
-						IChatComponent ichatcomponent1 = this.deserialize(jsonelement);
+					for (int i = 0, l = jsonarray1.length(); i < l; ++i) {
+						IChatComponent ichatcomponent1 = this.deserialize(jsonarray1.get(i));
 						if (ichatcomponent == null) {
 							ichatcomponent = ichatcomponent1;
 						} else {
@@ -179,8 +179,9 @@ public interface IChatComponent extends Iterable<IChatComponent> {
 				if (!ichatcomponent.getSiblings().isEmpty()) {
 					JSONArray jsonarray = new JSONArray();
 
-					for (IChatComponent ichatcomponent1 : ichatcomponent.getSiblings()) {
-						jsonarray.put(this.serialize(ichatcomponent1));
+					List<IChatComponent> lst = ichatcomponent.getSiblings();
+					for (int i = 0, l = lst.size(); i < l; ++i) {
+						jsonarray.put(this.serialize(lst.get(i)));
 					}
 
 					jsonobject.put("extra", jsonarray);
@@ -195,7 +196,9 @@ public interface IChatComponent extends Iterable<IChatComponent> {
 							&& chatcomponenttranslation.getFormatArgs().length > 0) {
 						JSONArray jsonarray1 = new JSONArray();
 
-						for (Object object : chatcomponenttranslation.getFormatArgs()) {
+						Object[] arr = chatcomponenttranslation.getFormatArgs();
+						for (int i = 0; i < arr.length; ++i) {
+							Object object = arr[i];
 							if (object instanceof IChatComponent) {
 								jsonarray1.put(this.serialize((IChatComponent) object));
 							} else {

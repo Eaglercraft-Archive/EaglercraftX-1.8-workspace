@@ -36,7 +36,6 @@ import net.minecraft.world.chunk.IChunkProvider;
  * 
  */
 public class ChunkProviderDebug implements IChunkProvider {
-
 	private static final List<IBlockState> field_177464_a = Lists.newArrayList();
 	private static final int field_177462_b;
 	private static final int field_181039_c;

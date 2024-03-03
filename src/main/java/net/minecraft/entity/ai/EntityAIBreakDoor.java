@@ -3,7 +3,6 @@ package net.minecraft.entity.ai;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDoor;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIDoorInteract;
 import net.minecraft.world.EnumDifficulty;
 
 /**+
@@ -27,7 +26,6 @@ import net.minecraft.world.EnumDifficulty;
  * 
  */
 public class EntityAIBreakDoor extends EntityAIDoorInteract {
-
 	private int breakingTime;
 	private int previousBreakProgress = -1;
 

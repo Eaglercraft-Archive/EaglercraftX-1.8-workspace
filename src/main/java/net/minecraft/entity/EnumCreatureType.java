@@ -32,6 +32,8 @@ public enum EnumCreatureType {
 	AMBIENT(EntityAmbientCreature.class, 15, Material.air, true, false),
 	WATER_CREATURE(EntityWaterMob.class, 5, Material.water, true, false);
 
+	public static final EnumCreatureType[] _VALUES = values();
+
 	private final Class<? extends IAnimals> creatureClass;
 	private final int maxNumberOfCreature;
 	private final Material creatureMaterial;

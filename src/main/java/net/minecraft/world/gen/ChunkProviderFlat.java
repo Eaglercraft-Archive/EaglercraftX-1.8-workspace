@@ -15,9 +15,6 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.FlatGeneratorInfo;
-import net.minecraft.world.gen.FlatLayerInfo;
-import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.feature.WorldGenDungeons;
 import net.minecraft.world.gen.feature.WorldGenLakes;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
@@ -48,7 +45,6 @@ import net.minecraft.world.gen.structure.StructureOceanMonument;
  * 
  */
 public class ChunkProviderFlat implements IChunkProvider {
-
 	private World worldObj;
 	private EaglercraftRandom random;
 	private final IBlockState[] cachedBlockIDs = new IBlockState[256];
@@ -183,7 +179,8 @@ public class ChunkProviderFlat implements IChunkProvider {
 		this.random.setSeed((long) i * i1 + (long) j * j1 ^ this.worldObj.getSeed());
 		ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(i, j);
 
-		for (MapGenStructure mapgenstructure : this.structureGenerators) {
+		for (int m = 0, n = this.structureGenerators.size(); m < n; ++m) {
+			MapGenStructure mapgenstructure = this.structureGenerators.get(m);
 			boolean flag1 = mapgenstructure.generateStructure(this.worldObj, this.random, chunkcoordintpair);
 			if (mapgenstructure instanceof MapGenVillage) {
 				flag |= flag1;
@@ -267,7 +264,8 @@ public class ChunkProviderFlat implements IChunkProvider {
 
 	public BlockPos getStrongholdGen(World world, String s, BlockPos blockpos) {
 		if ("Stronghold".equals(s)) {
-			for (MapGenStructure mapgenstructure : this.structureGenerators) {
+			for (int m = 0, n = this.structureGenerators.size(); m < n; ++m) {
+				MapGenStructure mapgenstructure = this.structureGenerators.get(m);
 				if (mapgenstructure instanceof MapGenStronghold) {
 					return mapgenstructure.getClosestStrongholdPos(world, blockpos);
 				}
@@ -282,8 +280,8 @@ public class ChunkProviderFlat implements IChunkProvider {
 	}
 
 	public void recreateStructures(Chunk var1, int i, int j) {
-		for (MapGenStructure mapgenstructure : this.structureGenerators) {
-			mapgenstructure.generate(this, this.worldObj, i, j, (ChunkPrimer) null);
+		for (int m = 0, n = this.structureGenerators.size(); m < n; ++m) {
+			this.structureGenerators.get(m).generate(this, this.worldObj, i, j, (ChunkPrimer) null);
 		}
 
 	}

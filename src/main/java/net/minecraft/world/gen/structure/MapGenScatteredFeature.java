@@ -11,10 +11,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.gen.structure.ComponentScatteredFeaturePieces;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.StructureComponent;
-import net.minecraft.world.gen.structure.StructureStart;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -37,7 +33,6 @@ import net.minecraft.world.gen.structure.StructureStart;
  * 
  */
 public class MapGenScatteredFeature extends MapGenStructure {
-
 	private static final List<BiomeGenBase> biomelist = Arrays.asList(new BiomeGenBase[] { BiomeGenBase.desert,
 			BiomeGenBase.desertHills, BiomeGenBase.jungle, BiomeGenBase.jungleHills, BiomeGenBase.swampland });
 	private List<BiomeGenBase.SpawnListEntry> scatteredFeatureSpawnList;
@@ -93,8 +88,8 @@ public class MapGenScatteredFeature extends MapGenStructure {
 				return false;
 			}
 
-			for (BiomeGenBase biomegenbase1 : biomelist) {
-				if (biomegenbase == biomegenbase1) {
+			for (int m = 0, n = biomelist.size(); m < n; ++m) {
+				if (biomegenbase == biomelist.get(m)) {
 					return true;
 				}
 			}

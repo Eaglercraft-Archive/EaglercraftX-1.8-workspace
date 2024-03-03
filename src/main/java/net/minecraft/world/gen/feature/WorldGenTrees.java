@@ -15,7 +15,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -38,7 +37,6 @@ import net.minecraft.world.gen.feature.WorldGenAbstractTree;
  * 
  */
 public class WorldGenTrees extends WorldGenAbstractTree {
-
 	private static final IBlockState field_181653_a = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT,
 			BlockPlanks.EnumType.OAK);
 	private static final IBlockState field_181654_b = Blocks.leaves.getDefaultState()
@@ -189,7 +187,9 @@ public class WorldGenTrees extends WorldGenAbstractTree {
 
 						if (random.nextInt(5) == 0 && i > 5) {
 							for (int i3 = 0; i3 < 2; ++i3) {
-								for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+								EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+								for (int m = 0; m < facings.length; ++m) {
+									EnumFacing enumfacing = facings[m];
 									if (random.nextInt(4 - i3) == 0) {
 										EnumFacing enumfacing1 = enumfacing.getOpposite();
 										this.func_181652_a(world, random.nextInt(3),

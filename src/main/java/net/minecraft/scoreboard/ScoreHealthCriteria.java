@@ -33,7 +33,8 @@ public class ScoreHealthCriteria extends ScoreDummyCriteria {
 	public int func_96635_a(List<EntityPlayer> list) {
 		float f = 0.0F;
 
-		for (EntityPlayer entityplayer : list) {
+		for (int i = 0, l = list.size(); i < l; ++i) {
+			EntityPlayer entityplayer = list.get(i);
 			f += entityplayer.getHealth() + entityplayer.getAbsorptionAmount();
 		}
 

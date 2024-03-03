@@ -16,8 +16,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
@@ -96,14 +94,14 @@ public class PlayerSelector {
 	}
 
 	public static IChatComponent matchEntitiesToChatComponent(ICommandSender sender, String token) {
-		List list = matchEntities(sender, token, Entity.class);
+		List<Entity> list = matchEntities(sender, token, Entity.class);
 		if (list.isEmpty()) {
 			return null;
 		} else {
 			ArrayList arraylist = Lists.newArrayList();
 
-			for (Entity entity : (ArrayList<Entity>) list) {
-				arraylist.add(entity.getDisplayName());
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				arraylist.add(list.get(i).getDisplayName());
 			}
 
 			return CommandBase.join(arraylist);
@@ -120,10 +118,11 @@ public class PlayerSelector {
 			} else {
 				String s = matcher.group(1);
 				BlockPos blockpos = func_179664_b(map, sender.getPosition());
-				List list = getWorlds(sender, map);
+				List<World> list = getWorlds(sender, map);
 				ArrayList arraylist = Lists.newArrayList();
 
-				for (World world : (ArrayList<World>) list) {
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					World world = list.get(i);
 					if (world != null) {
 						ArrayList arraylist1 = Lists.newArrayList();
 						arraylist1.addAll(func_179663_a(map, s));

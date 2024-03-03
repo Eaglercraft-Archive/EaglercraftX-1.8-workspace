@@ -1,9 +1,7 @@
 package net.minecraft.command;
 
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandGameMode;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
+import java.util.List;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
@@ -64,8 +62,9 @@ public class CommandDefaultGameMode extends CommandGameMode {
 		MinecraftServer minecraftserver = MinecraftServer.getServer();
 		minecraftserver.setGameType(parGameType);
 		if (minecraftserver.getForceGamemode()) {
-			for (EntityPlayerMP entityplayermp : MinecraftServer.getServer().getConfigurationManager()
-					.func_181057_v()) {
+			List<EntityPlayerMP> lst = MinecraftServer.getServer().getConfigurationManager().func_181057_v();
+			for (int i = 0, l = lst.size(); i < l; ++i) {
+				EntityPlayerMP entityplayermp = lst.get(i);
 				entityplayermp.setGameType(parGameType);
 				entityplayermp.fallDistance = 0.0F;
 			}

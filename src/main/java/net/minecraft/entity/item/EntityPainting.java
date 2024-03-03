@@ -45,11 +45,12 @@ public class EntityPainting extends EntityHanging {
 		super(worldIn, pos);
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (EntityPainting.EnumArt entitypainting$enumart : EntityPainting.EnumArt.values()) {
-			this.art = entitypainting$enumart;
+		EntityPainting.EnumArt[] types = EntityPainting.EnumArt._VALUES;
+		for (int i = 0; i < types.length; ++i) {
+			this.art = types[i];
 			this.updateFacingWithBoundingBox(facing);
 			if (this.onValidSurface()) {
-				arraylist.add(entitypainting$enumart);
+				arraylist.add(types[i]);
 			}
 		}
 
@@ -63,7 +64,9 @@ public class EntityPainting extends EntityHanging {
 	public EntityPainting(World worldIn, BlockPos pos, EnumFacing facing, String title) {
 		this(worldIn, pos, facing);
 
-		for (EntityPainting.EnumArt entitypainting$enumart : EntityPainting.EnumArt.values()) {
+		EntityPainting.EnumArt[] types = EntityPainting.EnumArt._VALUES;
+		for (int i = 0; i < types.length; ++i) {
+			EntityPainting.EnumArt entitypainting$enumart = types[i];
 			if (entitypainting$enumart.title.equals(title)) {
 				this.art = entitypainting$enumart;
 				break;
@@ -89,7 +92,9 @@ public class EntityPainting extends EntityHanging {
 	public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		String s = nbttagcompound.getString("Motive");
 
-		for (EntityPainting.EnumArt entitypainting$enumart : EntityPainting.EnumArt.values()) {
+		EntityPainting.EnumArt[] types = EntityPainting.EnumArt._VALUES;
+		for (int i = 0; i < types.length; ++i) {
+			EntityPainting.EnumArt entitypainting$enumart = types[i];
 			if (entitypainting$enumart.title.equals(s)) {
 				this.art = entitypainting$enumart;
 			}
@@ -152,6 +157,8 @@ public class EntityPainting extends EntityHanging {
 		FIGHTERS("Fighters", 64, 32, 0, 96), POINTER("Pointer", 64, 64, 0, 192), PIGSCENE("Pigscene", 64, 64, 64, 192),
 		BURNING_SKULL("BurningSkull", 64, 64, 128, 192), SKELETON("Skeleton", 64, 48, 192, 64),
 		DONKEY_KONG("DonkeyKong", 64, 48, 192, 112);
+
+		public static final EnumArt[] _VALUES = values();
 
 		public static final int field_180001_A = "SkullAndRoses".length();
 		public final String title;

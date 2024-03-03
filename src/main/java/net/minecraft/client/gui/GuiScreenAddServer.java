@@ -102,8 +102,8 @@ public class GuiScreenAddServer extends GuiScreen {
 						+ I18n.format(this.serverData.hideAddress ? "gui.yes" : "gui.no", new Object[0]);
 			} else if (parGuiButton.id == 2) {
 				this.serverData.setResourceMode(
-						ServerData.ServerResourceMode.values()[(this.serverData.getResourceMode().ordinal() + 1)
-								% ServerData.ServerResourceMode.values().length]);
+						ServerData.ServerResourceMode._VALUES[(this.serverData.getResourceMode().ordinal() + 1)
+								% ServerData.ServerResourceMode._VALUES.length]);
 				this.serverResourcePacks.displayString = I18n.format("addServer.resourcePack", new Object[0]) + ": "
 						+ this.serverData.getResourceMode().getMotd().getFormattedText();
 			} else if (parGuiButton.id == 1) {

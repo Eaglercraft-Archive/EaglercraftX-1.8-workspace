@@ -1,7 +1,5 @@
 package net.minecraft.crash;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -11,7 +9,6 @@ import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.ArrayUtils;
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
-import net.lax1dude.eaglercraft.v1_8.IOUtils;
 import net.lax1dude.eaglercraft.v1_8.internal.EnumPlatformType;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
@@ -131,16 +128,16 @@ public class CrashReport {
 			builder.append("-- Head --\n");
 			builder.append("Stacktrace:\n");
 
-			for (String stacktraceelement : this.stacktrace) {
-				builder.append("\t").append("at ").append(stacktraceelement.toString());
+			for (int i = 0; i < this.stacktrace.length; ++i) {
+				builder.append("\t").append("at ").append(this.stacktrace[i].toString());
 				builder.append("\n");
 			}
 
 			builder.append("\n");
 		}
 
-		for (CrashReportCategory crashreportcategory : this.crashReportSections) {
-			crashreportcategory.appendToStringBuilder(builder);
+		for (int i = 0, l = this.crashReportSections.size(); i < l; ++i) {
+			this.crashReportSections.get(i).appendToStringBuilder(builder);
 			builder.append("\n\n");
 		}
 

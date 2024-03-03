@@ -2,8 +2,6 @@ package net.minecraft.entity.ai;
 
 import java.util.List;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.util.Vec3;
 
@@ -28,7 +26,6 @@ import net.minecraft.util.Vec3;
  * 
  */
 public class EntityAIPlay extends EntityAIBase {
-
 	private EntityVillager villagerObj;
 	private EntityLivingBase targetVillager;
 	private double speed;
@@ -49,11 +46,12 @@ public class EntityAIPlay extends EntityAIBase {
 		} else if (this.villagerObj.getRNG().nextInt(400) != 0) {
 			return false;
 		} else {
-			List list = this.villagerObj.worldObj.getEntitiesWithinAABB(EntityVillager.class,
+			List<EntityVillager> list = this.villagerObj.worldObj.getEntitiesWithinAABB(EntityVillager.class,
 					this.villagerObj.getEntityBoundingBox().expand(6.0D, 3.0D, 6.0D));
 			double d0 = Double.MAX_VALUE;
 
-			for (EntityVillager entityvillager : (List<EntityVillager>) list) {
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				EntityVillager entityvillager = list.get(i);
 				if (entityvillager != this.villagerObj && !entityvillager.isPlaying()
 						&& entityvillager.getGrowingAge() < 0) {
 					double d1 = entityvillager.getDistanceSqToEntity(this.villagerObj);

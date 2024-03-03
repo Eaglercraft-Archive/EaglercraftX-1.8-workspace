@@ -21,6 +21,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -191,7 +192,8 @@ public class Explosion {
 		}
 
 		if (this.isSmoking) {
-			for (BlockPos blockpos : this.affectedBlockPositions) {
+			for (int i = 0, l = this.affectedBlockPositions.size(); i < l; ++i) {
+				BlockPos blockpos = this.affectedBlockPositions.get(i);
 				Block block = this.worldObj.getBlockState(blockpos).getBlock();
 				if (spawnParticles) {
 					double d0 = (double) ((float) blockpos.getX() + this.worldObj.rand.nextFloat());
@@ -228,9 +230,11 @@ public class Explosion {
 		}
 
 		if (this.isFlaming) {
-			for (BlockPos blockpos1 : this.affectedBlockPositions) {
-				if (this.worldObj.getBlockState(blockpos1).getBlock().getMaterial() == Material.air
-						&& this.worldObj.getBlockState(blockpos1.down()).getBlock().isFullBlock()
+			BlockPos tmp = new BlockPos(0, 0, 0);
+			for (int i = 0, l = this.affectedBlockPositions.size(); i < l; ++i) {
+				BlockPos blockpos1 = this.affectedBlockPositions.get(i);
+				if (this.worldObj.getBlockState(blockpos1).getBlock().getMaterial() == Material.air && this.worldObj
+						.getBlockState(blockpos1.offsetEvenFaster(EnumFacing.DOWN, tmp)).getBlock().isFullBlock()
 						&& this.explosionRNG.nextInt(3) == 0) {
 					this.worldObj.setBlockState(blockpos1, Blocks.fire.getDefaultState());
 				}

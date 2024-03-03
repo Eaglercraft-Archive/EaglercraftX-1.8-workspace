@@ -30,7 +30,6 @@ import net.minecraft.world.World;
  * 
  */
 public class DemoWorldManager extends ItemInWorldManager {
-
 	private boolean field_73105_c;
 	private boolean demoTimeExpired;
 	private int field_73104_e;

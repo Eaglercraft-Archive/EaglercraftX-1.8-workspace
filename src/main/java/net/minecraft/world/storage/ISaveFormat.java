@@ -2,9 +2,6 @@ package net.minecraft.world.storage;
 
 import java.util.List;
 import net.minecraft.util.IProgressUpdate;
-import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.SaveFormatComparator;
-import net.minecraft.world.storage.WorldInfo;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.

@@ -58,7 +58,9 @@ public class BlockColored extends Block {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (EnumDyeColor enumdyecolor : EnumDyeColor.values()) {
+		EnumDyeColor[] colors = EnumDyeColor.META_LOOKUP;
+		for (int i = 0; i < colors.length; ++i) {
+			EnumDyeColor enumdyecolor = colors[i];
 			list.add(new ItemStack(item, 1, enumdyecolor.getMetadata()));
 		}
 

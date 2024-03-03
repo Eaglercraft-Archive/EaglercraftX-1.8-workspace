@@ -5,6 +5,8 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.List;
+
 import net.lax1dude.eaglercraft.v1_8.HString;
 
 /**+
@@ -85,8 +87,9 @@ public class ChatComponentScore extends ChatComponentStyle {
 		chatcomponentscore.setValue(this.value);
 		chatcomponentscore.setChatStyle(this.getChatStyle().createShallowCopy());
 
-		for (IChatComponent ichatcomponent : this.getSiblings()) {
-			chatcomponentscore.appendSibling(ichatcomponent.createCopy());
+		List<IChatComponent> lst = this.getSiblings();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			chatcomponentscore.appendSibling(lst.get(i).createCopy());
 		}
 
 		return chatcomponentscore;

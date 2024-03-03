@@ -127,9 +127,9 @@ public class TileEntityBannerRenderer extends TileEntitySpecialRenderer<TileEnti
 				List list = bannerObj.getColorList();
 				ArrayList arraylist = Lists.newArrayList();
 
-				for (TileEntityBanner.EnumBannerPattern tileentitybanner$enumbannerpattern : (List<TileEntityBanner.EnumBannerPattern>) list1) {
-					arraylist.add(
-							"textures/entity/banner/" + tileentitybanner$enumbannerpattern.getPatternName() + ".png");
+				for (int i = 0, l = list1.size(); i < l; ++i) {
+					arraylist.add("textures/entity/banner/"
+							+ ((TileEntityBanner.EnumBannerPattern) list1.get(i)).getPatternName() + ".png");
 				}
 
 				tileentitybannerrenderer$timedbannertexture = new TileEntityBannerRenderer.TimedBannerTexture();

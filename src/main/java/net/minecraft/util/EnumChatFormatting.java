@@ -37,6 +37,8 @@ public enum EnumChatFormatting {
 	STRIKETHROUGH("STRIKETHROUGH", 'm', true), UNDERLINE("UNDERLINE", 'n', true), ITALIC("ITALIC", 'o', true),
 	RESET("RESET", 'r', -1);
 
+	public static final EnumChatFormatting[] _VALUES = values();
+
 	private static final Map<String, EnumChatFormatting> nameMapping = Maps.newHashMap();
 	/**+
 	 * Matches formatting codes that indicate that the client should
@@ -124,7 +126,9 @@ public enum EnumChatFormatting {
 		if (parInt1 < 0) {
 			return RESET;
 		} else {
-			for (EnumChatFormatting enumchatformatting : values()) {
+			EnumChatFormatting[] types = _VALUES;
+			for (int i = 0; i < types.length; ++i) {
+				EnumChatFormatting enumchatformatting = types[i];
 				if (enumchatformatting.getColorIndex() == parInt1) {
 					return enumchatformatting;
 				}
@@ -143,7 +147,9 @@ public enum EnumChatFormatting {
 	public static Collection<String> getValidValues(boolean parFlag, boolean parFlag2) {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (EnumChatFormatting enumchatformatting : values()) {
+		EnumChatFormatting[] types = _VALUES;
+		for (int i = 0; i < types.length; ++i) {
+			EnumChatFormatting enumchatformatting = types[i];
 			if ((!enumchatformatting.isColor() || parFlag) && (!enumchatformatting.isFancyStyling() || parFlag2)) {
 				arraylist.add(enumchatformatting.getFriendlyName());
 			}
@@ -153,8 +159,9 @@ public enum EnumChatFormatting {
 	}
 
 	static {
-		for (EnumChatFormatting enumchatformatting : values()) {
-			nameMapping.put(func_175745_c(enumchatformatting.name), enumchatformatting);
+		EnumChatFormatting[] types = _VALUES;
+		for (int i = 0; i < types.length; ++i) {
+			nameMapping.put(func_175745_c(types[i].name), types[i]);
 		}
 
 	}

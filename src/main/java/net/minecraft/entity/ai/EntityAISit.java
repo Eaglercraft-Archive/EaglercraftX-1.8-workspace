@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.passive.EntityTameable;
 
 /**+
@@ -25,7 +24,6 @@ import net.minecraft.entity.passive.EntityTameable;
  * 
  */
 public class EntityAISit extends EntityAIBase {
-
 	private EntityTameable theEntity;
 	private boolean isSitting;
 

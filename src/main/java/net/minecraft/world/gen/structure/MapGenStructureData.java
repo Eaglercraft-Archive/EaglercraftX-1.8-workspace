@@ -24,7 +24,6 @@ import net.minecraft.world.WorldSavedData;
  * 
  */
 public class MapGenStructureData extends WorldSavedData {
-
 	private NBTTagCompound tagCompound = new NBTTagCompound();
 
 	public MapGenStructureData(String name) {

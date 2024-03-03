@@ -7,7 +7,7 @@ import net.lax1dude.eaglercraft.v1_8.netty.Unpooled;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -37,8 +37,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemWritableBook;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C01PacketChatMessage;
@@ -582,7 +580,9 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 		if (this.playerEntity.isSpectator()) {
 			Entity entity = null;
 
-			for (WorldServer worldserver : this.serverController.worldServers) {
+			WorldServer[] srv = this.serverController.worldServers;
+			for (int i = 0; i < srv.length; ++i) {
+				WorldServer worldserver = srv[i];
 				if (worldserver != null) {
 					entity = c18packetspectate.getEntity(worldserver);
 					if (entity != null) {
@@ -1064,15 +1064,14 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 	 * string and sends them to the client
 	 */
 	public void processTabComplete(C14PacketTabComplete c14packettabcomplete) {
-		ArrayList arraylist = Lists.newArrayList();
-
-		for (String s : this.serverController.getTabCompletions(this.playerEntity, c14packettabcomplete.getMessage(),
-				c14packettabcomplete.getTargetBlock())) {
-			arraylist.add(s);
+		List<String> lst = this.serverController.getTabCompletions(this.playerEntity, c14packettabcomplete.getMessage(),
+				c14packettabcomplete.getTargetBlock());
+		String[] fuckOff = new String[lst.size()];
+		for (int i = 0; i < fuckOff.length; ++i) {
+			fuckOff[i] = lst.get(i);
 		}
 
-		this.playerEntity.playerNetServerHandler
-				.sendPacket(new S3APacketTabComplete((String[]) arraylist.toArray(new String[arraylist.size()])));
+		this.playerEntity.playerNetServerHandler.sendPacket(new S3APacketTabComplete(fuckOff));
 	}
 
 	/**+
@@ -1246,7 +1245,9 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 				byte[] cert = new byte[pb.readableBytes()];
 				pb.readBytes(cert);
 				playerEntity.updateCertificate = cert;
-				for (EntityPlayerMP player : playerEntity.mcServer.getConfigurationManager().func_181057_v()) {
+				List<EntityPlayerMP> lst = playerEntity.mcServer.getConfigurationManager().func_181057_v();
+				for (int i = 0, l = lst.size(); i < l; ++i) {
+					EntityPlayerMP player = lst.get(i);
 					if (player != playerEntity) {
 						player.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("EAG|UpdateCert-1.8",
 								new PacketBuffer(Unpooled.buffer(cert, cert.length).writerIndex(cert.length))));

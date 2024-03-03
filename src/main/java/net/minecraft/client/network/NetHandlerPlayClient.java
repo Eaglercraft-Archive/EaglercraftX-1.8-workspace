@@ -21,6 +21,7 @@ import net.lax1dude.eaglercraft.v1_8.sp.socket.ClientIntegratedServerNetworkMana
 import net.lax1dude.eaglercraft.v1_8.update.UpdateService;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import net.minecraft.block.Block;
 import net.minecraft.client.ClientBrandRetriever;
@@ -135,8 +136,10 @@ import net.minecraft.network.play.server.S1DPacketEntityEffect;
 import net.minecraft.network.play.server.S1EPacketRemoveEntityEffect;
 import net.minecraft.network.play.server.S1FPacketSetExperience;
 import net.minecraft.network.play.server.S20PacketEntityProperties;
+import net.minecraft.network.play.server.S20PacketEntityProperties.Snapshot;
 import net.minecraft.network.play.server.S21PacketChunkData;
 import net.minecraft.network.play.server.S22PacketMultiBlockChange;
+import net.minecraft.network.play.server.S22PacketMultiBlockChange.BlockUpdateData;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.network.play.server.S24PacketBlockAction;
 import net.minecraft.network.play.server.S25PacketBlockBreakAnim;
@@ -159,6 +162,7 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.network.play.server.S36PacketSignEditorOpen;
 import net.minecraft.network.play.server.S37PacketStatistics;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
+import net.minecraft.network.play.server.S38PacketPlayerListItem.AddPlayerData;
 import net.minecraft.network.play.server.S39PacketPlayerAbilities;
 import net.minecraft.network.play.server.S3APacketTabComplete;
 import net.minecraft.network.play.server.S3BPacketScoreboardObjective;
@@ -664,8 +668,9 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	 * more blocks are changed, the server sends S21PacketChunkData
 	 */
 	public void handleMultiBlockChange(S22PacketMultiBlockChange packetIn) {
-		for (S22PacketMultiBlockChange.BlockUpdateData s22packetmultiblockchange$blockupdatedata : packetIn
-				.getChangedBlocks()) {
+		BlockUpdateData[] dat = packetIn.getChangedBlocks();
+		for (int i = 0; i < dat.length; ++i) {
+			BlockUpdateData s22packetmultiblockchange$blockupdatedata = dat[i];
 			this.clientWorldController.invalidateRegionAndSetBlock(s22packetmultiblockchange$blockupdatedata.getPos(),
 					s22packetmultiblockchange$blockupdatedata.getBlockState());
 		}
@@ -1361,7 +1366,9 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	}
 
 	public void handlePlayerListItem(S38PacketPlayerListItem packetIn) {
-		for (S38PacketPlayerListItem.AddPlayerData s38packetplayerlistitem$addplayerdata : packetIn.func_179767_a()) {
+		List<AddPlayerData> lst = packetIn.func_179767_a();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			S38PacketPlayerListItem.AddPlayerData s38packetplayerlistitem$addplayerdata = lst.get(i);
 			if (packetIn.func_179768_b() == S38PacketPlayerListItem.Action.REMOVE_PLAYER) {
 				EaglercraftUUID uuid = s38packetplayerlistitem$addplayerdata.getProfile().getId();
 				this.playerInfoMap.remove(uuid);
@@ -1430,7 +1437,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	public void handleResourcePack(S48PacketResourcePackSend packetIn) {
 		final String s = packetIn.getURL();
 		final String s1 = packetIn.getHash();
-		if (s.startsWith("level://")) {
+		if (!EaglerFolderResourcePack.isSupported() || s.startsWith("level://")) {
 			this.netManager
 					.sendPacket(new C19PacketResourcePackStatus(s1, C19PacketResourcePackStatus.Action.DECLINED));
 			return;
@@ -1716,7 +1723,9 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 			} else {
 				BaseAttributeMap baseattributemap = ((EntityLivingBase) entity).getAttributeMap();
 
-				for (S20PacketEntityProperties.Snapshot s20packetentityproperties$snapshot : packetIn.func_149441_d()) {
+				List<Snapshot> lst = packetIn.func_149441_d();
+				for (int i = 0, l = lst.size(); i < l; ++i) {
+					S20PacketEntityProperties.Snapshot s20packetentityproperties$snapshot = lst.get(i);
 					IAttributeInstance iattributeinstance = baseattributemap
 							.getAttributeInstanceByName(s20packetentityproperties$snapshot.func_151409_a());
 					if (iattributeinstance == null) {

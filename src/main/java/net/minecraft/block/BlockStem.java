@@ -68,8 +68,11 @@ public class BlockStem extends BlockBush implements IGrowable {
 	public IBlockState getActualState(IBlockState iblockstate, IBlockAccess iblockaccess, BlockPos blockpos) {
 		iblockstate = iblockstate.withProperty(FACING, EnumFacing.UP);
 
-		for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-			if (iblockaccess.getBlockState(blockpos.offset(enumfacing)).getBlock() == this.crop) {
+		BlockPos tmp = new BlockPos(0, 0, 0);
+		EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
+			if (iblockaccess.getBlockState(blockpos.offsetEvenFaster(enumfacing, tmp)).getBlock() == this.crop) {
 				iblockstate = iblockstate.withProperty(FACING, enumfacing);
 				break;
 			}
@@ -95,8 +98,9 @@ public class BlockStem extends BlockBush implements IGrowable {
 					iblockstate = iblockstate.withProperty(AGE, Integer.valueOf(i + 1));
 					world.setBlockState(blockpos, iblockstate, 2);
 				} else {
-					for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-						if (world.getBlockState(blockpos.offset(enumfacing)).getBlock() == this.crop) {
+					EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+					for (int j = 0; j < facings.length; ++j) {
+						if (world.getBlockState(blockpos.offset(facings[j])).getBlock() == this.crop) {
 							return;
 						}
 					}

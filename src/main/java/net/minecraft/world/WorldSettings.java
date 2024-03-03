@@ -131,6 +131,8 @@ public final class WorldSettings {
 		NOT_SET(-1, ""), SURVIVAL(0, "survival"), CREATIVE(1, "creative"), ADVENTURE(2, "adventure"),
 		SPECTATOR(3, "spectator");
 
+		public static final GameType[] _VALUES = values();
+
 		int id;
 		String name;
 
@@ -180,7 +182,9 @@ public final class WorldSettings {
 		}
 
 		public static WorldSettings.GameType getByID(int idIn) {
-			for (WorldSettings.GameType worldsettings$gametype : values()) {
+			WorldSettings.GameType[] types = _VALUES;
+			for (int i = 0; i < types.length; ++i) {
+				WorldSettings.GameType worldsettings$gametype = types[i];
 				if (worldsettings$gametype.id == idIn) {
 					return worldsettings$gametype;
 				}
@@ -190,7 +194,9 @@ public final class WorldSettings {
 		}
 
 		public static WorldSettings.GameType getByName(String parString1) {
-			for (WorldSettings.GameType worldsettings$gametype : values()) {
+			WorldSettings.GameType[] types = _VALUES;
+			for (int i = 0; i < types.length; ++i) {
+				WorldSettings.GameType worldsettings$gametype = types[i];
 				if (worldsettings$gametype.name.equals(parString1)) {
 					return worldsettings$gametype;
 				}

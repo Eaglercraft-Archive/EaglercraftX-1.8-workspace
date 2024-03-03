@@ -1,5 +1,7 @@
 package net.minecraft.entity.item;
 
+import java.util.List;
+
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.minecraft.block.material.Material;
@@ -150,9 +152,10 @@ public class EntityItem extends Entity {
 	 * together
 	 */
 	private void searchForOtherItemsNearby() {
-		for (EntityItem entityitem : this.worldObj.getEntitiesWithinAABB(EntityItem.class,
-				this.getEntityBoundingBox().expand(0.5D, 0.0D, 0.5D))) {
-			this.combineItems(entityitem);
+		List<EntityItem> lst = this.worldObj.getEntitiesWithinAABB(EntityItem.class,
+				this.getEntityBoundingBox().expand(0.5D, 0.0D, 0.5D));
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			this.combineItems(lst.get(i));
 		}
 
 	}

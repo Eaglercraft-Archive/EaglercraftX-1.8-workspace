@@ -78,8 +78,9 @@ public class ChatComponentProcessor {
 			((IChatComponent) object).setChatStyle(chatstyle.createShallowCopy());
 		}
 
-		for (IChatComponent ichatcomponent : component.getSiblings()) {
-			((IChatComponent) object).appendSibling(processComponent(commandSender, ichatcomponent, entityIn));
+		List<IChatComponent> lst = component.getSiblings();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			((IChatComponent) object).appendSibling(processComponent(commandSender, lst.get(i), entityIn));
 		}
 
 		return (IChatComponent) object;

@@ -430,7 +430,9 @@ public abstract class EntityLivingBase extends Entity {
 		nbttagcompound.setShort("DeathTime", (short) this.deathTime);
 		nbttagcompound.setFloat("AbsorptionAmount", this.getAbsorptionAmount());
 
-		for (ItemStack itemstack : this.getInventory()) {
+		ItemStack[] inv = this.getInventory();
+		for (int i = 0; i < inv.length; ++i) {
+			ItemStack itemstack = inv[i];
 			if (itemstack != null) {
 				this.attributeMap.removeAttributeModifiers(itemstack.getAttributeModifiers());
 			}
@@ -438,7 +440,8 @@ public abstract class EntityLivingBase extends Entity {
 
 		nbttagcompound.setTag("Attributes", SharedMonsterAttributes.writeBaseAttributeMapToNBT(this.getAttributeMap()));
 
-		for (ItemStack itemstack1 : this.getInventory()) {
+		for (int i = 0; i < inv.length; ++i) {
+			ItemStack itemstack1 = inv[i];
 			if (itemstack1 != null) {
 				this.attributeMap.applyAttributeModifiers(itemstack1.getAttributeModifiers());
 			}

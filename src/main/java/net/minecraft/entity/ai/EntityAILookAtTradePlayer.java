@@ -1,6 +1,5 @@
 package net.minecraft.entity.ai;
 
-import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -25,7 +24,6 @@ import net.minecraft.entity.player.EntityPlayer;
  * 
  */
 public class EntityAILookAtTradePlayer extends EntityAIWatchClosest {
-
 	private final EntityVillager theMerchant;
 
 	public EntityAILookAtTradePlayer(EntityVillager theMerchantIn) {

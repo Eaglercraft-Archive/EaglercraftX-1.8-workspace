@@ -4,7 +4,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockDoor;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.pathfinding.PathPoint;
@@ -31,7 +30,6 @@ import net.minecraft.util.BlockPos;
  * 
  */
 public abstract class EntityAIDoorInteract extends EntityAIBase {
-
 	protected EntityLiving theEntity;
 	protected BlockPos doorPosition = BlockPos.ORIGIN;
 	protected BlockDoor doorBlock;

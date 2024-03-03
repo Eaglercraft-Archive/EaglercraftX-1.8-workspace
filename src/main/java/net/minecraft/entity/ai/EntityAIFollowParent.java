@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import java.util.List;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.passive.EntityAnimal;
 
 /**+
@@ -25,7 +24,6 @@ import net.minecraft.entity.passive.EntityAnimal;
  * 
  */
 public class EntityAIFollowParent extends EntityAIBase {
-
 	EntityAnimal childAnimal;
 	EntityAnimal parentAnimal;
 	double moveSpeed;
@@ -43,12 +41,13 @@ public class EntityAIFollowParent extends EntityAIBase {
 		if (this.childAnimal.getGrowingAge() >= 0) {
 			return false;
 		} else {
-			List list = this.childAnimal.worldObj.getEntitiesWithinAABB(this.childAnimal.getClass(),
+			List<EntityAnimal> list = this.childAnimal.worldObj.getEntitiesWithinAABB(this.childAnimal.getClass(),
 					this.childAnimal.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D));
 			EntityAnimal entityanimal = null;
 			double d0 = Double.MAX_VALUE;
 
-			for (EntityAnimal entityanimal1 : (List<EntityAnimal>) list) {
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				EntityAnimal entityanimal1 = list.get(i);
 				if (entityanimal1.getGrowingAge() >= 0) {
 					double d1 = this.childAnimal.getDistanceSqToEntity(entityanimal1);
 					if (d1 <= d0) {

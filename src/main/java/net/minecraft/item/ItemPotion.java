@@ -112,10 +112,10 @@ public class ItemPotion extends Item {
 		}
 
 		if (!world.isRemote) {
-			List list = this.getEffects(itemstack);
+			List<PotionEffect> list = this.getEffects(itemstack);
 			if (list != null) {
-				for (PotionEffect potioneffect : (List<PotionEffect>) list) {
-					entityplayer.addPotionEffect(new PotionEffect(potioneffect));
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					entityplayer.addPotionEffect(new PotionEffect(list.get(i)));
 				}
 			}
 		}
@@ -187,10 +187,10 @@ public class ItemPotion extends Item {
 	}
 
 	public boolean isEffectInstant(int meta) {
-		List list = this.getEffects(meta);
+		List<PotionEffect> list = this.getEffects(meta);
 		if (list != null && !list.isEmpty()) {
-			for (PotionEffect potioneffect : (List<PotionEffect>) list) {
-				if (Potion.potionTypes[potioneffect.getPotionID()].isInstant()) {
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				if (Potion.potionTypes[list.get(i).getPotionID()].isInstant()) {
 					return true;
 				}
 			}
@@ -228,10 +228,11 @@ public class ItemPotion extends Item {
 	 */
 	public void addInformation(ItemStack itemstack, EntityPlayer var2, List<String> list, boolean var4) {
 		if (itemstack.getMetadata() != 0) {
-			List list1 = Items.potionitem.getEffects(itemstack);
+			List<PotionEffect> list1 = Items.potionitem.getEffects(itemstack);
 			HashMultimap hashmultimap = HashMultimap.create();
 			if (list1 != null && !list1.isEmpty()) {
-				for (PotionEffect potioneffect : (List<PotionEffect>) list1) {
+				for (int i = 0, l = list1.size(); i < l; ++i) {
+					PotionEffect potioneffect = list1.get(i);
 					String s1 = StatCollector.translateToLocal(potioneffect.getEffectName()).trim();
 					Potion potion = Potion.potionTypes[potioneffect.getPotionID()];
 					Map map = potion.getAttributeModifierMap();

@@ -132,8 +132,8 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob {
 					if (itemstack != null && itemstack.getItem() == Items.potionitem) {
 						List<PotionEffect> list = Items.potionitem.getEffects(itemstack);
 						if (list != null) {
-							for (PotionEffect potioneffect : list) {
-								this.addPotionEffect(new PotionEffect(potioneffect));
+							for (int i = 0, l = list.size(); i < l; ++i) {
+								this.addPotionEffect(new PotionEffect(list.get(i)));
 							}
 						}
 					}

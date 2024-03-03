@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -28,7 +26,6 @@ import net.minecraft.world.biome.WorldChunkManager;
  * 
  */
 public class WorldChunkManagerHell extends WorldChunkManager {
-
 	private BiomeGenBase biomeGenerator;
 	private float rainfall;
 

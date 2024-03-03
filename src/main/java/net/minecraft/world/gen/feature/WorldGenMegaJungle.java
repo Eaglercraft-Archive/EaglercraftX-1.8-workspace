@@ -8,7 +8,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenHugeTrees;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -31,7 +30,6 @@ import net.minecraft.world.gen.feature.WorldGenHugeTrees;
  * 
  */
 public class WorldGenMegaJungle extends WorldGenHugeTrees {
-
 	public WorldGenMegaJungle(boolean parFlag, int parInt1, int parInt2, IBlockState parIBlockState,
 			IBlockState parIBlockState2) {
 		super(parFlag, parInt1, parInt2, parIBlockState, parIBlockState2);

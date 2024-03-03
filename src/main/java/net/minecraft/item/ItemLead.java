@@ -1,5 +1,7 @@
 package net.minecraft.item;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.creativetab.CreativeTabs;
@@ -62,9 +64,10 @@ public class ItemLead extends Item {
 		int j = fence.getY();
 		int k = fence.getZ();
 
-		for (EntityLiving entityliving : worldIn.getEntitiesWithinAABB(EntityLiving.class,
-				new AxisAlignedBB((double) i - d0, (double) j - d0, (double) k - d0, (double) i + d0, (double) j + d0,
-						(double) k + d0))) {
+		List<EntityLiving> lst = worldIn.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double) i - d0,
+				(double) j - d0, (double) k - d0, (double) i + d0, (double) j + d0, (double) k + d0));
+		for (int m = 0, l = lst.size(); m < l; ++m) {
+			EntityLiving entityliving = lst.get(m);
 			if (entityliving.getLeashed() && entityliving.getLeashedToEntity() == player) {
 				if (entityleashknot == null) {
 					entityleashknot = EntityLeashKnot.createKnot(worldIn, fence);

@@ -411,7 +411,8 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
 
 	protected void renderLayers(T entitylivingbaseIn, float partialTicks, float parFloat2, float parFloat3,
 			float parFloat4, float parFloat5, float parFloat6, float parFloat7) {
-		for (LayerRenderer layerrenderer : this.layerRenderers) {
+		for (int i = 0, l = this.layerRenderers.size(); i < l; ++i) {
+			LayerRenderer layerrenderer = this.layerRenderers.get(i);
 			boolean flag = this.setBrightness(entitylivingbaseIn, parFloat3, layerrenderer.shouldCombineTextures());
 			layerrenderer.doRenderLayer(entitylivingbaseIn, partialTicks, parFloat2, parFloat3, parFloat4, parFloat5,
 					parFloat6, parFloat7);

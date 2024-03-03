@@ -13,7 +13,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 
@@ -38,7 +37,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class WorldGenDungeons extends WorldGenerator {
-
 	private static final Logger field_175918_a = LogManager.getLogger();
 	private static final String[] SPAWNERTYPES = new String[] { "Skeleton", "Zombie", "Zombie", "Spider" };
 	private static final List<WeightedRandomChestContent> CHESTCONTENT = Lists
@@ -125,8 +123,9 @@ public class WorldGenDungeons extends WorldGenerator {
 					if (world.isAirBlock(blockpos3)) {
 						int k2 = 0;
 
-						for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-							if (world.getBlockState(blockpos3.offset(enumfacing)).getBlock().getMaterial().isSolid()) {
+						EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+						for (int m = 0; m < facings.length; ++m) {
+							if (world.getBlockState(blockpos3.offset(facings[m])).getBlock().getMaterial().isSolid()) {
 								++k2;
 							}
 						}

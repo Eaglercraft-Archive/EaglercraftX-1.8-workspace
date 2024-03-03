@@ -13,7 +13,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenHugeTrees;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -36,7 +35,6 @@ import net.minecraft.world.gen.feature.WorldGenHugeTrees;
  * 
  */
 public class WorldGenMegaPineTree extends WorldGenHugeTrees {
-
 	private static final IBlockState field_181633_e = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT,
 			BlockPlanks.EnumType.SPRUCE);
 	private static final IBlockState field_181634_f = Blocks.leaves.getDefaultState()

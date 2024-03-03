@@ -1,13 +1,10 @@
 package net.minecraft.client.gui.spectator.categories;
 
 import java.util.List;
-import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-
 import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiSpectator;
@@ -76,8 +73,8 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject 
 	}
 
 	public boolean func_178662_A_() {
-		for (ISpectatorMenuObject ispectatormenuobject : this.field_178672_a) {
-			if (ispectatormenuobject.func_178662_A_()) {
+		for (int i = 0, l = this.field_178672_a.size(); i < l; ++i) {
+			if (this.field_178672_a.get(i).func_178662_A_()) {
 				return true;
 			}
 		}

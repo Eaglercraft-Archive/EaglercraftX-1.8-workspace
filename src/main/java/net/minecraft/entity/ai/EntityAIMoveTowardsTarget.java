@@ -2,8 +2,6 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.Vec3;
 
 /**+
@@ -27,7 +25,6 @@ import net.minecraft.util.Vec3;
  * 
  */
 public class EntityAIMoveTowardsTarget extends EntityAIBase {
-
 	private EntityCreature theEntity;
 	private EntityLivingBase targetEntity;
 	private double movePosX;

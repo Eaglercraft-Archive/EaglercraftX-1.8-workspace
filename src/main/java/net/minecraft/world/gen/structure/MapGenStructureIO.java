@@ -4,20 +4,6 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.ComponentScatteredFeaturePieces;
-import net.minecraft.world.gen.structure.MapGenNetherBridge;
-import net.minecraft.world.gen.structure.MapGenScatteredFeature;
-import net.minecraft.world.gen.structure.MapGenStronghold;
-import net.minecraft.world.gen.structure.MapGenVillage;
-import net.minecraft.world.gen.structure.StructureComponent;
-import net.minecraft.world.gen.structure.StructureMineshaftPieces;
-import net.minecraft.world.gen.structure.StructureMineshaftStart;
-import net.minecraft.world.gen.structure.StructureNetherBridgePieces;
-import net.minecraft.world.gen.structure.StructureOceanMonument;
-import net.minecraft.world.gen.structure.StructureOceanMonumentPieces;
-import net.minecraft.world.gen.structure.StructureStart;
-import net.minecraft.world.gen.structure.StructureStrongholdPieces;
-import net.minecraft.world.gen.structure.StructureVillagePieces;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 
@@ -42,7 +28,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class MapGenStructureIO {
-
 	private static final Logger logger = LogManager.getLogger();
 	private static Map<String, Class<? extends StructureStart>> startNameToClassMap = Maps.newHashMap();
 	private static Map<Class<? extends StructureStart>, String> startClassToNameMap = Maps.newHashMap();

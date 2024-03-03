@@ -81,8 +81,8 @@ public class ChunkCompileTaskGenerator {
 		this.finished = true;
 		this.status = ChunkCompileTaskGenerator.Status.DONE;
 
-		for (Runnable runnable : this.listFinishRunnables) {
-			runnable.run();
+		for (int i = 0, l = this.listFinishRunnables.size(); i < l; ++i) {
+			this.listFinishRunnables.get(i).run();
 		}
 	}
 

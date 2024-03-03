@@ -91,7 +91,9 @@ public abstract class BlockStoneSlab extends BlockSlab {
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
 		if (item != Item.getItemFromBlock(Blocks.double_stone_slab)) {
-			for (BlockStoneSlab.EnumType blockstoneslab$enumtype : BlockStoneSlab.EnumType.values()) {
+			BlockStoneSlab.EnumType[] types = BlockStoneSlab.EnumType.META_LOOKUP;
+			for (int i = 0; i < types.length; ++i) {
+				BlockStoneSlab.EnumType blockstoneslab$enumtype = types[i];
 				if (blockstoneslab$enumtype != BlockStoneSlab.EnumType.WOOD) {
 					list.add(new ItemStack(item, 1, blockstoneslab$enumtype.getMetadata()));
 				}
@@ -162,7 +164,7 @@ public abstract class BlockStoneSlab extends BlockSlab {
 		NETHERBRICK(6, MapColor.netherrackColor, "nether_brick", "netherBrick"),
 		QUARTZ(7, MapColor.quartzColor, "quartz");
 
-		private static final BlockStoneSlab.EnumType[] META_LOOKUP = new BlockStoneSlab.EnumType[values().length];
+		public static final BlockStoneSlab.EnumType[] META_LOOKUP = new BlockStoneSlab.EnumType[8];
 		private final int meta;
 		private final MapColor field_181075_k;
 		private final String name;
@@ -211,8 +213,9 @@ public abstract class BlockStoneSlab extends BlockSlab {
 		}
 
 		static {
-			for (BlockStoneSlab.EnumType blockstoneslab$enumtype : values()) {
-				META_LOOKUP[blockstoneslab$enumtype.getMetadata()] = blockstoneslab$enumtype;
+			BlockStoneSlab.EnumType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMetadata()] = types[i];
 			}
 
 		}

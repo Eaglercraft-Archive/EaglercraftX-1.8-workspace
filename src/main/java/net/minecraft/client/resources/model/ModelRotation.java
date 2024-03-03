@@ -103,8 +103,9 @@ public enum ModelRotation {
 	}
 
 	static {
-		for (ModelRotation modelrotation : values()) {
-			mapRotations.put(Integer.valueOf(modelrotation.combinedXY), modelrotation);
+		ModelRotation[] lst = values();
+		for (int i = 0; i < lst.length; ++i) {
+			mapRotations.put(Integer.valueOf(lst[i].combinedXY), lst[i]);
 		}
 
 	}

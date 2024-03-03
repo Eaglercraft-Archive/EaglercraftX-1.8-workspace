@@ -41,7 +41,6 @@ import net.minecraft.world.WorldSettings;
  * 
  */
 public class ItemInWorldManager {
-
 	public World theWorld;
 	public EntityPlayerMP thisPlayerMP;
 	private WorldSettings.GameType gameType = WorldSettings.GameType.NOT_SET;

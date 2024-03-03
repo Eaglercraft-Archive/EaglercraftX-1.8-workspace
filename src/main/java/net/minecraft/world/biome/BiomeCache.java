@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.LongHashMap;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -28,7 +26,6 @@ import net.minecraft.world.biome.WorldChunkManager;
  * 
  */
 public class BiomeCache {
-
 	private final WorldChunkManager chunkManager;
 	private long lastCleanupTime;
 	/**+

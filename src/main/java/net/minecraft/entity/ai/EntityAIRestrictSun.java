@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathNavigateGround;
 
 /**+
@@ -25,7 +24,6 @@ import net.minecraft.pathfinding.PathNavigateGround;
  * 
  */
 public class EntityAIRestrictSun extends EntityAIBase {
-
 	private EntityCreature theEntity;
 
 	public EntityAIRestrictSun(EntityCreature parEntityCreature) {

@@ -1,8 +1,6 @@
 package net.minecraft.world.gen.layer;
 
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.gen.layer.GenLayer;
-import net.minecraft.world.gen.layer.IntCache;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 
@@ -27,7 +25,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public class GenLayerHills extends GenLayer {
-
 	private static final Logger logger = LogManager.getLogger();
 	private GenLayer field_151628_d;
 

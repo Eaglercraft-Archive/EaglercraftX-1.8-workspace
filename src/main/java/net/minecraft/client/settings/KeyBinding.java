@@ -61,8 +61,8 @@ public class KeyBinding implements Comparable<KeyBinding> {
 	}
 
 	public static void unPressAllKeys() {
-		for (KeyBinding keybinding : keybindArray) {
-			keybinding.unpressKey();
+		for (int i = 0, l = keybindArray.size(); i < l; ++i) {
+			keybindArray.get(i).unpressKey();
 		}
 
 	}
@@ -70,7 +70,8 @@ public class KeyBinding implements Comparable<KeyBinding> {
 	public static void resetKeyBindingArrayAndHash() {
 		hash.clearMap();
 
-		for (KeyBinding keybinding : keybindArray) {
+		for (int i = 0, l = keybindArray.size(); i < l; ++i) {
+			KeyBinding keybinding = keybindArray.get(i);
 			hash.addKey(keybinding.keyCode, keybinding);
 		}
 

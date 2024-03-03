@@ -3,7 +3,6 @@ package net.minecraft.entity.ai;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.ai.EntityAIMoveToBlock;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
@@ -32,7 +31,6 @@ import net.minecraft.world.World;
  * 
  */
 public class EntityAIOcelotSit extends EntityAIMoveToBlock {
-
 	private final EntityOcelot field_151493_a;
 
 	public EntityAIOcelotSit(EntityOcelot parEntityOcelot, double parDouble1) {

@@ -58,17 +58,8 @@ public class GuiVideoSettings extends GuiScreen {
 		this.buttonList.clear();
 		this.buttonList.add(
 				new GuiButton(200, this.width / 2 - 100, this.height - 27, I18n.format("gui.done", new Object[0])));
-		GameSettings.Options[] agamesettings$options = new GameSettings.Options[videoOptions.length];
-		int i = 0;
-
-		for (GameSettings.Options gamesettings$options : videoOptions) {
-			agamesettings$options[i] = gamesettings$options;
-			++i;
-		}
-
 		this.optionsRowList = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25,
-				agamesettings$options);
-
+				videoOptions);
 	}
 
 	/**+

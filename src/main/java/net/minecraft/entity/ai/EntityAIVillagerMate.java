@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.util.BlockPos;
 import net.minecraft.village.Village;
@@ -28,7 +27,6 @@ import net.minecraft.world.World;
  * 
  */
 public class EntityAIVillagerMate extends EntityAIBase {
-
 	private EntityVillager villagerObj;
 	private EntityVillager mate;
 	private World worldObj;

@@ -3,8 +3,8 @@ package net.minecraft.client.resources;
 import java.util.List;
 
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
-import net.lax1dude.eaglercraft.v1_8.vfs.SYS;
 import net.lax1dude.eaglercraft.v1_8.internal.KeyboardConstants;
+import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -182,7 +182,8 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
 			this.resourcePacksGUI.getListContaining(this).remove(this);
 			if (deleteInstead) {
 				this.mc.loadingScreen.eaglerShow(I18n.format("resourcePack.load.deleting"), this.func_148312_b());
-				SYS.deleteResourcePack(this.func_148312_b());
+				EaglerFolderResourcePack.deleteResourcePack(EaglerFolderResourcePack.RESOURCE_PACKS,
+						this.func_148312_b());
 			} else {
 				this.resourcePacksGUI.getSelectedResourcePacks().add(0, this);
 			}

@@ -129,7 +129,9 @@ public class ItemBanner extends ItemBlock {
 	 * (eg: dye returns 16 items)
 	 */
 	public void getSubItems(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (EnumDyeColor enumdyecolor : EnumDyeColor.values()) {
+		EnumDyeColor[] colors = EnumDyeColor.META_LOOKUP;
+		for (int i = 0; i < colors.length; ++i) {
+			EnumDyeColor enumdyecolor = colors[i];
 			NBTTagCompound nbttagcompound = new NBTTagCompound();
 			TileEntityBanner.func_181020_a(nbttagcompound, enumdyecolor.getDyeDamage(), (NBTTagList) null);
 			NBTTagCompound nbttagcompound1 = new NBTTagCompound();

@@ -26,7 +26,6 @@ import net.minecraft.world.World;
  * 
  */
 public abstract class WorldGenerator {
-
 	private final boolean doBlockNotify;
 
 	public WorldGenerator() {

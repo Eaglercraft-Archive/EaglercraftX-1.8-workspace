@@ -96,13 +96,16 @@ public class BlockSponge extends Block {
 		linkedlist.add(new Tuple(pos, Integer.valueOf(0)));
 		int i = 0;
 
+		BlockPos tmp = new BlockPos(0, 0, 0);
 		while (!linkedlist.isEmpty()) {
 			Tuple tuple = (Tuple) linkedlist.poll();
 			BlockPos blockpos = (BlockPos) tuple.getFirst();
 			int j = ((Integer) tuple.getSecond()).intValue();
 
-			for (EnumFacing enumfacing : EnumFacing.values()) {
-				BlockPos blockpos1 = blockpos.offset(enumfacing);
+			EnumFacing[] facings = EnumFacing._VALUES;
+			for (int k = 0; k < facings.length; ++k) {
+				EnumFacing enumfacing = facings[k];
+				BlockPos blockpos1 = blockpos.offsetEvenFaster(enumfacing, tmp);
 				if (worldIn.getBlockState(blockpos1).getBlock().getMaterial() == Material.water) {
 					worldIn.setBlockState(blockpos1, Blocks.air.getDefaultState(), 2);
 					arraylist.add(blockpos1);
@@ -118,8 +121,8 @@ public class BlockSponge extends Block {
 			}
 		}
 
-		for (BlockPos blockpos2 : arraylist) {
-			worldIn.notifyNeighborsOfStateChange(blockpos2, Blocks.air);
+		for (int j = 0, l = arraylist.size(); j < l; ++j) {
+			worldIn.notifyNeighborsOfStateChange(arraylist.get(j), Blocks.air);
 		}
 
 		return i > 0;

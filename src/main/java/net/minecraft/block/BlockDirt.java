@@ -127,7 +127,7 @@ public class BlockDirt extends Block {
 		DIRT(0, "dirt", "default", MapColor.dirtColor), COARSE_DIRT(1, "coarse_dirt", "coarse", MapColor.dirtColor),
 		PODZOL(2, "podzol", MapColor.obsidianColor);
 
-		private static final BlockDirt.DirtType[] METADATA_LOOKUP = new BlockDirt.DirtType[values().length];
+		private static final BlockDirt.DirtType[] METADATA_LOOKUP = new BlockDirt.DirtType[3];
 		private final int metadata;
 		private final String name;
 		private final String unlocalizedName;
@@ -173,8 +173,9 @@ public class BlockDirt extends Block {
 		}
 
 		static {
-			for (BlockDirt.DirtType blockdirt$dirttype : values()) {
-				METADATA_LOOKUP[blockdirt$dirttype.getMetadata()] = blockdirt$dirttype;
+			BlockDirt.DirtType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				METADATA_LOOKUP[types[i].getMetadata()] = types[i];
 			}
 
 		}

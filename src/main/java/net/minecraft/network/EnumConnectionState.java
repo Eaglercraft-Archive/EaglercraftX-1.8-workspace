@@ -6,8 +6,6 @@ import com.google.common.collect.Maps;
 
 import java.util.Collection;
 import java.util.Map;
-import net.minecraft.network.EnumPacketDirection;
-import net.minecraft.network.Packet;
 import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.client.C00PacketLoginStart;
 import net.minecraft.network.login.client.C01PacketEncryptionResponse;
@@ -306,7 +304,9 @@ public enum EnumConnectionState {
 	}
 
 	static {
-		for (EnumConnectionState enumconnectionstate : values()) {
+		EnumConnectionState[] states = values();
+		for (int j = 0; j < states.length; ++j) {
+			EnumConnectionState enumconnectionstate = states[j];
 			int i = enumconnectionstate.getId();
 			if (i < field_181136_e || i > field_181137_f) {
 				throw new Error("Invalid protocol ID " + Integer.toString(i));

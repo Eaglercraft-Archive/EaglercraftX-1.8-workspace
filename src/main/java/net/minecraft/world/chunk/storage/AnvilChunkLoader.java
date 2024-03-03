@@ -1,31 +1,18 @@
 package net.minecraft.world.chunk.storage;
 
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.NibbleArray;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 
@@ -50,7 +37,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * 
  */
 public abstract class AnvilChunkLoader implements IChunkLoader {
-
 	private static final Logger logger = LogManager.getLogger("AnvilChunkLoader");
 
 	/**+
@@ -167,12 +153,13 @@ public abstract class AnvilChunkLoader implements IChunkLoader {
 		}
 
 		parNBTTagCompound.setTag("TileEntities", nbttaglist2);
-		List list = worldIn.getPendingBlockUpdates(chunkIn, false);
+		List<NextTickListEntry> list = worldIn.getPendingBlockUpdates(chunkIn, false);
 		if (list != null) {
 			long j1 = worldIn.getTotalWorldTime();
 			NBTTagList nbttaglist3 = new NBTTagList();
 
-			for (NextTickListEntry nextticklistentry : (List<NextTickListEntry>) list) {
+			for (int k = 0, l = list.size(); k < l; ++k) {
+				NextTickListEntry nextticklistentry = list.get(k);
 				NBTTagCompound nbttagcompound3 = new NBTTagCompound();
 				ResourceLocation resourcelocation = (ResourceLocation) Block.blockRegistry
 						.getNameForObject(nextticklistentry.getBlock());

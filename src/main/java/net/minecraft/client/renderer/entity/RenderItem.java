@@ -10,7 +10,6 @@ import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.EaglerDeferredPipeline;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.ShadersRenderPassFuture;
-import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.ShadersRenderPassFuture.PassType;
 import net.lax1dude.eaglercraft.v1_8.vector.Matrix4f;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
@@ -139,7 +138,9 @@ public class RenderItem implements IResourceManagerReloadListener {
 		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
 		worldrenderer.begin(7, DefaultVertexFormats.ITEM);
 
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			this.renderQuads(worldrenderer, model.getFaceQuads(enumfacing), color, stack);
 		}
 

@@ -26,7 +26,6 @@ import net.minecraft.entity.EntityLiving;
  * 
  */
 public class EntitySenses {
-
 	EntityLiving entityObj;
 	List<Entity> seenEntities = Lists.newArrayList();
 	List<Entity> unseenEntities = Lists.newArrayList();

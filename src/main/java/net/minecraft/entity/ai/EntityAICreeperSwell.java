@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntityCreeper;
 
 /**+
@@ -25,7 +24,6 @@ import net.minecraft.entity.monster.EntityCreeper;
  * 
  */
 public class EntityAICreeperSwell extends EntityAIBase {
-
 	EntityCreeper swellingCreeper;
 	EntityLivingBase creeperAttackTarget;
 

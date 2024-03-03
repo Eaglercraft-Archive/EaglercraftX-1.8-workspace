@@ -62,8 +62,8 @@ public abstract class ChatComponentStyle implements IChatComponent {
 	public IChatComponent setChatStyle(ChatStyle style) {
 		this.style = style;
 
-		for (IChatComponent ichatcomponent : this.siblings) {
-			ichatcomponent.getChatStyle().setParentStyle(this.getChatStyle());
+		for (int i = 0, l = this.siblings.size(); i < l; ++i) {
+			this.siblings.get(i).getChatStyle().setParentStyle(this.getChatStyle());
 		}
 
 		return this;
@@ -73,8 +73,8 @@ public abstract class ChatComponentStyle implements IChatComponent {
 		if (this.style == null) {
 			this.style = new ChatStyle();
 
-			for (IChatComponent ichatcomponent : this.siblings) {
-				ichatcomponent.getChatStyle().setParentStyle(this.style);
+			for (int i = 0, l = this.siblings.size(); i < l; ++i) {
+				this.siblings.get(i).getChatStyle().setParentStyle(this.style);
 			}
 		}
 

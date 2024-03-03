@@ -73,7 +73,9 @@ public class FurnaceRecipes {
 		this.addSmeltingRecipeForBlock(Blocks.netherrack, new ItemStack(Items.netherbrick), 0.1F);
 		this.addSmeltingRecipe(new ItemStack(Blocks.sponge, 1, 1), new ItemStack(Blocks.sponge, 1, 0), 0.15F);
 
-		for (ItemFishFood.FishType itemfishfood$fishtype : ItemFishFood.FishType.values()) {
+		ItemFishFood.FishType[] types = ItemFishFood.FishType.values();
+		for (int i = 0; i < types.length; ++i) {
+			ItemFishFood.FishType itemfishfood$fishtype = types[i];
 			if (itemfishfood$fishtype.canCook()) {
 				this.addSmeltingRecipe(new ItemStack(Items.fish, 1, itemfishfood$fishtype.getMetadata()),
 						new ItemStack(Items.cooked_fish, 1, itemfishfood$fishtype.getMetadata()), 0.35F);

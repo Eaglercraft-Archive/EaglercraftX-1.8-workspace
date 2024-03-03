@@ -119,7 +119,9 @@ public class S45PacketTitle implements Packet<INetHandlerPlayClient> {
 		TITLE, SUBTITLE, TIMES, CLEAR, RESET;
 
 		public static S45PacketTitle.Type byName(String name) {
-			for (S45PacketTitle.Type s45packettitle$type : values()) {
+			S45PacketTitle.Type[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				S45PacketTitle.Type s45packettitle$type = types[i];
 				if (s45packettitle$type.name().equalsIgnoreCase(name)) {
 					return s45packettitle$type;
 				}
@@ -129,11 +131,11 @@ public class S45PacketTitle implements Packet<INetHandlerPlayClient> {
 		}
 
 		public static String[] getNames() {
-			String[] astring = new String[values().length];
-			int i = 0;
+			S45PacketTitle.Type[] types = values();
+			String[] astring = new String[types.length];
 
-			for (S45PacketTitle.Type s45packettitle$type : values()) {
-				astring[i++] = s45packettitle$type.name().toLowerCase();
+			for (int i = 0; i < types.length; ++i) {
+				astring[i] = types[i].name().toLowerCase();
 			}
 
 			return astring;

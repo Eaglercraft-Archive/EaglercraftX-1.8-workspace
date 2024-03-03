@@ -1,5 +1,7 @@
 package net.minecraft.entity;
 
+import java.util.List;
+
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.ai.EntityAITasks;
@@ -407,8 +409,10 @@ public abstract class EntityLiving extends EntityLivingBase {
 		this.worldObj.theProfiler.startSection("looting");
 		if (!this.worldObj.isRemote && this.canPickUpLoot() && !this.dead
 				&& this.worldObj.getGameRules().getBoolean("mobGriefing")) {
-			for (EntityItem entityitem : this.worldObj.getEntitiesWithinAABB(EntityItem.class,
-					this.getEntityBoundingBox().expand(1.0D, 0.0D, 1.0D))) {
+			List<EntityItem> lst = this.worldObj.getEntitiesWithinAABB(EntityItem.class,
+					this.getEntityBoundingBox().expand(1.0D, 0.0D, 1.0D));
+			for (int i = 0, l = lst.size(); i < l; ++i) {
+				EntityItem entityitem = lst.get(i);
 				if (!entityitem.isDead && entityitem.getEntityItem() != null && !entityitem.cannotPickup()) {
 					this.updateEquipmentIfNeeded(entityitem);
 				}
@@ -1012,8 +1016,10 @@ public abstract class EntityLiving extends EntityLivingBase {
 				EaglercraftUUID uuid = new EaglercraftUUID(this.leashNBTTag.getLong("UUIDMost"),
 						this.leashNBTTag.getLong("UUIDLeast"));
 
-				for (EntityLivingBase entitylivingbase : this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
-						this.getEntityBoundingBox().expand(10.0D, 10.0D, 10.0D))) {
+				List<EntityLivingBase> entities = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
+						this.getEntityBoundingBox().expand(10.0D, 10.0D, 10.0D));
+				for (int i = 0, l = entities.size(); i < l; ++i) {
+					EntityLivingBase entitylivingbase = entities.get(i);
 					if (entitylivingbase.getUniqueID().equals(uuid)) {
 						this.leashedToEntity = entitylivingbase;
 						break;

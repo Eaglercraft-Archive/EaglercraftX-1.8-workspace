@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.chunk;
 
 import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 
-import net.lax1dude.eaglercraft.v1_8.internal.buffer.FloatBuffer;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -99,8 +98,9 @@ public class RenderChunk {
 		this.position = pos;
 		this.boundingBox = new AxisAlignedBB(pos, pos.add(16, 16, 16));
 
-		for (EnumFacing enumfacing : EnumFacing.values()) {
-			this.field_181702_p.put(enumfacing, pos.offset(enumfacing, 16));
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			this.field_181702_p.put(facings[i], pos.offset(facings[i], 16));
 		}
 
 		this.initModelviewMatrix();
@@ -147,7 +147,7 @@ public class RenderChunk {
 		HashSet hashset = Sets.newHashSet();
 		if (!regionrendercache.extendedLevelsInChunkCache()) {
 			++renderChunksUpdated;
-			boolean[] aboolean = new boolean[EnumWorldBlockLayer.values().length];
+			boolean[] aboolean = new boolean[EnumWorldBlockLayer._VALUES.length];
 			BlockRendererDispatcher blockrendererdispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
 
 			for (BlockPos blockpos$mutableblockpos : BlockPos.getAllInBox(blockpos, blockpos1)) {
@@ -196,7 +196,9 @@ public class RenderChunk {
 				}
 			}
 
-			for (EnumWorldBlockLayer enumworldblocklayer : EnumWorldBlockLayer.values()) {
+			EnumWorldBlockLayer[] layers = EnumWorldBlockLayer._VALUES;
+			for (int i = 0; i < layers.length; ++i) {
+				EnumWorldBlockLayer enumworldblocklayer = layers[i];
 				if (aboolean[enumworldblocklayer.ordinal()]) {
 					compiledchunk.setLayerUsed(enumworldblocklayer);
 				}

@@ -1,7 +1,5 @@
 package net.minecraft.pathfinding;
 
-import net.minecraft.pathfinding.PathPoint;
-
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
  * 
@@ -23,7 +21,6 @@ import net.minecraft.pathfinding.PathPoint;
  * 
  */
 public class Path {
-
 	/**+
 	 * Contains the points in this path
 	 */

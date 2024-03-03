@@ -109,8 +109,9 @@ public class ClickEvent {
 		}
 
 		static {
-			for (ClickEvent.Action clickevent$action : values()) {
-				nameMapping.put(clickevent$action.getCanonicalName(), clickevent$action);
+			ClickEvent.Action[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				nameMapping.put(types[i].getCanonicalName(), types[i]);
 			}
 
 		}

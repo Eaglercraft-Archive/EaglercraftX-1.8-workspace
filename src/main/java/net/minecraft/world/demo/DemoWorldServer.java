@@ -31,7 +31,6 @@ import net.lax1dude.eaglercraft.v1_8.EaglercraftVersion;
  * 
  */
 public class DemoWorldServer extends WorldServer {
-
 	private static final long demoWorldSeed = EaglercraftVersion.demoWorldSeed;
 	public static final WorldSettings demoWorldSettings = (new WorldSettings(demoWorldSeed,
 			WorldSettings.GameType.SURVIVAL, true, false, WorldType.DEFAULT)).enableBonusChest();

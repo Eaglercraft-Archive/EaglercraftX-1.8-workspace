@@ -26,7 +26,6 @@ import net.minecraft.world.chunk.IChunkProvider;
  * 
  */
 public class MapGenBase {
-
 	/**+
 	 * The number of Chunks to gen-check in any given direction.
 	 */

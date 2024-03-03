@@ -3,8 +3,6 @@ package net.minecraft.entity.ai;
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.BlockPos;
@@ -34,7 +32,6 @@ import net.minecraft.village.VillageDoorInfo;
  * 
  */
 public class EntityAIMoveThroughVillage extends EntityAIBase {
-
 	private EntityCreature theEntity;
 	private double movementSpeed;
 	private PathEntity entityPathNavigate;
@@ -131,7 +128,9 @@ public class EntityAIMoveThroughVillage extends EntityAIBase {
 		VillageDoorInfo villagedoorinfo = null;
 		int i = Integer.MAX_VALUE;
 
-		for (VillageDoorInfo villagedoorinfo1 : villageIn.getVillageDoorInfoList()) {
+		List<VillageDoorInfo> lst = villageIn.getVillageDoorInfoList();
+		for (int k = 0, l = lst.size(); k < l; ++k) {
+			VillageDoorInfo villagedoorinfo1 = lst.get(k);
 			int j = villagedoorinfo1.getDistanceSquared(MathHelper.floor_double(this.theEntity.posX),
 					MathHelper.floor_double(this.theEntity.posY), MathHelper.floor_double(this.theEntity.posZ));
 			if (j < i && !this.doesDoorListContain(villagedoorinfo1)) {
@@ -144,7 +143,8 @@ public class EntityAIMoveThroughVillage extends EntityAIBase {
 	}
 
 	private boolean doesDoorListContain(VillageDoorInfo doorInfoIn) {
-		for (VillageDoorInfo villagedoorinfo : this.doorList) {
+		for (int i = 0, l = this.doorList.size(); i < l; ++i) {
+			VillageDoorInfo villagedoorinfo = this.doorList.get(i);
 			if (doorInfoIn.getDoorBlockPos().equals(villagedoorinfo.getDoorBlockPos())) {
 				return true;
 			}

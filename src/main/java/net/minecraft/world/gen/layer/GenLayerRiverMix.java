@@ -1,8 +1,6 @@
 package net.minecraft.world.gen.layer;
 
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.gen.layer.GenLayer;
-import net.minecraft.world.gen.layer.IntCache;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -25,7 +23,6 @@ import net.minecraft.world.gen.layer.IntCache;
  * 
  */
 public class GenLayerRiverMix extends GenLayer {
-
 	private GenLayer biomePatternGeneratorChain;
 	private GenLayer riverPatternGeneratorChain;
 

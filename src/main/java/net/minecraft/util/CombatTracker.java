@@ -144,7 +144,8 @@ public class CombatTracker {
 		float f = 0.0F;
 		float f1 = 0.0F;
 
-		for (CombatEntry combatentry : this.combatEntries) {
+		for (int i = 0, l = this.combatEntries.size(); i < l; ++i) {
+			CombatEntry combatentry = this.combatEntries.get(i);
 			if (combatentry.getDamageSrc().getEntity() instanceof EntityPlayer
 					&& (entityplayer == null || combatentry.func_94563_c() > f1)) {
 				f1 = combatentry.func_94563_c();

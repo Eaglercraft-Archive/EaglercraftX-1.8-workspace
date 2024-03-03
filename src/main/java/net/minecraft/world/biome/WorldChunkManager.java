@@ -9,8 +9,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeCache;
-import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.IntCache;
 
@@ -35,7 +33,6 @@ import net.minecraft.world.gen.layer.IntCache;
  * 
  */
 public class WorldChunkManager {
-
 	private GenLayer genBiomes;
 	private GenLayer biomeIndexLayer;
 	private BiomeCache biomeCache;

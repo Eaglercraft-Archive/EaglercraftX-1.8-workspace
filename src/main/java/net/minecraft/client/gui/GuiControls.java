@@ -91,8 +91,9 @@ public class GuiControls extends GuiScreen {
 		if (parGuiButton.id == 200) {
 			this.mc.displayGuiScreen(this.parentScreen);
 		} else if (parGuiButton.id == 201) {
-			for (KeyBinding keybinding : this.mc.gameSettings.keyBindings) {
-				keybinding.setKeyCode(keybinding.getKeyCodeDefault());
+			KeyBinding[] arr = this.mc.gameSettings.keyBindings;
+			for (int i = 0; i < arr.length; ++i) {
+				arr[i].setKeyCode(arr[i].getKeyCodeDefault());
 			}
 
 			KeyBinding.resetKeyBindingArrayAndHash();
@@ -165,8 +166,9 @@ public class GuiControls extends GuiScreen {
 		this.drawCenteredString(this.fontRendererObj, this.screenTitle, this.width / 2, 8, 16777215);
 		boolean flag = true;
 
-		for (KeyBinding keybinding : this.options.keyBindings) {
-			if (keybinding.getKeyCode() != keybinding.getKeyCodeDefault()) {
+		KeyBinding[] arr = this.options.keyBindings;
+		for (int k = 0; k < arr.length; ++k) {
+			if (arr[k].getKeyCode() != arr[k].getKeyCodeDefault()) {
 				flag = false;
 				break;
 			}

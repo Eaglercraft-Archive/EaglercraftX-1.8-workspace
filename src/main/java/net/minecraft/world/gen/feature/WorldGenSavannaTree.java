@@ -12,7 +12,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -35,7 +34,6 @@ import net.minecraft.world.gen.feature.WorldGenAbstractTree;
  * 
  */
 public class WorldGenSavannaTree extends WorldGenAbstractTree {
-
 	private static final IBlockState field_181643_a = Blocks.log2.getDefaultState().withProperty(BlockNewLog.VARIANT,
 			BlockPlanks.EnumType.ACACIA);
 	private static final IBlockState field_181644_b = Blocks.leaves2.getDefaultState()

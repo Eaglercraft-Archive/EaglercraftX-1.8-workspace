@@ -67,8 +67,8 @@ public class S30PacketWindowItems implements Packet<INetHandlerPlayClient> {
 		parPacketBuffer.writeByte(this.windowId);
 		parPacketBuffer.writeShort(this.itemStacks.length);
 
-		for (ItemStack itemstack : this.itemStacks) {
-			parPacketBuffer.writeItemStackToBuffer(itemstack);
+		for (int i = 0; i < this.itemStacks.length; ++i) {
+			parPacketBuffer.writeItemStackToBuffer(this.itemStacks[i]);
 		}
 
 	}

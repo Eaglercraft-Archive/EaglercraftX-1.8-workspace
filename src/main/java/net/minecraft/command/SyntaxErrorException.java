@@ -1,7 +1,5 @@
 package net.minecraft.command;
 
-import net.minecraft.command.CommandException;
-
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
  * 

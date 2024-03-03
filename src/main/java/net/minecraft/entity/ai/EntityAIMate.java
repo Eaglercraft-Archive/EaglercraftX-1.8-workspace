@@ -3,7 +3,6 @@ package net.minecraft.entity.ai;
 import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityCow;
@@ -34,7 +33,6 @@ import net.minecraft.world.World;
  * 
  */
 public class EntityAIMate extends EntityAIBase {
-
 	private EntityAnimal theAnimal;
 	World theWorld;
 	private EntityAnimal targetMate;
@@ -97,12 +95,13 @@ public class EntityAIMate extends EntityAIBase {
 	 */
 	private EntityAnimal getNearbyMate() {
 		float f = 8.0F;
-		List list = this.theWorld.getEntitiesWithinAABB(this.theAnimal.getClass(),
+		List<EntityAnimal> list = this.theWorld.getEntitiesWithinAABB(this.theAnimal.getClass(),
 				this.theAnimal.getEntityBoundingBox().expand((double) f, (double) f, (double) f));
 		double d0 = Double.MAX_VALUE;
 		EntityAnimal entityanimal = null;
 
-		for (EntityAnimal entityanimal1 : (List<EntityAnimal>) list) {
+		for (int i = 0, l = list.size(); i < l; ++i) {
+			EntityAnimal entityanimal1 = list.get(i);
 			if (this.theAnimal.canMateWith(entityanimal1) && this.theAnimal.getDistanceSqToEntity(entityanimal1) < d0) {
 				entityanimal = entityanimal1;
 				d0 = this.theAnimal.getDistanceSqToEntity(entityanimal1);

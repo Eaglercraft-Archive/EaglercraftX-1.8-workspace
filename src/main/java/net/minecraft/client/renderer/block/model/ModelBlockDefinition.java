@@ -1,13 +1,10 @@
 package net.minecraft.client.renderer.block.model;
 
 import java.io.Reader;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,8 +53,8 @@ public class ModelBlockDefinition {
 	}
 
 	public ModelBlockDefinition(List<ModelBlockDefinition> parList) {
-		for (ModelBlockDefinition modelblockdefinition : parList) {
-			this.mapVariants.putAll(modelblockdefinition.mapVariants);
+		for (int i = 0, l = parList.size(); i < l; ++i) {
+			this.mapVariants.putAll(parList.get(i).mapVariants);
 		}
 
 	}

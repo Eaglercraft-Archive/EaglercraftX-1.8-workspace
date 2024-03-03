@@ -5,7 +5,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.PathEntity;
@@ -37,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
  * 
  */
 public abstract class EntityAITarget extends EntityAIBase {
-
 	protected final EntityCreature taskOwner;
 	protected boolean shouldCheckSight;
 	private boolean nearbyOnly;

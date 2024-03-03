@@ -92,8 +92,11 @@ public class BlockPattern {
 		int i = Math.max(Math.max(this.palmLength, this.thumbLength), this.fingerLength);
 
 		for (BlockPos blockpos : BlockPos.getAllInBox(pos, pos.add(i - 1, i - 1, i - 1))) {
-			for (EnumFacing enumfacing : EnumFacing.values()) {
-				for (EnumFacing enumfacing1 : EnumFacing.values()) {
+			EnumFacing[] facings = EnumFacing._VALUES;
+			for (int j = 0; j < facings.length; ++j) {
+				EnumFacing enumfacing = facings[j];
+				for (int k = 0; k < facings.length; ++k) {
+					EnumFacing enumfacing1 = facings[k];
 					if (enumfacing1 != enumfacing && enumfacing1 != enumfacing.getOpposite()) {
 						BlockPattern.PatternHelper blockpattern$patternhelper = this.checkPatternAt(blockpos,
 								enumfacing, enumfacing1, loadingcache);

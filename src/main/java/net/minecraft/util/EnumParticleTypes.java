@@ -43,6 +43,8 @@ public enum EnumParticleTypes {
 	BLOCK_CRACK("blockcrack_", 37, false, 1), BLOCK_DUST("blockdust_", 38, false, 1), WATER_DROP("droplet", 39, false),
 	ITEM_TAKE("take", 40, false), MOB_APPEARANCE("mobappearance", 41, true);
 
+	public static final EnumParticleTypes[] _VALUES = values();
+
 	private final String particleName;
 	private final int particleID;
 	private final boolean shouldIgnoreRange;
@@ -95,7 +97,9 @@ public enum EnumParticleTypes {
 	static {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (EnumParticleTypes enumparticletypes : values()) {
+		EnumParticleTypes[] types = values();
+		for (int i = 0; i < types.length; ++i) {
+			EnumParticleTypes enumparticletypes = types[i];
 			PARTICLES.put(Integer.valueOf(enumparticletypes.getParticleID()), enumparticletypes);
 			if (!enumparticletypes.getParticleName().endsWith("_")) {
 				arraylist.add(enumparticletypes.getParticleName());

@@ -297,7 +297,9 @@ public class BlockFire extends Block {
 	}
 
 	private boolean canNeighborCatchFire(World worldIn, BlockPos pos) {
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			if (this.canCatchFire(worldIn, pos.offset(enumfacing))) {
 				return true;
 			}
@@ -312,8 +314,9 @@ public class BlockFire extends Block {
 		} else {
 			int i = 0;
 
-			for (EnumFacing enumfacing : EnumFacing.values()) {
-				i = Math.max(this.getEncouragement(worldIn.getBlockState(pos.offset(enumfacing)).getBlock()), i);
+			EnumFacing[] facings = EnumFacing._VALUES;
+			for (int j = 0; j < facings.length; ++j) {
+				i = Math.max(this.getEncouragement(worldIn.getBlockState(pos.offset(facings[j])).getBlock()), i);
 			}
 
 			return i;

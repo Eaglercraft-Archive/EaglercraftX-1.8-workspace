@@ -945,8 +945,9 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 	public float getArmorVisibility() {
 		int i = 0;
 
-		for (ItemStack itemstack : this.inventory.armorInventory) {
-			if (itemstack != null) {
+		ItemStack[] stack = this.inventory.armorInventory;
+		for (int j = 0; j < stack.length; ++j) {
+			if (stack[j] != null) {
 				++i;
 			}
 		}
@@ -2054,7 +2055,7 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		FULL(0, "options.chat.visibility.full"), SYSTEM(1, "options.chat.visibility.system"),
 		HIDDEN(2, "options.chat.visibility.hidden");
 
-		private static final EntityPlayer.EnumChatVisibility[] ID_LOOKUP = new EntityPlayer.EnumChatVisibility[values().length];
+		private static final EntityPlayer.EnumChatVisibility[] ID_LOOKUP = new EntityPlayer.EnumChatVisibility[3];
 		private final int chatVisibility;
 		private final String resourceKey;
 
@@ -2076,8 +2077,9 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		}
 
 		static {
-			for (EntityPlayer.EnumChatVisibility entityplayer$enumchatvisibility : values()) {
-				ID_LOOKUP[entityplayer$enumchatvisibility.chatVisibility] = entityplayer$enumchatvisibility;
+			EntityPlayer.EnumChatVisibility[] lst = values();
+			for (int i = 0; i < lst.length; ++i) {
+				ID_LOOKUP[lst[i].chatVisibility] = lst[i];
 			}
 
 		}

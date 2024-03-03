@@ -133,8 +133,9 @@ public class WorldBorder {
 		this.centerX = x;
 		this.centerZ = z;
 
-		for (IBorderListener iborderlistener : this.getListeners()) {
-			iborderlistener.onCenterChanged(this, x, z);
+		List<IBorderListener> lst = this.getListeners();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			lst.get(i).onCenterChanged(this, x, z);
 		}
 
 	}
@@ -167,8 +168,9 @@ public class WorldBorder {
 		this.endTime = System.currentTimeMillis();
 		this.startTime = this.endTime;
 
-		for (IBorderListener iborderlistener : this.getListeners()) {
-			iborderlistener.onSizeChanged(this, newSize);
+		List<IBorderListener> lst = this.getListeners();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			lst.get(i).onSizeChanged(this, newSize);
 		}
 
 	}
@@ -179,8 +181,9 @@ public class WorldBorder {
 		this.startTime = System.currentTimeMillis();
 		this.endTime = this.startTime + time;
 
-		for (IBorderListener iborderlistener : this.getListeners()) {
-			iborderlistener.onTransitionStarted(this, oldSize, newSize, time);
+		List<IBorderListener> lst = this.getListeners();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			lst.get(i).onTransitionStarted(this, oldSize, newSize, time);
 		}
 
 	}
@@ -208,8 +211,9 @@ public class WorldBorder {
 	public void setDamageBuffer(double bufferSize) {
 		this.damageBuffer = bufferSize;
 
-		for (IBorderListener iborderlistener : this.getListeners()) {
-			iborderlistener.onDamageBufferChanged(this, bufferSize);
+		List<IBorderListener> lst = this.getListeners();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			lst.get(i).onDamageBufferChanged(this, bufferSize);
 		}
 
 	}
@@ -221,8 +225,9 @@ public class WorldBorder {
 	public void setDamageAmount(double newAmount) {
 		this.damageAmount = newAmount;
 
-		for (IBorderListener iborderlistener : this.getListeners()) {
-			iborderlistener.onDamageAmountChanged(this, newAmount);
+		List<IBorderListener> lst = this.getListeners();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			lst.get(i).onDamageAmountChanged(this, newAmount);
 		}
 
 	}
@@ -239,8 +244,9 @@ public class WorldBorder {
 	public void setWarningTime(int warningTime) {
 		this.warningTime = warningTime;
 
-		for (IBorderListener iborderlistener : this.getListeners()) {
-			iborderlistener.onWarningTimeChanged(this, warningTime);
+		List<IBorderListener> lst = this.getListeners();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			lst.get(i).onWarningTimeChanged(this, warningTime);
 		}
 
 	}
@@ -252,8 +258,9 @@ public class WorldBorder {
 	public void setWarningDistance(int warningDistance) {
 		this.warningDistance = warningDistance;
 
-		for (IBorderListener iborderlistener : this.getListeners()) {
-			iborderlistener.onWarningDistanceChanged(this, warningDistance);
+		List<IBorderListener> lst = this.getListeners();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			lst.get(i).onWarningDistanceChanged(this, warningDistance);
 		}
 
 	}

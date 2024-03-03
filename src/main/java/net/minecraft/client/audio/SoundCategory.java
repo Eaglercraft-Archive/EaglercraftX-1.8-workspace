@@ -28,6 +28,8 @@ public enum SoundCategory {
 	MASTER("master", 0), MUSIC("music", 1), RECORDS("record", 2), WEATHER("weather", 3), BLOCKS("block", 4),
 	MOBS("hostile", 5), ANIMALS("neutral", 6), PLAYERS("player", 7), AMBIENT("ambient", 8), VOICE("voice", 9);
 
+	public static final SoundCategory[] _VALUES = values();
+
 	private static final Map<String, SoundCategory> NAME_CATEGORY_MAP = Maps.newHashMap();
 	private static final Map<Integer, SoundCategory> ID_CATEGORY_MAP = Maps.newHashMap();
 	private final String categoryName;
@@ -51,7 +53,9 @@ public enum SoundCategory {
 	}
 
 	static {
-		for (SoundCategory soundcategory : values()) {
+		SoundCategory[] categories = _VALUES;
+		for (int i = 0; i < categories.length; ++i) {
+			SoundCategory soundcategory = categories[i];
 			if (NAME_CATEGORY_MAP.containsKey(soundcategory.getCategoryName())
 					|| ID_CATEGORY_MAP.containsKey(Integer.valueOf(soundcategory.getCategoryId()))) {
 				throw new Error("Clash in Sound Category ID & Name pools! Cannot insert " + soundcategory);

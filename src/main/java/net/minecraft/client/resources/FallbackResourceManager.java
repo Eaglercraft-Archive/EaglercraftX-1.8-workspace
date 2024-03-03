@@ -83,7 +83,8 @@ public class FallbackResourceManager implements IResourceManager {
 		ArrayList arraylist = Lists.newArrayList();
 		ResourceLocation resourcelocation = getLocationMcmeta(location);
 
-		for (IResourcePack iresourcepack : this.resourcePacks) {
+		for (int i = 0, l = this.resourcePacks.size(); i < l; ++i) {
+			IResourcePack iresourcepack = this.resourcePacks.get(i);
 			if (iresourcepack.resourceExists(location)) {
 				InputStream inputstream = iresourcepack.resourceExists(resourcelocation)
 						? this.getInputStream(resourcelocation, iresourcepack)

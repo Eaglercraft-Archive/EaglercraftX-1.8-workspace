@@ -310,7 +310,8 @@ public class GuiContainerCreative extends InventoryEffectRenderer {
 			}
 		}
 
-		for (Enchantment enchantment : Enchantment.enchantmentsBookList) {
+		for (int i = 0; i < Enchantment.enchantmentsBookList.length; ++i) {
+			Enchantment enchantment = Enchantment.enchantmentsBookList[i];
 			if (enchantment != null && enchantment.type != null) {
 				Items.enchanted_book.getAll(enchantment, guicontainercreative$containercreative.itemList);
 			}
@@ -323,8 +324,9 @@ public class GuiContainerCreative extends InventoryEffectRenderer {
 			ItemStack itemstack = (ItemStack) iterator.next();
 			boolean flag = false;
 
-			for (String s : itemstack.getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips)) {
-				if (EnumChatFormatting.getTextWithoutFormattingCodes(s).toLowerCase().contains(s1)) {
+			List<String> lst = itemstack.getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips);
+			for (int i = 0, l = lst.size(); i < l; ++i) {
+				if (EnumChatFormatting.getTextWithoutFormattingCodes(lst.get(i)).toLowerCase().contains(s1)) {
 					flag = true;
 					break;
 				}
@@ -362,8 +364,8 @@ public class GuiContainerCreative extends InventoryEffectRenderer {
 			int i = parInt1 - this.guiLeft;
 			int j = parInt2 - this.guiTop;
 
-			for (CreativeTabs creativetabs : CreativeTabs.creativeTabArray) {
-				if (this.func_147049_a(creativetabs, i, j)) {
+			for (int k = 0; k < CreativeTabs.creativeTabArray.length; ++k) {
+				if (this.func_147049_a(CreativeTabs.creativeTabArray[k], i, j)) {
 					return;
 				}
 			}
@@ -381,7 +383,8 @@ public class GuiContainerCreative extends InventoryEffectRenderer {
 			int l = i - this.guiLeft;
 			int i1 = j - this.guiTop;
 
-			for (CreativeTabs creativetabs : CreativeTabs.creativeTabArray) {
+			for (int m = 0; m < CreativeTabs.creativeTabArray.length; ++m) {
+				CreativeTabs creativetabs = CreativeTabs.creativeTabArray[m];
 				if (this.func_147049_a(creativetabs, l, i1)) {
 					this.setCurrentCreativeTab(creativetabs);
 					return;
@@ -520,8 +523,8 @@ public class GuiContainerCreative extends InventoryEffectRenderer {
 
 		super.drawScreen(i, j, f);
 
-		for (CreativeTabs creativetabs : CreativeTabs.creativeTabArray) {
-			if (this.renderCreativeInventoryHoveringText(creativetabs, i, j)) {
+		for (int m = 0; m < CreativeTabs.creativeTabArray.length; ++m) {
+			if (this.renderCreativeInventoryHoveringText(CreativeTabs.creativeTabArray[m], i, j)) {
 				Mouse.showCursor(EnumCursorType.HAND);
 				break;
 			}
@@ -547,7 +550,8 @@ public class GuiContainerCreative extends InventoryEffectRenderer {
 					Enchantment enchantment = Enchantment
 							.getEnchantmentById(((Integer) map.keySet().iterator().next()).intValue());
 
-					for (CreativeTabs creativetabs1 : CreativeTabs.creativeTabArray) {
+					for (int m = 0; m < CreativeTabs.creativeTabArray.length; ++m) {
+						CreativeTabs creativetabs1 = CreativeTabs.creativeTabArray[m];
 						if (creativetabs1.hasRelevantEnchantmentType(enchantment.type)) {
 							creativetabs = creativetabs1;
 							break;
@@ -584,7 +588,8 @@ public class GuiContainerCreative extends InventoryEffectRenderer {
 		RenderHelper.enableGUIStandardItemLighting();
 		CreativeTabs creativetabs = CreativeTabs.creativeTabArray[selectedTabIndex];
 
-		for (CreativeTabs creativetabs1 : CreativeTabs.creativeTabArray) {
+		for (int m = 0; m < CreativeTabs.creativeTabArray.length; ++m) {
+			CreativeTabs creativetabs1 = CreativeTabs.creativeTabArray[m];
 			this.mc.getTextureManager().bindTexture(creativeInventoryTabs);
 			if (creativetabs1.getTabIndex() != selectedTabIndex) {
 				this.func_147051_a(creativetabs1);

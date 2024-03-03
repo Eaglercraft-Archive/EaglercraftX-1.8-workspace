@@ -2,8 +2,6 @@ package net.minecraft.world.gen.structure;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.StructureMineshaftPieces;
-import net.minecraft.world.gen.structure.StructureStart;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -26,7 +24,6 @@ import net.minecraft.world.gen.structure.StructureStart;
  * 
  */
 public class StructureMineshaftStart extends StructureStart {
-
 	public StructureMineshaftStart() {
 	}
 

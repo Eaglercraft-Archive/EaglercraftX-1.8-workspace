@@ -1,6 +1,5 @@
 package net.minecraft.entity.ai;
 
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -26,7 +25,6 @@ import net.minecraft.inventory.Container;
  * 
  */
 public class EntityAITradePlayer extends EntityAIBase {
-
 	private EntityVillager villager;
 
 	public EntityAITradePlayer(EntityVillager villagerIn) {

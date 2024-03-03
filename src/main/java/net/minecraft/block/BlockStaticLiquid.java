@@ -88,7 +88,9 @@ public class BlockStaticLiquid extends BlockLiquid {
 	}
 
 	protected boolean isSurroundingBlockFlammable(World worldIn, BlockPos pos) {
-		for (EnumFacing enumfacing : EnumFacing.values()) {
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			if (this.getCanBlockBurn(worldIn, pos.offset(enumfacing))) {
 				return true;
 			}

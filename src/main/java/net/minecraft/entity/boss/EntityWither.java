@@ -18,7 +18,6 @@ import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
-import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
@@ -96,10 +95,10 @@ public class EntityWither extends EntityMob implements IBossDisplayData, IRanged
 
 	protected void entityInit() {
 		super.entityInit();
-		this.dataWatcher.addObject(17, new Integer(0));
-		this.dataWatcher.addObject(18, new Integer(0));
-		this.dataWatcher.addObject(19, new Integer(0));
-		this.dataWatcher.addObject(20, new Integer(0));
+		this.dataWatcher.addObject(17, Integer.valueOf(0));
+		this.dataWatcher.addObject(18, Integer.valueOf(0));
+		this.dataWatcher.addObject(19, Integer.valueOf(0));
+		this.dataWatcher.addObject(20, Integer.valueOf(0));
 	}
 
 	/**+
@@ -501,9 +500,10 @@ public class EntityWither extends EntityMob implements IBossDisplayData, IRanged
 		}
 
 		if (!this.worldObj.isRemote) {
-			for (EntityPlayer entityplayer : this.worldObj.getEntitiesWithinAABB(EntityPlayer.class,
-					this.getEntityBoundingBox().expand(50.0D, 100.0D, 50.0D))) {
-				entityplayer.triggerAchievement(AchievementList.killWither);
+			List<EntityPlayer> lst = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class,
+					this.getEntityBoundingBox().expand(50.0D, 100.0D, 50.0D));
+			for (int i = 0, l = lst.size(); i < l; ++i) {
+				lst.get(i).triggerAchievement(AchievementList.killWither);
 			}
 		}
 

@@ -264,6 +264,10 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback {
 		}
 	}
 
+	public void cancelDirectConnect() {
+		this.directConnect = false;
+	}
+
 	/**+
 	 * Fired when a key is typed (except F11 which toggles full
 	 * screen). This is the equivalent of
@@ -329,11 +333,11 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback {
 		this.drawCenteredString(this.fontRendererObj, I18n.format("multiplayer.title", new Object[0]), this.width / 2,
 				20, 16777215);
 		super.drawScreen(i, j, f);
+		relaysButton.drawScreen(i, j);
+		drawPluginDownloadLink(i, j);
 		if (this.hoveringText != null) {
 			this.drawHoveringText(Lists.newArrayList(Splitter.on("\n").split(this.hoveringText)), i, j);
 		}
-		relaysButton.drawScreen(i, j);
-		drawPluginDownloadLink(i, j);
 	}
 
 	private void drawPluginDownloadLink(int xx, int yy) {

@@ -90,8 +90,8 @@ public class GuiYesNo extends GuiScreen {
 		this.drawCenteredString(this.fontRendererObj, this.messageLine1, this.width / 2, 70, 16777215);
 		int k = 90;
 
-		for (String s : this.field_175298_s) {
-			this.drawCenteredString(this.fontRendererObj, s, this.width / 2, k, 16777215);
+		for (int l = 0, m = this.field_175298_s.size(); l < m; ++l) {
+			this.drawCenteredString(this.fontRendererObj, this.field_175298_s.get(l), this.width / 2, k, 16777215);
 			k += this.fontRendererObj.FONT_HEIGHT;
 		}
 
@@ -104,8 +104,8 @@ public class GuiYesNo extends GuiScreen {
 	public void setButtonDelay(int parInt1) {
 		this.ticksUntilEnable = parInt1;
 
-		for (GuiButton guibutton : this.buttonList) {
-			guibutton.enabled = false;
+		for (int l = 0, m = this.buttonList.size(); l < m; ++l) {
+			this.buttonList.get(l).enabled = false;
 		}
 
 	}
@@ -116,8 +116,8 @@ public class GuiYesNo extends GuiScreen {
 	public void updateScreen() {
 		super.updateScreen();
 		if (--this.ticksUntilEnable == 0) {
-			for (GuiButton guibutton : this.buttonList) {
-				guibutton.enabled = true;
+			for (int l = 0, m = this.buttonList.size(); l < m; ++l) {
+				this.buttonList.get(l).enabled = true;
 			}
 		}
 

@@ -54,8 +54,8 @@ public class S3APacketTabComplete implements Packet<INetHandlerPlayClient> {
 	public void writePacketData(PacketBuffer parPacketBuffer) throws IOException {
 		parPacketBuffer.writeVarIntToBuffer(this.matches.length);
 
-		for (String s : this.matches) {
-			parPacketBuffer.writeString(s);
+		for (int i = 0; i < this.matches.length; ++i) {
+			parPacketBuffer.writeString(this.matches[i]);
 		}
 
 	}

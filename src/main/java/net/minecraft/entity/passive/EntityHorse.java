@@ -1,5 +1,7 @@
 package net.minecraft.entity.passive;
 
+import java.util.List;
+
 import com.google.common.base.Predicate;
 
 import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
@@ -486,8 +488,10 @@ public class EntityHorse extends EntityAnimal implements IInvBasic {
 		double d0 = Double.MAX_VALUE;
 		Entity entity = null;
 
-		for (Entity entity1 : this.worldObj.getEntitiesInAABBexcluding(entityIn,
-				entityIn.getEntityBoundingBox().addCoord(distance, distance, distance), horseBreedingSelector)) {
+		List<Entity> lst = this.worldObj.getEntitiesInAABBexcluding(entityIn,
+				entityIn.getEntityBoundingBox().addCoord(distance, distance, distance), horseBreedingSelector);
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			Entity entity1 = lst.get(i);
 			double d1 = entity1.getDistanceSq(entityIn.posX, entityIn.posY, entityIn.posZ);
 			if (d1 < d0) {
 				entity = entity1;

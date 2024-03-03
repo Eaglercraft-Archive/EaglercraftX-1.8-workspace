@@ -6,7 +6,6 @@ import net.minecraft.block.BlockStairs;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -35,7 +34,6 @@ import net.minecraft.world.pathfinder.WalkNodeProcessor;
  * 
  */
 public class EntityAIControlledByPlayer extends EntityAIBase {
-
 	private final EntityLiving thisEntity;
 	private final float maxSpeed;
 	private float currentSpeed;

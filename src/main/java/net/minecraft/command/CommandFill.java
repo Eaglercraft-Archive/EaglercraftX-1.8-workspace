@@ -5,11 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandResultStats;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.JsonToNBT;
@@ -182,7 +177,8 @@ public class CommandFill extends CommandBase {
 					}
 				}
 
-				for (BlockPos blockpos5 : (ArrayList<BlockPos>) arraylist) {
+				for (int m = 0, n = arraylist.size(); m < n; ++m) {
+					BlockPos blockpos5 = (BlockPos) arraylist.get(m);
 					Block block2 = world.getBlockState(blockpos5).getBlock();
 					world.notifyNeighborsRespectDebug(blockpos5, block2);
 				}

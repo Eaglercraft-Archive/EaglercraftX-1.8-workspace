@@ -1,5 +1,7 @@
 package net.minecraft.block;
 
+import java.util.List;
+
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyDirection;
@@ -96,7 +98,9 @@ public class BlockChest extends BlockContainer {
 	public void onBlockAdded(World world, BlockPos blockpos, IBlockState iblockstate) {
 		this.checkForSurroundingChests(world, blockpos, iblockstate);
 
-		for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+		EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facings();
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing = facings[i];
 			BlockPos blockpos1 = blockpos.offset(enumfacing);
 			IBlockState iblockstate1 = world.getBlockState(blockpos1);
 			if (iblockstate1.getBlock() == this) {
@@ -241,7 +245,9 @@ public class BlockChest extends BlockContainer {
 	public IBlockState correctFacing(World worldIn, BlockPos pos, IBlockState state) {
 		EnumFacing enumfacing = null;
 
-		for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL) {
+		EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+		for (int i = 0; i < facings.length; ++i) {
+			EnumFacing enumfacing1 = facings[i];
 			IBlockState iblockstate = worldIn.getBlockState(pos.offset(enumfacing1));
 			if (iblockstate.getBlock() == this) {
 				return state;
@@ -322,7 +328,9 @@ public class BlockChest extends BlockContainer {
 		if (worldIn.getBlockState(pos).getBlock() != this) {
 			return false;
 		} else {
-			for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+			EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+			for (int i = 0; i < facings.length; ++i) {
+				EnumFacing enumfacing = facings[i];
 				if (worldIn.getBlockState(pos.offset(enumfacing)).getBlock() == this) {
 					return true;
 				}
@@ -380,7 +388,9 @@ public class BlockChest extends BlockContainer {
 			if (this.isBlocked(worldIn, pos)) {
 				return null;
 			} else {
-				for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+				EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+				for (int i = 0; i < facings.length; ++i) {
+					EnumFacing enumfacing = facings[i];
 					BlockPos blockpos = pos.offset(enumfacing);
 					Block block = worldIn.getBlockState(blockpos).getBlock();
 					if (block == this) {
@@ -450,9 +460,11 @@ public class BlockChest extends BlockContainer {
 	}
 
 	private boolean isOcelotSittingOnChest(World worldIn, BlockPos pos) {
-		for (Entity entity : worldIn.getEntitiesWithinAABB(EntityOcelot.class,
+		List<Entity> entityList = worldIn.getEntitiesWithinAABB(EntityOcelot.class,
 				new AxisAlignedBB((double) pos.getX(), (double) (pos.getY() + 1), (double) pos.getZ(),
-						(double) (pos.getX() + 1), (double) (pos.getY() + 2), (double) (pos.getZ() + 1)))) {
+						(double) (pos.getX() + 1), (double) (pos.getY() + 2), (double) (pos.getZ() + 1)));
+		for (int i = 0, l = entityList.size(); i < l; ++i) {
+			Entity entity = entityList.get(i);
 			EntityOcelot entityocelot = (EntityOcelot) entity;
 			if (entityocelot.isSitting()) {
 				return true;

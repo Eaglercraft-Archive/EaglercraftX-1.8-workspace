@@ -91,8 +91,10 @@ public class BlockTripWireHook extends Block {
 	}
 
 	public boolean canPlaceBlockAt(World world, BlockPos blockpos) {
-		for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-			if (world.getBlockState(blockpos.offset(enumfacing)).getBlock().isNormalCube()) {
+		EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+		BlockPos tmp = new BlockPos(0, 0, 0);
+		for (int i = 0; i < facings.length; ++i) {
+			if (world.getBlockState(blockpos.offsetEvenFaster(facings[i], tmp)).getBlock().isNormalCube()) {
 				return true;
 			}
 		}

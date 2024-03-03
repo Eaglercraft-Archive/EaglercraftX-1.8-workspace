@@ -59,9 +59,9 @@ public class VisGraph {
 		} else if (this.field_178611_f == 0) {
 			setvisibility.setAllVisible(false);
 		} else {
-			for (int i : field_178613_e) {
-				if (!this.field_178612_d.get(i)) {
-					setvisibility.setManyVisible(this.func_178604_a(i));
+			for (int i = 0; i < field_178613_e.length; ++i) {
+				if (!this.field_178612_d.get(field_178613_e[i])) {
+					setvisibility.setManyVisible(this.func_178604_a(field_178613_e[i]));
 				}
 			}
 		}
@@ -83,7 +83,9 @@ public class VisGraph {
 			int i = ((Integer) linkedlist.poll()).intValue();
 			this.func_178610_a(i, enumset);
 
-			for (EnumFacing enumfacing : EnumFacing.values()) {
+			EnumFacing[] facings = EnumFacing._VALUES;
+			for (int k = 0; k < facings.length; ++k) {
+				EnumFacing enumfacing = facings[k];
 				int j = this.func_178603_a(i, enumfacing);
 				if (j >= 0 && !this.field_178612_d.get(j)) {
 					this.field_178612_d.set(j, true);

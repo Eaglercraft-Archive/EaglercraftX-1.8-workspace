@@ -43,7 +43,6 @@ import net.minecraft.world.World;
  * 
  */
 public class BlockRailDetector extends BlockRailBase {
-
 	public static PropertyEnum<BlockRailBase.EnumRailDirection> SHAPE;
 	public static final PropertyBool POWERED = PropertyBool.create("powered");
 

@@ -2,8 +2,6 @@ package net.minecraft.pathfinding;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.pathfinding.PathEntity;
-import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -29,7 +27,6 @@ import net.minecraft.world.World;
  * 
  */
 public class PathNavigateClimber extends PathNavigateGround {
-
 	private BlockPos targetPosition;
 
 	public PathNavigateClimber(EntityLiving entityLivingIn, World worldIn) {

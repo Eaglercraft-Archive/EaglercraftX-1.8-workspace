@@ -1,5 +1,7 @@
 package net.minecraft.block;
 
+import java.util.List;
+
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 
 import net.minecraft.block.material.Material;
@@ -129,7 +131,9 @@ public class BlockBed extends BlockDirectional {
 	}
 
 	private EntityPlayer getPlayerInBed(World worldIn, BlockPos pos) {
-		for (EntityPlayer entityplayer : worldIn.playerEntities) {
+		List<EntityPlayer> playerEntities = worldIn.playerEntities;
+		for (int i = 0, l = playerEntities.size(); i < l; ++i) {
+			EntityPlayer entityplayer = playerEntities.get(i);
 			if (entityplayer.isPlayerSleeping() && entityplayer.playerLocation.equals(pos)) {
 				return entityplayer;
 			}

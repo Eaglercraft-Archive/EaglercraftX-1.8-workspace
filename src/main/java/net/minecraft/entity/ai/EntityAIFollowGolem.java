@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import java.util.List;
-import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.passive.EntityVillager;
 
@@ -26,7 +25,6 @@ import net.minecraft.entity.passive.EntityVillager;
  * 
  */
 public class EntityAIFollowGolem extends EntityAIBase {
-
 	private EntityVillager theVillager;
 	private EntityIronGolem theGolem;
 	private int takeGolemRoseTick;
@@ -46,12 +44,13 @@ public class EntityAIFollowGolem extends EntityAIBase {
 		} else if (!this.theVillager.worldObj.isDaytime()) {
 			return false;
 		} else {
-			List list = this.theVillager.worldObj.getEntitiesWithinAABB(EntityIronGolem.class,
+			List<EntityIronGolem> list = this.theVillager.worldObj.getEntitiesWithinAABB(EntityIronGolem.class,
 					this.theVillager.getEntityBoundingBox().expand(6.0D, 2.0D, 6.0D));
 			if (list.isEmpty()) {
 				return false;
 			} else {
-				for (EntityIronGolem entityirongolem : (List<EntityIronGolem>) list) {
+				for (int i = 0, l = list.size(); i < l; ++i) {
+					EntityIronGolem entityirongolem = list.get(i);
 					if (entityirongolem.getHoldRoseTick() > 0) {
 						this.theGolem = entityirongolem;
 						break;

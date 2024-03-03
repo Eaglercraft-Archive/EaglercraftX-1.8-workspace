@@ -75,7 +75,8 @@ public class Stitcher {
 				.toArray(new Stitcher.Holder[this.setStitchHolders.size()]);
 		Arrays.sort(astitcher$holder);
 
-		for (Stitcher.Holder stitcher$holder : astitcher$holder) {
+		for (int i = 0; i < astitcher$holder.length; ++i) {
+			Stitcher.Holder stitcher$holder = astitcher$holder[i];
 			if (!this.allocateSlot(stitcher$holder)) {
 				String s = HString.format("Unable to fit: %s - size: %dx%d - Maybe try a lowerresolution resourcepack?",
 						new Object[] { stitcher$holder.getAtlasSprite().getIconName(),
@@ -93,15 +94,16 @@ public class Stitcher {
 	}
 
 	public List<EaglerTextureAtlasSprite> getStichSlots() {
-		ArrayList arraylist = Lists.newArrayList();
+		ArrayList<Slot> arraylist = Lists.newArrayList();
 
-		for (Stitcher.Slot stitcher$slot : this.stitchSlots) {
-			stitcher$slot.getAllStitchSlots(arraylist);
+		for (int i = 0, l = this.stitchSlots.size(); i < l; ++i) {
+			this.stitchSlots.get(i).getAllStitchSlots(arraylist);
 		}
 
-		ArrayList arraylist1 = Lists.newArrayList();
+		ArrayList<EaglerTextureAtlasSprite> arraylist1 = Lists.newArrayList();
 
-		for (Stitcher.Slot stitcher$slot1 : (List<Stitcher.Slot>) arraylist) {
+		for (int i = 0, l = arraylist.size(); i < l; ++i) {
+			Stitcher.Slot stitcher$slot1 = arraylist.get(i);
 			Stitcher.Holder stitcher$holder = stitcher$slot1.getStitchHolder();
 			EaglerTextureAtlasSprite textureatlassprite = stitcher$holder.getAtlasSprite();
 			textureatlassprite.initSprite(this.currentWidth, this.currentHeight, stitcher$slot1.getOriginX(),
@@ -335,8 +337,8 @@ public class Stitcher {
 							}
 						}
 
-						for (Stitcher.Slot stitcher$slot : this.subSlots) {
-							if (stitcher$slot.addSlot(holderIn)) {
+						for (int m = 0, n = this.subSlots.size(); m < n; ++m) {
+							if (this.subSlots.get(m).addSlot(holderIn)) {
 								return true;
 							}
 						}
@@ -353,8 +355,8 @@ public class Stitcher {
 			if (this.holder != null) {
 				parList.add(this);
 			} else if (this.subSlots != null) {
-				for (Stitcher.Slot stitcher$slot : this.subSlots) {
-					stitcher$slot.getAllStitchSlots(parList);
+				for (int i = 0, l = this.subSlots.size(); i < l; ++i) {
+					this.subSlots.get(i).getAllStitchSlots(parList);
 				}
 			}
 

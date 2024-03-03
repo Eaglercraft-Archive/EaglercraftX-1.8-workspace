@@ -2,6 +2,8 @@ package net.minecraft.block;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 
+import java.util.List;
+
 import com.google.common.base.Predicate;
 
 import net.minecraft.block.material.Material;
@@ -228,9 +230,10 @@ public class BlockSkull extends BlockContainer {
 						: 90.0F;
 				entitywither.func_82206_m();
 
-				for (EntityPlayer entityplayer : worldIn.getEntitiesWithinAABB(EntityPlayer.class,
-						entitywither.getEntityBoundingBox().expand(50.0D, 50.0D, 50.0D))) {
-					entityplayer.triggerAchievement(AchievementList.spawnWither);
+				List<EntityPlayer> list = worldIn.getEntitiesWithinAABB(EntityPlayer.class,
+						entitywither.getEntityBoundingBox().expand(50.0D, 50.0D, 50.0D));
+				for (int j = 0, l = list.size(); j < l; ++j) {
+					list.get(j).triggerAchievement(AchievementList.spawnWither);
 				}
 
 				worldIn.spawnEntityInWorld(entitywither);

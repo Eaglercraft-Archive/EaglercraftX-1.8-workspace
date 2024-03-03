@@ -272,14 +272,17 @@ public class Chunk {
 						int i1 = this.zPosition * 16 + j;
 						int j1 = Integer.MAX_VALUE;
 
-						for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+						EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+						for (int m = 0; m < facings.length; ++m) {
+							EnumFacing enumfacing = facings[m];
 							j1 = Math.min(j1, this.worldObj.getChunksLowestHorizon(l + enumfacing.getFrontOffsetX(),
 									i1 + enumfacing.getFrontOffsetZ()));
 						}
 
 						this.checkSkylightNeighborHeight(l, i1, j1);
 
-						for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL) {
+						for (int m = 0; m < facings.length; ++m) {
+							EnumFacing enumfacing1 = facings[m];
 							this.checkSkylightNeighborHeight(l + enumfacing1.getFrontOffsetX(),
 									i1 + enumfacing1.getFrontOffsetZ(), k);
 						}
@@ -398,7 +401,9 @@ public class Chunk {
 			}
 
 			if (!this.worldObj.provider.getHasNoSky()) {
-				for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+				EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+				for (int m = 0; m < facings.length; ++m) {
+					EnumFacing enumfacing = facings[m];
 					this.updateSkylightNeighborHeight(k + enumfacing.getFrontOffsetX(),
 							l + enumfacing.getFrontOffsetZ(), j2, k2);
 				}
@@ -1200,13 +1205,14 @@ public class Chunk {
 			int l = this.queuedLightChecks / 256;
 			++this.queuedLightChecks;
 
+			EnumFacing[] facings = EnumFacing._VALUES;
 			for (int i1 = 0; i1 < 16; ++i1) {
 				BlockPos blockpos1 = blockpos.add(k, (j << 4) + i1, l);
 				boolean flag = i1 == 0 || i1 == 15 || k == 0 || k == 15 || l == 0 || l == 15;
 				if (this.storageArrays[j] == null && flag || this.storageArrays[j] != null
 						&& this.storageArrays[j].getBlockByExtId(k, i1, l).getMaterial() == Material.air) {
-					for (EnumFacing enumfacing : EnumFacing.values()) {
-						BlockPos blockpos2 = blockpos1.offset(enumfacing);
+					for (int m = 0; m < facings.length; ++m) {
+						BlockPos blockpos2 = blockpos1.offset(facings[m]);
 						if (this.worldObj.getBlockState(blockpos2).getBlock().getLightValue() > 0) {
 							this.worldObj.checkLight(blockpos2);
 						}
@@ -1236,7 +1242,9 @@ public class Chunk {
 				}
 
 				if (this.isLightPopulated) {
-					for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+					EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
+					for (int i = 0; i < facings.length; ++i) {
+						EnumFacing enumfacing = facings[i];
 						int k = enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? 16 : 1;
 						this.worldObj.getChunkFromBlockCoords(blockpos.offset(enumfacing, k))
 								.func_180700_a(enumfacing.getOpposite());

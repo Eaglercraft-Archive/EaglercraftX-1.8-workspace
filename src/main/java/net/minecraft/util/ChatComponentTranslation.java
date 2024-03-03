@@ -44,7 +44,8 @@ public class ChatComponentTranslation extends ChatComponentStyle {
 		this.key = translationKey;
 		this.formatArgs = args;
 
-		for (Object object : args) {
+		for (int i = 0; i < args.length; ++i) {
+			Object object = args[i];
 			if (object instanceof IChatComponent) {
 				((IChatComponent) object).getChatStyle().setParentStyle(this.getChatStyle());
 			}
@@ -154,15 +155,16 @@ public class ChatComponentTranslation extends ChatComponentStyle {
 	public IChatComponent setChatStyle(ChatStyle chatstyle) {
 		super.setChatStyle(chatstyle);
 
-		for (Object object : this.formatArgs) {
+		for (int i = 0; i < this.formatArgs.length; ++i) {
+			Object object = this.formatArgs[i];
 			if (object instanceof IChatComponent) {
 				((IChatComponent) object).getChatStyle().setParentStyle(this.getChatStyle());
 			}
 		}
 
 		if (this.lastTranslationUpdateTimeInMilliseconds > -1L) {
-			for (IChatComponent ichatcomponent : this.children) {
-				ichatcomponent.getChatStyle().setParentStyle(chatstyle);
+			for (int i = 0, l = this.children.size(); i < l; ++i) {
+				this.children.get(i).getChatStyle().setParentStyle(chatstyle);
 			}
 		}
 
@@ -183,8 +185,8 @@ public class ChatComponentTranslation extends ChatComponentStyle {
 		this.ensureInitialized();
 		StringBuilder stringbuilder = new StringBuilder();
 
-		for (IChatComponent ichatcomponent : this.children) {
-			stringbuilder.append(ichatcomponent.getUnformattedTextForChat());
+		for (int i = 0, l = this.children.size(); i < l; ++i) {
+			stringbuilder.append(this.children.get(i).getUnformattedTextForChat());
 		}
 
 		return stringbuilder.toString();
@@ -208,8 +210,9 @@ public class ChatComponentTranslation extends ChatComponentStyle {
 		ChatComponentTranslation chatcomponenttranslation = new ChatComponentTranslation(this.key, aobject);
 		chatcomponenttranslation.setChatStyle(this.getChatStyle().createShallowCopy());
 
-		for (IChatComponent ichatcomponent : this.getSiblings()) {
-			chatcomponenttranslation.appendSibling(ichatcomponent.createCopy());
+		List<IChatComponent> lst = this.getSiblings();
+		for (int i = 0, l = lst.size(); i < l; ++i) {
+			chatcomponenttranslation.appendSibling(lst.get(i).createCopy());
 		}
 
 		return chatcomponenttranslation;

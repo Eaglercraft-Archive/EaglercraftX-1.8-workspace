@@ -23,7 +23,6 @@ import net.minecraft.util.MathHelper;
  * 
  */
 public class PathPoint {
-
 	public final int xCoord;
 	public final int yCoord;
 	public final int zCoord;

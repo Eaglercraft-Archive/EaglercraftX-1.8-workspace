@@ -97,9 +97,9 @@ public interface IScoreObjectiveCriteria {
 		}
 
 		static {
-			for (IScoreObjectiveCriteria.EnumRenderType iscoreobjectivecriteria$enumrendertype : values()) {
-				field_178801_c.put(iscoreobjectivecriteria$enumrendertype.func_178796_a(),
-						iscoreobjectivecriteria$enumrendertype);
+			IScoreObjectiveCriteria.EnumRenderType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				field_178801_c.put(types[i].func_178796_a(), types[i]);
 			}
 
 		}

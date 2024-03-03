@@ -5,8 +5,6 @@ import com.google.common.base.Predicates;
 import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.EntitySelectors;
@@ -33,7 +31,6 @@ import net.minecraft.util.Vec3;
  * 
  */
 public class EntityAIAvoidEntity<T extends Entity> extends EntityAIBase {
-
 	private final Predicate<Entity> canBeSeenSelector;
 	protected EntityCreature theEntity;
 	private double farSpeed;

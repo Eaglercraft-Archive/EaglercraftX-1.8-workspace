@@ -64,8 +64,9 @@ public class BlockStoneBrick extends Block {
 	 * (eg: wood returns 4 blocks)
 	 */
 	public void getSubBlocks(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (BlockStoneBrick.EnumType blockstonebrick$enumtype : BlockStoneBrick.EnumType.values()) {
-			list.add(new ItemStack(item, 1, blockstonebrick$enumtype.getMetadata()));
+		BlockStoneBrick.EnumType[] types = BlockStoneBrick.EnumType.META_LOOKUP;
+		for (int i = 0; i < types.length; ++i) {
+			list.add(new ItemStack(item, 1, types[i].getMetadata()));
 		}
 
 	}
@@ -92,7 +93,7 @@ public class BlockStoneBrick extends Block {
 		DEFAULT(0, "stonebrick", "default"), MOSSY(1, "mossy_stonebrick", "mossy"),
 		CRACKED(2, "cracked_stonebrick", "cracked"), CHISELED(3, "chiseled_stonebrick", "chiseled");
 
-		private static final BlockStoneBrick.EnumType[] META_LOOKUP = new BlockStoneBrick.EnumType[values().length];
+		public static final BlockStoneBrick.EnumType[] META_LOOKUP = new BlockStoneBrick.EnumType[4];
 		private final int meta;
 		private final String name;
 		private final String unlocalizedName;
@@ -128,8 +129,9 @@ public class BlockStoneBrick extends Block {
 		}
 
 		static {
-			for (BlockStoneBrick.EnumType blockstonebrick$enumtype : values()) {
-				META_LOOKUP[blockstonebrick$enumtype.getMetadata()] = blockstonebrick$enumtype;
+			BlockStoneBrick.EnumType[] types = values();
+			for (int i = 0; i < types.length; ++i) {
+				META_LOOKUP[types[i].getMetadata()] = types[i];
 			}
 
 		}

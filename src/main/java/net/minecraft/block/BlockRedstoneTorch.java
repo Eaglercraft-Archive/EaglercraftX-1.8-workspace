@@ -81,8 +81,10 @@ public class BlockRedstoneTorch extends BlockTorch {
 
 	public void onBlockAdded(World world, BlockPos blockpos, IBlockState var3) {
 		if (this.isOn) {
-			for (EnumFacing enumfacing : EnumFacing.values()) {
-				world.notifyNeighborsOfStateChange(blockpos.offset(enumfacing), this);
+			EnumFacing[] facings = EnumFacing._VALUES;
+			BlockPos tmp = new BlockPos(0, 0, 0);
+			for (int i = 0; i < facings.length; ++i) {
+				world.notifyNeighborsOfStateChange(blockpos.offsetEvenFaster(facings[i], tmp), this);
 			}
 		}
 
@@ -90,8 +92,10 @@ public class BlockRedstoneTorch extends BlockTorch {
 
 	public void breakBlock(World world, BlockPos blockpos, IBlockState var3) {
 		if (this.isOn) {
-			for (EnumFacing enumfacing : EnumFacing.values()) {
-				world.notifyNeighborsOfStateChange(blockpos.offset(enumfacing), this);
+			EnumFacing[] facings = EnumFacing._VALUES;
+			BlockPos tmp = new BlockPos(0, 0, 0);
+			for (int i = 0; i < facings.length; ++i) {
+				world.notifyNeighborsOfStateChange(blockpos.offsetEvenFaster(facings[i], tmp), this);
 			}
 		}
 
