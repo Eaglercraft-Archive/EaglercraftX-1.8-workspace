@@ -140,6 +140,7 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
 		this.mc.displayGuiScreen(this);
 		if (i == 109 && flag && this.mc.theWorld != null) {
 			this.mc.theWorld.getWorldInfo().setDifficultyLocked(true);
+			SingleplayerServerController.setDifficulty(-1);
 			this.field_175356_r.func_175229_b(true);
 			this.field_175356_r.enabled = false;
 			this.field_175357_i.enabled = false;

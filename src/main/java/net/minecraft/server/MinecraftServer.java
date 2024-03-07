@@ -23,6 +23,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S03PacketTimeUpdate;
+import net.minecraft.network.play.server.S41PacketServerDifficulty;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.BlockPos;
@@ -194,13 +195,12 @@ public abstract class MinecraftServer implements Runnable, ICommandSender, IThre
 			}
 
 			this.worldServers[j].addWorldAccess(new WorldManager(this, this.worldServers[j]));
-			if (!this.isSinglePlayer()) {
-				this.worldServers[j].getWorldInfo().setGameType(this.getGameType());
-			}
 		}
 
 		this.serverConfigManager.setPlayerManager(this.worldServers);
-		this.setDifficultyForAllWorlds(this.getDifficulty());
+		if (this.worldServers[0].getWorldInfo().getDifficulty() == null) {
+			this.setDifficultyForAllWorlds(this.getDifficulty());
+		}
 		this.isSpawnChunksLoaded = this.worldServers[0].getWorldInfo().getGameRulesInstance()
 				.getBoolean("loadSpawnChunks");
 		if (this.isSpawnChunksLoaded) {
@@ -754,6 +754,17 @@ public abstract class MinecraftServer implements Runnable, ICommandSender, IThre
 					worldserver.getWorldInfo().setDifficulty(enumdifficulty);
 					worldserver.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
 				}
+			}
+		}
+		this.getConfigurationManager().sendPacketToAllPlayers(new S41PacketServerDifficulty(
+				this.worldServers[0].getDifficulty(), this.worldServers[0].getWorldInfo().isDifficultyLocked()));
+	}
+
+	public void setDifficultyLockedForAllWorlds(boolean locked) {
+		for (int i = 0; i < this.worldServers.length; ++i) {
+			WorldServer worldserver = this.worldServers[i];
+			if (worldserver != null) {
+				worldserver.getWorldInfo().setDifficultyLocked(locked);
 			}
 		}
 

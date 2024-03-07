@@ -50,14 +50,16 @@ public class S41PacketServerDifficulty implements Packet<INetHandlerPlayClient> 
 	 * Reads the raw packet data from the data stream.
 	 */
 	public void readPacketData(PacketBuffer parPacketBuffer) throws IOException {
-		this.difficulty = EnumDifficulty.getDifficultyEnum(parPacketBuffer.readUnsignedByte());
+		int i = parPacketBuffer.readUnsignedByte();
+		this.difficulty = EnumDifficulty.getDifficultyEnum(i & 3);
+		this.difficultyLocked = (i & 4) != 0;
 	}
 
 	/**+
 	 * Writes the raw packet data to the data stream.
 	 */
 	public void writePacketData(PacketBuffer parPacketBuffer) throws IOException {
-		parPacketBuffer.writeByte(this.difficulty.getDifficultyId());
+		parPacketBuffer.writeByte(this.difficulty.getDifficultyId() | (this.difficultyLocked ? 4 : 0));
 	}
 
 	public boolean isDifficultyLocked() {
