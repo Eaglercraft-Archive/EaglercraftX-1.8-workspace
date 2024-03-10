@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.HString;
+import net.lax1dude.eaglercraft.v1_8.ThreadLocalRandom;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -115,7 +116,7 @@ public class CommandSpreadPlayers extends CommandBase {
 
 	private void func_110669_a(ICommandSender worldIn, List<Entity> parList, CommandSpreadPlayers.Position parPosition,
 			double parDouble1, double parDouble2, World parWorld, boolean parFlag) throws CommandException {
-		EaglercraftRandom random = new EaglercraftRandom();
+		EaglercraftRandom random = ThreadLocalRandom.current();
 		double d0 = parPosition.field_111101_a - parDouble2;
 		double d1 = parPosition.field_111100_b - parDouble2;
 		double d2 = parPosition.field_111101_a + parDouble2;

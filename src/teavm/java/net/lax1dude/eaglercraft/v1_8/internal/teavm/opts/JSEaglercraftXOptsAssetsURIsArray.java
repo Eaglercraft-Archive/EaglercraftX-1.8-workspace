@@ -1,9 +1,11 @@
-package net.minecraft.entity;
+package net.lax1dude.eaglercraft.v1_8.internal.teavm.opts;
 
-import net.minecraft.world.World;
+import org.teavm.jso.JSIndexer;
+import org.teavm.jso.JSObject;
+import org.teavm.jso.JSProperty;
 
 /**
- * Copyright (c) 2022 lax1dude. All Rights Reserved.
+ * Copyright (c) 2024 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -17,8 +19,12 @@ import net.minecraft.world.World;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-public interface EntityConstructor<T> {
+public interface JSEaglercraftXOptsAssetsURIsArray extends JSObject {
 
-	T createEntity(World world);
+	@JSIndexer
+	JSEaglercraftXOptsAssetsURI get(int idx);
+
+	@JSProperty
+	int getLength();
 
 }

@@ -17,6 +17,7 @@ import net.lax1dude.eaglercraft.v1_8.EaglercraftSoundManager;
 import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.IOUtils;
+import net.lax1dude.eaglercraft.v1_8.ThreadLocalRandom;
 import net.lax1dude.eaglercraft.v1_8.json.JSONTypeProvider;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
@@ -266,7 +267,7 @@ public class SoundHandler implements IResourceManagerReloadListener, ITickable {
 		if (arraylist.isEmpty()) {
 			return null;
 		} else {
-			return (SoundEventAccessorComposite) arraylist.get((new EaglercraftRandom()).nextInt(arraylist.size()));
+			return (SoundEventAccessorComposite) arraylist.get(ThreadLocalRandom.current().nextInt(arraylist.size()));
 		}
 	}
 

@@ -2,6 +2,7 @@ package net.minecraft.command;
 
 import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
+import net.lax1dude.eaglercraft.v1_8.ThreadLocalRandom;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -55,7 +56,7 @@ public class CommandWeather extends CommandBase {
 	 */
 	public void processCommand(ICommandSender parICommandSender, String[] parArrayOfString) throws CommandException {
 		if (parArrayOfString.length >= 1 && parArrayOfString.length <= 2) {
-			int i = (300 + (new EaglercraftRandom()).nextInt(600)) * 20 * 2;
+			int i = (300 + ThreadLocalRandom.current().nextInt(600)) * 20 * 2;
 			if (parArrayOfString.length >= 2) {
 				i = parseInt(parArrayOfString[1], 1, 1000000) * 20;
 			}

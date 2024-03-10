@@ -79,6 +79,10 @@ public abstract class EntityFireball extends Entity {
 		this.setLocationAndAngles(x, y, z, this.rotationYaw, this.rotationPitch);
 		this.setPosition(x, y, z);
 		double d0 = (double) MathHelper.sqrt_double(accelX * accelX + accelY * accelY + accelZ * accelZ);
+		if (d0 == 0.0) {
+			this.accelerationX = this.accelerationY = this.accelerationZ = 0.0D;
+			return;
+		}
 		this.accelerationX = accelX / d0 * 0.1D;
 		this.accelerationY = accelY / d0 * 0.1D;
 		this.accelerationZ = accelZ / d0 * 0.1D;
@@ -95,6 +99,10 @@ public abstract class EntityFireball extends Entity {
 		accelY = accelY + this.rand.nextGaussian() * 0.4D;
 		accelZ = accelZ + this.rand.nextGaussian() * 0.4D;
 		double d0 = (double) MathHelper.sqrt_double(accelX * accelX + accelY * accelY + accelZ * accelZ);
+		if (d0 == 0.0) {
+			this.accelerationX = this.accelerationY = this.accelerationZ = 0.0D;
+			return;
+		}
 		this.accelerationX = accelX / d0 * 0.1D;
 		this.accelerationY = accelY / d0 * 0.1D;
 		this.accelerationZ = accelZ / d0 * 0.1D;
@@ -144,7 +152,7 @@ public abstract class EntityFireball extends Entity {
 					.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
 			double d0 = 0.0D;
 
-			for (int i = 0; i < list.size(); ++i) {
+			for (int i = 0, l = list.size(); i < l; ++i) {
 				Entity entity1 = (Entity) list.get(i);
 				if (entity1.canBeCollidedWith()
 						&& (!entity1.isEntityEqual(this.shootingEntity) || this.ticksInAir >= 25)) {
