@@ -1,7 +1,7 @@
 package net.minecraft.command;
 
 import java.util.List;
-import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
+
 import net.lax1dude.eaglercraft.v1_8.ThreadLocalRandom;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;

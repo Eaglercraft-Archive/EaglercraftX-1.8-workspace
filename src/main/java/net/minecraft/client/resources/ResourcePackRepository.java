@@ -185,7 +185,7 @@ public class ResourcePackRepository {
 
 			try {
 				this.texturePackIcon = this.reResourcePack.getPackImage();
-			} catch (IOException var2) {
+			} catch (Throwable var2) {
 				logger.error("Failed to load resource pack icon for \"{}\"!", reResourcePack.resourcePackFile);
 				logger.error(var2);
 			}

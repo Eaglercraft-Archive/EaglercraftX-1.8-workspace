@@ -11,11 +11,9 @@ import java.util.Set;
 
 import net.lax1dude.eaglercraft.v1_8.internal.PlatformAudio;
 
-import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-import net.lax1dude.eaglercraft.v1_8.EaglercraftSoundManager;
-
 import com.google.common.collect.Lists;
 
+import net.lax1dude.eaglercraft.v1_8.EaglercraftSoundManager;
 import net.lax1dude.eaglercraft.v1_8.IOUtils;
 import net.lax1dude.eaglercraft.v1_8.ThreadLocalRandom;
 import net.lax1dude.eaglercraft.v1_8.json.JSONTypeProvider;
