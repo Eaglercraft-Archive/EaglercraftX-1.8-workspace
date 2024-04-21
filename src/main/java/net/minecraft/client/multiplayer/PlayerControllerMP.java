@@ -313,6 +313,7 @@ public class PlayerControllerMP {
 						.closeChannel(new ChatComponentText("Exception thrown: " + ex.toString()));
 			}
 			this.netClientHandler.getSkinCache().flush();
+			this.netClientHandler.getCapeCache().flush();
 		} else {
 			this.netClientHandler.getNetworkManager().checkDisconnected();
 		}

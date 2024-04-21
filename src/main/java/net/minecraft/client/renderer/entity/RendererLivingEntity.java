@@ -193,7 +193,8 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
 
 			GlStateManager.disableRescaleNormal();
 		} catch (Exception exception) {
-			logger.error("Couldn\'t render entity", exception);
+			logger.error("Couldn\'t render entity");
+			logger.error(exception);
 		}
 
 		GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);

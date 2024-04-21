@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.entity;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelZombie;
@@ -58,6 +59,10 @@ public class RenderPlayer extends RendererLivingEntity<AbstractClientPlayer> {
 		this.addLayer(new LayerDeadmau5Head(this));
 		this.addLayer(new LayerCape(this));
 		this.addLayer(new LayerCustomHead(this.getMainModel().bipedHead));
+	}
+
+	protected RenderPlayer(RenderManager renderManager, ModelBase modelBase, float size) {
+		super(renderManager, modelBase, size);
 	}
 
 	public ModelBiped getMainModel() {

@@ -34,6 +34,7 @@ import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.ShadersRenderPassFuture
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.gui.GuiShaderConfig;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.texture.EmissiveItems;
 import net.lax1dude.eaglercraft.v1_8.vector.Vector4f;
+import net.lax1dude.eaglercraft.v1_8.voice.VoiceTagRenderer;
 import net.lax1dude.eaglercraft.v1_8.vector.Matrix4f;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
@@ -172,6 +173,8 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 	private int frameCount;
 	private GameOverlayFramebuffer overlayFramebuffer;
 	private float eagPartialTicks = 0.0f;
+
+	public float currentProjMatrixFOV = 0.0f;
 
 	public EntityRenderer(Minecraft mcIn, IResourceManager resourceManagerIn) {
 		this.useShader = false;
@@ -413,7 +416,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 			Entity entity = this.mc.getRenderViewEntity();
 			float f = 70.0F;
 			if (parFlag) {
-				f = this.mc.gameSettings.keyBindZoomCamera.isKeyDown() ? 17.0f : this.mc.gameSettings.fovSetting;
+				f = this.mc.isZoomKey ? this.mc.adjustedZoomValue : this.mc.gameSettings.fovSetting;
 				f = f * (this.fovModifierHandPrev + (this.fovModifierHand - this.fovModifierHandPrev) * partialTicks);
 			}
 
@@ -594,7 +597,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 		}
 
 		float farPlane = this.farPlaneDistance * 2.0f * MathHelper.SQRT_2;
-		GlStateManager.gluPerspective(this.getFOVModifier(partialTicks, true),
+		GlStateManager.gluPerspective(currentProjMatrixFOV = this.getFOVModifier(partialTicks, true),
 				(float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, farPlane);
 		DeferredStateManager.setGBufferNearFarPlanes(0.05f, farPlane);
 		GlStateManager.matrixMode(GL_MODELVIEW);
@@ -1015,6 +1018,8 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 					});
 					throw new ReportedException(crashreport);
 				}
+
+				this.mc.voiceOverlay.drawOverlay();
 			}
 
 		}
@@ -1087,6 +1092,8 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 			EffectPipelineFXAA.begin(this.mc.displayWidth, this.mc.displayHeight);
 		}
 
+		VoiceTagRenderer.clearTagsDrawnSet();
+
 		GlStateManager.enableDepth();
 		GlStateManager.enableAlpha();
 		GlStateManager.alphaFunc(GL_GREATER, 0.5F);
@@ -1149,14 +1156,14 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 			this.mc.mcProfiler.endStartSection("sky");
 			GlStateManager.matrixMode(GL_PROJECTION);
 			GlStateManager.loadIdentity();
-			GlStateManager.gluPerspective(this.getFOVModifier(partialTicks, true),
-					(float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * 4.0F);
+			float vigg = this.getFOVModifier(partialTicks, true);
+			GlStateManager.gluPerspective(vigg, (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F,
+					this.farPlaneDistance * 4.0F);
 			GlStateManager.matrixMode(GL_MODELVIEW);
 			renderglobal.renderSky(partialTicks, pass);
 			GlStateManager.matrixMode(GL_PROJECTION);
 			GlStateManager.loadIdentity();
-			GlStateManager.gluPerspective(this.getFOVModifier(partialTicks, true),
-					(float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F,
+			GlStateManager.gluPerspective(vigg, (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F,
 					this.farPlaneDistance * MathHelper.SQRT_2);
 			GlStateManager.matrixMode(GL_MODELVIEW);
 		}

@@ -133,7 +133,7 @@ public class GuiOptions extends GuiScreen implements GuiYesNoCallback {
 		chatcomponenttext.appendText(": ");
 		chatcomponenttext.appendSibling(
 				new ChatComponentTranslation(parEnumDifficulty.getDifficultyResourceKey(), new Object[0]));
-		return chatcomponenttext.getFormattedText();
+		return chatcomponenttext.getUnformattedText();
 	}
 
 	public void confirmClicked(boolean flag, int i) {

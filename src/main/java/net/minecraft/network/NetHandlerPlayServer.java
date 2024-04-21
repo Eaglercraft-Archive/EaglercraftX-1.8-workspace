@@ -90,6 +90,7 @@ import net.minecraft.util.IntHashMap;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.WorldServer;
 import net.lax1dude.eaglercraft.v1_8.sp.server.socket.IntegratedServerPlayerNetworkManager;
+import net.lax1dude.eaglercraft.v1_8.sp.server.voice.IntegratedVoiceService;
 
 import org.apache.commons.lang3.StringUtils;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
@@ -1239,6 +1240,15 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 			byte[] r = new byte[c17packetcustompayload.getBufferData().readableBytes()];
 			c17packetcustompayload.getBufferData().readBytes(r);
 			((EaglerMinecraftServer) serverController).getSkinService().processPacket(r, playerEntity);
+		} else if ("EAG|Capes-1.8".equals(c17packetcustompayload.getChannelName())) {
+			byte[] r = new byte[c17packetcustompayload.getBufferData().readableBytes()];
+			c17packetcustompayload.getBufferData().readBytes(r);
+			((EaglerMinecraftServer) serverController).getCapeService().processPacket(r, playerEntity);
+		} else if ("EAG|Voice-1.8".equals(c17packetcustompayload.getChannelName())) {
+			IntegratedVoiceService vcs = ((EaglerMinecraftServer) serverController).getVoiceService();
+			if (vcs != null) {
+				vcs.processPacket(c17packetcustompayload.getBufferData(), playerEntity);
+			}
 		} else if ("EAG|MyUpdCert-1.8".equals(c17packetcustompayload.getChannelName())) {
 			if (playerEntity.updateCertificate == null) {
 				PacketBuffer pb = c17packetcustompayload.getBufferData();

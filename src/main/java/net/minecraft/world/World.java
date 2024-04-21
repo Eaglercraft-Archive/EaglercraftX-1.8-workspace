@@ -2701,9 +2701,10 @@ public abstract class World implements IBlockAccess {
 		int i = 0;
 
 		EnumFacing[] facings = EnumFacing._VALUES;
+		BlockPos tmp = new BlockPos(0, 0, 0);
 		for (int k = 0; k < facings.length; ++k) {
 			EnumFacing enumfacing = facings[k];
-			int j = this.getRedstonePower(pos.offset(enumfacing), enumfacing);
+			int j = this.getRedstonePower(pos.offsetEvenFaster(enumfacing, tmp), enumfacing);
 			if (j >= 15) {
 				return 15;
 			}

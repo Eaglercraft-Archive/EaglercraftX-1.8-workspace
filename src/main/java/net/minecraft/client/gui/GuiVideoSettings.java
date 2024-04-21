@@ -30,16 +30,20 @@ public class GuiVideoSettings extends GuiScreen {
 	protected String screenTitle = "Video Settings";
 	private GameSettings guiGameSettings;
 	private GuiListExtended optionsRowList;
+	/**
+	 * + An array of all of GameSettings.Options's video options.
+	 */
 	/**+
 	 * An array of all of GameSettings.Options's video options.
 	 */
 	private static final GameSettings.Options[] videoOptions = new GameSettings.Options[] {
 			GameSettings.Options.GRAPHICS, GameSettings.Options.RENDER_DISTANCE, GameSettings.Options.AMBIENT_OCCLUSION,
-			GameSettings.Options.FRAMERATE_LIMIT, GameSettings.Options.ANAGLYPH, GameSettings.Options.VIEW_BOBBING,
-			GameSettings.Options.GUI_SCALE, GameSettings.Options.GAMMA, GameSettings.Options.RENDER_CLOUDS,
-			GameSettings.Options.PARTICLES, GameSettings.Options.FXAA, GameSettings.Options.MIPMAP_LEVELS,
-			GameSettings.Options.BLOCK_ALTERNATIVES, GameSettings.Options.ENTITY_SHADOWS, GameSettings.Options.FOG,
-			GameSettings.Options.FULLSCREEN, GameSettings.Options.HUD_FPS, GameSettings.Options.HUD_COORDS,
+			GameSettings.Options.FRAMERATE_LIMIT, GameSettings.Options.EAGLER_VSYNC, GameSettings.Options.ANAGLYPH,
+			GameSettings.Options.VIEW_BOBBING, GameSettings.Options.GUI_SCALE, GameSettings.Options.GAMMA,
+			GameSettings.Options.RENDER_CLOUDS, GameSettings.Options.PARTICLES, GameSettings.Options.FXAA,
+			GameSettings.Options.MIPMAP_LEVELS, GameSettings.Options.BLOCK_ALTERNATIVES,
+			GameSettings.Options.ENTITY_SHADOWS, GameSettings.Options.FOG, GameSettings.Options.FULLSCREEN,
+			GameSettings.Options.FNAW_SKINS, GameSettings.Options.HUD_FPS, GameSettings.Options.HUD_COORDS,
 			GameSettings.Options.HUD_PLAYER, GameSettings.Options.HUD_STATS, GameSettings.Options.HUD_WORLD,
 			GameSettings.Options.HUD_24H, GameSettings.Options.CHUNK_FIX };
 
@@ -97,6 +101,7 @@ public class GuiVideoSettings extends GuiScreen {
 			int j = scaledresolution.getScaledWidth();
 			int k = scaledresolution.getScaledHeight();
 			this.setWorldAndResolution(this.mc, j, k);
+			this.mc.voiceOverlay.setResolution(j, k);
 		}
 
 	}

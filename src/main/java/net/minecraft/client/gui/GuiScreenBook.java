@@ -551,4 +551,8 @@ public class GuiScreenBook extends GuiScreen {
 			}
 		}
 	}
+
+	public boolean blockPTTKey() {
+		return this.bookIsUnsigned;
+	}
 }

@@ -161,6 +161,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 	private double lastViewEntityZ = Double.MIN_VALUE;
 	private double lastViewEntityPitch = Double.MIN_VALUE;
 	private double lastViewEntityYaw = Double.MIN_VALUE;
+	private float lastViewProjMatrixFOV = Float.MIN_VALUE;
 	private final ChunkUpdateManager renderDispatcher = new ChunkUpdateManager();
 	private ChunkRenderContainer renderContainer;
 	private int renderDistanceChunks = -1;
@@ -857,12 +858,14 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 				|| viewEntity.posX != this.lastViewEntityX || viewEntity.posY != this.lastViewEntityY
 				|| viewEntity.posZ != this.lastViewEntityZ
 				|| (double) viewEntity.rotationPitch != this.lastViewEntityPitch
-				|| (double) viewEntity.rotationYaw != this.lastViewEntityYaw;
+				|| (double) viewEntity.rotationYaw != this.lastViewEntityYaw
+				|| this.mc.entityRenderer.currentProjMatrixFOV != this.lastViewProjMatrixFOV;
 		this.lastViewEntityX = viewEntity.posX;
 		this.lastViewEntityY = viewEntity.posY;
 		this.lastViewEntityZ = viewEntity.posZ;
 		this.lastViewEntityPitch = (double) viewEntity.rotationPitch;
 		this.lastViewEntityYaw = (double) viewEntity.rotationYaw;
+		this.lastViewProjMatrixFOV = this.mc.entityRenderer.currentProjMatrixFOV;
 		boolean flag = this.debugFixedClippingHelper != null;
 		if (!flag && this.displayListEntitiesDirty) {
 			this.displayListEntitiesDirty = false;

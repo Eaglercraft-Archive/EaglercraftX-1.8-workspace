@@ -99,7 +99,7 @@ public class BlockRedstoneWire extends Block {
 		BlockPos posTmp = new BlockPos(0, 0, 0);
 		Block block = worldIn.getBlockState(blockpos).getBlock();
 		if (!canConnectTo(worldIn.getBlockState(blockpos), direction) && (block.isBlockNormalCube()
-				|| !canConnectUpwardsTo(worldIn.getBlockState(blockpos.offsetEvenFaster(EnumFacing.UP, posTmp))))) {
+				|| !canConnectUpwardsTo(worldIn.getBlockState(blockpos.offsetEvenFaster(EnumFacing.DOWN, posTmp))))) {
 			Block block1 = worldIn.getBlockState(pos.up()).getBlock();
 			return !block1.isBlockNormalCube() && block.isBlockNormalCube()
 					&& canConnectUpwardsTo(worldIn.getBlockState(blockpos.offsetEvenFaster(EnumFacing.UP, posTmp)))
@@ -177,11 +177,13 @@ public class BlockRedstoneWire extends Block {
 			if (worldIn.getBlockState(blockpos).getBlock().isNormalCube()
 					&& !worldIn.getBlockState(pos1.up()).getBlock().isNormalCube()) {
 				if (flag && pos1.getY() >= pos2.getY()) {
-					l = this.getMaxCurrentStrength(worldIn, blockpos.up(), l);
+					++blockpos.y;
+					l = this.getMaxCurrentStrength(worldIn, blockpos, l);
 				}
 			} else if (!worldIn.getBlockState(blockpos).getBlock().isNormalCube() && flag
 					&& pos1.getY() <= pos2.getY()) {
-				l = this.getMaxCurrentStrength(worldIn, blockpos.down(), l);
+				--blockpos.y;
+				l = this.getMaxCurrentStrength(worldIn, blockpos, l);
 			}
 		}
 
@@ -205,6 +207,7 @@ public class BlockRedstoneWire extends Block {
 
 			this.blocksNeedingUpdate.add(pos1);
 
+			facings = EnumFacing._VALUES;
 			for (int m = 0; m < facings.length; ++m) {
 				this.blocksNeedingUpdate.add(pos1.offset(facings[m]));
 			}

@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import net.lax1dude.eaglercraft.v1_8.sp.relay.RelayManager;
+import net.lax1dude.eaglercraft.v1_8.voice.VoiceClientController;
+
 import org.json.JSONArray;
 
 import com.google.common.collect.ImmutableSet;
@@ -24,6 +26,7 @@ import net.lax1dude.eaglercraft.v1_8.EaglerZLIB;
 import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
 import net.lax1dude.eaglercraft.v1_8.Mouse;
+import net.lax1dude.eaglercraft.v1_8.internal.EnumPlatformType;
 import net.lax1dude.eaglercraft.v1_8.internal.KeyboardConstants;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
@@ -105,7 +108,7 @@ public class GameSettings {
 	public boolean chatLinksPrompt = true;
 	public float chatOpacity = 1.0F;
 	public boolean snooperEnabled = true;
-	public boolean enableVsync = true;
+	public boolean enableVsync = EagRuntime.getPlatformType() != EnumPlatformType.DESKTOP;
 	public boolean allowBlockAlternatives = true;
 	public boolean reducedDebugInfo = false;
 	public boolean hideServerAddress;
@@ -198,6 +201,12 @@ public class GameSettings {
 	public boolean shadersAODisable = false;
 	public EaglerDeferredConfig deferredShaderConf = new EaglerDeferredConfig();
 	public boolean enableUpdateSvc = true;
+	public boolean enableFNAWSkins = true;
+
+	public int voiceListenRadius = 16;
+	public float voiceListenVolume = 0.5f;
+	public float voiceSpeakVolume = 0.5f;
+	public int voicePTTKey = 47; // V
 
 	public GameSettings(Minecraft mcIn) {
 		this.keyBindings = (KeyBinding[]) ArrayUtils.addAll(new KeyBinding[] { this.keyBindAttack, this.keyBindUseItem,
@@ -447,6 +456,15 @@ public class GameSettings {
 			this.mc.toggleFullscreen();
 		}
 
+		if (parOptions == GameSettings.Options.FNAW_SKINS) {
+			this.enableFNAWSkins = !this.enableFNAWSkins;
+			this.mc.getRenderManager().setEnableFNAWSkins(this.mc.getEnableFNAWSkins());
+		}
+
+		if (parOptions == GameSettings.Options.EAGLER_VSYNC) {
+			this.enableVsync = !this.enableVsync;
+		}
+
 		this.saveOptions();
 	}
 
@@ -519,6 +537,10 @@ public class GameSettings {
 			return this.fog;
 		case FULLSCREEN:
 			return this.mc.isFullScreen();
+		case FNAW_SKINS:
+			return this.enableFNAWSkins;
+		case EAGLER_VSYNC:
+			return this.enableVsync;
 		default:
 			return false;
 		}
@@ -805,7 +827,7 @@ public class GameSettings {
 						this.snooperEnabled = astring[1].equals("true");
 					}
 
-					if (astring[0].equals("enableVsync")) {
+					if (astring[0].equals("enableVsyncEag")) {
 						this.enableVsync = astring[1].equals("true");
 					}
 
@@ -932,7 +954,21 @@ public class GameSettings {
 						this.enableUpdateSvc = astring[1].equals("true");
 					}
 
-					Keyboard.setFunctionKeyModifier(keyBindFunction.getKeyCode());
+					if (astring[0].equals("voiceListenRadius")) {
+						voiceListenRadius = Integer.parseInt(astring[1]);
+					}
+
+					if (astring[0].equals("voiceListenVolume")) {
+						voiceListenVolume = this.parseFloat(astring[1]);
+					}
+
+					if (astring[0].equals("voiceSpeakVolume")) {
+						voiceSpeakVolume = this.parseFloat(astring[1]);
+					}
+
+					if (astring[0].equals("voicePTTKey")) {
+						voicePTTKey = Integer.parseInt(astring[1]);
+					}
 
 					for (SoundCategory soundcategory : SoundCategory._VALUES) {
 						if (astring[0].equals("soundCategory_" + soundcategory.getCategoryName())) {
@@ -946,6 +982,10 @@ public class GameSettings {
 						}
 					}
 
+					if (astring[0].equals("enableFNAWSkins")) {
+						this.enableFNAWSkins = astring[1].equals("true");
+					}
+
 					deferredShaderConf.readOption(astring[0], astring[1]);
 				} catch (Exception var8) {
 					logger.warn("Skipping bad option: " + s);
@@ -953,8 +993,16 @@ public class GameSettings {
 			}
 
 			KeyBinding.resetKeyBindingArrayAndHash();
+
+			Keyboard.setFunctionKeyModifier(keyBindFunction.getKeyCode());
+			VoiceClientController.setVoiceListenVolume(voiceListenVolume);
+			VoiceClientController.setVoiceSpeakVolume(voiceSpeakVolume);
+			VoiceClientController.setVoiceProximity(voiceListenRadius);
+			if (this.mc.getRenderManager() != null)
+				this.mc.getRenderManager().setEnableFNAWSkins(this.enableFNAWSkins);
 		} catch (Exception exception) {
-			logger.error("Failed to load options", exception);
+			logger.error("Failed to load options");
+			logger.error(exception);
 		}
 
 	}
@@ -1021,7 +1069,7 @@ public class GameSettings {
 			printwriter.println("chatLinksPrompt:" + this.chatLinksPrompt);
 			printwriter.println("chatOpacity:" + this.chatOpacity);
 			printwriter.println("snooperEnabled:" + this.snooperEnabled);
-			printwriter.println("enableVsync:" + this.enableVsync);
+			printwriter.println("enableVsyncEag:" + this.enableVsync);
 			printwriter.println("hideServerAddress:" + this.hideServerAddress);
 			printwriter.println("advancedItemTooltips:" + this.advancedItemTooltips);
 			printwriter.println("pauseOnLostFocus:" + this.pauseOnLostFocus);
@@ -1051,6 +1099,11 @@ public class GameSettings {
 			printwriter.println("fxaa:" + this.fxaa);
 			printwriter.println("shaders:" + this.shaders);
 			printwriter.println("enableUpdateSvc:" + this.enableUpdateSvc);
+			printwriter.println("voiceListenRadius:" + this.voiceListenRadius);
+			printwriter.println("voiceListenVolume:" + this.voiceListenVolume);
+			printwriter.println("voiceSpeakVolume:" + this.voiceSpeakVolume);
+			printwriter.println("voicePTTKey:" + this.voicePTTKey);
+			printwriter.println("enableFNAWSkins:" + this.enableFNAWSkins);
 
 			for (KeyBinding keybinding : this.keyBindings) {
 				printwriter.println("key_" + keybinding.getKeyDescription() + ":" + keybinding.getKeyCode());
@@ -1073,7 +1126,8 @@ public class GameSettings {
 			printwriter.close();
 			return bao.toByteArray();
 		} catch (Exception exception) {
-			logger.error("Failed to save options", exception);
+			logger.error("Failed to save options");
+			logger.error(exception);
 			return null;
 		}
 
@@ -1182,7 +1236,9 @@ public class GameSettings {
 		HUD_WORLD("options.hud.world", false, true), HUD_PLAYER("options.hud.player", false, true),
 		HUD_24H("options.hud.24h", false, true), CHUNK_FIX("options.chunkFix", false, true),
 		FOG("options.fog", false, true), FXAA("options.fxaa", false, false),
-		FULLSCREEN("options.fullscreen", false, true), FAST_MATH("options.fastMath", false, false);
+		FULLSCREEN("options.fullscreen", false, true),
+		FNAW_SKINS("options.skinCustomisation.enableFNAWSkins", false, true),
+		EAGLER_VSYNC("options.vsync", false, true);
 
 		private final boolean enumFloat;
 		private final boolean enumBoolean;

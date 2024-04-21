@@ -1,6 +1,7 @@
 package net.minecraft.client.entity;
 
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
+import net.lax1dude.eaglercraft.v1_8.profile.SkinModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -34,6 +35,14 @@ import net.minecraft.world.WorldSettings;
  */
 public abstract class AbstractClientPlayer extends EntityPlayer {
 	private NetworkPlayerInfo playerInfo;
+
+	public long eaglerHighPolyAnimationTick = System.currentTimeMillis();
+	public float eaglerHighPolyAnimationFloat1 = 0.0f;
+	public float eaglerHighPolyAnimationFloat2 = 0.0f;
+	public float eaglerHighPolyAnimationFloat3 = 0.0f;
+	public float eaglerHighPolyAnimationFloat4 = 0.0f;
+	public float eaglerHighPolyAnimationFloat5 = 0.0f;
+	public float eaglerHighPolyAnimationFloat6 = 0.0f;
 
 	public AbstractClientPlayer(World worldIn, GameProfile playerProfile) {
 		super(worldIn, playerProfile);
@@ -90,6 +99,11 @@ public abstract class AbstractClientPlayer extends EntityPlayer {
 		NetworkPlayerInfo networkplayerinfo = this.getPlayerInfo();
 		return networkplayerinfo == null ? DefaultPlayerSkin.getSkinType(this.getUniqueID())
 				: networkplayerinfo.getSkinType();
+	}
+
+	public SkinModel getEaglerSkinModel() {
+		NetworkPlayerInfo networkplayerinfo = this.getPlayerInfo();
+		return networkplayerinfo == null ? SkinModel.STEVE : networkplayerinfo.getEaglerSkinModel();
 	}
 
 	public float getFovModifier() {

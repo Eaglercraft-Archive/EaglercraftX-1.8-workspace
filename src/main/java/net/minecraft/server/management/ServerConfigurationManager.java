@@ -60,7 +60,9 @@ import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.demo.DemoWorldManager;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
+import net.lax1dude.eaglercraft.v1_8.sp.server.EaglerMinecraftServer;
 import net.lax1dude.eaglercraft.v1_8.sp.server.socket.IntegratedServerPlayerNetworkManager;
+import net.lax1dude.eaglercraft.v1_8.sp.server.voice.IntegratedVoiceService;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 
@@ -345,6 +347,13 @@ public abstract class ServerConfigurationManager {
 		if (entityplayermp == playerIn) {
 			this.uuidToPlayerMap.remove(uuid);
 			this.playerStatFiles.remove(entityplayermp.getName());
+		}
+
+		((EaglerMinecraftServer) mcServer).getSkinService().unregisterPlayer(uuid);
+		((EaglerMinecraftServer) mcServer).getCapeService().unregisterPlayer(uuid);
+		IntegratedVoiceService vcs = ((EaglerMinecraftServer) mcServer).getVoiceService();
+		if (vcs != null) {
+			vcs.handlePlayerLoggedOut(playerIn);
 		}
 
 		this.sendPacketToAllPlayers(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.REMOVE_PLAYER,

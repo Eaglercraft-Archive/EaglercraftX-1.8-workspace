@@ -673,4 +673,8 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 	public boolean shouldHangupIntegratedServer() {
 		return true;
 	}
+
+	public boolean blockPTTKey() {
+		return false;
+	}
 }

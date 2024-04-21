@@ -1,5 +1,7 @@
 package net.minecraft.client.model;
 
+import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
+
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.minecraft.entity.Entity;
 
@@ -119,7 +121,14 @@ public class ModelPlayer extends ModelBiped {
 	}
 
 	public void renderCape(float parFloat1) {
+		GlStateManager.matrixMode(GL_TEXTURE);
+		GlStateManager.pushMatrix();
+		GlStateManager.scale(2.0f, 1.0f, 1.0f);
+		GlStateManager.matrixMode(GL_MODELVIEW);
 		this.bipedCape.render(parFloat1);
+		GlStateManager.matrixMode(GL_TEXTURE);
+		GlStateManager.popMatrix();
+		GlStateManager.matrixMode(GL_MODELVIEW);
 	}
 
 	/**+

@@ -57,8 +57,8 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
 
 	public void bindTexture(ResourceLocation resource) {
 		int glTex;
-		if (resource.cachedPointer != null) {
-			TextureUtil.bindTexture(glTex = ((ITextureObject) resource.cachedPointer).getGlTextureId()); // unsafe, lol
+		if (resource.cachedPointerType == ResourceLocation.CACHED_POINTER_TEXTURE) {
+			TextureUtil.bindTexture(glTex = ((ITextureObject) resource.cachedPointer).getGlTextureId());
 		} else {
 			Object object = (ITextureObject) this.mapTextureObjects.get(resource);
 			if (object == null) {
@@ -67,6 +67,7 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
 			}
 
 			resource.cachedPointer = object;
+			resource.cachedPointerType = ResourceLocation.CACHED_POINTER_TEXTURE;
 			TextureUtil.bindTexture(glTex = ((ITextureObject) object).getGlTextureId());
 		}
 		if (DeferredStateManager.isInDeferredPass()) {
@@ -114,15 +115,17 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
 			throw new ReportedException(crashreport);
 		}
 
+		textureLocation.cachedPointerType = ResourceLocation.CACHED_POINTER_TEXTURE;
 		textureLocation.cachedPointer = textureObj;
 		this.mapTextureObjects.put(textureLocation, textureObj);
 		return flag;
 	}
 
 	public ITextureObject getTexture(ResourceLocation textureLocation) {
-		if (textureLocation.cachedPointer != null) {
+		if (textureLocation.cachedPointerType == ResourceLocation.CACHED_POINTER_TEXTURE) {
 			return (ITextureObject) textureLocation.cachedPointer;
 		} else {
+			textureLocation.cachedPointerType = ResourceLocation.CACHED_POINTER_TEXTURE;
 			return (ITextureObject) (textureLocation.cachedPointer = this.mapTextureObjects.get(textureLocation));
 		}
 	}

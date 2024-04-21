@@ -17,6 +17,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ITickable;
 import net.lax1dude.eaglercraft.v1_8.sp.server.socket.IntegratedServerPlayerNetworkManager;
+import net.lax1dude.eaglercraft.v1_8.sp.server.voice.IntegratedVoiceService;
 
 import org.apache.commons.lang3.Validate;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
@@ -52,6 +53,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
 	private int connectionTimer;
 	private GameProfile loginGameProfile;
 	private byte[] loginSkinPacket;
+	private byte[] loginCapePacket;
 	private String serverId = "";
 	private EntityPlayerMP field_181025_l;
 
@@ -77,6 +79,14 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
 						this.field_181025_l);
 				((EaglerMinecraftServer) field_181025_l.mcServer).getSkinService()
 						.processLoginPacket(this.loginSkinPacket, field_181025_l);
+				if (this.loginCapePacket != null) {
+					((EaglerMinecraftServer) field_181025_l.mcServer).getCapeService()
+							.processLoginPacket(this.loginCapePacket, field_181025_l);
+				}
+				IntegratedVoiceService svc = ((EaglerMinecraftServer) field_181025_l.mcServer).getVoiceService();
+				if (svc != null) {
+					svc.handlePlayerLoggedIn(entityplayermp);
+				}
 				this.field_181025_l = null;
 			}
 		}
@@ -117,6 +127,14 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
 				this.server.getConfigurationManager().initializeConnectionToPlayer(this.networkManager, entityplayermp);
 				((EaglerMinecraftServer) entityplayermp.mcServer).getSkinService()
 						.processLoginPacket(this.loginSkinPacket, entityplayermp);
+				if (this.loginCapePacket != null) {
+					((EaglerMinecraftServer) entityplayermp.mcServer).getCapeService()
+							.processLoginPacket(this.loginCapePacket, entityplayermp);
+				}
+				IntegratedVoiceService svc = ((EaglerMinecraftServer) entityplayermp.mcServer).getVoiceService();
+				if (svc != null) {
+					svc.handlePlayerLoggedIn(entityplayermp);
+				}
 			}
 		}
 
@@ -141,6 +159,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
 				new Object[0]);
 		this.loginGameProfile = this.getOfflineProfile(c00packetloginstart.getProfile());
 		this.loginSkinPacket = c00packetloginstart.getSkin();
+		this.loginCapePacket = c00packetloginstart.getCape();
 		this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
 	}
 

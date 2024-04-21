@@ -30,13 +30,15 @@ import net.minecraft.network.login.INetHandlerLoginServer;
 public class C00PacketLoginStart implements Packet<INetHandlerLoginServer> {
 	private GameProfile profile;
 	private byte[] skin;
+	private byte[] cape;
 
 	public C00PacketLoginStart() {
 	}
 
-	public C00PacketLoginStart(GameProfile profileIn, byte[] skin) {
+	public C00PacketLoginStart(GameProfile profileIn, byte[] skin, byte[] cape) {
 		this.profile = profileIn;
 		this.skin = skin;
+		this.cape = cape;
 	}
 
 	/**+
@@ -45,6 +47,7 @@ public class C00PacketLoginStart implements Packet<INetHandlerLoginServer> {
 	public void readPacketData(PacketBuffer parPacketBuffer) throws IOException {
 		this.profile = new GameProfile((EaglercraftUUID) null, parPacketBuffer.readStringFromBuffer(16));
 		this.skin = parPacketBuffer.readByteArray();
+		this.cape = parPacketBuffer.readableBytes() > 0 ? parPacketBuffer.readByteArray() : null;
 	}
 
 	/**+
@@ -53,6 +56,7 @@ public class C00PacketLoginStart implements Packet<INetHandlerLoginServer> {
 	public void writePacketData(PacketBuffer parPacketBuffer) throws IOException {
 		parPacketBuffer.writeString(this.profile.getName());
 		parPacketBuffer.writeByteArray(this.skin);
+		parPacketBuffer.writeByteArray(this.cape);
 	}
 
 	/**+
@@ -68,5 +72,9 @@ public class C00PacketLoginStart implements Packet<INetHandlerLoginServer> {
 
 	public byte[] getSkin() {
 		return this.skin;
+	}
+
+	public byte[] getCape() {
+		return this.cape;
 	}
 }

@@ -337,4 +337,8 @@ public class GuiChat extends GuiScreen {
 	public boolean doesGuiPauseGame() {
 		return false;
 	}
+
+	public boolean blockPTTKey() {
+		return true;
+	}
 }

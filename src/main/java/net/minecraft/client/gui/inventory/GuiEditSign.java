@@ -172,4 +172,8 @@ public class GuiEditSign extends GuiScreen {
 		GlStateManager.popMatrix();
 		super.drawScreen(i, j, f);
 	}
+
+	public boolean blockPTTKey() {
+		return true;
+	}
 }

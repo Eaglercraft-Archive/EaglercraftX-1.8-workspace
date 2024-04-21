@@ -8,8 +8,12 @@ import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.NameTagRenderer;
+import net.lax1dude.eaglercraft.v1_8.voice.EnumVoiceChannelStatus;
+import net.lax1dude.eaglercraft.v1_8.voice.VoiceClientController;
+import net.lax1dude.eaglercraft.v1_8.voice.VoiceTagRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -126,6 +130,9 @@ public abstract class Render<T extends Entity> {
 	 * partialTickTime
 	 */
 	private void renderEntityOnFire(Entity entity, double x, double y, double z, float partialTicks) {
+		if (entity.width == 0 || entity.height == 0) {
+			return;
+		}
 		GlStateManager.disableLighting();
 		TextureMap texturemap = Minecraft.getMinecraft().getTextureMapBlocks();
 		EaglerTextureAtlasSprite textureatlassprite = texturemap.getAtlasSprite("minecraft:blocks/fire_layer_0");
@@ -386,6 +393,13 @@ public abstract class Render<T extends Entity> {
 			GlStateManager.enableLighting();
 			GlStateManager.disableBlend();
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+			if (entityIn instanceof EntityOtherPlayerMP) {
+				if (VoiceClientController.getVoiceStatus() == EnumVoiceChannelStatus.CONNECTED) {
+					VoiceTagRenderer.renderVoiceNameTag(Minecraft.getMinecraft(), (EntityOtherPlayerMP) entityIn, b0);
+				}
+			}
+
 			GlStateManager.popMatrix();
 		}
 	}

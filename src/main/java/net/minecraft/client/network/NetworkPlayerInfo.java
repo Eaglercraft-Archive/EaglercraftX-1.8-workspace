@@ -1,6 +1,7 @@
 package net.minecraft.client.network;
 
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
+import net.lax1dude.eaglercraft.v1_8.profile.SkinModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -84,12 +85,17 @@ public class NetworkPlayerInfo {
 				.getSkinModel().profileSkinType;
 	}
 
+	public SkinModel getEaglerSkinModel() {
+		return Minecraft.getMinecraft().getNetHandler().getSkinCache().getSkin(this.gameProfile).getSkinModel();
+	}
+
 	public ResourceLocation getLocationSkin() {
 		return Minecraft.getMinecraft().getNetHandler().getSkinCache().getSkin(this.gameProfile).getResourceLocation();
 	}
 
 	public ResourceLocation getLocationCape() {
-		return null;
+		return Minecraft.getMinecraft().getNetHandler().getCapeCache().getCape(this.gameProfile.getId())
+				.getResourceLocation();
 	}
 
 	public ScorePlayerTeam getPlayerTeam() {

@@ -285,6 +285,10 @@ public class GuiIngame extends Gui {
 			this.renderScoreboard(scoreobjective1, scaledresolution);
 		}
 
+		if (this.mc.currentScreen == null) {
+			this.mc.voiceOverlay.drawOverlay();
+		}
+
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, 1, 0);
 		GlStateManager.disableAlpha();

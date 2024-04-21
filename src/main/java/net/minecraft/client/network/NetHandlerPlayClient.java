@@ -13,12 +13,15 @@ import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 import com.google.common.collect.Maps;
 
 import net.lax1dude.eaglercraft.v1_8.netty.Unpooled;
+import net.lax1dude.eaglercraft.v1_8.profile.CapePackets;
+import net.lax1dude.eaglercraft.v1_8.profile.ServerCapeCache;
 import net.lax1dude.eaglercraft.v1_8.profile.ServerSkinCache;
 import net.lax1dude.eaglercraft.v1_8.profile.SkinPackets;
 import net.lax1dude.eaglercraft.v1_8.socket.EaglercraftNetworkManager;
 import net.lax1dude.eaglercraft.v1_8.sp.lan.LANClientNetworkManager;
 import net.lax1dude.eaglercraft.v1_8.sp.socket.ClientIntegratedServerNetworkManager;
 import net.lax1dude.eaglercraft.v1_8.update.UpdateService;
+import net.lax1dude.eaglercraft.v1_8.voice.VoiceClientController;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
@@ -253,6 +256,8 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	 */
 	private final EaglercraftRandom avRandomizer = new EaglercraftRandom();
 	private final ServerSkinCache skinCache;
+	private final ServerCapeCache capeCache;
+	public boolean currentFNAWSkinAllowedState = true;
 
 	public NetHandlerPlayClient(Minecraft mcIn, GuiScreen parGuiScreen, EaglercraftNetworkManager parNetworkManager,
 			GameProfile parGameProfile) {
@@ -261,6 +266,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 		this.netManager = parNetworkManager;
 		this.profile = parGameProfile;
 		this.skinCache = new ServerSkinCache(parNetworkManager, mcIn.getTextureManager());
+		this.capeCache = new ServerCapeCache(parNetworkManager, mcIn.getTextureManager());
 		this.isIntegratedServer = (parNetworkManager instanceof ClientIntegratedServerNetworkManager)
 				|| (parNetworkManager instanceof LANClientNetworkManager);
 	}
@@ -272,10 +278,15 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	public void cleanup() {
 		this.clientWorldController = null;
 		this.skinCache.destroy();
+		this.capeCache.destroy();
 	}
 
 	public ServerSkinCache getSkinCache() {
 		return this.skinCache;
+	}
+
+	public ServerCapeCache getCapeCache() {
+		return this.capeCache;
 	}
 
 	/**+
@@ -301,6 +312,10 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 		this.gameController.gameSettings.sendSettingsToServer();
 		this.netManager.sendPacket(new C17PacketCustomPayload("MC|Brand",
 				(new PacketBuffer(Unpooled.buffer())).writeString(ClientBrandRetriever.getClientModName())));
+		if (VoiceClientController.isClientSupported()) {
+			VoiceClientController.initializeVoiceClient((pkt) -> this.netManager
+					.sendPacket(new C17PacketCustomPayload(VoiceClientController.SIGNAL_CHANNEL, pkt)));
+		}
 	}
 
 	/**+
@@ -723,6 +738,9 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	 * describing the reason for termination
 	 */
 	public void onDisconnect(IChatComponent ichatcomponent) {
+		VoiceClientController.handleServerDisconnect();
+		Minecraft.getMinecraft().getRenderManager()
+				.setEnableFNAWSkins(this.gameController.gameSettings.enableFNAWSkins);
 		if (this.gameController.theWorld != null) {
 			this.gameController.loadWorld((WorldClient) null);
 		}
@@ -1373,6 +1391,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 				EaglercraftUUID uuid = s38packetplayerlistitem$addplayerdata.getProfile().getId();
 				this.playerInfoMap.remove(uuid);
 				this.skinCache.evictSkin(uuid);
+				this.capeCache.evictCape(uuid);
 			} else {
 				NetworkPlayerInfo networkplayerinfo = (NetworkPlayerInfo) this.playerInfoMap
 						.get(s38packetplayerlistitem$addplayerdata.getProfile().getId());
@@ -1547,6 +1566,13 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 				logger.error("Couldn't read EAG|Skins-1.8 packet!");
 				logger.error(e);
 			}
+		} else if ("EAG|Capes-1.8".equals(packetIn.getChannelName())) {
+			try {
+				CapePackets.readPluginMessage(packetIn.getBufferData(), capeCache);
+			} catch (IOException e) {
+				logger.error("Couldn't read EAG|Capes-1.8 packet!");
+				logger.error(e);
+			}
 		} else if ("EAG|UpdateCert-1.8".equals(packetIn.getChannelName())) {
 			if (EagRuntime.getConfiguration().allowUpdateSvc()) {
 				try {
@@ -1559,8 +1585,15 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 					logger.error(e);
 				}
 			}
+		} else if (VoiceClientController.SIGNAL_CHANNEL.equals(packetIn.getChannelName())) {
+			if (VoiceClientController.isClientSupported()) {
+				VoiceClientController.handleVoiceSignalPacket(packetIn.getBufferData());
+			}
+		} else if ("EAG|FNAWSEn-1.8".equals(packetIn.getChannelName())) {
+			this.currentFNAWSkinAllowedState = packetIn.getBufferData().readBoolean();
+			Minecraft.getMinecraft().getRenderManager().setEnableFNAWSkins(
+					this.currentFNAWSkinAllowedState && Minecraft.getMinecraft().gameSettings.enableFNAWSkins);
 		}
-
 	}
 
 	/**+

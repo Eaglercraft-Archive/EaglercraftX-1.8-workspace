@@ -36,6 +36,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFontRenderer;
+import net.lax1dude.eaglercraft.v1_8.opengl.EaglerMeshLoader;
 import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.ImageData;
@@ -63,6 +64,8 @@ import net.lax1dude.eaglercraft.v1_8.sp.gui.GuiScreenIntegratedServerBusy;
 import net.lax1dude.eaglercraft.v1_8.sp.gui.GuiScreenSingleplayerConnecting;
 import net.lax1dude.eaglercraft.v1_8.sp.lan.LANServerController;
 import net.lax1dude.eaglercraft.v1_8.update.RelayUpdateChecker;
+import net.lax1dude.eaglercraft.v1_8.voice.GuiVoiceOverlay;
+import net.lax1dude.eaglercraft.v1_8.voice.VoiceClientController;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.audio.MusicTicker;
@@ -304,6 +307,12 @@ public class Minecraft implements IThreadListener {
 
 	public SkullCommand eagskullCommand;
 
+	public GuiVoiceOverlay voiceOverlay;
+
+	public float startZoomValue = 18.0f;
+	public float adjustedZoomValue = 18.0f;
+	public boolean isZoomKey = false;
+
 	public Minecraft(GameConfiguration gameConfig) {
 		theMinecraft = this;
 		StringTranslate.initClient();
@@ -416,6 +425,7 @@ public class Minecraft implements IThreadListener {
 		this.mcResourceManager.registerReloadListener(new MetalsLUT());
 		this.mcResourceManager.registerReloadListener(new EmissiveItems());
 		this.mcResourceManager.registerReloadListener(new BlockVertexIDs());
+		this.mcResourceManager.registerReloadListener(new EaglerMeshLoader());
 		AchievementList.openInventory.setStatStringFormatter(new IStatStringFormat() {
 			public String formatString(String parString1) {
 				try {
@@ -466,6 +476,9 @@ public class Minecraft implements IThreadListener {
 		this.checkGLError("Post startup");
 		this.ingameGUI = new GuiIngame(this);
 		this.eagskullCommand = new SkullCommand(this);
+		this.voiceOverlay = new GuiVoiceOverlay(this);
+		ScaledResolution voiceRes = new ScaledResolution(this);
+		this.voiceOverlay.setResolution(voiceRes.getScaledWidth(), voiceRes.getScaledHeight());
 
 		ServerList.initServerList(this);
 		EaglerProfile.read();
@@ -863,6 +876,7 @@ public class Minecraft implements IThreadListener {
 
 	public void updateDisplay() {
 		this.mcProfiler.startSection("display_update");
+		Display.setVSync(this.gameSettings.enableVsync);
 		Display.update();
 		this.mcProfiler.endSection();
 		this.checkWindowResize();
@@ -1209,12 +1223,14 @@ public class Minecraft implements IThreadListener {
 	private void resize(int width, int height) {
 		this.displayWidth = Math.max(1, width);
 		this.displayHeight = Math.max(1, height);
+		ScaledResolution scaledresolution = new ScaledResolution(this);
 		if (this.currentScreen != null) {
-			ScaledResolution scaledresolution = new ScaledResolution(this);
 			this.currentScreen.onResize(this, scaledresolution.getScaledWidth(), scaledresolution.getScaledHeight());
 		}
 
 		this.loadingScreen = new LoadingScreenRenderer(this);
+
+		this.voiceOverlay.setResolution(scaledresolution.getScaledWidth(), scaledresolution.getScaledHeight());
 	}
 
 	public MusicTicker func_181535_r() {
@@ -1252,6 +1268,9 @@ public class Minecraft implements IThreadListener {
 		if (!this.isGamePaused) {
 			this.ingameGUI.updateTick();
 		}
+
+		this.mcProfiler.endStartSection("eaglerVoice");
+		VoiceClientController.tickVoiceClient(this);
 
 		this.mcProfiler.endSection();
 		this.entityRenderer.getMouseOver(1.0F);
@@ -1340,7 +1359,9 @@ public class Minecraft implements IThreadListener {
 				if (i1 <= 200L) {
 					int j = Mouse.getEventDWheel();
 					if (j != 0) {
-						if (this.thePlayer.isSpectator()) {
+						if (this.isZoomKey) {
+							this.adjustedZoomValue = MathHelper.clamp_float(adjustedZoomValue - j * 4.0f, 5.0f, 32.0f);
+						} else if (this.thePlayer.isSpectator()) {
 							j = j < 0 ? -1 : 1;
 							if (this.ingameGUI.getSpectatorGui().func_175262_a()) {
 								this.ingameGUI.getSpectatorGui().func_175259_b(-j);
@@ -1527,6 +1548,12 @@ public class Minecraft implements IThreadListener {
 						this.thePlayer.inventory.currentItem = l;
 					}
 				}
+			}
+
+			boolean zoomKey = this.gameSettings.keyBindZoomCamera.isKeyDown();
+			if (zoomKey != isZoomKey) {
+				adjustedZoomValue = startZoomValue;
+				isZoomKey = zoomKey;
 			}
 
 			boolean flag = this.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN;
@@ -1718,6 +1745,7 @@ public class Minecraft implements IThreadListener {
 	 */
 	public void launchIntegratedServer(String folderName, String worldName, WorldSettings worldSettingsIn) {
 		this.loadWorld((WorldClient) null);
+		Minecraft.getMinecraft().getRenderManager().setEnableFNAWSkins(this.gameSettings.enableFNAWSkins);
 		session.reset();
 		SingleplayerServerController.launchEaglercraftServer(folderName, gameSettings.difficulty.getDifficultyId(),
 				Math.max(gameSettings.renderDistanceChunks, 2), worldSettingsIn);
@@ -2260,5 +2288,13 @@ public class Minecraft implements IThreadListener {
 
 	public void clearTitles() {
 		ingameGUI.displayTitle(null, null, -1, -1, -1);
+	}
+
+	public boolean getEnableFNAWSkins() {
+		boolean ret = this.gameSettings.enableFNAWSkins;
+		if (this.thePlayer != null) {
+			ret &= this.thePlayer.sendQueue.currentFNAWSkinAllowedState;
+		}
+		return ret;
 	}
 }
