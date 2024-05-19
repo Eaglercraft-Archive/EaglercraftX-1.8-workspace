@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.OpenGlHelper;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
@@ -218,8 +219,12 @@ public class RenderManager {
 		this.skinMap.put("default", this.playerRenderer);
 		this.skinMap.put("slim", new RenderPlayer(this, true, false));
 		this.skinMap.put("zombie", new RenderPlayer(this, false, true));
-		this.eaglerRenderer = new RenderHighPoly(this, this.playerRenderer.getMainModel(),
-				this.playerRenderer.shadowSize);
+		if (EagRuntime.getConfiguration().isAllowFNAWSkins()) {
+			this.eaglerRenderer = new RenderHighPoly(this, this.playerRenderer.getMainModel(),
+					this.playerRenderer.shadowSize);
+		} else {
+			this.eaglerRenderer = this.playerRenderer;
+		}
 		this.skinMap.put("eagler",
 				Minecraft.getMinecraft().gameSettings.enableFNAWSkins ? this.eaglerRenderer : this.playerRenderer);
 	}

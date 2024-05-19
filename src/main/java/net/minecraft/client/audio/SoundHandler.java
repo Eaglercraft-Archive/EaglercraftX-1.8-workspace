@@ -49,6 +49,7 @@ import net.minecraft.util.ResourceLocation;
  */
 public class SoundHandler implements IResourceManagerReloadListener, ITickable {
 	private static final Logger logger = LogManager.getLogger();
+	private static final Logger tipLogger = LogManager.getLogger("EaglercraftX");
 	public static final SoundPoolEntry missing_sound = new SoundPoolEntry(new ResourceLocation("meta:missing_sound"),
 			0.0D, 0.0D, false);
 	private final SoundRegistry sndRegistry = new SoundRegistry();
@@ -83,6 +84,10 @@ public class SoundHandler implements IResourceManagerReloadListener, ITickable {
 			}
 		}
 
+		if (this.sndRegistry.getObject(new ResourceLocation("minecraft:sounds/music/game/calm1.ogg")) == null) {
+			tipLogger.info(
+					"Download this resource pack if you want music: https://bafybeiayojww5jfyzvlmtuk7l5ufkt7nlfto7mhwmzf2vs4bvsjd5ouiuq.ipfs.nftstorage.link/?filename=Music_For_Eaglercraft.zip");
+		}
 	}
 
 	public static class SoundMap {
