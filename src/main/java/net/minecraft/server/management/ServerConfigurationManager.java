@@ -110,7 +110,7 @@ public abstract class ServerConfigurationManager {
 	public ServerConfigurationManager(MinecraftServer server) {
 		this.playerStatFiles = Maps.newHashMap();
 		this.mcServer = server;
-		this.maxPlayers = 8;
+		this.maxPlayers = 100;
 	}
 
 	public void initializeConnectionToPlayer(IntegratedServerPlayerNetworkManager netManager, EntityPlayerMP playerIn) {
@@ -365,11 +365,9 @@ public abstract class ServerConfigurationManager {
 	 * server. Returns null on success, or an error message
 	 */
 	public String allowUserToConnect(GameProfile gameprofile) {
-		return this.playerEntityList.size() >= this.maxPlayers && !this.func_183023_f(gameprofile)
-				? "The server is full!"
-				: (doesPlayerAlreadyExist(gameprofile)
-						? "\"" + gameprofile.getName() + "\" is already playing on this world!"
-						: null);
+		return doesPlayerAlreadyExist(gameprofile)
+				? "\"" + gameprofile.getName() + "\" is already playing on this world!"
+				: null;
 	}
 
 	private boolean doesPlayerAlreadyExist(GameProfile gameprofile) {
