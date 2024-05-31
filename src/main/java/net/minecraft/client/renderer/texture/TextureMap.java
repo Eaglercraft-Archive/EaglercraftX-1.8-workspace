@@ -74,6 +74,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 	private int height;
 	private boolean isEaglerPBRMode = false;
 	public int eaglerPBRMaterialTexture = -1;
+	private boolean hasAllocatedEaglerPBRMaterialTexture = false;
 
 	public static final int _GL_FRAMEBUFFER = 0x8D40;
 	public static final int _GL_COLOR_ATTACHMENT0 = 0x8CE0;
@@ -173,6 +174,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 		if (isEaglerPBRMode) {
 			if (eaglerPBRMaterialTexture == -1) {
 				eaglerPBRMaterialTexture = GlStateManager.generateTexture();
+				hasAllocatedEaglerPBRMaterialTexture = false;
 			}
 			if (copyMaterialFramebuffer == null) {
 				GlStateManager.bindTexture(eaglerPBRMaterialTexture);
@@ -422,9 +424,14 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 
 		logger.info("Created: {}x{} {}-atlas", new Object[] { Integer.valueOf(stitcher.getCurrentWidth()),
 				Integer.valueOf(stitcher.getCurrentHeight()), this.basePath });
+		regenerateIfNotAllocated();
 		TextureUtil.allocateTextureImpl(this.getGlTextureId(), this.mipmapLevels, stitcher.getCurrentWidth(),
 				stitcher.getCurrentHeight());
 		if (isEaglerPBRMode) {
+			if (hasAllocatedEaglerPBRMaterialTexture) {
+				EaglercraftGPU.regenerateTexture(eaglerPBRMaterialTexture);
+			}
+			hasAllocatedEaglerPBRMaterialTexture = true;
 			TextureUtil.allocateTextureImpl(eaglerPBRMaterialTexture, this.mipmapLevels, stitcher.getCurrentWidth(),
 					stitcher.getCurrentHeight() * 2);
 		}

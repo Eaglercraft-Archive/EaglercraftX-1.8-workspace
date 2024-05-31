@@ -91,6 +91,7 @@ public class LayeredColorMaskTexture extends AbstractTexture {
 			return;
 		}
 
+		regenerateIfNotAllocated();
 		TextureUtil.uploadTextureImage(this.getGlTextureId(), bufferedimage);
 	}
 }

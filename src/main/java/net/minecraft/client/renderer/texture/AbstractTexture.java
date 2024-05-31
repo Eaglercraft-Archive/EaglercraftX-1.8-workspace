@@ -30,6 +30,7 @@ public abstract class AbstractTexture implements ITextureObject {
 	protected boolean mipmap;
 	protected boolean blurLast;
 	protected boolean mipmapLast;
+	protected boolean hasAllocated;
 
 	public void setBlurMipmapDirect(boolean parFlag, boolean parFlag2) {
 		if (blur != parFlag || mipmap != parFlag2) {
@@ -67,6 +68,7 @@ public abstract class AbstractTexture implements ITextureObject {
 	public int getGlTextureId() {
 		if (this.glTextureId == -1) {
 			this.glTextureId = TextureUtil.glGenTextures();
+			hasAllocated = false;
 		}
 
 		return this.glTextureId;
@@ -78,5 +80,19 @@ public abstract class AbstractTexture implements ITextureObject {
 			this.glTextureId = -1;
 		}
 
+	}
+
+	/**
+	 * This function is needed due to EaglercraftX's use of glTexStorage2D to
+	 * allocate memory for textures, some OpenGL implementations don't like it when
+	 * you call glTexStorage2D on the same texture object more than once
+	 */
+	protected void regenerateIfNotAllocated() {
+		if (this.glTextureId != -1) {
+			if (hasAllocated) {
+				EaglercraftGPU.regenerateTexture(glTextureId);
+			}
+			hasAllocated = true;
+		}
 	}
 }

@@ -63,6 +63,7 @@ public class LayeredTexture extends AbstractTexture {
 			return;
 		}
 
+		regenerateIfNotAllocated();
 		TextureUtil.uploadTextureImage(this.getGlTextureId(), bufferedimage);
 	}
 }

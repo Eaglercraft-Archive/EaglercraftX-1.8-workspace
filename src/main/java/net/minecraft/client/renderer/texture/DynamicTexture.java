@@ -40,6 +40,7 @@ public class DynamicTexture extends AbstractTexture {
 		this.width = textureWidth;
 		this.height = textureHeight;
 		this.dynamicTextureData = new int[textureWidth * textureHeight];
+		this.hasAllocated = true;
 		TextureUtil.allocateTexture(this.getGlTextureId(), textureWidth, textureHeight);
 	}
 

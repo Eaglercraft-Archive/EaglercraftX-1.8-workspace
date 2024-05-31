@@ -136,6 +136,8 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
 
 	protected abstract void func_148313_c();
 
+	protected abstract String getEaglerFolderName();
+
 	protected boolean func_148310_d() {
 		return true;
 	}
@@ -183,7 +185,7 @@ public abstract class ResourcePackListEntry implements GuiListExtended.IGuiListE
 			if (deleteInstead) {
 				this.mc.loadingScreen.eaglerShow(I18n.format("resourcePack.load.deleting"), this.func_148312_b());
 				EaglerFolderResourcePack.deleteResourcePack(EaglerFolderResourcePack.RESOURCE_PACKS,
-						this.func_148312_b());
+						this.getEaglerFolderName());
 			} else {
 				this.resourcePacksGUI.getSelectedResourcePacks().add(0, this);
 			}

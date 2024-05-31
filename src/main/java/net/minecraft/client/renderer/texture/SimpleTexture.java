@@ -62,6 +62,7 @@ public class SimpleTexture extends AbstractTexture {
 				}
 			}
 
+			regenerateIfNotAllocated();
 			TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), bufferedimage, flag, flag1);
 		} finally {
 			if (inputstream != null) {
