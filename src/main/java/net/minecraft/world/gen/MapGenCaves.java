@@ -32,6 +32,11 @@ import net.minecraft.world.chunk.ChunkPrimer;
  * 
  */
 public class MapGenCaves extends MapGenBase {
+
+	public MapGenCaves(boolean scramble) {
+		super(scramble);
+	}
+
 	protected void func_180703_a(long parLong1, int parInt1, int parInt2, ChunkPrimer parChunkPrimer, double parDouble1,
 			double parDouble2, double parDouble3) {
 		this.func_180702_a(parLong1, parInt1, parInt2, parChunkPrimer, parDouble1, parDouble2, parDouble3,
@@ -45,7 +50,7 @@ public class MapGenCaves extends MapGenBase {
 		double d1 = (double) (parInt2 * 16 + 8);
 		float f = 0.0F;
 		float f1 = 0.0F;
-		EaglercraftRandom random = new EaglercraftRandom(parLong1);
+		EaglercraftRandom random = new EaglercraftRandom(parLong1, this.rand.isScramble());
 		if (parInt4 <= 0) {
 			int i = this.range * 16 - 16;
 			parInt4 = i - random.nextInt(i / 4);

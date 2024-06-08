@@ -135,8 +135,9 @@ public abstract class WorldProvider {
 			--f;
 		}
 
+		float f2 = f;
 		f = 1.0F - (float) ((Math.cos((double) f * 3.141592653589793D) + 1.0D) / 2.0D);
-		f = f + (f - f) / 3.0F;
+		f = f2 + (f - f2) / 3.0F;
 		return f;
 	}
 

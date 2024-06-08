@@ -31,10 +31,14 @@ import net.minecraft.world.chunk.ChunkPrimer;
 public class MapGenRavine extends MapGenBase {
 	private float[] field_75046_d = new float[1024];
 
+	public MapGenRavine(boolean scramble) {
+		super(scramble);
+	}
+
 	protected void func_180707_a(long parLong1, int parInt1, int parInt2, ChunkPrimer parChunkPrimer, double parDouble1,
 			double parDouble2, double parDouble3, float parFloat1, float parFloat2, float parFloat3, int parInt3,
 			int parInt4, double parDouble4) {
-		EaglercraftRandom random = new EaglercraftRandom(parLong1);
+		EaglercraftRandom random = new EaglercraftRandom(parLong1, this.rand.isScramble());
 		double d0 = (double) (parInt1 * 16 + 8);
 		double d1 = (double) (parInt2 * 16 + 8);
 		float f = 0.0F;

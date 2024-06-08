@@ -93,6 +93,8 @@ public class LayerSpiderEyes implements LayerRenderer<EntitySpider> {
 		this.spiderRenderer.bindTexture(SPIDER_EYES);
 		GlStateManager.enableBlend();
 		GlStateManager.disableAlpha();
+		GlStateManager.enablePolygonOffset();
+		GlStateManager.doPolygonOffset(-0.025f, 1.0f);
 		GlStateManager.blendFunc(GL_ONE, GL_ONE);
 		if (entityspider.isInvisible()) {
 			GlStateManager.depthMask(false);
@@ -113,6 +115,7 @@ public class LayerSpiderEyes implements LayerRenderer<EntitySpider> {
 		this.spiderRenderer.func_177105_a(entityspider, f2);
 		GlStateManager.disableBlend();
 		GlStateManager.enableAlpha();
+		GlStateManager.disablePolygonOffset();
 	}
 
 	public boolean shouldCombineTextures() {

@@ -196,6 +196,10 @@ public class EntityFireworkRocket extends Entity {
 		return super.getBrightness(f);
 	}
 
+	protected float getEaglerDynamicLightsValueSimple(float partialTicks) {
+		return 1.0f;
+	}
+
 	public int getBrightnessForRender(float f) {
 		return super.getBrightnessForRender(f);
 	}

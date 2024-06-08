@@ -84,11 +84,12 @@ public class BiomeGenMesa extends BiomeGenBase {
 	public void genTerrainBlocks(World world, EaglercraftRandom random, ChunkPrimer chunkprimer, int i, int j,
 			double d0) {
 		if (this.field_150621_aC == null || this.field_150622_aD != world.getSeed()) {
-			this.func_150619_a(world.getSeed());
+			this.func_150619_a(world.getSeed(), !world.getWorldInfo().isOldEaglercraftRandom());
 		}
 
 		if (this.field_150623_aE == null || this.field_150624_aF == null || this.field_150622_aD != world.getSeed()) {
-			EaglercraftRandom random1 = new EaglercraftRandom(this.field_150622_aD);
+			EaglercraftRandom random1 = new EaglercraftRandom(this.field_150622_aD,
+					!world.getWorldInfo().isOldEaglercraftRandom());
 			this.field_150623_aE = new NoiseGeneratorPerlin(random1, 4);
 			this.field_150624_aF = new NoiseGeneratorPerlin(random1, 1);
 		}
@@ -197,10 +198,10 @@ public class BiomeGenMesa extends BiomeGenBase {
 
 	}
 
-	private void func_150619_a(long parLong1) {
+	private void func_150619_a(long parLong1, boolean scrambleRNG) {
 		this.field_150621_aC = new IBlockState[64];
 		Arrays.fill(this.field_150621_aC, Blocks.hardened_clay.getDefaultState());
-		EaglercraftRandom random = new EaglercraftRandom(parLong1);
+		EaglercraftRandom random = new EaglercraftRandom(parLong1, scrambleRNG);
 		this.field_150625_aG = new NoiseGeneratorPerlin(random, 1);
 
 		for (int l1 = 0; l1 < 64; ++l1) {

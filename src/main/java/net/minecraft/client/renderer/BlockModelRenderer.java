@@ -7,6 +7,7 @@ import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.VertexMarkerState;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -139,6 +140,7 @@ public class BlockModelRenderer {
 			WorldRenderer worldRendererIn, List<BakedQuad> listQuadsIn, float[] quadBounds, BitSet boundsFlags,
 			BlockModelRenderer.AmbientOcclusionFace aoFaceIn) {
 		boolean isDeferred = DeferredStateManager.isDeferredRenderer();
+		boolean isDynamicLights = isDeferred || DynamicLightsStateManager.isDynamicLightsRender();
 		double d0 = (double) blockPosIn.getX();
 		double d1 = (double) blockPosIn.getY();
 		double d2 = (double) blockPosIn.getZ();
@@ -154,8 +156,9 @@ public class BlockModelRenderer {
 
 		for (int i = 0, l = listQuadsIn.size(); i < l; ++i) {
 			BakedQuad bakedquad = listQuadsIn.get(i);
-			int[] vertData = isDeferred ? bakedquad.getVertexDataWithNormals() : bakedquad.getVertexData();
-			this.fillQuadBounds(blockIn, vertData, bakedquad.getFace(), quadBounds, boundsFlags, isDeferred ? 8 : 7);
+			int[] vertData = isDynamicLights ? bakedquad.getVertexDataWithNormals() : bakedquad.getVertexData();
+			this.fillQuadBounds(blockIn, vertData, bakedquad.getFace(), quadBounds, boundsFlags,
+					isDynamicLights ? 8 : 7);
 			aoFaceIn.updateVertexBrightness(blockAccessIn, blockIn, blockPosIn, bakedquad.getFace(), quadBounds,
 					boundsFlags);
 			worldRendererIn.addVertexData(vertData);
@@ -272,6 +275,7 @@ public class BlockModelRenderer {
 			EnumFacing faceIn, int brightnessIn, boolean ownBrightness, WorldRenderer worldRendererIn,
 			List<BakedQuad> listQuadsIn, BitSet boundsFlags, float[] quadBounds) {
 		boolean isDeferred = DeferredStateManager.isDeferredRenderer();
+		boolean isDynamicLights = isDeferred || DynamicLightsStateManager.isDynamicLightsRender();
 		double d0 = (double) blockPosIn.getX();
 		double d1 = (double) blockPosIn.getY();
 		double d2 = (double) blockPosIn.getZ();
@@ -291,9 +295,9 @@ public class BlockModelRenderer {
 		for (int m = 0, n = listQuadsIn.size(); m < n; ++m) {
 			BakedQuad bakedquad = listQuadsIn.get(m);
 			EnumFacing facingIn = bakedquad.getFace();
-			int[] vertData = isDeferred ? bakedquad.getVertexDataWithNormals() : bakedquad.getVertexData();
+			int[] vertData = isDynamicLights ? bakedquad.getVertexDataWithNormals() : bakedquad.getVertexData();
 			blockPosIn.offsetEvenFaster(facingIn, blockpos0);
-			this.fillQuadBounds(blockIn, vertData, facingIn, quadBounds, boundsFlags, isDeferred ? 8 : 7);
+			this.fillQuadBounds(blockIn, vertData, facingIn, quadBounds, boundsFlags, isDynamicLights ? 8 : 7);
 			boolean boundsFlags0 = boundsFlags.get(0);
 			if (ownBrightness) {
 				brightnessIn = boundsFlags0 ? blockIn.getMixedBrightnessForBlock(blockAccessIn, blockpos0)

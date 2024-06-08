@@ -927,7 +927,7 @@ public class Chunk {
 	public EaglercraftRandom getRandomWithSeed(long i) {
 		return new EaglercraftRandom(this.worldObj.getSeed() + (long) (this.xPosition * this.xPosition * 4987142)
 				+ (long) (this.xPosition * 5947611) + (long) (this.zPosition * this.zPosition) * 4392871L
-				+ (long) (this.zPosition * 389711) ^ i);
+				+ (long) (this.zPosition * 389711) ^ i, !this.worldObj.getWorldInfo().isOldEaglercraftRandom());
 	}
 
 	public boolean isEmpty() {

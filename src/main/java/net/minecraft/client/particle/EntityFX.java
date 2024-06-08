@@ -280,4 +280,8 @@ public class EntityFX extends Entity {
 				+ this.particleRed + "," + this.particleGreen + "," + this.particleBlue + "," + this.particleAlpha
 				+ "), Age " + this.particleAge;
 	}
+
+	protected float getEaglerDynamicLightsValueSimple(float partialTicks) {
+		return 0.0f;
+	}
 }

@@ -84,6 +84,10 @@ public class EntityXPOrb extends Entity {
 		return j | k << 16;
 	}
 
+	protected float getEaglerDynamicLightsValueSimple(float partialTicks) {
+		return 0.25f;
+	}
+
 	/**+
 	 * Called to update the entity's position/logic.
 	 */

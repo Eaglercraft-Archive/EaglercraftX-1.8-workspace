@@ -4,6 +4,7 @@ import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerTextureAtlasSprite;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.BlockVertexIDs;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
@@ -55,6 +56,7 @@ public class BlockFluidRenderer {
 			WorldRenderer worldRendererIn) {
 		BlockPos tmp = new BlockPos(0, 0, 0);
 		boolean deferred = DeferredStateManager.isDeferredRenderer();
+		boolean isDynamicLights = deferred || DynamicLightsStateManager.isDynamicLightsRender();
 		BlockLiquid blockliquid = (BlockLiquid) blockStateIn.getBlock();
 		boolean lava = blockliquid.getMaterial() == Material.lava;
 		boolean realistic = !lava && DeferredStateManager.isRenderingRealisticWater();
@@ -151,7 +153,7 @@ public class BlockFluidRenderer {
 						.tex((double) f15, (double) f19).lightmap(l2, i3).endVertex();
 				worldRendererIn.pos(d0 + 1.0D, d1 + (double) f10, d2 + 0.0D).color(f24, f25, f26, 1.0F)
 						.tex((double) f16, (double) f20).lightmap(l2, i3).endVertex();
-				if (deferred)
+				if (isDynamicLights)
 					worldRendererIn.genNormals(true, f12 <= -999.0F ? BlockVertexIDs.builtin_water_still_vertex_id
 							: BlockVertexIDs.builtin_water_flow_vertex_id);
 
@@ -164,7 +166,7 @@ public class BlockFluidRenderer {
 							.tex((double) f15, (double) f19).lightmap(l2, i3).endVertex();
 					worldRendererIn.pos(d0 + 0.0D, d1 + (double) f8, d2 + 1.0D).color(f24, f25, f26, 1.0F)
 							.tex((double) f14, (double) f18).lightmap(l2, i3).endVertex();
-					if (deferred)
+					if (isDynamicLights)
 						worldRendererIn.genNormals(true, f12 <= -999.0F ? BlockVertexIDs.builtin_water_still_vertex_id
 								: BlockVertexIDs.builtin_water_flow_vertex_id);
 				}
@@ -186,7 +188,7 @@ public class BlockFluidRenderer {
 						.lightmap(i2, j2).endVertex();
 				worldRendererIn.pos(d0 + 1.0D, d1, d2 + 1.0D).color(f3, f3, f3, 1.0F).tex((double) f36, (double) f38)
 						.lightmap(i2, j2).endVertex();
-				if (deferred)
+				if (isDynamicLights)
 					worldRendererIn.putNormal(0.0f, -1.0f, 0.0f, BlockVertexIDs.builtin_water_still_vertex_id);
 				flag2 = true;
 			}
@@ -272,7 +274,7 @@ public class BlockFluidRenderer {
 							.lightmap(k, l).endVertex();
 					worldRendererIn.pos(d3, d1 + 0.0D, d4).color(f32, f33, f34, 1.0F).tex((double) f41, (double) f30)
 							.lightmap(k, l).endVertex();
-					if (deferred)
+					if (isDynamicLights)
 						worldRendererIn.putNormal(j1, 0.0f, k1, BlockVertexIDs.builtin_water_flow_vertex_id);
 					if (!realistic) {
 						worldRendererIn.pos(d3, d1 + 0.0D, d4).color(f32, f33, f34, 1.0F)
@@ -283,7 +285,7 @@ public class BlockFluidRenderer {
 								.tex((double) f27, (double) f29).lightmap(k, l).endVertex();
 						worldRendererIn.pos(d3, d1 + (double) f39, d4).color(f32, f33, f34, 1.0F)
 								.tex((double) f41, (double) f28).lightmap(k, l).endVertex();
-						if (deferred)
+						if (isDynamicLights)
 							worldRendererIn.putNormal(-j1, 0.0f, -k1, BlockVertexIDs.builtin_water_flow_vertex_id);
 					}
 				}

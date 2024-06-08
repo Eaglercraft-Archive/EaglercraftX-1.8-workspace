@@ -20,6 +20,7 @@ import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.internal.EnumPlatformType;
 import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
@@ -394,6 +395,9 @@ public class GuiOverlayDebug extends Gui {
 							new Object[] { enumfacing, s,
 									Float.valueOf(MathHelper.wrapAngleTo180_float(entity.rotationYaw)),
 									Float.valueOf(MathHelper.wrapAngleTo180_float(entity.rotationPitch)) }) });
+			if (DynamicLightsStateManager.isDynamicLightsRender()) {
+				arraylist.add(6, DynamicLightsStateManager.getF3String());
+			}
 			if (this.mc.theWorld != null && this.mc.theWorld.isBlockLoaded(blockpos)) {
 				Chunk chunk = this.mc.theWorld.getChunkFromBlockCoords(blockpos);
 				arraylist.add("Biome: " + chunk.getBiome(blockpos, null).biomeName);

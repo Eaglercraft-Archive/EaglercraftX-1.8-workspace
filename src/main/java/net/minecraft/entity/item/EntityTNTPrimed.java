@@ -145,4 +145,12 @@ public class EntityTNTPrimed extends Entity {
 					entityZ, dynamicLightMag, dynamicLightMag * 0.7792f, dynamicLightMag * 0.618f, false);
 		}
 	}
+
+	protected float getEaglerDynamicLightsValueSimple(float partialTicks) {
+		float f = super.getEaglerDynamicLightsValueSimple(partialTicks);
+		if (fuse / 5 % 2 == 0) {
+			f = Math.min(f + 0.75f, 1.25f);
+		}
+		return f;
+	}
 }

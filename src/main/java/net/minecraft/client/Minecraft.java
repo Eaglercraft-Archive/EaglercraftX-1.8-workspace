@@ -750,7 +750,18 @@ public class Minecraft implements IThreadListener {
 			}
 
 			this.mcSoundHandler.unloadSounds();
-			SingleplayerServerController.shutdownEaglercraftServer();
+			if (SingleplayerServerController.isWorldRunning()) {
+				SingleplayerServerController.shutdownEaglercraftServer();
+				while (SingleplayerServerController.getStatusState() == IntegratedServerState.WORLD_UNLOADING) {
+					EagUtils.sleep(50l);
+					SingleplayerServerController.runTick();
+				}
+			}
+			if (SingleplayerServerController.isIntegratedServerWorkerAlive()
+					&& SingleplayerServerController.canKillWorker()) {
+				SingleplayerServerController.killWorker();
+				EagUtils.sleep(50l);
+			}
 		} finally {
 			EagRuntime.destroy();
 			if (!this.hasCrashed) {

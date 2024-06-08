@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
@@ -53,10 +54,15 @@ public abstract class ChunkRenderContainer {
 		float posZ = (float) ((double) blockpos.getZ() - this.viewEntityZ);
 		GlStateManager.translate(posX, posY, posZ);
 		if (DeferredStateManager.isInForwardPass()) {
-			posX = (float) (blockpos.getX() - (MathHelper.floor_double(this.viewEntityX / 16.0) << 4)); // TODO
+			posX = (float) (blockpos.getX() - (MathHelper.floor_double(this.viewEntityX / 16.0) << 4));
 			posY = (float) (blockpos.getY() - (MathHelper.floor_double(this.viewEntityY / 16.0) << 4));
 			posZ = (float) (blockpos.getZ() - (MathHelper.floor_double(this.viewEntityZ / 16.0) << 4));
 			DeferredStateManager.reportForwardRenderObjectPosition((int) posX, (int) posY, (int) posZ);
+		} else if (DynamicLightsStateManager.isInDynamicLightsPass()) {
+			posX = (float) (blockpos.getX() - (MathHelper.floor_double(this.viewEntityX / 16.0) << 4));
+			posY = (float) (blockpos.getY() - (MathHelper.floor_double(this.viewEntityY / 16.0) << 4));
+			posZ = (float) (blockpos.getZ() - (MathHelper.floor_double(this.viewEntityZ / 16.0) << 4));
+			DynamicLightsStateManager.reportForwardRenderObjectPosition((int) posX, (int) posY, (int) posZ);
 		}
 	}
 

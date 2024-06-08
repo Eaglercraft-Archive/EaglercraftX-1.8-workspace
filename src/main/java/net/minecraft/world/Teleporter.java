@@ -50,7 +50,7 @@ public class Teleporter {
 
 	public Teleporter(WorldServer worldIn) {
 		this.worldServerInstance = worldIn;
-		this.random = new EaglercraftRandom(worldIn.getSeed());
+		this.random = new EaglercraftRandom(worldIn.getSeed(), !worldIn.getWorldInfo().isOldEaglercraftRandom());
 	}
 
 	public void placeInPortal(Entity entityIn, float rotationYaw) {

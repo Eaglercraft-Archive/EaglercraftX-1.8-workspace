@@ -287,7 +287,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
 	public boolean generate(World worldIn, EaglercraftRandom rand, BlockPos position) {
 		this.world = worldIn;
 		this.basePos = position;
-		this.rand = new EaglercraftRandom(rand.nextLong());
+		this.rand = new EaglercraftRandom(rand.nextLong(), !worldIn.getWorldInfo().isOldEaglercraftRandom());
 		if (this.heightLimit == 0) {
 			this.heightLimit = 5 + this.rand.nextInt(this.heightLimitLimit);
 		}

@@ -9,6 +9,7 @@ import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.OpenGlHelper;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.lax1dude.eaglercraft.v1_8.profile.RenderHighPoly;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
@@ -332,6 +333,10 @@ public class RenderManager {
 		double d0 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double) partialTicks;
 		double d1 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double) partialTicks;
 		double d2 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double) partialTicks;
+		if (DynamicLightsStateManager.isInDynamicLightsPass()) {
+			DynamicLightsStateManager.reportForwardRenderObjectPosition2((float) (d0 - viewerPosX),
+					(float) (d1 - viewerPosY), (float) (d2 - viewerPosZ));
+		}
 		float f = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks;
 		int i = entity.getBrightnessForRender(partialTicks);
 		if (entity.isBurning()) {

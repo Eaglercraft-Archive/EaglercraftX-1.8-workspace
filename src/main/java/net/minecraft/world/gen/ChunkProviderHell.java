@@ -77,8 +77,8 @@ public class ChunkProviderHell implements IChunkProvider {
 	private final WorldGenHellLava field_177472_y = new WorldGenHellLava(Blocks.flowing_lava, false);
 	private final GeneratorBushFeature field_177471_z = new GeneratorBushFeature(Blocks.brown_mushroom);
 	private final GeneratorBushFeature field_177465_A = new GeneratorBushFeature(Blocks.red_mushroom);
-	private final MapGenNetherBridge genNetherBridge = new MapGenNetherBridge();
-	private final MapGenBase netherCaveGenerator = new MapGenCavesHell();
+	private final MapGenNetherBridge genNetherBridge;
+	private final MapGenBase netherCaveGenerator;
 	double[] noiseData1;
 	double[] noiseData2;
 	double[] noiseData3;
@@ -88,7 +88,10 @@ public class ChunkProviderHell implements IChunkProvider {
 	public ChunkProviderHell(World worldIn, boolean parFlag, long parLong1) {
 		this.worldObj = worldIn;
 		this.field_177466_i = parFlag;
-		this.hellRNG = new EaglercraftRandom(parLong1);
+		boolean scramble = !worldIn.getWorldInfo().isOldEaglercraftRandom();
+		this.hellRNG = new EaglercraftRandom(parLong1, scramble);
+		this.genNetherBridge = new MapGenNetherBridge(scramble);
+		this.netherCaveGenerator = new MapGenCavesHell(scramble);
 		this.netherNoiseGen1 = new NoiseGeneratorOctaves(this.hellRNG, 16);
 		this.netherNoiseGen2 = new NoiseGeneratorOctaves(this.hellRNG, 16);
 		this.netherNoiseGen3 = new NoiseGeneratorOctaves(this.hellRNG, 8);

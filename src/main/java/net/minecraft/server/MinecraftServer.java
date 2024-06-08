@@ -169,6 +169,11 @@ public abstract class MinecraftServer implements Runnable, ICommandSender, IThre
 			worldsettings = new WorldSettings(worldinfo);
 		}
 
+		if (worldinfo.isOldEaglercraftRandom()) {
+			LogManager.getLogger("EaglerMinecraftServer")
+					.info("Detected a pre-u34 world, using old EaglercraftRandom implementation for world generation");
+		}
+
 		for (int j = 0; j < this.worldServers.length; ++j) {
 			byte b0 = 0;
 			if (j == 1) {

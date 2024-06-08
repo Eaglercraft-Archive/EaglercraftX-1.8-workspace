@@ -39,7 +39,8 @@ public class MapGenStronghold extends MapGenStructure {
 	private double field_82671_h;
 	private int field_82672_i;
 
-	public MapGenStronghold() {
+	public MapGenStronghold(boolean scramble) {
+		super(scramble);
 		this.structureCoords = new ChunkCoordIntPair[3];
 		this.field_82671_h = 32.0D;
 		this.field_82672_i = 3;
@@ -55,8 +56,8 @@ public class MapGenStronghold extends MapGenStructure {
 
 	}
 
-	public MapGenStronghold(Map<String, String> parMap) {
-		this();
+	public MapGenStronghold(Map<String, String> parMap, boolean scramble) {
+		this(scramble);
 
 		for (Entry entry : parMap.entrySet()) {
 			if (((String) entry.getKey()).equals("distance")) {
@@ -79,7 +80,7 @@ public class MapGenStronghold extends MapGenStructure {
 
 	protected boolean canSpawnStructureAtCoords(int i, int j) {
 		if (!this.ranBiomeCheck) {
-			EaglercraftRandom random = new EaglercraftRandom();
+			EaglercraftRandom random = new EaglercraftRandom(!this.worldObj.getWorldInfo().isOldEaglercraftRandom());
 			random.setSeed(this.worldObj.getSeed());
 			double d0 = random.nextDouble() * 3.141592653589793D * 2.0D;
 			int k = 1;

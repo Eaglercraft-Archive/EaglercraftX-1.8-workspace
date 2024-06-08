@@ -33,7 +33,8 @@ import net.minecraft.world.biome.BiomeGenBase;
 public class MapGenNetherBridge extends MapGenStructure {
 	private List<BiomeGenBase.SpawnListEntry> spawnList = Lists.newArrayList();
 
-	public MapGenNetherBridge() {
+	public MapGenNetherBridge(boolean scramble) {
+		super(scramble);
 		this.spawnList.add(new BiomeGenBase.SpawnListEntry(EntityBlaze.class, 10, 2, 3));
 		this.spawnList.add(new BiomeGenBase.SpawnListEntry(EntityPigZombie.class, 5, 4, 4));
 		this.spawnList.add(new BiomeGenBase.SpawnListEntry(EntitySkeleton.class, 10, 4, 4));

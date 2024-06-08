@@ -27,14 +27,16 @@ import net.minecraft.util.MathHelper;
 public class MapGenMineshaft extends MapGenStructure {
 	private double field_82673_e = 0.004D;
 
-	public MapGenMineshaft() {
+	public MapGenMineshaft(boolean scramble) {
+		super(scramble);
 	}
 
 	public String getStructureName() {
 		return "Mineshaft";
 	}
 
-	public MapGenMineshaft(Map<String, String> parMap) {
+	public MapGenMineshaft(Map<String, String> parMap, boolean scramble) {
+		super(scramble);
 		for (Entry entry : parMap.entrySet()) {
 			if (((String) entry.getKey()).equals("chance")) {
 				this.field_82673_e = MathHelper.parseDoubleWithDefault((String) entry.getValue(), this.field_82673_e);

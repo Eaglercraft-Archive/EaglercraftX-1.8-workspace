@@ -30,11 +30,16 @@ public class MapGenBase {
 	 * The number of Chunks to gen-check in any given direction.
 	 */
 	protected int range = 8;
-	/**+
-	 * The RNG used by the MapGen classes.
-	 */
-	protected EaglercraftRandom rand = new EaglercraftRandom();
+	protected EaglercraftRandom rand;
 	protected World worldObj;
+
+	public MapGenBase() {
+		this(true);
+	}
+
+	public MapGenBase(boolean scramble) {
+		rand = new EaglercraftRandom(scramble);
+	}
 
 	public void generate(IChunkProvider chunkProviderIn, World worldIn, int x, int z, ChunkPrimer chunkPrimerIn) {
 		int i = this.range;

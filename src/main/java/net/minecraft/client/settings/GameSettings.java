@@ -202,6 +202,7 @@ public class GameSettings {
 	public EaglerDeferredConfig deferredShaderConf = new EaglerDeferredConfig();
 	public boolean enableUpdateSvc = true;
 	public boolean enableFNAWSkins = true;
+	public boolean enableDynamicLights = false;
 
 	public int voiceListenRadius = 16;
 	public float voiceListenVolume = 0.5f;
@@ -465,6 +466,11 @@ public class GameSettings {
 			this.enableVsync = !this.enableVsync;
 		}
 
+		if (parOptions == GameSettings.Options.EAGLER_DYNAMIC_LIGHTS) {
+			this.enableDynamicLights = !this.enableDynamicLights;
+			this.mc.renderGlobal.loadRenderers();
+		}
+
 		this.saveOptions();
 	}
 
@@ -541,6 +547,8 @@ public class GameSettings {
 			return this.enableFNAWSkins;
 		case EAGLER_VSYNC:
 			return this.enableVsync;
+		case EAGLER_DYNAMIC_LIGHTS:
+			return this.enableDynamicLights;
 		default:
 			return false;
 		}
@@ -986,6 +994,10 @@ public class GameSettings {
 						this.enableFNAWSkins = astring[1].equals("true");
 					}
 
+					if (astring[0].equals("enableDynamicLights")) {
+						this.enableDynamicLights = astring[1].equals("true");
+					}
+
 					deferredShaderConf.readOption(astring[0], astring[1]);
 				} catch (Exception var8) {
 					logger.warn("Skipping bad option: " + s);
@@ -1104,6 +1116,7 @@ public class GameSettings {
 			printwriter.println("voiceSpeakVolume:" + this.voiceSpeakVolume);
 			printwriter.println("voicePTTKey:" + this.voicePTTKey);
 			printwriter.println("enableFNAWSkins:" + this.enableFNAWSkins);
+			printwriter.println("enableDynamicLights:" + this.enableDynamicLights);
 
 			for (KeyBinding keybinding : this.keyBindings) {
 				printwriter.println("key_" + keybinding.getKeyDescription() + ":" + keybinding.getKeyCode());
@@ -1206,7 +1219,7 @@ public class GameSettings {
 		INVERT_MOUSE("options.invertMouse", false, true), SENSITIVITY("options.sensitivity", true, false),
 		FOV("options.fov", true, false, 30.0F, 110.0F, 1.0F), GAMMA("options.gamma", true, false),
 		SATURATION("options.saturation", true, false),
-		RENDER_DISTANCE("options.renderDistance", true, false, 1.0F, 16.0F, 1.0F),
+		RENDER_DISTANCE("options.renderDistance", true, false, 1.0F, 18.0F, 1.0F),
 		VIEW_BOBBING("options.viewBobbing", false, true), ANAGLYPH("options.anaglyph", false, true),
 		FRAMERATE_LIMIT("options.framerateLimit", true, false, 10.0F, 260.0F, 10.0F),
 		FBO_ENABLE("options.fboEnable", false, true), RENDER_CLOUDS("options.renderClouds", false, false),
@@ -1238,7 +1251,7 @@ public class GameSettings {
 		FOG("options.fog", false, true), FXAA("options.fxaa", false, false),
 		FULLSCREEN("options.fullscreen", false, true),
 		FNAW_SKINS("options.skinCustomisation.enableFNAWSkins", false, true),
-		EAGLER_VSYNC("options.vsync", false, true);
+		EAGLER_VSYNC("options.vsync", false, true), EAGLER_DYNAMIC_LIGHTS("options.dynamicLights", false, true);
 
 		private final boolean enumFloat;
 		private final boolean enumBoolean;

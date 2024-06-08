@@ -6,6 +6,7 @@ import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -251,5 +252,18 @@ public class EntityItemFrame extends EntityHanging {
 		super.renderDynamicLightsEaglerAt(entityX, entityY, entityZ, renderX, renderY, renderZ, partialTicks,
 				isInFrustum);
 		eaglerEmissiveFlag = Minecraft.getMinecraft().entityRenderer.renderItemEntityLight(this, 0.1f);
+	}
+
+	protected float getEaglerDynamicLightsValueSimple(float partialTicks) {
+		float f = super.getEaglerDynamicLightsValueSimple(partialTicks);
+		ItemStack itm = this.getDisplayedItem();
+		if (itm != null && itm.stackSize > 0) {
+			Item item = itm.getItem();
+			if (item != null) {
+				float f2 = item.getHeldItemBrightnessEagler() * 0.75f;
+				f = Math.min(f + f2 * 0.5f, 1.0f) + f2 * 0.5f;
+			}
+		}
+		return f;
 	}
 }

@@ -40,13 +40,14 @@ public class MapGenVillage extends MapGenStructure {
 	private int field_82665_g;
 	private int field_82666_h;
 
-	public MapGenVillage() {
+	public MapGenVillage(boolean scramble) {
+		super(scramble);
 		this.field_82665_g = 32;
 		this.field_82666_h = 8;
 	}
 
-	public MapGenVillage(Map<String, String> parMap) {
-		this();
+	public MapGenVillage(Map<String, String> parMap, boolean scramble) {
+		this(scramble);
 
 		for (Entry entry : parMap.entrySet()) {
 			if (((String) entry.getKey()).equals("size")) {

@@ -75,6 +75,10 @@ public class EntityMagmaCube extends EntitySlime {
 		return 1.0F;
 	}
 
+	protected float getEaglerDynamicLightsValueSimple(float partialTicks) {
+		return 1.0f;
+	}
+
 	protected EnumParticleTypes getParticleType() {
 		return EnumParticleTypes.FLAME;
 	}

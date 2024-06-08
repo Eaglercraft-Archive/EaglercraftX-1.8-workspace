@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.OpenGlHelper;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.crash.CrashReport;
@@ -146,6 +147,9 @@ public class TileEntityRendererDispatcher {
 		TileEntitySpecialRenderer tileentityspecialrenderer = this.getSpecialRenderer(tileEntityIn);
 		if (tileentityspecialrenderer != null) {
 			try {
+				if (DynamicLightsStateManager.isInDynamicLightsPass()) {
+					DynamicLightsStateManager.reportForwardRenderObjectPosition2((float) x, (float) y, (float) z);
+				}
 				tileentityspecialrenderer.renderTileEntityAt(tileEntityIn, x, y, z, partialTicks, destroyStage);
 			} catch (Throwable throwable) {
 				CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Block Entity");

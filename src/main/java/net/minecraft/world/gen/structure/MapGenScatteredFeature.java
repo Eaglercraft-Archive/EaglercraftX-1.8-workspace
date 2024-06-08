@@ -39,15 +39,16 @@ public class MapGenScatteredFeature extends MapGenStructure {
 	private int maxDistanceBetweenScatteredFeatures;
 	private int minDistanceBetweenScatteredFeatures;
 
-	public MapGenScatteredFeature() {
+	public MapGenScatteredFeature(boolean scramble) {
+		super(scramble);
 		this.scatteredFeatureSpawnList = Lists.newArrayList();
 		this.maxDistanceBetweenScatteredFeatures = 32;
 		this.minDistanceBetweenScatteredFeatures = 8;
 		this.scatteredFeatureSpawnList.add(new BiomeGenBase.SpawnListEntry(EntityWitch.class, 1, 1, 1));
 	}
 
-	public MapGenScatteredFeature(Map<String, String> parMap) {
-		this();
+	public MapGenScatteredFeature(Map<String, String> parMap, boolean scramble) {
+		this(scramble);
 
 		for (Entry entry : parMap.entrySet()) {
 			if (((String) entry.getKey()).equals("distance")) {

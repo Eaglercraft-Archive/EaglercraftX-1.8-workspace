@@ -54,7 +54,7 @@ public class ChunkProviderEnd implements IChunkProvider {
 
 	public ChunkProviderEnd(World worldIn, long parLong1) {
 		this.endWorld = worldIn;
-		this.endRNG = new EaglercraftRandom(parLong1);
+		this.endRNG = new EaglercraftRandom(parLong1, !worldIn.getWorldInfo().isOldEaglercraftRandom());
 		this.noiseGen1 = new NoiseGeneratorOctaves(this.endRNG, 16);
 		this.noiseGen2 = new NoiseGeneratorOctaves(this.endRNG, 16);
 		this.noiseGen3 = new NoiseGeneratorOctaves(this.endRNG, 8);

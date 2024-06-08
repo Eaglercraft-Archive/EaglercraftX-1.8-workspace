@@ -32,6 +32,7 @@ import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DynamicLightManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.EaglerDeferredConfig;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.EaglerDeferredPipeline;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.program.SharedPipelineShaders;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.lax1dude.eaglercraft.v1_8.vector.Vector3f;
 import net.lax1dude.eaglercraft.v1_8.vector.Vector4f;
 import net.minecraft.block.Block;
@@ -465,6 +466,16 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 					logger.error(ex);
 				}
 				SharedPipelineShaders.free();
+			}
+
+			if (DeferredStateManager.isDeferredRenderer()) {
+				DynamicLightsStateManager.disableDynamicLightsRender(false);
+			} else {
+				if (mc.gameSettings.enableDynamicLights) {
+					DynamicLightsStateManager.enableDynamicLightsRender();
+				} else {
+					DynamicLightsStateManager.disableDynamicLightsRender(true);
+				}
 			}
 		}
 	}
@@ -1948,8 +1959,10 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 		if (!this.damagedBlocks.isEmpty()) {
 			this.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
 			this.preRenderDamagedBlocks();
-			worldRendererIn.begin(7, DeferredStateManager.isDeferredRenderer() ? VertexFormat.BLOCK_SHADERS
-					: DefaultVertexFormats.BLOCK);
+			worldRendererIn.begin(7,
+					(DeferredStateManager.isDeferredRenderer() || DynamicLightsStateManager.isDynamicLightsRender())
+							? VertexFormat.BLOCK_SHADERS
+							: DefaultVertexFormats.BLOCK);
 			worldRendererIn.setTranslation(-d0, -d1, -d2);
 			worldRendererIn.markDirty();
 			Iterator iterator = this.damagedBlocks.values().iterator();
@@ -1971,6 +1984,10 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 							int i = destroyblockprogress.getPartialBlockDamage();
 							EaglerTextureAtlasSprite textureatlassprite = this.destroyBlockIcons[i];
 							BlockRendererDispatcher blockrendererdispatcher = this.mc.getBlockRendererDispatcher();
+							if (DynamicLightsStateManager.isInDynamicLightsPass()) {
+								DynamicLightsStateManager.reportForwardRenderObjectPosition2(blockpos.x, blockpos.y,
+										blockpos.z);
+							}
 							blockrendererdispatcher.renderBlockDamage(iblockstate, blockpos, textureatlassprite,
 									this.theWorld);
 						}

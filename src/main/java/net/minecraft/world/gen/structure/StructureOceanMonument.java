@@ -45,13 +45,14 @@ public class StructureOceanMonument extends MapGenStructure {
 			BiomeGenBase.deepOcean, BiomeGenBase.river, BiomeGenBase.frozenOcean, BiomeGenBase.frozenRiver });
 	private static final List<BiomeGenBase.SpawnListEntry> field_175803_h = Lists.newArrayList();
 
-	public StructureOceanMonument() {
+	public StructureOceanMonument(boolean scramble) {
+		super(scramble);
 		this.field_175800_f = 32;
 		this.field_175801_g = 5;
 	}
 
-	public StructureOceanMonument(Map<String, String> parMap) {
-		this();
+	public StructureOceanMonument(Map<String, String> parMap, boolean scramble) {
+		this(scramble);
 
 		for (Entry entry : parMap.entrySet()) {
 			if (((String) entry.getKey()).equals("spacing")) {

@@ -57,7 +57,8 @@ public class ChunkProviderFlat implements IChunkProvider {
 
 	public ChunkProviderFlat(World worldIn, long seed, boolean generateStructures, String flatGeneratorSettings) {
 		this.worldObj = worldIn;
-		this.random = new EaglercraftRandom(seed);
+		boolean scramble = !worldIn.getWorldInfo().isOldEaglercraftRandom();
+		this.random = new EaglercraftRandom(seed, scramble);
 		this.flatWorldGenInfo = FlatGeneratorInfo.createFlatGeneratorFromString(flatGeneratorSettings);
 		if (generateStructures) {
 			Map map = this.flatWorldGenInfo.getWorldFeatures();
@@ -67,23 +68,23 @@ public class ChunkProviderFlat implements IChunkProvider {
 					map1.put("size", "1");
 				}
 
-				this.structureGenerators.add(new MapGenVillage(map1));
+				this.structureGenerators.add(new MapGenVillage(map1, scramble));
 			}
 
 			if (map.containsKey("biome_1")) {
-				this.structureGenerators.add(new MapGenScatteredFeature((Map) map.get("biome_1")));
+				this.structureGenerators.add(new MapGenScatteredFeature((Map) map.get("biome_1"), scramble));
 			}
 
 			if (map.containsKey("mineshaft")) {
-				this.structureGenerators.add(new MapGenMineshaft((Map) map.get("mineshaft")));
+				this.structureGenerators.add(new MapGenMineshaft((Map) map.get("mineshaft"), scramble));
 			}
 
 			if (map.containsKey("stronghold")) {
-				this.structureGenerators.add(new MapGenStronghold((Map) map.get("stronghold")));
+				this.structureGenerators.add(new MapGenStronghold((Map) map.get("stronghold"), scramble));
 			}
 
 			if (map.containsKey("oceanmonument")) {
-				this.structureGenerators.add(new StructureOceanMonument((Map) map.get("oceanmonument")));
+				this.structureGenerators.add(new StructureOceanMonument((Map) map.get("oceanmonument"), scramble));
 			}
 		}
 

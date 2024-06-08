@@ -520,6 +520,10 @@ public class EntityWither extends EntityMob implements IBossDisplayData, IRanged
 		return 15728880;
 	}
 
+	protected float getEaglerDynamicLightsValueSimple(float partialTicks) {
+		return 1.0f;
+	}
+
 	public void fall(float var1, float var2) {
 	}
 

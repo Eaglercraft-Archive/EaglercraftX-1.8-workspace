@@ -1113,4 +1113,8 @@ public class Item {
 									: (this == IRON ? Items.iron_ingot : (this == EMERALD ? Items.diamond : null))));
 		}
 	}
+
+	public float getHeldItemBrightnessEagler() {
+		return 0.0f;
+	}
 }

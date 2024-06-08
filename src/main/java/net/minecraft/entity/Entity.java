@@ -5,6 +5,7 @@ import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DynamicLightManager;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 
 import java.util.concurrent.Callable;
 
@@ -1013,7 +1014,12 @@ public abstract class Entity implements ICommandSender {
 
 	public int getBrightnessForRender(float var1) {
 		BlockPos blockpos = new BlockPos(this.posX, this.posY + (double) this.getEyeHeight(), this.posZ);
-		return this.worldObj.isBlockLoaded(blockpos) ? this.worldObj.getCombinedLight(blockpos, 0) : 0;
+		int i = 0;
+		if (DynamicLightsStateManager.isDynamicLightsRender()) {
+			i += (int) (getEaglerDynamicLightsValueSimple(var1) * 15.0f);
+		}
+		return this.worldObj.isBlockLoaded(blockpos) ? this.worldObj.getCombinedLight(blockpos, -i)
+				: (i > 15 ? 240 : (i << 4));
 	}
 
 	/**+
@@ -1021,7 +1027,11 @@ public abstract class Entity implements ICommandSender {
 	 */
 	public float getBrightness(float var1) {
 		BlockPos blockpos = new BlockPos(this.posX, this.posY + (double) this.getEyeHeight(), this.posZ);
-		return this.worldObj.isBlockLoaded(blockpos) ? this.worldObj.getLightBrightness(blockpos) : 0.0F;
+		float f = this.worldObj.isBlockLoaded(blockpos) ? this.worldObj.getLightBrightness(blockpos) : 0.0F;
+		if (DynamicLightsStateManager.isDynamicLightsRender()) {
+			f = Math.min(f + getEaglerDynamicLightsValueSimple(var1), 1.0f);
+		}
+		return f;
 	}
 
 	/**+
@@ -2380,7 +2390,8 @@ public abstract class Entity implements ICommandSender {
 		double entityX2 = entityX - TileEntityRendererDispatcher.staticPlayerX;
 		double entityY2 = entityY - TileEntityRendererDispatcher.staticPlayerY;
 		double entityZ2 = entityZ - TileEntityRendererDispatcher.staticPlayerZ;
-		if (Math.sqrt(entityX2 * entityX2 + entityY2 * entityY2 + entityZ2 * entityZ2) < 48.0 * 48.0) {
+		if (entityX2 * entityX2 + entityY2 * entityY2
+				+ entityZ2 * entityZ2 < (isInFrustum ? (64.0 * 64.0) : (24.0 * 24.0))) {
 			renderDynamicLightsEaglerAt(entityX, entityY, entityZ, entityX2, entityY2, entityZ2, partialTicks,
 					isInFrustum);
 		}
@@ -2388,14 +2399,41 @@ public abstract class Entity implements ICommandSender {
 
 	protected void renderDynamicLightsEaglerAt(double entityX, double entityY, double entityZ, double renderX,
 			double renderY, double renderZ, float partialTicks, boolean isInFrustum) {
+		float size = Math.max(width, height);
+		if (size < 1.0f && !isInFrustum) {
+			return;
+		}
 		if (this.isBurning()) {
-			float size = Math.max(width, height);
-			if (size < 1.0f && !isInFrustum) {
-				return;
-			}
 			float mag = 5.0f * size;
 			DynamicLightManager.renderDynamicLight("entity_" + entityId + "_fire", entityX, entityY + height * 0.75,
 					entityZ, mag, 0.487f * mag, 0.1411f * mag, false);
 		}
+	}
+
+	public void renderDynamicLightsEaglerSimple(float partialTicks) {
+		double entityX = prevPosX + (posX - prevPosX) * (double) partialTicks;
+		double entityY = prevPosY + (posY - prevPosY) * (double) partialTicks;
+		double entityZ = prevPosZ + (posZ - prevPosZ) * (double) partialTicks;
+		renderDynamicLightsEaglerSimpleAt(entityX, entityY, entityZ, partialTicks);
+	}
+
+	protected void renderDynamicLightsEaglerSimpleAt(double entityX, double entityY, double entityZ,
+			float partialTicks) {
+		float renderBrightness = this.getEaglerDynamicLightsValueSimple(partialTicks);
+		if (renderBrightness > 0.1f) {
+			DynamicLightsStateManager.renderDynamicLight("entity_" + entityId + "_lightmap", entityX,
+					entityY + height * 0.85, entityZ, renderBrightness * 13.0f);
+		}
+	}
+
+	protected float getEaglerDynamicLightsValueSimple(float partialTicks) {
+		float size = Math.max(width, height);
+		if (size < 1.0f) {
+			return 0.0f;
+		}
+		if (this.isBurning()) {
+			return size / 2.0f;
+		}
+		return 0.0f;
 	}
 }

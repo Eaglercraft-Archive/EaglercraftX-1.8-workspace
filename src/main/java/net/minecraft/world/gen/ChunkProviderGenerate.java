@@ -62,25 +62,13 @@ public class ChunkProviderGenerate implements IChunkProvider {
 	private ChunkProviderSettings settings;
 	private Block field_177476_s = Blocks.water;
 	private double[] stoneNoise = new double[256];
-	private MapGenBase caveGenerator = new MapGenCaves();
-	/**+
-	 * Holds Stronghold Generator
-	 */
-	private MapGenStronghold strongholdGenerator = new MapGenStronghold();
-	/**+
-	 * Holds Village Generator
-	 */
-	private MapGenVillage villageGenerator = new MapGenVillage();
-	/**+
-	 * Holds Mineshaft Generator
-	 */
-	private MapGenMineshaft mineshaftGenerator = new MapGenMineshaft();
-	private MapGenScatteredFeature scatteredFeatureGenerator = new MapGenScatteredFeature();
-	/**+
-	 * Holds ravine generator
-	 */
-	private MapGenBase ravineGenerator = new MapGenRavine();
-	private StructureOceanMonument oceanMonumentGenerator = new StructureOceanMonument();
+	private MapGenBase caveGenerator;
+	private MapGenStronghold strongholdGenerator;
+	private MapGenVillage villageGenerator;
+	private MapGenMineshaft mineshaftGenerator;
+	private MapGenScatteredFeature scatteredFeatureGenerator;
+	private MapGenBase ravineGenerator;
+	private StructureOceanMonument oceanMonumentGenerator;
 	private BiomeGenBase[] biomesForGeneration;
 	double[] field_147427_d;
 	double[] field_147428_e;
@@ -91,7 +79,15 @@ public class ChunkProviderGenerate implements IChunkProvider {
 		this.worldObj = worldIn;
 		this.mapFeaturesEnabled = parFlag;
 		this.field_177475_o = worldIn.getWorldInfo().getTerrainType();
-		this.rand = new EaglercraftRandom(parLong1);
+		boolean scramble = !worldIn.getWorldInfo().isOldEaglercraftRandom();
+		this.rand = new EaglercraftRandom(parLong1, scramble);
+		this.caveGenerator = new MapGenCaves(scramble);
+		this.strongholdGenerator = new MapGenStronghold(scramble);
+		this.villageGenerator = new MapGenVillage(scramble);
+		this.mineshaftGenerator = new MapGenMineshaft(scramble);
+		this.scatteredFeatureGenerator = new MapGenScatteredFeature(scramble);
+		this.ravineGenerator = new MapGenRavine(scramble);
+		this.oceanMonumentGenerator = new StructureOceanMonument(scramble);
 		this.field_147431_j = new NoiseGeneratorOctaves(this.rand, 16);
 		this.field_147432_k = new NoiseGeneratorOctaves(this.rand, 16);
 		this.field_147429_l = new NoiseGeneratorOctaves(this.rand, 8);

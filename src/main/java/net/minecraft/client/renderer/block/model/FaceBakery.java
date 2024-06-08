@@ -5,6 +5,7 @@ import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.VertexMarkerState;
 import net.lax1dude.eaglercraft.v1_8.vector.Matrix4f;
 import net.lax1dude.eaglercraft.v1_8.vector.Vector3f;
 import net.lax1dude.eaglercraft.v1_8.vector.Vector4f;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EnumFaceDirection;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.EnumFacing;
@@ -119,7 +120,9 @@ public class FaceBakery {
 			float[] sprite, EaglerTextureAtlasSprite modelRotationIn, ModelRotation partRotation,
 			BlockPartRotation uvLocked, boolean shade, boolean parFlag2, Vector3f calcNormal) {
 		EnumFacing enumfacing = partRotation.rotateFace(facing);
-		int i = (parFlag2 && stride != 8) ? this.getFaceShadeColor(enumfacing) : -1;
+		int i = (parFlag2 && (stride != 8 || !Minecraft.getMinecraft().gameSettings.shaders))
+				? this.getFaceShadeColor(enumfacing)
+				: -1;
 		EnumFaceDirection.VertexInformation enumfacedirection$vertexinformation = EnumFaceDirection.getFacing(facing)
 				.func_179025_a(vertexIndex);
 		Vector3f vector3f = new Vector3f(sprite[enumfacedirection$vertexinformation.field_179184_a],
@@ -139,9 +142,15 @@ public class FaceBakery {
 		faceData[i + 4 + 1] = Float
 				.floatToRawIntBits(sprite.getInterpolatedV((double) faceUV.func_178346_b(vertexIndex)));
 		if (stride == 8) {
-			faceData[i] = Float.floatToRawIntBits(position.x * VertexMarkerState.localCoordDeriveHackX);
-			faceData[i + 1] = Float.floatToRawIntBits(position.y * VertexMarkerState.localCoordDeriveHackY);
-			faceData[i + 2] = Float.floatToRawIntBits(position.z * VertexMarkerState.localCoordDeriveHackZ);
+			if (!Minecraft.getMinecraft().gameSettings.shaders) {
+				faceData[i] = Float.floatToRawIntBits(position.x);
+				faceData[i + 1] = Float.floatToRawIntBits(position.y);
+				faceData[i + 2] = Float.floatToRawIntBits(position.z);
+			} else {
+				faceData[i] = Float.floatToRawIntBits(position.x * VertexMarkerState.localCoordDeriveHackX);
+				faceData[i + 1] = Float.floatToRawIntBits(position.y * VertexMarkerState.localCoordDeriveHackY);
+				faceData[i + 2] = Float.floatToRawIntBits(position.z * VertexMarkerState.localCoordDeriveHackZ);
+			}
 			if (calcNormal != null) {
 				int x = (byte) ((int) (calcNormal.x * 127.0F)) & 255;
 				int y = (byte) ((int) (calcNormal.y * 127.0F)) & 255;
