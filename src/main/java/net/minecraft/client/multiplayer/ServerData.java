@@ -174,7 +174,12 @@ public class ServerData {
 				this.serverMOTD = motd.length() > 0
 						? (motd.length() > 1 ? motd.getString(0) + "\n" + motd.getString(1) : motd.getString(0))
 						: "";
-				this.populationInfo = "" + motdData.getInt("online") + "/" + motdData.getInt("max");
+				int max = motdData.getInt("max");
+				if (max > 0) {
+					this.populationInfo = "" + motdData.getInt("online") + "/" + max;
+				} else {
+					this.populationInfo = "" + motdData.getInt("online");
+				}
 				this.playerList = null;
 				JSONArray players = motdData.optJSONArray("players");
 				if (players.length() > 0) {

@@ -5,12 +5,14 @@ import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
+import net.lax1dude.eaglercraft.v1_8.EagUtils;
 import net.lax1dude.eaglercraft.v1_8.EaglerInputStream;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftVersion;
@@ -19,7 +21,6 @@ import net.lax1dude.eaglercraft.v1_8.Mouse;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
-import net.lax1dude.eaglercraft.v1_8.crypto.MD5Digest;
 import net.lax1dude.eaglercraft.v1_8.crypto.SHA1Digest;
 import net.lax1dude.eaglercraft.v1_8.internal.EnumCursorType;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
@@ -72,8 +73,6 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 	private float updateCounter;
 	private boolean isDefault;
 	private static final int lendef = 5987;
-	private static final byte[] md5def = new byte[] { -61, -53, -36, 27, 24, 27, 103, -31, -58, -116, 113, -60, -67, -8,
-			-77, 30 };
 	private static final byte[] sha1def = new byte[] { -107, 77, 108, 49, 11, -100, -8, -119, -1, -100, -85, -55, 18,
 			-69, -107, 113, -93, -101, -79, 32 };
 	private String splashText;
@@ -90,6 +89,8 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 	private static final ResourceLocation splashTexts = new ResourceLocation("texts/splashes.txt");
 	private static final ResourceLocation minecraftTitleTextures = new ResourceLocation(
 			"textures/gui/title/minecraft.png");
+	private static final ResourceLocation minecraftTitleBlurFlag = new ResourceLocation(
+			"textures/gui/title/background/enable_blur.txt");
 	private static final ResourceLocation eaglerGuiTextures = new ResourceLocation("eagler:gui/eagler_gui.png");
 	/**+
 	 * An array of all the paths to the panorama pictures.
@@ -110,8 +111,13 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 	private static ResourceLocation backgroundTexture = null;
 	private GuiUpdateCheckerOverlay updateCheckerOverlay;
 	private GuiButton downloadOfflineButton;
+	private boolean enableBlur = true;
+	private boolean shouldReload = false;
+
+	private static GuiMainMenu instance = null;
 
 	public GuiMainMenu() {
+		instance = this;
 		this.splashText = "missingno";
 		updateCheckerOverlay = new GuiUpdateCheckerOverlay(false, this);
 		BufferedReader bufferedreader = null;
@@ -153,29 +159,58 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 
 		this.updateCounter = RANDOM.nextFloat();
 
+		reloadResourceFlags();
+	}
+
+	private void reloadResourceFlags() {
 		if (Minecraft.getMinecraft().isDemo()) {
 			this.isDefault = false;
 		} else {
-			MD5Digest md5 = new MD5Digest();
-			SHA1Digest sha1 = new SHA1Digest();
-			byte[] md5out = new byte[16];
-			byte[] sha1out = new byte[20];
-			try {
-				byte[] bytes = EaglerInputStream.inputStreamToBytesQuiet(Minecraft.getMinecraft().getResourceManager()
-						.getResource(minecraftTitleTextures).getInputStream());
-				if (bytes != null) {
-					md5.update(bytes, 0, bytes.length);
-					sha1.update(bytes, 0, bytes.length);
-					md5.doFinal(md5out, 0);
-					sha1.doFinal(sha1out, 0);
-					this.isDefault = bytes.length == lendef && Arrays.equals(md5out, md5def)
-							&& Arrays.equals(sha1out, sha1def);
-				} else {
+			if (!EagRuntime.getConfiguration().isEnableMinceraft()) {
+				this.isDefault = false;
+			} else {
+				try {
+					byte[] bytes = EaglerInputStream.inputStreamToBytesQuiet(Minecraft.getMinecraft()
+							.getResourceManager().getResource(minecraftTitleTextures).getInputStream());
+					if (bytes != null && bytes.length == lendef) {
+						SHA1Digest sha1 = new SHA1Digest();
+						byte[] sha1out = new byte[20];
+						sha1.update(bytes, 0, bytes.length);
+						sha1.doFinal(sha1out, 0);
+						this.isDefault = Arrays.equals(sha1out, sha1def);
+					} else {
+						this.isDefault = false;
+					}
+				} catch (IOException e) {
 					this.isDefault = false;
 				}
-			} catch (IOException e) {
-				this.isDefault = false;
 			}
+		}
+
+		this.enableBlur = true;
+
+		try {
+			byte[] bytes = EaglerInputStream.inputStreamToBytesQuiet(
+					Minecraft.getMinecraft().getResourceManager().getResource(minecraftTitleBlurFlag).getInputStream());
+			if (bytes != null) {
+				String[] blurCfg = EagUtils.linesArray(new String(bytes, StandardCharsets.UTF_8));
+				for (int i = 0; i < blurCfg.length; ++i) {
+					String s = blurCfg[i];
+					if (s.startsWith("enable_blur=")) {
+						s = s.substring(12).trim();
+						this.enableBlur = s.equals("1") || s.equals("true");
+						break;
+					}
+				}
+			}
+		} catch (IOException e) {
+			;
+		}
+	}
+
+	public static void doResourceReloadHack() {
+		if (instance != null) {
+			instance.shouldReload = true;
 		}
 	}
 
@@ -186,6 +221,10 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 		++this.panoramaTimer;
 		if (downloadOfflineButton != null) {
 			downloadOfflineButton.enabled = !UpdateService.shouldDisableDownloadButton();
+		}
+		if (shouldReload) {
+			reloadResourceFlags();
+			shouldReload = false;
 		}
 	}
 
@@ -372,19 +411,25 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 		GlStateManager.matrixMode(GL_PROJECTION);
 		GlStateManager.pushMatrix();
 		GlStateManager.loadIdentity();
-		GlStateManager.gluPerspective(120.0F, 1.0F, 0.05F, 10.0F);
+		if (enableBlur) {
+			GlStateManager.gluPerspective(120.0F, 1.0F, 0.05F, 10.0F);
+		} else {
+			GlStateManager.gluPerspective(85.0F, (float) width / (float) height, 0.05F, 10.0F);
+		}
 		GlStateManager.matrixMode(GL_MODELVIEW);
 		GlStateManager.pushMatrix();
 		GlStateManager.loadIdentity();
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.rotate(180.0F, 1.0F, 0.0F, 0.0F);
-		GlStateManager.rotate(90.0F, 0.0F, 0.0F, 1.0F);
+		if (enableBlur) {
+			GlStateManager.rotate(90.0F, 0.0F, 0.0F, 1.0F);
+		}
 		GlStateManager.enableBlend();
 		GlStateManager.disableAlpha();
 		GlStateManager.disableCull();
 		GlStateManager.depthMask(false);
 		GlStateManager.tryBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-		byte b0 = 8;
+		byte b0 = enableBlur ? (byte) 8 : (byte) 1;
 
 		for (int i = 0; i < b0 * b0; ++i) {
 			GlStateManager.pushMatrix();
@@ -521,7 +566,11 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 	 */
 	public void drawScreen(int i, int j, float f) {
 		GlStateManager.disableAlpha();
-		this.renderSkybox(i, j, f);
+		if (enableBlur) {
+			this.renderSkybox(i, j, f);
+		} else {
+			this.drawPanorama(i, j, f);
+		}
 		GlStateManager.enableAlpha();
 		short short1 = 274;
 		int k = this.width / 2 - short1 / 2;
@@ -530,7 +579,11 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback {
 		this.drawGradientRect(0, 0, this.width, this.height, 0, Integer.MIN_VALUE);
 		this.mc.getTextureManager().bindTexture(minecraftTitleTextures);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-		if (this.isDefault || (double) this.updateCounter < 1.0E-4D) {
+		boolean minc = (double) this.updateCounter < 1.0E-4D;
+		if (this.isDefault) {
+			minc = !minc;
+		}
+		if (minc) {
 			this.drawTexturedModalRect(k + 0, b0 + 0, 0, 0, 99, 44);
 			this.drawTexturedModalRect(k + 99, b0 + 0, 129, 0, 27, 44);
 			this.drawTexturedModalRect(k + 99 + 26, b0 + 0, 126, 0, 3, 44);
