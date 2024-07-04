@@ -1776,6 +1776,7 @@ public class Minecraft implements IThreadListener {
 		session.reset();
 		SingleplayerServerController.launchEaglercraftServer(folderName, gameSettings.difficulty.getDifficultyId(),
 				Math.max(gameSettings.renderDistanceChunks, 2), worldSettingsIn);
+		EagRuntime.setMCServerWindowGlobal("singleplayer");
 		this.displayGuiScreen(new GuiScreenIntegratedServerBusy(
 				new GuiScreenSingleplayerConnecting(new GuiMainMenu(), "Connecting to " + folderName),
 				"singleplayer.busy.startingIntegratedServer", "singleplayer.failed.startingIntegratedServer",
@@ -2055,6 +2056,22 @@ public class Minecraft implements IThreadListener {
 						+ EaglercraftGPU.glGetString(7936);
 			}
 		});
+		theCrash.getCategory().addCrashSectionCallable("Is Eagler Shaders", new Callable<String>() {
+			public String call() throws Exception {
+				return Minecraft.this.gameSettings.shaders ? "Yes" : "No";
+			}
+		});
+		theCrash.getCategory().addCrashSectionCallable("Is Dynamic Lights", new Callable<String>() {
+			public String call() throws Exception {
+				return !Minecraft.this.gameSettings.shaders && Minecraft.this.gameSettings.enableDynamicLights ? "Yes"
+						: "No";
+			}
+		});
+		theCrash.getCategory().addCrashSectionCallable("In Ext. Pipeline", new Callable<String>() {
+			public String call() throws Exception {
+				return GlStateManager.isExtensionPipeline() ? "Yes" : "No";
+			}
+		});
 		theCrash.getCategory().addCrashSectionCallable("Is Modded", new Callable<String>() {
 			public String call() throws Exception {
 				return "Definitely Not; You're an eagler";
@@ -2134,6 +2151,7 @@ public class Minecraft implements IThreadListener {
 	 */
 	public void setServerData(ServerData serverDataIn) {
 		this.currentServerData = serverDataIn;
+		EagRuntime.setMCServerWindowGlobal(serverDataIn != null ? serverDataIn.serverIP : null);
 	}
 
 	public ServerData getCurrentServerData() {

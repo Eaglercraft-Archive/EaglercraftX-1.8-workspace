@@ -116,7 +116,7 @@ public class MapItemRenderer {
 				} else {
 					c = MapColor.mapColorArray[j / 4].func_151643_b(j & 3);
 				}
-				this.mapTextureData[i] = (c & 0xFF00FF00) | ((c & 0x00FF0000) >> 16) | ((c & 0x000000FF) << 16);
+				this.mapTextureData[i] = (c & 0xFF00FF00) | ((c & 0x00FF0000) >>> 16) | ((c & 0x000000FF) << 16);
 			}
 
 			this.mapTexture.updateDynamicTexture();

@@ -351,9 +351,9 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
 			return false;
 		} else {
 			GlStateManager.enableShaderBlendAdd();
-			float f1 = 1.0F - (float) (i >> 24 & 255) / 255.0F;
-			float f2 = (float) (i >> 16 & 255) / 255.0F;
-			float f3 = (float) (i >> 8 & 255) / 255.0F;
+			float f1 = 1.0F - (float) (i >>> 24 & 255) / 255.0F;
+			float f2 = (float) (i >>> 16 & 255) / 255.0F;
+			float f3 = (float) (i >>> 8 & 255) / 255.0F;
 			float f4 = (float) (i & 255) / 255.0F;
 			GlStateManager.setShaderBlendSrc(f1, f1, f1, 1.0F);
 			GlStateManager.setShaderBlendAdd(f2 * f1 + 0.4F, f3 * f1, f4 * f1, 0.0f);
