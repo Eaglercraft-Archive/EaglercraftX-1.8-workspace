@@ -211,6 +211,7 @@ public class GameSettings {
 	public boolean enableProfanityFilter = false;
 	public boolean hasShownProfanityFilter = false;
 	public float touchControlOpacity = 1.0f;
+	public boolean hideDefaultUsernameWarning = false;
 
 	public int voiceListenRadius = 16;
 	public float voiceListenVolume = 0.5f;
@@ -1072,6 +1073,10 @@ public class GameSettings {
 						touchControlOpacity = parseFloat(astring[1]);
 					}
 
+					if (astring[0].equals("hideDefaultUsernameWarning")) {
+						this.hideDefaultUsernameWarning = astring[1].equals("true");
+					}
+
 					deferredShaderConf.readOption(astring[0], astring[1]);
 				} catch (Exception var8) {
 					logger.warn("Skipping bad option: " + s);
@@ -1213,6 +1218,7 @@ public class GameSettings {
 			printwriter.println("screenRecordGameVolume:" + this.screenRecordGameVolume);
 			printwriter.println("screenRecordMicVolume:" + this.screenRecordMicVolume);
 			printwriter.println("touchControlOpacity:" + this.touchControlOpacity);
+			printwriter.println("hideDefaultUsernameWarning:" + this.hideDefaultUsernameWarning);
 
 			for (KeyBinding keybinding : this.keyBindings) {
 				printwriter.println("key_" + keybinding.getKeyDescription() + ":" + keybinding.getKeyCode());
