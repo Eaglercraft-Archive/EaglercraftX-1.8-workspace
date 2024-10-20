@@ -63,19 +63,32 @@ public class StructureStrongholdPieces {
 	private static final StructureStrongholdPieces.Stones strongholdStones = new StructureStrongholdPieces.Stones();
 
 	public static void registerStrongholdPieces() {
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.ChestCorridor.class, "SHCC");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Corridor.class, "SHFC");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Crossing.class, "SH5C");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.LeftTurn.class, "SHLT");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Library.class, "SHLi");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.PortalRoom.class, "SHPR");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Prison.class, "SHPH");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.RightTurn.class, "SHRT");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.RoomCrossing.class, "SHRC");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Stairs.class, "SHSD");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Stairs2.class, "SHStart");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Straight.class, "SHS");
-		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.StairsStraight.class, "SHSSD");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.ChestCorridor.class,
+				StructureStrongholdPieces.ChestCorridor::new, "SHCC");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Corridor.class,
+				StructureStrongholdPieces.Corridor::new, "SHFC");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Crossing.class,
+				StructureStrongholdPieces.Crossing::new, "SH5C");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.LeftTurn.class,
+				StructureStrongholdPieces.LeftTurn::new, "SHLT");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Library.class,
+				StructureStrongholdPieces.Library::new, "SHLi");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.PortalRoom.class,
+				StructureStrongholdPieces.PortalRoom::new, "SHPR");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Prison.class,
+				StructureStrongholdPieces.Prison::new, "SHPH");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.RightTurn.class,
+				StructureStrongholdPieces.RightTurn::new, "SHRT");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.RoomCrossing.class,
+				StructureStrongholdPieces.RoomCrossing::new, "SHRC");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Stairs.class,
+				StructureStrongholdPieces.Stairs::new, "SHSD");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Stairs2.class,
+				StructureStrongholdPieces.Stairs2::new, "SHStart");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.Straight.class,
+				StructureStrongholdPieces.Straight::new, "SHS");
+		MapGenStructureIO.registerStructureComponent(StructureStrongholdPieces.StairsStraight.class,
+				StructureStrongholdPieces.StairsStraight::new, "SHSSD");
 	}
 
 	/**+

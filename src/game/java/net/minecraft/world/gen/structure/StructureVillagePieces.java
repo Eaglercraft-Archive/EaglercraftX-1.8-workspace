@@ -48,19 +48,32 @@ import net.minecraft.world.biome.WorldChunkManager;
  */
 public class StructureVillagePieces {
 	public static void registerVillagePieces() {
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.House1.class, "ViBH");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Field1.class, "ViDF");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Field2.class, "ViF");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Torch.class, "ViL");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Hall.class, "ViPH");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.House4Garden.class, "ViSH");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.WoodHut.class, "ViSmH");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Church.class, "ViST");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.House2.class, "ViS");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Start.class, "ViStart");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Path.class, "ViSR");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.House3.class, "ViTRH");
-		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Well.class, "ViW");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.House1.class,
+				StructureVillagePieces.House1::new, "ViBH");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Field1.class,
+				StructureVillagePieces.Field1::new, "ViDF");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Field2.class,
+				StructureVillagePieces.Field2::new, "ViF");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Torch.class,
+				StructureVillagePieces.Torch::new, "ViL");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Hall.class,
+				StructureVillagePieces.Hall::new, "ViPH");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.House4Garden.class,
+				StructureVillagePieces.House4Garden::new, "ViSH");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.WoodHut.class,
+				StructureVillagePieces.WoodHut::new, "ViSmH");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Church.class,
+				StructureVillagePieces.Church::new, "ViST");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.House2.class,
+				StructureVillagePieces.House2::new, "ViS");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Start.class,
+				StructureVillagePieces.Start::new, "ViStart");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Path.class,
+				StructureVillagePieces.Path::new, "ViSR");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.House3.class,
+				StructureVillagePieces.House3::new, "ViTRH");
+		MapGenStructureIO.registerStructureComponent(StructureVillagePieces.Well.class,
+				StructureVillagePieces.Well::new, "ViW");
 	}
 
 	public static List<StructureVillagePieces.PieceWeight> getStructureVillageWeightedPieceList(

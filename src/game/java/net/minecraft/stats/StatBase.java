@@ -3,6 +3,7 @@ package net.minecraft.stats;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 import net.minecraft.event.HoverEvent;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
@@ -38,6 +39,7 @@ public class StatBase {
 	private final IStatType type;
 	private final IScoreObjectiveCriteria field_150957_c;
 	private Class<? extends IJsonSerializable> field_150956_d;
+	private Supplier<? extends IJsonSerializable> field_150956_d_ctor;
 	private static NumberFormat numberFormat = NumberFormat.getIntegerInstance(Locale.US);
 	public static IStatType simpleStatType = new IStatType() {
 		public String format(int parInt1) {
@@ -164,8 +166,14 @@ public class StatBase {
 		return this.field_150956_d;
 	}
 
-	public StatBase func_150953_b(Class<? extends IJsonSerializable> oclass) {
+	public Supplier<? extends IJsonSerializable> func_150954_l_ctor() {
+		return this.field_150956_d_ctor;
+	}
+
+	public StatBase func_150953_b(Class<? extends IJsonSerializable> oclass,
+			Supplier<? extends IJsonSerializable> octor) {
 		this.field_150956_d = oclass;
+		this.field_150956_d_ctor = octor;
 		return this;
 	}
 }

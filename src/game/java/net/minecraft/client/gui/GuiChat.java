@@ -122,7 +122,7 @@ public class GuiChat extends GuiScreenVisualViewport {
 	 * on the key), keyCode (lwjgl Keyboard key code)
 	 */
 	protected void keyTyped(char parChar1, int parInt1) {
-		if (parInt1 == 1 && (this.mc.gameSettings.keyBindClose.getKeyCode() == 0 || this.mc.areKeysLocked())) {
+		if (parInt1 == 1 && (this.mc.gameSettings.keyBindClose.getKeyCode() == 0 || Keyboard.areKeysLocked())) {
 			this.mc.displayGuiScreen((GuiScreen) null);
 		} else {
 			this.waitingOnAutocomplete = false;

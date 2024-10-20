@@ -195,13 +195,6 @@ public class LoadingScreenRenderer implements IProgressUpdate {
 							(float) (l / 2 - 4 + 8), 16777215);
 				}
 				this.mc.updateDisplay();
-
-				try {
-					Thread.yield();
-				} catch (Exception var15) {
-					;
-				}
-
 			}
 		}
 	}

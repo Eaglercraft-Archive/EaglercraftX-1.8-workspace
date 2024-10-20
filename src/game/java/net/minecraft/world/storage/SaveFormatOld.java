@@ -11,6 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.lax1dude.eaglercraft.v1_8.sp.server.EaglerIntegratedServerWorker;
 import net.lax1dude.eaglercraft.v1_8.sp.server.WorldsDB;
 import net.minecraft.util.IProgressUpdate;
+import net.lax1dude.eaglercraft.v1_8.EagUtils;
 import net.lax1dude.eaglercraft.v1_8.internal.vfs2.VFile2;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
@@ -160,11 +161,7 @@ public class SaveFormatOld implements ISaveFormat {
 
 			logger.warn("Unsuccessful in deleting contents.");
 			if (i < 5) {
-				try {
-					Thread.sleep(500L);
-				} catch (InterruptedException var5) {
-					;
-				}
+				EagUtils.sleep(500);
 			}
 		}
 

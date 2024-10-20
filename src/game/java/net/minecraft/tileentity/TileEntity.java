@@ -2,6 +2,7 @@ package net.minecraft.tileentity;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import com.google.common.collect.Maps;
 
@@ -41,6 +42,7 @@ import net.minecraft.world.World;
 public abstract class TileEntity {
 	private static final Logger logger = LogManager.getLogger();
 	private static Map<String, Class<? extends TileEntity>> nameToClassMap = Maps.newHashMap();
+	private static Map<String, Supplier<? extends TileEntity>> nameToCtorMap = Maps.newHashMap();
 	private static Map<Class<? extends TileEntity>, String> classToNameMap = Maps.newHashMap();
 	protected World worldObj;
 	protected BlockPos pos = BlockPos.ORIGIN;
@@ -52,11 +54,12 @@ public abstract class TileEntity {
 	 * Adds a new two-way mapping between the class and its string
 	 * name in both hashmaps.
 	 */
-	private static void addMapping(Class<? extends TileEntity> cl, String id) {
+	private static void addMapping(Class<? extends TileEntity> cl, Supplier<? extends TileEntity> ct, String id) {
 		if (nameToClassMap.containsKey(id)) {
 			throw new IllegalArgumentException("Duplicate id: " + id);
 		} else {
 			nameToClassMap.put(id, cl);
+			nameToCtorMap.put(id, ct);
 			classToNameMap.put(cl, id);
 		}
 	}
@@ -107,9 +110,9 @@ public abstract class TileEntity {
 		TileEntity tileentity = null;
 
 		try {
-			Class oclass = (Class) nameToClassMap.get(nbt.getString("id"));
+			Supplier<? extends TileEntity> oclass = nameToCtorMap.get(nbt.getString("id"));
 			if (oclass != null) {
-				tileentity = (TileEntity) oclass.newInstance();
+				tileentity = (TileEntity) oclass.get();
 			}
 		} catch (Exception exception) {
 			logger.error("Could not create TileEntity", exception);
@@ -265,26 +268,26 @@ public abstract class TileEntity {
 	}
 
 	static {
-		addMapping(TileEntityFurnace.class, "Furnace");
-		addMapping(TileEntityChest.class, "Chest");
-		addMapping(TileEntityEnderChest.class, "EnderChest");
-		addMapping(BlockJukebox.TileEntityJukebox.class, "RecordPlayer");
-		addMapping(TileEntityDispenser.class, "Trap");
-		addMapping(TileEntityDropper.class, "Dropper");
-		addMapping(TileEntitySign.class, "Sign");
-		addMapping(TileEntityMobSpawner.class, "MobSpawner");
-		addMapping(TileEntityNote.class, "Music");
-		addMapping(TileEntityPiston.class, "Piston");
-		addMapping(TileEntityBrewingStand.class, "Cauldron");
-		addMapping(TileEntityEnchantmentTable.class, "EnchantTable");
-		addMapping(TileEntityEndPortal.class, "Airportal");
-		addMapping(TileEntityCommandBlock.class, "Control");
-		addMapping(TileEntityBeacon.class, "Beacon");
-		addMapping(TileEntitySkull.class, "Skull");
-		addMapping(TileEntityDaylightDetector.class, "DLDetector");
-		addMapping(TileEntityHopper.class, "Hopper");
-		addMapping(TileEntityComparator.class, "Comparator");
-		addMapping(TileEntityFlowerPot.class, "FlowerPot");
-		addMapping(TileEntityBanner.class, "Banner");
+		addMapping(TileEntityFurnace.class, TileEntityFurnace::new, "Furnace");
+		addMapping(TileEntityChest.class, TileEntityChest::new, "Chest");
+		addMapping(TileEntityEnderChest.class, TileEntityEnderChest::new, "EnderChest");
+		addMapping(BlockJukebox.TileEntityJukebox.class, BlockJukebox.TileEntityJukebox::new, "RecordPlayer");
+		addMapping(TileEntityDispenser.class, TileEntityDispenser::new, "Trap");
+		addMapping(TileEntityDropper.class, TileEntityDropper::new, "Dropper");
+		addMapping(TileEntitySign.class, TileEntitySign::new, "Sign");
+		addMapping(TileEntityMobSpawner.class, TileEntityMobSpawner::new, "MobSpawner");
+		addMapping(TileEntityNote.class, TileEntityNote::new, "Music");
+		addMapping(TileEntityPiston.class, TileEntityPiston::new, "Piston");
+		addMapping(TileEntityBrewingStand.class, TileEntityBrewingStand::new, "Cauldron");
+		addMapping(TileEntityEnchantmentTable.class, TileEntityEnchantmentTable::new, "EnchantTable");
+		addMapping(TileEntityEndPortal.class, TileEntityEndPortal::new, "Airportal");
+		addMapping(TileEntityCommandBlock.class, TileEntityCommandBlock::new, "Control");
+		addMapping(TileEntityBeacon.class, TileEntityBeacon::new, "Beacon");
+		addMapping(TileEntitySkull.class, TileEntitySkull::new, "Skull");
+		addMapping(TileEntityDaylightDetector.class, TileEntityDaylightDetector::new, "DLDetector");
+		addMapping(TileEntityHopper.class, TileEntityHopper::new, "Hopper");
+		addMapping(TileEntityComparator.class, TileEntityComparator::new, "Comparator");
+		addMapping(TileEntityFlowerPot.class, TileEntityFlowerPot::new, "FlowerPot");
+		addMapping(TileEntityBanner.class, TileEntityBanner::new, "Banner");
 	}
 }

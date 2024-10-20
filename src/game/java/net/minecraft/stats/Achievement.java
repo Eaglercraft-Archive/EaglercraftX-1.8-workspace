@@ -1,5 +1,7 @@
 package net.minecraft.stats;
 
+import java.util.function.Supplier;
+
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -115,8 +117,9 @@ public class Achievement extends StatBase {
 		return ichatcomponent;
 	}
 
-	public Achievement func_150953_b(Class<? extends IJsonSerializable> parClass1) {
-		return (Achievement) super.func_150953_b(parClass1);
+	public Achievement func_150953_b(Class<? extends IJsonSerializable> parClass1,
+			Supplier<? extends IJsonSerializable> ctor) {
+		return (Achievement) super.func_150953_b(parClass1, ctor);
 	}
 
 	/**+

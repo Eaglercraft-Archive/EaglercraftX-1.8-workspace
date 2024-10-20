@@ -52,21 +52,36 @@ public class StructureNetherBridgePieces {
 			new StructureNetherBridgePieces.PieceWeight(StructureNetherBridgePieces.NetherStalkRoom.class, 5, 2) };
 
 	public static void registerNetherFortressPieces() {
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Crossing3.class, "NeBCr");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.End.class, "NeBEF");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Straight.class, "NeBS");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor3.class, "NeCCS");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor4.class, "NeCTB");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Entrance.class, "NeCE");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Crossing2.class, "NeSCSC");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor.class, "NeSCLT");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor5.class, "NeSC");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor2.class, "NeSCRT");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.NetherStalkRoom.class, "NeCSR");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Throne.class, "NeMT");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Crossing.class, "NeRC");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Stairs.class, "NeSR");
-		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Start.class, "NeStart");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Crossing3.class,
+				StructureNetherBridgePieces.Crossing3::new, "NeBCr");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.End.class,
+				StructureNetherBridgePieces.End::new, "NeBEF");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Straight.class,
+				StructureNetherBridgePieces.Straight::new, "NeBS");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor3.class,
+				StructureNetherBridgePieces.Corridor3::new, "NeCCS");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor4.class,
+				StructureNetherBridgePieces.Corridor4::new, "NeCTB");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Entrance.class,
+				StructureNetherBridgePieces.Entrance::new, "NeCE");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Crossing2.class,
+				StructureNetherBridgePieces.Crossing2::new, "NeSCSC");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor.class,
+				StructureNetherBridgePieces.Corridor::new, "NeSCLT");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor5.class,
+				StructureNetherBridgePieces.Corridor5::new, "NeSC");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Corridor2.class,
+				StructureNetherBridgePieces.Corridor2::new, "NeSCRT");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.NetherStalkRoom.class,
+				StructureNetherBridgePieces.NetherStalkRoom::new, "NeCSR");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Throne.class,
+				StructureNetherBridgePieces.Throne::new, "NeMT");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Crossing.class,
+				StructureNetherBridgePieces.Crossing::new, "NeRC");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Stairs.class,
+				StructureNetherBridgePieces.Stairs::new, "NeSR");
+		MapGenStructureIO.registerStructureComponent(StructureNetherBridgePieces.Start.class,
+				StructureNetherBridgePieces.Start::new, "NeStart");
 	}
 
 	private static StructureNetherBridgePieces.Piece func_175887_b(

@@ -592,8 +592,8 @@ public abstract class GuiContainer extends GuiScreen {
 	 */
 	protected void keyTyped(char parChar1, int parInt1) {
 		if (parInt1 == this.mc.gameSettings.keyBindClose.getKeyCode()
-				|| parInt1 == this.mc.gameSettings.keyBindInventory.getKeyCode()
-				|| (parInt1 == 1 && (this.mc.gameSettings.keyBindClose.getKeyCode() == 0 || this.mc.areKeysLocked()))) {
+				|| parInt1 == this.mc.gameSettings.keyBindInventory.getKeyCode() || (parInt1 == 1
+						&& (this.mc.gameSettings.keyBindClose.getKeyCode() == 0 || Keyboard.areKeysLocked()))) {
 			this.mc.thePlayer.closeScreen();
 			if (this.mc.currentScreen == null) {
 				this.mc.setIngameFocus();

@@ -924,10 +924,10 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 			if (this.mc.theWorld != null) {
 				int i = Math.min(Minecraft.getDebugFPS(), l1);
 				i = Math.max(i, 60);
-				long j = System.nanoTime() - parLong1;
+				long j = EagRuntime.nanoTime() - parLong1;
 				long k = Math.max((long) (1000000000 / i / 4) - j, 0L);
-				this.renderWorld(parFloat1, System.nanoTime() + k);
-				this.renderEndNanoTime = System.nanoTime();
+				this.renderWorld(parFloat1, EagRuntime.nanoTime() + k);
+				this.renderEndNanoTime = EagRuntime.nanoTime();
 				final boolean b = !this.mc.gameSettings.hideGUI || this.mc.currentScreen != null;
 				if (b) {
 					GlStateManager.alphaFunc(GL_GREATER, 0.1F);
@@ -983,7 +983,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 				GlStateManager.matrixMode(GL_MODELVIEW);
 				GlStateManager.loadIdentity();
 				this.setupOverlayRendering();
-				this.renderEndNanoTime = System.nanoTime();
+				this.renderEndNanoTime = EagRuntime.nanoTime();
 			}
 
 			this.mc.notifRenderer.renderOverlay(j1, k1);

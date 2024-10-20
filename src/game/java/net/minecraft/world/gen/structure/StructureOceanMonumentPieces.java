@@ -40,17 +40,28 @@ import net.minecraft.world.World;
  */
 public class StructureOceanMonumentPieces {
 	public static void registerOceanMonumentPieces() {
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.MonumentBuilding.class, "OMB");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.MonumentCoreRoom.class, "OMCR");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleXRoom.class, "OMDXR");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleXYRoom.class, "OMDXYR");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleYRoom.class, "OMDYR");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleYZRoom.class, "OMDYZR");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleZRoom.class, "OMDZR");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.EntryRoom.class, "OMEntry");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.Penthouse.class, "OMPenthouse");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.SimpleRoom.class, "OMSimple");
-		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.SimpleTopRoom.class, "OMSimpleT");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.MonumentBuilding.class,
+				StructureOceanMonumentPieces.MonumentBuilding::new, "OMB");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.MonumentCoreRoom.class,
+				StructureOceanMonumentPieces.MonumentCoreRoom::new, "OMCR");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleXRoom.class,
+				StructureOceanMonumentPieces.DoubleXRoom::new, "OMDXR");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleXYRoom.class,
+				StructureOceanMonumentPieces.DoubleXYRoom::new, "OMDXYR");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleYRoom.class,
+				StructureOceanMonumentPieces.DoubleYRoom::new, "OMDYR");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleYZRoom.class,
+				StructureOceanMonumentPieces.DoubleYZRoom::new, "OMDYZR");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.DoubleZRoom.class,
+				StructureOceanMonumentPieces.DoubleZRoom::new, "OMDZR");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.EntryRoom.class,
+				StructureOceanMonumentPieces.EntryRoom::new, "OMEntry");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.Penthouse.class,
+				StructureOceanMonumentPieces.Penthouse::new, "OMPenthouse");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.SimpleRoom.class,
+				StructureOceanMonumentPieces.SimpleRoom::new, "OMSimple");
+		MapGenStructureIO.registerStructureComponent(StructureOceanMonumentPieces.SimpleTopRoom.class,
+				StructureOceanMonumentPieces.SimpleTopRoom::new, "OMSimpleT");
 	}
 
 	public static class DoubleXRoom extends StructureOceanMonumentPieces.Piece {

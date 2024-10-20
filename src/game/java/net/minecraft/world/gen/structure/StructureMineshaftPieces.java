@@ -56,10 +56,14 @@ public class StructureMineshaftPieces {
 					new WeightedRandomChestContent(Items.iron_horse_armor, 0, 1, 1, 1) });
 
 	public static void registerStructurePieces() {
-		MapGenStructureIO.registerStructureComponent(StructureMineshaftPieces.Corridor.class, "MSCorridor");
-		MapGenStructureIO.registerStructureComponent(StructureMineshaftPieces.Cross.class, "MSCrossing");
-		MapGenStructureIO.registerStructureComponent(StructureMineshaftPieces.Room.class, "MSRoom");
-		MapGenStructureIO.registerStructureComponent(StructureMineshaftPieces.Stairs.class, "MSStairs");
+		MapGenStructureIO.registerStructureComponent(StructureMineshaftPieces.Corridor.class,
+				StructureMineshaftPieces.Corridor::new, "MSCorridor");
+		MapGenStructureIO.registerStructureComponent(StructureMineshaftPieces.Cross.class,
+				StructureMineshaftPieces.Cross::new, "MSCrossing");
+		MapGenStructureIO.registerStructureComponent(StructureMineshaftPieces.Room.class,
+				StructureMineshaftPieces.Room::new, "MSRoom");
+		MapGenStructureIO.registerStructureComponent(StructureMineshaftPieces.Stairs.class,
+				StructureMineshaftPieces.Stairs::new, "MSStairs");
 	}
 
 	private static StructureComponent func_175892_a(List<StructureComponent> listIn, EaglercraftRandom rand, int x,

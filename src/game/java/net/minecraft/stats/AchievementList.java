@@ -135,7 +135,8 @@ public class AchievementList {
 		fullBeacon = (new Achievement("achievement.fullBeacon", "fullBeacon", 7, 8, Blocks.beacon, killWither))
 				.setSpecial().registerStat();
 		exploreAllBiomes = (new Achievement("achievement.exploreAllBiomes", "exploreAllBiomes", 4, 8,
-				Items.diamond_boots, theEnd)).func_150953_b(JsonSerializableSet.class).setSpecial().registerStat();
+				Items.diamond_boots, theEnd)).func_150953_b(JsonSerializableSet.class, JsonSerializableSet::new)
+						.setSpecial().registerStat();
 		overpowered = (new Achievement("achievement.overpowered", "overpowered", 6, 4,
 				new ItemStack(Items.golden_apple, 1, 1), buildBetterPickaxe)).setSpecial().registerStat();
 	}
