@@ -30,6 +30,7 @@ import net.lax1dude.eaglercraft.v1_8.internal.EnumPlatformType;
 import net.lax1dude.eaglercraft.v1_8.internal.KeyboardConstants;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.lax1dude.eaglercraft.v1_8.minecraft.GuiScreenVideoSettingsWarning;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.EaglerDeferredConfig;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.EaglerDeferredPipeline;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
@@ -212,6 +213,7 @@ public class GameSettings {
 	public boolean hasShownProfanityFilter = false;
 	public float touchControlOpacity = 1.0f;
 	public boolean hideDefaultUsernameWarning = false;
+	public boolean hideVideoSettingsWarning = false;
 
 	public int voiceListenRadius = 16;
 	public float voiceListenVolume = 0.5f;
@@ -1077,6 +1079,10 @@ public class GameSettings {
 						this.hideDefaultUsernameWarning = astring[1].equals("true");
 					}
 
+					if (astring[0].equals("hideVideoSettingsWarning")) {
+						hideVideoSettingsWarning = astring[1].equals("true");
+					}
+
 					deferredShaderConf.readOption(astring[0], astring[1]);
 				} catch (Exception var8) {
 					logger.warn("Skipping bad option: " + s);
@@ -1219,6 +1225,7 @@ public class GameSettings {
 			printwriter.println("screenRecordMicVolume:" + this.screenRecordMicVolume);
 			printwriter.println("touchControlOpacity:" + this.touchControlOpacity);
 			printwriter.println("hideDefaultUsernameWarning:" + this.hideDefaultUsernameWarning);
+			printwriter.println("hideVideoSettingsWarning:" + this.hideVideoSettingsWarning);
 
 			for (KeyBinding keybinding : this.keyBindings) {
 				printwriter.println("key_" + keybinding.getKeyDescription() + ":" + keybinding.getKeyCode());
@@ -1315,6 +1322,22 @@ public class GameSettings {
 			arr.put(s);
 		}
 		return arr.toString();
+	}
+
+	public int checkBadVideoSettings() {
+		return hideVideoSettingsWarning ? 0
+				: ((renderDistanceChunks > 6 ? GuiScreenVideoSettingsWarning.WARNING_RENDER_DISTANCE : 0)
+						| (!enableVsync ? GuiScreenVideoSettingsWarning.WARNING_VSYNC : 0)
+						| (limitFramerate < 30 ? GuiScreenVideoSettingsWarning.WARNING_FRAME_LIMIT : 0));
+	}
+
+	public void fixBadVideoSettings() {
+		if (renderDistanceChunks > 6)
+			renderDistanceChunks = 4;
+		if (!enableVsync)
+			enableVsync = true;
+		if (limitFramerate < 30)
+			limitFramerate = 260;
 	}
 
 	public static enum Options {

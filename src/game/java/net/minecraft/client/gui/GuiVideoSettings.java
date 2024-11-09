@@ -3,6 +3,7 @@ package net.minecraft.client.gui;
 import java.io.IOException;
 
 import net.lax1dude.eaglercraft.v1_8.Display;
+import net.lax1dude.eaglercraft.v1_8.minecraft.GuiScreenVideoSettingsWarning;
 import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.lax1dude.eaglercraft.v1_8.recording.ScreenRecordingController;
@@ -115,9 +116,13 @@ public class GuiVideoSettings extends GuiScreen {
 		if (parGuiButton.enabled) {
 			if (parGuiButton.id == 200) {
 				this.mc.gameSettings.saveOptions();
-				this.mc.displayGuiScreen(this.parentGuiScreen);
+				GuiScreen contScreen = parentGuiScreen;
+				int vidIssues = mc.gameSettings.checkBadVideoSettings();
+				if (vidIssues != 0) {
+					contScreen = new GuiScreenVideoSettingsWarning(contScreen, vidIssues);
+				}
+				this.mc.displayGuiScreen(contScreen);
 			}
-
 		}
 	}
 

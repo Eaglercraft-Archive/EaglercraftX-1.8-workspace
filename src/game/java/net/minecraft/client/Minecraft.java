@@ -43,6 +43,7 @@ import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFontRenderer;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EnumInputEvent;
 import net.lax1dude.eaglercraft.v1_8.minecraft.GuiScreenGenericErrorMessage;
+import net.lax1dude.eaglercraft.v1_8.minecraft.GuiScreenVideoSettingsWarning;
 import net.lax1dude.eaglercraft.v1_8.notifications.ServerNotificationRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.EaglerMeshLoader;
 import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
@@ -521,6 +522,11 @@ public class Minecraft implements IThreadListener {
 		}
 		if (this.serverName != null) {
 			mainMenu = new GuiConnecting(mainMenu, this, this.serverName, this.serverPort);
+		}
+
+		int vidIssues = gameSettings.checkBadVideoSettings();
+		if (vidIssues != 0) {
+			mainMenu = new GuiScreenVideoSettingsWarning(mainMenu, vidIssues);
 		}
 
 		mainMenu = new GuiScreenEditProfile(mainMenu);
@@ -1547,8 +1553,9 @@ public class Minecraft implements IThreadListener {
 				this.displayGuiScreen(new GuiChat("/"));
 			}
 
-			boolean miningTouch = isMiningTouch();
-			boolean useTouch = thePlayer.getItemShouldUseOnTouchEagler();
+			boolean touchMode = PointerInputAbstraction.isTouchMode();
+			boolean miningTouch = touchMode && isMiningTouch();
+			boolean useTouch = touchMode && thePlayer.getItemShouldUseOnTouchEagler();
 			if (this.thePlayer.isUsingItem()) {
 				if (!this.gameSettings.keyBindUseItem.isKeyDown() && !miningTouch) {
 					this.playerController.onStoppedUsingItem(this.thePlayer);
