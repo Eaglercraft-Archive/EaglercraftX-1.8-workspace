@@ -157,7 +157,7 @@ public class MapGenCaves extends MapGenBase {
 					}
 
 					if (!flag3) {
-						BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+						BlockPos blockpos$mutableblockpos = new BlockPos();
 
 						for (int j3 = k2; j3 < k; ++j3) {
 							double d10 = ((double) (j3 + parInt1 * 16) + 0.5D - parDouble1) / d2;

@@ -58,7 +58,7 @@ public class WorldGenTaiga1 extends WorldGenAbstractTree {
 					j1 = l;
 				}
 
-				BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+				BlockPos blockpos$mutableblockpos = new BlockPos();
 
 				for (int k1 = blockpos.getX() - j1; k1 <= blockpos.getX() + j1 && flag; ++k1) {
 					for (int l1 = blockpos.getZ() - j1; l1 <= blockpos.getZ() + j1 && flag; ++l1) {

@@ -38,7 +38,7 @@ public class WorldGenSpikes extends WorldGenerator {
 		if (world.isAirBlock(blockpos) && world.getBlockState(blockpos.down()).getBlock() == this.baseBlockRequired) {
 			int i = random.nextInt(32) + 6;
 			int j = random.nextInt(4) + 1;
-			BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+			BlockPos blockpos$mutableblockpos = new BlockPos();
 
 			for (int k = blockpos.getX() - j; k <= blockpos.getX() + j; ++k) {
 				for (int l = blockpos.getZ() - j; l <= blockpos.getZ() + j; ++l) {

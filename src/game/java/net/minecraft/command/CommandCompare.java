@@ -83,8 +83,8 @@ public class CommandCompare extends CommandBase {
 					BlockPos blockpos3 = new BlockPos(structureboundingbox1.minX - structureboundingbox.minX,
 							structureboundingbox1.minY - structureboundingbox.minY,
 							structureboundingbox1.minZ - structureboundingbox.minZ);
-					BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-					BlockPos.MutableBlockPos blockpos$mutableblockpos1 = new BlockPos.MutableBlockPos();
+					BlockPos blockpos$mutableblockpos = new BlockPos();
+					BlockPos blockpos$mutableblockpos1 = new BlockPos();
 
 					for (int j = structureboundingbox.minZ; j <= structureboundingbox.maxZ; ++j) {
 						for (int k = structureboundingbox.minY; k <= structureboundingbox.maxY; ++k) {

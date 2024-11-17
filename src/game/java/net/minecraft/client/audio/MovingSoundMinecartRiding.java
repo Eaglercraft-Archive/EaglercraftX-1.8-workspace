@@ -35,7 +35,6 @@ public class MovingSoundMinecartRiding extends MovingSound {
 		this.minecart = minecart;
 		this.attenuationType = ISound.AttenuationType.NONE;
 		this.repeat = true;
-		this.repeatDelay = 0;
 	}
 
 	/**+

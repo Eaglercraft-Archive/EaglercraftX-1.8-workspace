@@ -31,7 +31,6 @@ public class GuardianSound extends MovingSound {
 		this.guardian = guardian;
 		this.attenuationType = ISound.AttenuationType.NONE;
 		this.repeat = true;
-		this.repeatDelay = 0;
 	}
 
 	/**+

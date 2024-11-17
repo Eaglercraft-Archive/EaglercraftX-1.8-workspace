@@ -58,7 +58,7 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
 					b0 = 2;
 				}
 
-				BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+				BlockPos blockpos$mutableblockpos = new BlockPos();
 
 				for (int k = blockpos.getX() - b0; k <= blockpos.getX() + b0 && flag; ++k) {
 					for (int l = blockpos.getZ() - b0; l <= blockpos.getZ() + b0 && flag; ++l) {

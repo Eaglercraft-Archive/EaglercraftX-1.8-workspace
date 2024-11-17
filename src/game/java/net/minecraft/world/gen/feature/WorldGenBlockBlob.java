@@ -62,7 +62,8 @@ public class WorldGenBlockBlob extends WorldGenerator {
 					int l = i1 + random.nextInt(2);
 					float f = (float) (j + k + l) * 0.333F + 0.5F;
 
-					for (BlockPos blockpos1 : BlockPos.getAllInBox(blockpos.add(-j, -k, -l), blockpos.add(j, k, l))) {
+					for (BlockPos blockpos1 : BlockPos.getAllInBoxMutable(blockpos.add(-j, -k, -l),
+							blockpos.add(j, k, l))) {
 						if (blockpos1.distanceSq(blockpos) <= (double) (f * f)) {
 							world.setBlockState(blockpos1, this.field_150545_a.getDefaultState(), 4);
 						}

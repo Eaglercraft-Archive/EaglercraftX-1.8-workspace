@@ -156,7 +156,7 @@ public class WorldGenCanopyTree extends WorldGenAbstractTree {
 		int i = parBlockPos.getX();
 		int j = parBlockPos.getY();
 		int k = parBlockPos.getZ();
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int l = 0; l <= parInt1 + 1; ++l) {
 			byte b0 = 1;

@@ -406,7 +406,7 @@ public abstract class BiomeGenBase {
 		int k = (int) (parDouble1 / 3.0D + 3.0D + rand.nextDouble() * 0.25D);
 		int l = parInt1 & 15;
 		int i1 = parInt2 & 15;
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int j1 = 255; j1 >= 0; --j1) {
 			if (j1 <= rand.nextInt(5)) {

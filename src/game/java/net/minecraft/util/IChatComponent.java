@@ -233,6 +233,9 @@ public interface IChatComponent extends Iterable<IChatComponent> {
 		 * So sorry for this implementation
 		 */
 		public static String componentToJson(IChatComponent component) {
+			if (component == null) {
+				return "null";
+			}
 			if ((component instanceof ChatComponentText) && component.getChatStyle().isEmpty()
 					&& component.getSiblings().isEmpty()) {
 				String escaped = new JSONObject().put("E", component.getUnformattedTextForChat()).toString();

@@ -1514,8 +1514,7 @@ public abstract class Entity implements ICommandSender {
 		if (this.noClip) {
 			return false;
 		} else {
-			BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(Integer.MIN_VALUE,
-					Integer.MIN_VALUE, Integer.MIN_VALUE);
+			BlockPos blockpos$mutableblockpos = new BlockPos(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 
 			for (int i = 0; i < 8; ++i) {
 				int j = MathHelper.floor_double(

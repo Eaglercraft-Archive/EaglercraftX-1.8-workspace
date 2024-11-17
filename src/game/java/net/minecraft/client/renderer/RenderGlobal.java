@@ -988,8 +988,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 		BlockPos blockpos = new BlockPos(pos.getX() >> 4 << 4, pos.getY() >> 4 << 4, pos.getZ() >> 4 << 4);
 		Chunk chunk = this.theWorld.getChunkFromBlockCoords(blockpos);
 
-		for (BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(blockpos,
-				blockpos.add(15, 15, 15))) {
+		for (BlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(blockpos, blockpos.add(15, 15, 15))) {
 			if (chunk.getBlock(blockpos$mutableblockpos).isOpaqueCube()) {
 				visgraph.func_178606_a(blockpos$mutableblockpos);
 			}

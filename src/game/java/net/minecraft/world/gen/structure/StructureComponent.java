@@ -139,7 +139,7 @@ public abstract class StructureComponent {
 		int l = Math.min(this.boundingBox.maxX + 1, boundingboxIn.maxX);
 		int i1 = Math.min(this.boundingBox.maxY + 1, boundingboxIn.maxY);
 		int j1 = Math.min(this.boundingBox.maxZ + 1, boundingboxIn.maxZ);
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int k1 = i; k1 <= l; ++k1) {
 			for (int l1 = k; l1 <= j1; ++l1) {

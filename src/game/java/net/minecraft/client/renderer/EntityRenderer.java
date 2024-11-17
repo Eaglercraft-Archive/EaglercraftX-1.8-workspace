@@ -1496,7 +1496,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 			float f1 = (float) this.rendererUpdateCount + partialTicks;
 			worldrenderer.setTranslation(-d0, -d1, -d2);
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+			BlockPos blockpos$mutableblockpos = new BlockPos();
 
 			for (int i1 = k - b0; i1 <= k + b0; ++i1) {
 				for (int j1 = i - b0; j1 <= i + b0; ++j1) {

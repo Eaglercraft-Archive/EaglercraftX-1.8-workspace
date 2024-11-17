@@ -46,7 +46,7 @@ public class BiomeColorHelper {
 		int j = 0;
 		int k = 0;
 
-		for (BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(parBlockPos.add(-1, 0, -1),
+		for (BlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(parBlockPos.add(-1, 0, -1),
 				parBlockPos.add(1, 0, 1))) {
 			int l = parColorResolver.getColorAtPos(parIBlockAccess.getBiomeGenForCoords(blockpos$mutableblockpos),
 					blockpos$mutableblockpos);

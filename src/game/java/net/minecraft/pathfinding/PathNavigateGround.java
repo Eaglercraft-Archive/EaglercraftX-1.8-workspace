@@ -217,7 +217,7 @@ public class PathNavigateGround extends PathNavigate {
 	 */
 	private boolean isPositionClear(int parInt1, int parInt2, int parInt3, int parInt4, int parInt5, int parInt6,
 			Vec3 parVec3_1, double parDouble1, double parDouble2) {
-		for (BlockPos blockpos : BlockPos.getAllInBox(new BlockPos(parInt1, parInt2, parInt3),
+		for (BlockPos blockpos : BlockPos.getAllInBoxMutable(new BlockPos(parInt1, parInt2, parInt3),
 				new BlockPos(parInt1 + parInt4 - 1, parInt2 + parInt5 - 1, parInt3 + parInt6 - 1))) {
 			double d0 = (double) blockpos.getX() + 0.5D - parVec3_1.xCoord;
 			double d1 = (double) blockpos.getZ() + 0.5D - parVec3_1.zCoord;

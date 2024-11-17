@@ -32,7 +32,6 @@ public class MovingSoundMinecart extends MovingSound {
 		super(new ResourceLocation("minecraft:minecart.base"));
 		this.minecart = minecartIn;
 		this.repeat = true;
-		this.repeatDelay = 0;
 	}
 
 	/**+
@@ -54,7 +53,6 @@ public class MovingSoundMinecart extends MovingSound {
 				this.distance = 0.0F;
 				this.volume = 0.0F;
 			}
-
 		}
 	}
 }

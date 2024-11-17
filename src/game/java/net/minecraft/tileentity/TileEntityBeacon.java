@@ -125,7 +125,7 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
 				EntitySheep.func_175513_a(EnumDyeColor.WHITE));
 		this.beamSegments.add(tileentitybeacon$beamsegment);
 		boolean flag = true;
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int i1 = k + 1; i1 < 256; ++i1) {
 			IBlockState iblockstate = this.worldObj.getBlockState(blockpos$mutableblockpos.func_181079_c(j, i1, l));

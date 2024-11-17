@@ -1749,7 +1749,7 @@ public class StructureVillagePieces {
 		protected int getAverageGroundLevel(World worldIn, StructureBoundingBox parStructureBoundingBox) {
 			int i = 0;
 			int j = 0;
-			BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+			BlockPos blockpos$mutableblockpos = new BlockPos();
 
 			for (int k = this.boundingBox.minZ; k <= this.boundingBox.maxZ; ++k) {
 				for (int l = this.boundingBox.minX; l <= this.boundingBox.maxX; ++l) {

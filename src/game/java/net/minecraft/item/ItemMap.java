@@ -126,7 +126,7 @@ public class ItemMap extends ItemMapBase {
 
 									d1 = 100.0D;
 								} else {
-									BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+									BlockPos blockpos$mutableblockpos = new BlockPos();
 
 									for (int i4 = 0; i4 < i; ++i4) {
 										for (int j4 = 0; j4 < i; ++j4) {

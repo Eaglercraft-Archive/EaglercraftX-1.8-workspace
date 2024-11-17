@@ -89,7 +89,7 @@ public class SwimNodeProcessor extends NodeProcessor {
 	}
 
 	private int func_176186_b(Entity entityIn, int x, int y, int z) {
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int i = x; i < x + this.entitySizeX; ++i) {
 			for (int j = y; j < y + this.entitySizeY; ++j) {

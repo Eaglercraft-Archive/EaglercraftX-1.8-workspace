@@ -110,7 +110,7 @@ public class BlockModelRenderer {
 		float[] afloat = isDeferred ? new float[EnumFacing._VALUES.length * 2] : null;
 		BitSet bitset = new BitSet(3);
 
-		BlockPos.MutableBlockPos pointer = new BlockPos.MutableBlockPos();
+		BlockPos pointer = new BlockPos();
 		EnumFacing[] facings = EnumFacing._VALUES;
 		for (int m = 0; m < facings.length; ++m) {
 			EnumFacing enumfacing = facings[m];

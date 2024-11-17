@@ -74,7 +74,7 @@ public class WorldGenTrees extends WorldGenAbstractTree {
 					b0 = 2;
 				}
 
-				BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+				BlockPos blockpos$mutableblockpos = new BlockPos();
 
 				for (int k = blockpos.getX() - b0; k <= blockpos.getX() + b0 && flag; ++k) {
 					for (int l = blockpos.getZ() - b0; l <= blockpos.getZ() + b0 && flag; ++l) {
@@ -150,7 +150,7 @@ public class WorldGenTrees extends WorldGenAbstractTree {
 						for (int l2 = blockpos.getY() - 3 + i; l2 <= blockpos.getY() + i; ++l2) {
 							int k3 = l2 - (blockpos.getY() + i);
 							int l3 = 2 - k3 / 2;
-							BlockPos.MutableBlockPos blockpos$mutableblockpos1 = new BlockPos.MutableBlockPos();
+							BlockPos blockpos$mutableblockpos1 = new BlockPos();
 
 							for (int i4 = blockpos.getX() - l3; i4 <= blockpos.getX() + l3; ++i4) {
 								for (int j4 = blockpos.getZ() - l3; j4 <= blockpos.getZ() + l3; ++j4) {

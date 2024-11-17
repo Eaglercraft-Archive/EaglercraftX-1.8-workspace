@@ -103,8 +103,7 @@ public class BlockFarmland extends Block {
 	}
 
 	private boolean hasWater(World worldIn, BlockPos pos) {
-		for (BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(pos.add(-4, 0, -4),
-				pos.add(4, 1, 4))) {
+		for (BlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(pos.add(-4, 0, -4), pos.add(4, 1, 4))) {
 			if (worldIn.getBlockState(blockpos$mutableblockpos).getBlock().getMaterial() == Material.water) {
 				return true;
 			}

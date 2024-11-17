@@ -71,19 +71,22 @@ public class BlockGrass extends Block implements IGrowable {
 
 	public void updateTick(World world, BlockPos blockpos, IBlockState var3, EaglercraftRandom random) {
 		if (!world.isRemote) {
-			if (world.getLightFromNeighbors(blockpos.up()) < 4
-					&& world.getBlockState(blockpos.up()).getBlock().getLightOpacity() > 2) {
+			BlockPos tmp = new BlockPos();
+			if (world.getLightFromNeighbors(blockpos.up(tmp)) < 4
+					&& world.getBlockState(blockpos.up(tmp)).getBlock().getLightOpacity() > 2) {
 				world.setBlockState(blockpos, Blocks.dirt.getDefaultState());
 			} else {
-				if (world.getLightFromNeighbors(blockpos.up()) >= 9) {
+				if (world.getLightFromNeighbors(blockpos.up(tmp)) >= 9) {
+					BlockPos tmp2 = new BlockPos();
 					for (int i = 0; i < 4; ++i) {
 						BlockPos blockpos1 = blockpos.add(random.nextInt(3) - 1, random.nextInt(5) - 3,
-								random.nextInt(3) - 1);
-						Block block = world.getBlockState(blockpos1.up()).getBlock();
+								random.nextInt(3) - 1, tmp2);
+						Block block = world.getBlockState(blockpos1.up(tmp)).getBlock();
 						IBlockState iblockstate = world.getBlockState(blockpos1);
 						if (iblockstate.getBlock() == Blocks.dirt
 								&& iblockstate.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT
-								&& world.getLightFromNeighbors(blockpos1.up()) >= 4 && block.getLightOpacity() <= 2) {
+								&& world.getLightFromNeighbors(blockpos1.up(tmp)) >= 4
+								&& block.getLightOpacity() <= 2) {
 							world.setBlockState(blockpos1, Blocks.grass.getDefaultState());
 						}
 					}

@@ -656,7 +656,7 @@ public class EntityZombie extends EntityMob {
 		int i = 1;
 		if (this.rand.nextFloat() < 0.01F) {
 			int j = 0;
-			BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+			BlockPos blockpos$mutableblockpos = new BlockPos();
 
 			for (int k = (int) this.posX - 4; k < (int) this.posX + 4 && j < 14; ++k) {
 				for (int l = (int) this.posY - 4; l < (int) this.posY + 4 && j < 14; ++l) {

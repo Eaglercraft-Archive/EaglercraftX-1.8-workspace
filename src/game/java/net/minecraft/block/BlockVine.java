@@ -243,10 +243,11 @@ public class BlockVine extends Block {
 				int i = 5;
 				boolean flag = false;
 
+				BlockPos tmp = new BlockPos(0, 0, 0);
 				label62: for (int j = -b0; j <= b0; ++j) {
 					for (int k = -b0; k <= b0; ++k) {
 						for (int l = -1; l <= 1; ++l) {
-							if (world.getBlockState(blockpos.add(j, l, k)).getBlock() == this) {
+							if (world.getBlockState(blockpos.add(j, l, k, tmp)).getBlock() == this) {
 								--i;
 								if (i <= 0) {
 									flag = true;
@@ -259,7 +260,6 @@ public class BlockVine extends Block {
 
 				EnumFacing enumfacing1 = EnumFacing.random(random);
 				BlockPos blockpos2 = blockpos.up();
-				BlockPos tmp = new BlockPos(0, 0, 0);
 				if (enumfacing1 == EnumFacing.UP && blockpos.getY() < 255 && world.isAirBlock(blockpos2)) {
 					if (!flag) {
 						IBlockState iblockstate3 = iblockstate;
@@ -285,7 +285,7 @@ public class BlockVine extends Block {
 				} else if (enumfacing1.getAxis().isHorizontal()
 						&& !((Boolean) iblockstate.getValue(getPropertyFor(enumfacing1))).booleanValue()) {
 					if (!flag) {
-						BlockPos blockpos4 = blockpos.offset(enumfacing1);
+						BlockPos blockpos4 = blockpos.offsetEvenFaster(enumfacing1, blockpos2);
 						Block block1 = world.getBlockState(blockpos4).getBlock();
 						if (block1.blockMaterial == Material.air) {
 							EnumFacing enumfacing2 = enumfacing1.rotateY();
@@ -310,7 +310,7 @@ public class BlockVine extends Block {
 									world.getBlockState(blockpos.offsetEvenFaster(enumfacing4, tmp)).getBlock())) {
 								world.setBlockState(blockpos1, this.getDefaultState().withProperty(
 										getPropertyFor(enumfacing1.getOpposite()), Boolean.valueOf(true)), 2);
-							} else if (this.canPlaceOn(world.getBlockState(blockpos4.up()).getBlock())) {
+							} else if (this.canPlaceOn(world.getBlockState(blockpos4.up(tmp)).getBlock())) {
 								world.setBlockState(blockpos4, this.getDefaultState(), 2);
 							}
 						} else if (block1.blockMaterial.isOpaque() && block1.isFullCube()) {
@@ -321,7 +321,7 @@ public class BlockVine extends Block {
 					}
 				} else {
 					if (blockpos.getY() > 1) {
-						BlockPos blockpos3 = blockpos.down();
+						BlockPos blockpos3 = blockpos.down(blockpos2);
 						IBlockState iblockstate1 = world.getBlockState(blockpos3);
 						Block block = iblockstate1.getBlock();
 						EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;

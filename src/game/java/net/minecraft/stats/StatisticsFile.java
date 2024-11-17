@@ -2,7 +2,6 @@ package net.minecraft.stats;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

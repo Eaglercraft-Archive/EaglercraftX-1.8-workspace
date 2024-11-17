@@ -106,7 +106,7 @@ public abstract class BlockLeaves extends BlockLeavesBase {
 				}
 
 				if (world.isAreaLoaded(new BlockPos(j - i, k - i, l - i), new BlockPos(j + i, k + i, l + i))) {
-					BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+					BlockPos blockpos$mutableblockpos = new BlockPos();
 
 					for (int k1 = -b0; k1 <= b0; ++k1) {
 						for (int l1 = -b0; l1 <= b0; ++l1) {

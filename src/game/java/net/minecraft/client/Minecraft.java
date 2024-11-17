@@ -1171,6 +1171,11 @@ public class Minecraft implements IThreadListener {
 
 		if (wasPaused != isGamePaused) {
 			SingleplayerServerController.setPaused(this.isGamePaused);
+			if (isGamePaused) {
+				mcSoundHandler.pauseSounds();
+			} else {
+				mcSoundHandler.resumeSounds();
+			}
 			wasPaused = isGamePaused;
 		}
 

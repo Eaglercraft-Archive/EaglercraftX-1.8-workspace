@@ -66,8 +66,8 @@ public class WalkNodeProcessor extends NodeProcessor {
 		int i;
 		if (this.canSwim && entity.isInWater()) {
 			i = (int) entity.getEntityBoundingBox().minY;
-			BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(
-					MathHelper.floor_double(entity.posX), i, MathHelper.floor_double(entity.posZ));
+			BlockPos blockpos$mutableblockpos = new BlockPos(MathHelper.floor_double(entity.posX), i,
+					MathHelper.floor_double(entity.posZ));
 
 			for (Block block = this.blockaccess.getBlockState(blockpos$mutableblockpos)
 					.getBlock(); block == Blocks.flowing_water
@@ -194,7 +194,7 @@ public class WalkNodeProcessor extends NodeProcessor {
 			int sizeY, int sizeZ, boolean avoidWater, boolean breakDoors, boolean enterDoors) {
 		boolean flag = false;
 		BlockPos blockpos = new BlockPos(entityIn);
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int i = x; i < x + sizeX; ++i) {
 			for (int j = y; j < y + sizeY; ++j) {

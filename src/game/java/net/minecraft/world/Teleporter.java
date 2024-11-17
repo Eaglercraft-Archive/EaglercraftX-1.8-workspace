@@ -203,7 +203,7 @@ public class Teleporter {
 		int j1 = k;
 		int k1 = 0;
 		int l1 = this.random.nextInt(4);
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int i2 = i - b0; i2 <= i + b0; ++i2) {
 			double d1 = (double) i2 + 0.5D - parEntity.posX;

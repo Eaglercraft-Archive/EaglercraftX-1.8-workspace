@@ -63,7 +63,7 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
 					b0 = 3;
 				}
 
-				BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+				BlockPos blockpos$mutableblockpos = new BlockPos();
 
 				for (int k = blockpos.getX() - b0; k <= blockpos.getX() + b0 && flag; ++k) {
 					for (int l = blockpos.getZ() - b0; l <= blockpos.getZ() + b0 && flag; ++l) {
@@ -121,7 +121,7 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
 					for (int i2 = blockpos.getY() - 3 + i; i2 <= blockpos.getY() + i; ++i2) {
 						int k2 = i2 - (blockpos.getY() + i);
 						int i3 = 2 - k2 / 2;
-						BlockPos.MutableBlockPos blockpos$mutableblockpos1 = new BlockPos.MutableBlockPos();
+						BlockPos blockpos$mutableblockpos1 = new BlockPos();
 
 						for (int l3 = blockpos.getX() - i3; l3 <= blockpos.getX() + i3; ++l3) {
 							for (int i4 = blockpos.getZ() - i3; i4 <= blockpos.getZ() + i3; ++i4) {

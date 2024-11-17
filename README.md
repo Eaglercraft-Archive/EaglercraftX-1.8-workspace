@@ -22,6 +22,8 @@ Java must be added to your PATH!
 2. Open one of the .java files from the source folders (workaround for a bug)
 3. Run/Debug the client with the included "eaglercraftDebugRuntime" configuration
 
+**Note:** If you are trying to use the desktop runtime on Linux, make sure you add the "desktopRuntime" folder to the `LD_LIBRARY_PATH` environment variable of the Java process. This should be done automatically by the Eclipse project's default run configuration, but it might not work properly on every system, or when the Eclipse project is imported into IntelliJ.
+
 **See the main 1.8 repository's README for more info**
 
 The source codes of EaglercraftXBungee and EaglercraftXVelocity are not included here.

@@ -113,7 +113,7 @@ public class ChunkLoader {
 
 		parNBTTagCompound.setTag("Sections", nbttaglist);
 		byte[] abyte = new byte[256];
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int j2 = 0; j2 < 16; ++j2) {
 			for (int k2 = 0; k2 < 16; ++k2) {

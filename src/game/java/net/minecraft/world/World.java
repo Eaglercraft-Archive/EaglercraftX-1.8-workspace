@@ -524,11 +524,12 @@ public abstract class World implements IBlockAccess {
 	public int getLight(BlockPos pos, boolean checkNeighbors) {
 		if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000) {
 			if (checkNeighbors && this.getBlockState(pos).getBlock().getUseNeighborBrightness()) {
-				int i1 = this.getLight(pos.up(), false);
-				int i = this.getLight(pos.east(), false);
-				int j = this.getLight(pos.west(), false);
-				int k = this.getLight(pos.south(), false);
-				int l = this.getLight(pos.north(), false);
+				BlockPos tmp = new BlockPos(0, 0, 0);
+				int i1 = this.getLight(pos.up(tmp), false);
+				int i = this.getLight(pos.east(tmp), false);
+				int j = this.getLight(pos.west(tmp), false);
+				int k = this.getLight(pos.south(tmp), false);
+				int l = this.getLight(pos.north(tmp), false);
 				if (i > i1) {
 					i1 = i;
 				}
@@ -610,11 +611,12 @@ public abstract class World implements IBlockAccess {
 			} else if (!this.isBlockLoaded(pos)) {
 				return type.defaultLightValue;
 			} else if (this.getBlockState(pos).getBlock().getUseNeighborBrightness()) {
-				int i1 = this.getLightFor(type, pos.up());
-				int i = this.getLightFor(type, pos.east());
-				int j = this.getLightFor(type, pos.west());
-				int k = this.getLightFor(type, pos.south());
-				int l = this.getLightFor(type, pos.north());
+				BlockPos tmp = new BlockPos();
+				int i1 = this.getLightFor(type, pos.up(tmp));
+				int i = this.getLightFor(type, pos.east(tmp));
+				int j = this.getLightFor(type, pos.west(tmp));
+				int k = this.getLightFor(type, pos.south(tmp));
+				int l = this.getLightFor(type, pos.north(tmp));
 				if (i > i1) {
 					i1 = i;
 				}
@@ -1060,7 +1062,7 @@ public abstract class World implements IBlockAccess {
 		boolean flag = entityIn.isOutsideBorder();
 		boolean flag1 = this.isInsideBorder(worldborder, entityIn);
 		IBlockState iblockstate = Blocks.stone.getDefaultState();
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int k1 = i; k1 < j; ++k1) {
 			for (int l1 = i1; l1 < j1; ++l1) {
@@ -1133,7 +1135,7 @@ public abstract class World implements IBlockAccess {
 		int l = MathHelper.floor_double(bb.maxY + 1.0D);
 		int i1 = MathHelper.floor_double(bb.minZ);
 		int j1 = MathHelper.floor_double(bb.maxZ + 1.0D);
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int k1 = i; k1 < j; ++k1) {
 			for (int l1 = i1; l1 < j1; ++l1) {
@@ -1628,7 +1630,7 @@ public abstract class World implements IBlockAccess {
 		int l = MathHelper.floor_double(bb.maxY);
 		int i1 = MathHelper.floor_double(bb.minZ);
 		int j1 = MathHelper.floor_double(bb.maxZ);
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int k1 = i; k1 <= j; ++k1) {
 			for (int l1 = k; l1 <= l; ++l1) {
@@ -1655,7 +1657,7 @@ public abstract class World implements IBlockAccess {
 		int l = MathHelper.floor_double(bb.maxY);
 		int i1 = MathHelper.floor_double(bb.minZ);
 		int j1 = MathHelper.floor_double(bb.maxZ);
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int k1 = i; k1 <= j; ++k1) {
 			for (int l1 = k; l1 <= l; ++l1) {
@@ -1679,7 +1681,7 @@ public abstract class World implements IBlockAccess {
 		int i1 = MathHelper.floor_double(bb.minZ);
 		int j1 = MathHelper.floor_double(bb.maxZ + 1.0D);
 		if (this.isAreaLoaded(i, k, i1, j, l, j1, true)) {
-			BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+			BlockPos blockpos$mutableblockpos = new BlockPos();
 
 			for (int k1 = i; k1 < j; ++k1) {
 				for (int l1 = k; l1 < l; ++l1) {
@@ -1712,7 +1714,7 @@ public abstract class World implements IBlockAccess {
 		} else {
 			boolean flag = false;
 			Vec3 vec3 = new Vec3(0.0D, 0.0D, 0.0D);
-			BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+			BlockPos blockpos$mutableblockpos = new BlockPos();
 
 			for (int k1 = i; k1 < j; ++k1) {
 				for (int l1 = k; l1 < l; ++l1) {
@@ -1755,7 +1757,7 @@ public abstract class World implements IBlockAccess {
 		int l = MathHelper.floor_double(bb.maxY + 1.0D);
 		int i1 = MathHelper.floor_double(bb.minZ);
 		int j1 = MathHelper.floor_double(bb.maxZ + 1.0D);
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int k1 = i; k1 < j; ++k1) {
 			for (int l1 = k; l1 < l; ++l1) {
@@ -1782,7 +1784,7 @@ public abstract class World implements IBlockAccess {
 		int l = MathHelper.floor_double(bb.maxY + 1.0D);
 		int i1 = MathHelper.floor_double(bb.minZ);
 		int j1 = MathHelper.floor_double(bb.maxZ + 1.0D);
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int k1 = i; k1 < j; ++k1) {
 			for (int l1 = k; l1 < l; ++l1) {
@@ -2210,8 +2212,9 @@ public abstract class World implements IBlockAccess {
 						return true;
 					}
 
-					boolean flag = this.isWater(pos.west()) && this.isWater(pos.east()) && this.isWater(pos.north())
-							&& this.isWater(pos.south());
+					BlockPos tmp = new BlockPos();
+					boolean flag = this.isWater(pos.west(tmp)) && this.isWater(pos.east(tmp))
+							&& this.isWater(pos.north(tmp)) && this.isWater(pos.south(tmp));
 					if (!flag) {
 						return true;
 					}
@@ -2332,7 +2335,7 @@ public abstract class World implements IBlockAccess {
 							int k3 = MathHelper.abs_int(j2 - j1);
 							int l3 = MathHelper.abs_int(k2 - k1);
 							if (j3 + k3 + l3 < 17) {
-								BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+								BlockPos blockpos$mutableblockpos = new BlockPos();
 
 								EnumFacing[] facings = EnumFacing._VALUES;
 								for (int m = 0; m < facings.length; ++m) {
@@ -2363,6 +2366,7 @@ public abstract class World implements IBlockAccess {
 				int k5 = (i5 >> 6 & 63) - 32 + j1;
 				int l5 = (i5 >> 12 & 63) - 32 + k1;
 				BlockPos blockpos1 = new BlockPos(j5, k5, l5);
+				BlockPos tmp = new BlockPos(0, 0, 0);
 				int i6 = this.getLightFor(lightType, blockpos1);
 				int j6 = this.getRawLight(blockpos1, lightType);
 				if (j6 != i6) {
@@ -2373,32 +2377,32 @@ public abstract class World implements IBlockAccess {
 						int i7 = Math.abs(l5 - k1);
 						boolean flag = j < this.lightUpdateBlockList.length - 6;
 						if (k6 + l6 + i7 < 17 && flag) {
-							if (this.getLightFor(lightType, blockpos1.west()) < j6) {
+							if (this.getLightFor(lightType, blockpos1.west(tmp)) < j6) {
 								this.lightUpdateBlockList[j++] = j5 - 1 - i1 + 32 + (k5 - j1 + 32 << 6)
 										+ (l5 - k1 + 32 << 12);
 							}
 
-							if (this.getLightFor(lightType, blockpos1.east()) < j6) {
+							if (this.getLightFor(lightType, blockpos1.east(tmp)) < j6) {
 								this.lightUpdateBlockList[j++] = j5 + 1 - i1 + 32 + (k5 - j1 + 32 << 6)
 										+ (l5 - k1 + 32 << 12);
 							}
 
-							if (this.getLightFor(lightType, blockpos1.down()) < j6) {
+							if (this.getLightFor(lightType, blockpos1.down(tmp)) < j6) {
 								this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - 1 - j1 + 32 << 6)
 										+ (l5 - k1 + 32 << 12);
 							}
 
-							if (this.getLightFor(lightType, blockpos1.up()) < j6) {
+							if (this.getLightFor(lightType, blockpos1.up(tmp)) < j6) {
 								this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 + 1 - j1 + 32 << 6)
 										+ (l5 - k1 + 32 << 12);
 							}
 
-							if (this.getLightFor(lightType, blockpos1.north()) < j6) {
+							if (this.getLightFor(lightType, blockpos1.north(tmp)) < j6) {
 								this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6)
 										+ (l5 - 1 - k1 + 32 << 12);
 							}
 
-							if (this.getLightFor(lightType, blockpos1.south()) < j6) {
+							if (this.getLightFor(lightType, blockpos1.south(tmp)) < j6) {
 								this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6)
 										+ (l5 + 1 - k1 + 32 << 12);
 							}
@@ -2617,27 +2621,28 @@ public abstract class World implements IBlockAccess {
 	 */
 	public int getStrongPower(BlockPos pos) {
 		int i = 0;
-		i = Math.max(i, this.getStrongPower(pos.down(), EnumFacing.DOWN));
+		BlockPos tmp = new BlockPos();
+		i = Math.max(i, this.getStrongPower(pos.down(tmp), EnumFacing.DOWN));
 		if (i >= 15) {
 			return i;
 		} else {
-			i = Math.max(i, this.getStrongPower(pos.up(), EnumFacing.UP));
+			i = Math.max(i, this.getStrongPower(pos.up(tmp), EnumFacing.UP));
 			if (i >= 15) {
 				return i;
 			} else {
-				i = Math.max(i, this.getStrongPower(pos.north(), EnumFacing.NORTH));
+				i = Math.max(i, this.getStrongPower(pos.north(tmp), EnumFacing.NORTH));
 				if (i >= 15) {
 					return i;
 				} else {
-					i = Math.max(i, this.getStrongPower(pos.south(), EnumFacing.SOUTH));
+					i = Math.max(i, this.getStrongPower(pos.south(tmp), EnumFacing.SOUTH));
 					if (i >= 15) {
 						return i;
 					} else {
-						i = Math.max(i, this.getStrongPower(pos.west(), EnumFacing.WEST));
+						i = Math.max(i, this.getStrongPower(pos.west(tmp), EnumFacing.WEST));
 						if (i >= 15) {
 							return i;
 						} else {
-							i = Math.max(i, this.getStrongPower(pos.east(), EnumFacing.EAST));
+							i = Math.max(i, this.getStrongPower(pos.east(tmp), EnumFacing.EAST));
 							return i >= 15 ? i : i;
 						}
 					}
@@ -2657,12 +2662,13 @@ public abstract class World implements IBlockAccess {
 	}
 
 	public boolean isBlockPowered(BlockPos pos) {
-		return this.getRedstonePower(pos.down(), EnumFacing.DOWN) > 0 ? true
-				: (this.getRedstonePower(pos.up(), EnumFacing.UP) > 0 ? true
-						: (this.getRedstonePower(pos.north(), EnumFacing.NORTH) > 0 ? true
-								: (this.getRedstonePower(pos.south(), EnumFacing.SOUTH) > 0 ? true
-										: (this.getRedstonePower(pos.west(), EnumFacing.WEST) > 0 ? true
-												: this.getRedstonePower(pos.east(), EnumFacing.EAST) > 0))));
+		BlockPos tmp = new BlockPos(0, 0, 0);
+		return this.getRedstonePower(pos.down(tmp), EnumFacing.DOWN) > 0 ? true
+				: (this.getRedstonePower(pos.up(tmp), EnumFacing.UP) > 0 ? true
+						: (this.getRedstonePower(pos.north(tmp), EnumFacing.NORTH) > 0 ? true
+								: (this.getRedstonePower(pos.south(tmp), EnumFacing.SOUTH) > 0 ? true
+										: (this.getRedstonePower(pos.west(tmp), EnumFacing.WEST) > 0 ? true
+												: this.getRedstonePower(pos.east(tmp), EnumFacing.EAST) > 0))));
 	}
 
 	/**+

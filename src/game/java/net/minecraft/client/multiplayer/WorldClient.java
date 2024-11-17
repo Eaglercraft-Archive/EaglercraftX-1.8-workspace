@@ -281,7 +281,7 @@ public class WorldClient extends World {
 		ItemStack itemstack = this.mc.thePlayer.getHeldItem();
 		boolean flag = this.mc.playerController.getCurrentGameType() == WorldSettings.GameType.CREATIVE
 				&& itemstack != null && Block.getBlockFromItem(itemstack.getItem()) == Blocks.barrier;
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+		BlockPos blockpos$mutableblockpos = new BlockPos();
 
 		for (int i = 0; i < 1000; ++i) {
 			int j = parInt1 + this.rand.nextInt(b0) - this.rand.nextInt(b0);

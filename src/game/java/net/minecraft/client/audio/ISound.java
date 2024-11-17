@@ -27,8 +27,6 @@ public interface ISound {
 
 	boolean canRepeat();
 
-	int getRepeatDelay();
-
 	float getVolume();
 
 	float getPitch();
