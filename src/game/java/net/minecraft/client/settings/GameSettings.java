@@ -213,7 +213,7 @@ public class GameSettings {
 	public boolean hasShownProfanityFilter = false;
 	public float touchControlOpacity = 1.0f;
 	public boolean hideDefaultUsernameWarning = false;
-	public boolean hideVideoSettingsWarning = false;
+	public boolean hideVideoSettingsWarning = EagRuntime.getPlatformType() == EnumPlatformType.DESKTOP;
 
 	public int voiceListenRadius = 16;
 	public float voiceListenVolume = 0.5f;

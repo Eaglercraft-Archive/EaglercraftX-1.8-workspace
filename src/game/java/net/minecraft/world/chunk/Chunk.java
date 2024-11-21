@@ -261,6 +261,9 @@ public class Chunk {
 	}
 
 	private void recheckGaps(boolean parFlag) {
+		if (!this.worldObj.isRemote) {
+			++EaglerMinecraftServer.counterLightUpdate;
+		}
 		if (this.worldObj.isAreaLoaded(new BlockPos(this.xPosition * 16 + 8, 0, this.zPosition * 16 + 8), 16)) {
 			for (int i = 0; i < 16; ++i) {
 				for (int j = 0; j < 16; ++j) {
@@ -766,11 +769,12 @@ public class Chunk {
 	public TileEntity getTileEntity(BlockPos blockpos, Chunk.EnumCreateEntityType chunk$enumcreateentitytype) {
 		TileEntity tileentity = (TileEntity) this.chunkTileEntityMap.get(blockpos);
 		if (tileentity == null) {
+			BlockPos pos2 = new BlockPos(blockpos);
 			if (chunk$enumcreateentitytype == Chunk.EnumCreateEntityType.IMMEDIATE) {
-				tileentity = this.createNewTileEntity(blockpos);
-				this.worldObj.setTileEntity(blockpos, tileentity);
+				tileentity = this.createNewTileEntity(pos2);
+				this.worldObj.setTileEntity(pos2, tileentity);
 			} else if (chunk$enumcreateentitytype == Chunk.EnumCreateEntityType.QUEUED) {
-				this.tileEntityPosQueue.add(blockpos);
+				this.tileEntityPosQueue.add(pos2);
 			}
 		} else if (tileentity.isInvalid()) {
 			this.chunkTileEntityMap.remove(blockpos);
@@ -790,6 +794,7 @@ public class Chunk {
 
 	public void addTileEntity(BlockPos blockpos, TileEntity tileentity) {
 		tileentity.setWorldObj(this.worldObj);
+		blockpos = new BlockPos(blockpos);
 		tileentity.setPos(blockpos);
 		if (this.getBlock(blockpos) instanceof ITileEntityProvider) {
 			if (this.chunkTileEntityMap.containsKey(blockpos)) {

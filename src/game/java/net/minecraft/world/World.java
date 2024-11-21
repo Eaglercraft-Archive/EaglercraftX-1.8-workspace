@@ -1929,7 +1929,7 @@ public abstract class World implements IBlockAccess {
 	public void setTileEntity(BlockPos pos, TileEntity tileEntityIn) {
 		if (tileEntityIn != null && !tileEntityIn.isInvalid()) {
 			if (this.processingLoadedTiles) {
-				tileEntityIn.setPos(pos);
+				tileEntityIn.setPos(new BlockPos(pos));
 				Iterator iterator = this.addedTileEntityList.iterator();
 
 				while (iterator.hasNext()) {

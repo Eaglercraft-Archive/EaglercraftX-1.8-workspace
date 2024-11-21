@@ -115,7 +115,8 @@ public abstract class TileEntity {
 				tileentity = (TileEntity) oclass.get();
 			}
 		} catch (Exception exception) {
-			logger.error("Could not create TileEntity", exception);
+			logger.error("Could not create TileEntity");
+			logger.error(exception);
 		}
 
 		if (tileentity != null) {

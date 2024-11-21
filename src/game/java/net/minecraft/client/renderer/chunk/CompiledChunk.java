@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.chunk;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -30,7 +31,7 @@ import net.minecraft.util.EnumWorldBlockLayer;
  * 
  */
 public class CompiledChunk {
-	public static final CompiledChunk DUMMY = new CompiledChunk() {
+	public static final CompiledChunk DUMMY = new CompiledChunk(null) {
 		protected void setLayerUsed(EnumWorldBlockLayer layer) {
 			throw new UnsupportedOperationException();
 		}
@@ -43,6 +44,7 @@ public class CompiledChunk {
 			return true;
 		}
 	};
+	private final RenderChunk chunk;
 	private final boolean[] layersUsed = new boolean[EnumWorldBlockLayer._VALUES.length];
 	private final boolean[] layersStarted = new boolean[EnumWorldBlockLayer._VALUES.length];
 	private boolean empty = true;
@@ -50,6 +52,20 @@ public class CompiledChunk {
 	private SetVisibility setVisibility = new SetVisibility();
 	private WorldRenderer.State state;
 	private WorldRenderer.State stateWater;
+
+	public CompiledChunk(RenderChunk chunk) {
+		this.chunk = chunk;
+	}
+
+	public void reset() {
+		Arrays.fill(layersUsed, false);
+		Arrays.fill(layersStarted, false);
+		empty = true;
+		tileEntities.clear();
+		setVisibility.setAllVisible(false);
+		setState(null);
+		setStateRealisticWater(null);
+	}
 
 	public boolean isEmpty() {
 		return this.empty;
@@ -93,6 +109,9 @@ public class CompiledChunk {
 	}
 
 	public void setState(WorldRenderer.State stateIn) {
+		if (this.state != stateIn && this.state != null) {
+			this.state.release();
+		}
 		this.state = stateIn;
 	}
 
@@ -101,6 +120,9 @@ public class CompiledChunk {
 	}
 
 	public void setStateRealisticWater(WorldRenderer.State stateIn) {
+		if (this.stateWater != stateIn && this.stateWater != null) {
+			this.stateWater.release();
+		}
 		this.stateWater = stateIn;
 	}
 }

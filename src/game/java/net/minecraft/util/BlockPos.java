@@ -61,7 +61,7 @@ public class BlockPos extends Vec3i {
 	}
 
 	public BlockPos(Vec3i source) {
-		this(source.getX(), source.getY(), source.getZ());
+		this(source.x, source.y, source.z);
 	}
 
 	/**+

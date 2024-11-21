@@ -92,7 +92,6 @@ public class ChunkRenderWorker {
 						this.chunkRenderDispatcher.uploadChunk(enumworldblocklayer,
 								generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(enumworldblocklayer),
 								generator.getRenderChunk(), compiledchunk);
-						generator.getRenderChunk().setCompiledChunk(compiledchunk);
 						generator.setStatus(ChunkCompileTaskGenerator.Status.DONE);
 					}
 				}
@@ -107,7 +106,6 @@ public class ChunkRenderWorker {
 									.getWorldRendererByLayer(EnumWorldBlockLayer.REALISTIC_WATER),
 							generator.getRenderChunk(), compiledchunk);
 				}
-				generator.getRenderChunk().setCompiledChunk(compiledchunk);
 				generator.setStatus(ChunkCompileTaskGenerator.Status.DONE);
 			}
 
