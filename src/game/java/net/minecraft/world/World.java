@@ -2772,14 +2772,6 @@ public abstract class World implements IBlockAccess {
 	public void sendQuittingDisconnectingPacket() {
 	}
 
-	/**+
-	 * Checks whether the session lock file was modified by another
-	 * process
-	 */
-	public void checkSessionLock() throws MinecraftException {
-		this.saveHandler.checkSessionLock();
-	}
-
 	public void setTotalWorldTime(long worldTime) {
 		this.worldInfo.setWorldTotalTime(worldTime);
 	}

@@ -50,6 +50,9 @@ public class CrashReport {
 	private String[] stacktrace;
 
 	public CrashReport(String descriptionIn, Throwable causeThrowable) {
+		if (causeThrowable == null) {
+			throw new NullPointerException("Crash report created for null throwable!");
+		}
 		this.description = descriptionIn;
 		this.cause = causeThrowable;
 		this.stacktrace = EagRuntime.getStackTraceElements(causeThrowable);
@@ -83,7 +86,7 @@ public class CrashReport {
 						+ System.getProperty("java.vm.vendor");
 			}
 		});
-		if (EagRuntime.getPlatformType() != EnumPlatformType.JAVASCRIPT) {
+		if (EagRuntime.getPlatformType() == EnumPlatformType.DESKTOP) {
 			this.theReportCategory.addCrashSectionCallable("Memory", new Callable<String>() {
 				public String call() {
 					long i = EagRuntime.maxMemory();

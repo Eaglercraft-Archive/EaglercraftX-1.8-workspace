@@ -8,7 +8,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.lax1dude.eaglercraft.v1_8.internal.vfs2.VFile2;
@@ -62,12 +61,6 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData {
 	 */
 	public VFile2 getWorldDirectory() {
 		return this.worldDirectory;
-	}
-
-	/**+
-	 * Checks the session lock to prevent save collisions
-	 */
-	public void checkSessionLock() throws MinecraftException {
 	}
 
 	/**+

@@ -64,12 +64,6 @@ public class WorldServerMulti extends WorldServer {
 		});
 	}
 
-	/**+
-	 * Saves the chunks to disk.
-	 */
-	protected void saveLevel() throws MinecraftException {
-	}
-
 	public World init() {
 		this.mapStorage = this.delegate.getMapStorage();
 		this.worldScoreboard = this.delegate.getScoreboard();

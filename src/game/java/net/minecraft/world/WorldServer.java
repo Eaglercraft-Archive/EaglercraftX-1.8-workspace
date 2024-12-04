@@ -765,7 +765,7 @@ public class WorldServer extends World implements IThreadListener {
 	/**+
 	 * Saves all chunks to disk while updating progress bar.
 	 */
-	public void saveAllChunks(boolean progressCallback, IProgressUpdate parIProgressUpdate) throws MinecraftException {
+	public void saveAllChunks(boolean progressCallback, IProgressUpdate parIProgressUpdate) {
 		if (this.chunkProvider.canSave()) {
 			if (parIProgressUpdate != null) {
 				parIProgressUpdate.displaySavingString("Saving level");
@@ -802,8 +802,7 @@ public class WorldServer extends World implements IThreadListener {
 	/**+
 	 * Saves the chunks to disk.
 	 */
-	protected void saveLevel() throws MinecraftException {
-		this.checkSessionLock();
+	protected void saveLevel() {
 		this.worldInfo.setBorderSize(this.getWorldBorder().getDiameter());
 		this.worldInfo.getBorderCenterX(this.getWorldBorder().getCenterX());
 		this.worldInfo.getBorderCenterZ(this.getWorldBorder().getCenterZ());

@@ -17,6 +17,9 @@ Java must be added to your PATH!
 3. Run `MakeOfflineDownload`
 4. Check the "javascript" folder
 
+**To compile the WASM GC client:**
+Consult the [README](wasm_gc_teavm/README.md) in the wasm_gc_teavm folder
+
 **To use the desktop runtime:**
 1. Import the Eclipse project in "desktopRuntime/eclipseProject" into your IDE
 2. Open one of the .java files from the source folders (workaround for a bug)

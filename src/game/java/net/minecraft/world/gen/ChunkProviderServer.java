@@ -16,7 +16,6 @@ import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.LongHashMap;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -200,11 +199,7 @@ public class ChunkProviderServer implements IChunkProvider {
 			} catch (IOException ioexception) {
 				logger.error("Couldn\'t save chunk");
 				logger.error(ioexception);
-			} catch (MinecraftException minecraftexception) {
-				logger.error("Couldn\'t save chunk; already in use by another instance of Minecraft?");
-				logger.error(minecraftexception);
 			}
-
 		}
 	}
 

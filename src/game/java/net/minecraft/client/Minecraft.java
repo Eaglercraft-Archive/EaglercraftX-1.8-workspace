@@ -43,6 +43,7 @@ import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFontRenderer;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EnumInputEvent;
 import net.lax1dude.eaglercraft.v1_8.minecraft.GuiScreenGenericErrorMessage;
+import net.lax1dude.eaglercraft.v1_8.minecraft.GuiScreenVSyncReEnabled;
 import net.lax1dude.eaglercraft.v1_8.minecraft.GuiScreenVideoSettingsWarning;
 import net.lax1dude.eaglercraft.v1_8.notifications.ServerNotificationRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.EaglerMeshLoader;
@@ -524,15 +525,26 @@ public class Minecraft implements IThreadListener {
 			mainMenu = new GuiConnecting(mainMenu, this, this.serverName, this.serverPort);
 		}
 
+		mainMenu = new GuiScreenEditProfile(mainMenu);
+
+		if (!EagRuntime.getConfiguration().isForceProfanityFilter() && !gameSettings.hasShownProfanityFilter) {
+			mainMenu = new GuiScreenContentWarning(mainMenu);
+		}
+
+		boolean vsyncScreen = false;
+		if (EagRuntime.getConfiguration().isEnforceVSync() && Display.isVSyncSupported() && !gameSettings.enableVsync) {
+			gameSettings.enableVsync = true;
+			gameSettings.saveOptions();
+			vsyncScreen = true;
+		}
+
 		int vidIssues = gameSettings.checkBadVideoSettings();
 		if (vidIssues != 0) {
 			mainMenu = new GuiScreenVideoSettingsWarning(mainMenu, vidIssues);
 		}
 
-		mainMenu = new GuiScreenEditProfile(mainMenu);
-
-		if (!EagRuntime.getConfiguration().isForceProfanityFilter() && !gameSettings.hasShownProfanityFilter) {
-			mainMenu = new GuiScreenContentWarning(mainMenu);
+		if (vsyncScreen) {
+			mainMenu = new GuiScreenVSyncReEnabled(mainMenu);
 		}
 
 		this.displayGuiScreen(mainMenu);

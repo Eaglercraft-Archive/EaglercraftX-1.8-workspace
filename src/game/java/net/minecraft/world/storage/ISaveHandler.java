@@ -2,7 +2,6 @@ package net.minecraft.world.storage;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.lax1dude.eaglercraft.v1_8.internal.vfs2.VFile2;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 
@@ -31,11 +30,6 @@ public interface ISaveHandler {
 	 * Loads and returns the world info
 	 */
 	WorldInfo loadWorldInfo();
-
-	/**+
-	 * Checks the session lock to prevent save collisions
-	 */
-	void checkSessionLock() throws MinecraftException;
 
 	/**+
 	 * initializes and returns the chunk loader for the specified

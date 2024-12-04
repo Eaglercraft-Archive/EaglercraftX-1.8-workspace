@@ -37,7 +37,6 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.Util;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldManager;
 import net.minecraft.world.WorldServer;
@@ -307,11 +306,7 @@ public abstract class MinecraftServer implements Runnable, ICommandSender, IThre
 								+ worldserver.provider.getDimensionName());
 					}
 
-					try {
-						worldserver.saveAllChunks(true, (IProgressUpdate) null);
-					} catch (MinecraftException minecraftexception) {
-						logger.warn(minecraftexception.getMessage());
-					}
+					worldserver.saveAllChunks(true, (IProgressUpdate) null);
 				}
 			}
 

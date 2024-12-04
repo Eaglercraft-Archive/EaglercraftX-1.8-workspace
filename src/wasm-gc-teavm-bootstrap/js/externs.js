@@ -1,12 +1,9 @@
-package net.minecraft.world;
-
-/**+
- * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
- * 
- * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
- * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
- * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+/**
+ * @fileoverview loader bootstrap externs
+ * @externs
+ */
+/*
+ * Copyright (c) 2024 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -20,8 +17,29 @@ package net.minecraft.world;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-public class MinecraftException extends Exception {
-	public MinecraftException(String msg) {
-		super(msg);
-	}
-}
+
+
+window.main = function() {};
+
+window.eaglercraftXOpts = {};
+
+window.eaglercraftXOpts.assetsURI = "";
+
+window.eaglercraftXOpts.container = "";
+
+window.__eaglercraftXLoaderContextPre = {};
+
+/** @type {!HTMLElement} */
+window.__eaglercraftXLoaderContextPre.rootElement;
+
+/** @type {!Object} */
+window.__eaglercraftXLoaderContextPre.eaglercraftXOpts;
+
+/** @type {!ArrayBuffer} */
+window.__eaglercraftXLoaderContextPre.theEPWFileBuffer;
+
+/** @type {string} */
+window.__eaglercraftXLoaderContextPre.loaderWASMURL;
+
+/** @type {string} */
+window.__eaglercraftXLoaderContextPre.splashURL;

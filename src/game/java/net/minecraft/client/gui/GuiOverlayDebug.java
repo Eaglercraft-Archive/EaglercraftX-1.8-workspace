@@ -430,7 +430,7 @@ public class GuiOverlayDebug extends Gui {
 
 	protected List<String> getDebugInfoRight() {
 		ArrayList arraylist;
-		if (EagRuntime.getPlatformType() != EnumPlatformType.JAVASCRIPT) {
+		if (EagRuntime.getPlatformType() == EnumPlatformType.DESKTOP) {
 			long i = EagRuntime.maxMemory();
 			long j = EagRuntime.totalMemory();
 			long k = EagRuntime.freeMemory();

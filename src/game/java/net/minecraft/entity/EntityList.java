@@ -8,6 +8,8 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import net.lax1dude.eaglercraft.v1_8.EagRuntime;
+import net.lax1dude.eaglercraft.v1_8.internal.EnumPlatformType;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EntityConstructor;
@@ -288,11 +290,16 @@ public class EntityList {
 		Set<String> set = stringToClassMapping.keySet();
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (String s : set) {
-			Class oclass = (Class) stringToClassMapping.get(s);
-			if ((oclass.getModifiers() & 1024) != 1024) {
-				arraylist.add(s);
+		// TODO: Eventually TeaVM will support getModifiers
+		if (EagRuntime.getPlatformType() != EnumPlatformType.WASM_GC) {
+			for (String s : set) {
+				Class oclass = (Class) stringToClassMapping.get(s);
+				if ((oclass.getModifiers() & 1024) != 1024) {
+					arraylist.add(s);
+				}
 			}
+		} else {
+			arraylist.addAll(set);
 		}
 
 		arraylist.add("LightningBolt");
