@@ -100,9 +100,8 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback {
 			this.serverListSelector.func_148195_a(this.savedServerList);
 			if (lanServerList == null) {
 				lanServerList = new LANServerList();
-			} else {
-				lanServerList.forceRefresh();
 			}
+			lanServerList.forceRefresh();
 		} else {
 			this.serverListSelector.setDimensions(this.width, this.height, 32, this.height - 64);
 		}
