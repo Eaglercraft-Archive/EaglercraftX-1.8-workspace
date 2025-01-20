@@ -3,11 +3,13 @@ package net.minecraft.enchantment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 
+import com.carrotsearch.hppc.IntIntHashMap;
+import com.carrotsearch.hppc.IntIntMap;
+import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -29,7 +31,7 @@ import net.minecraft.util.WeightedRandom;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -85,15 +87,18 @@ public class EnchantmentHelper {
 		}
 	}
 
-	public static Map<Integer, Integer> getEnchantments(ItemStack stack) {
-		LinkedHashMap linkedhashmap = Maps.newLinkedHashMap();
+	/**+
+	 * Return the enchantments for the specified stack.
+	 */
+	public static IntIntMap getEnchantments(ItemStack stack) {
+		IntIntHashMap linkedhashmap = new IntIntHashMap();
 		NBTTagList nbttaglist = stack.getItem() == Items.enchanted_book ? Items.enchanted_book.getEnchantments(stack)
 				: stack.getEnchantmentTagList();
 		if (nbttaglist != null) {
 			for (int i = 0; i < nbttaglist.tagCount(); ++i) {
 				short short1 = nbttaglist.getCompoundTagAt(i).getShort("id");
 				short short2 = nbttaglist.getCompoundTagAt(i).getShort("lvl");
-				linkedhashmap.put(Integer.valueOf(short1), Integer.valueOf(short2));
+				linkedhashmap.put(short1, short2);
 			}
 		}
 
@@ -103,12 +108,11 @@ public class EnchantmentHelper {
 	/**+
 	 * Set the enchantments for the specified stack.
 	 */
-	public static void setEnchantments(Map<Integer, Integer> enchMap, ItemStack stack) {
+	public static void setEnchantments(IntIntMap enchMap, ItemStack stack) {
 		NBTTagList nbttaglist = new NBTTagList();
-		Iterator iterator = enchMap.keySet().iterator();
 
-		while (iterator.hasNext()) {
-			int i = ((Integer) iterator.next()).intValue();
+		for (IntCursor cur : enchMap.keys()) {
+			int i = cur.value;
 			Enchantment enchantment = Enchantment.getEnchantmentById(i);
 			if (enchantment != null) {
 				NBTTagCompound nbttagcompound = new NBTTagCompound();

@@ -1,7 +1,6 @@
 package net.minecraft.client.resources.data;
 
-import java.util.Collections;
-import java.util.List;
+import com.carrotsearch.hppc.IntIndexedContainer;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -9,7 +8,7 @@ import java.util.List;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -26,9 +25,9 @@ import java.util.List;
 public class TextureMetadataSection implements IMetadataSection {
 	private final boolean textureBlur;
 	private final boolean textureClamp;
-	private final List<Integer> listMipmaps;
+	private final IntIndexedContainer listMipmaps;
 
-	public TextureMetadataSection(boolean parFlag, boolean parFlag2, List<Integer> parList) {
+	public TextureMetadataSection(boolean parFlag, boolean parFlag2, IntIndexedContainer parList) {
 		this.textureBlur = parFlag;
 		this.textureClamp = parFlag2;
 		this.listMipmaps = parList;
@@ -42,7 +41,7 @@ public class TextureMetadataSection implements IMetadataSection {
 		return this.textureClamp;
 	}
 
-	public List<Integer> getListMipmaps() {
-		return Collections.unmodifiableList(this.listMipmaps);
+	public IntIndexedContainer getListMipmaps() {
+		return listMipmaps;
 	}
 }

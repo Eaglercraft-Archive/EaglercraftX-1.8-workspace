@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+
+import net.lax1dude.eaglercraft.v1_8.EaglerBidiReorder;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 
 import net.lax1dude.eaglercraft.v1_8.HString;
@@ -28,7 +30,7 @@ import net.minecraft.util.ResourceLocation;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -330,21 +332,6 @@ public class FontRenderer implements IResourceManagerReloadListener {
 	}
 
 	/**+
-	 * Apply Unicode Bidirectional Algorithm to string and return a
-	 * new possibly reordered string for visual rendering.
-	 */
-	private String bidiReorder(String parString1) {
-//		try {
-//			Bidi bidi = new Bidi((new ArabicShaping(8)).shape(parString1), 127);
-//			bidi.setReorderingMode(0);
-//			return bidi.writeReordered(2);
-//		} catch (ArabicShapingException var3) {
-//			return parString1;
-//		}
-		return parString1;
-	}
-
-	/**+
 	 * Reset all style flag fields in the class to false; called at
 	 * the start of string rendering
 	 */
@@ -501,7 +488,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
 	 */
 	private int renderStringAligned(String text, int x, int y, int wrapWidth, int color, boolean parFlag) {
 		if (this.bidiFlag) {
-			int i = this.getStringWidth(this.bidiReorder(text));
+			int i = this.getStringWidth(EaglerBidiReorder.bidiReorder(text));
 			x = x + wrapWidth - i;
 		}
 
@@ -518,7 +505,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
 			this.posY = y;
 		} else {
 			if (this.bidiFlag) {
-				text = this.bidiReorder(text);
+				text = EaglerBidiReorder.bidiReorder(text);
 			}
 
 			if ((color & -67108864) == 0) {

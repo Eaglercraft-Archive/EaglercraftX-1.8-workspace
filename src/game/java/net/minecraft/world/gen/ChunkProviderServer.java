@@ -1,19 +1,19 @@
 package net.minecraft.world.gen;
 
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongObjectHashMap;
+import com.carrotsearch.hppc.LongObjectMap;
+import com.carrotsearch.hppc.LongSet;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.lax1dude.eaglercraft.v1_8.sp.server.EaglerMinecraftServer;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.IProgressUpdate;
-import net.minecraft.util.LongHashMap;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
@@ -33,7 +33,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -49,7 +49,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  */
 public class ChunkProviderServer implements IChunkProvider {
 	private static final Logger logger = LogManager.getLogger();
-	private Set<Long> droppedChunksSet = Collections.newSetFromMap(new ConcurrentHashMap());
+	private LongSet droppedChunksSet = new LongHashSet();
 	private Chunk dummyChunk;
 	private IChunkProvider serverChunkGenerator;
 	private IChunkLoader chunkLoader;
@@ -61,13 +61,13 @@ public class ChunkProviderServer implements IChunkProvider {
 	/**+
 	 * map of chunk Id's to Chunk instances
 	 */
-	private LongHashMap<Chunk> id2ChunkMap = new LongHashMap();
+	private LongObjectMap<Chunk> id2ChunkMap = new LongObjectHashMap<>();
 	private List<Chunk> loadedChunks = Lists.newLinkedList();
 	private WorldServer worldObj;
 
 	public ChunkProviderServer(WorldServer parWorldServer, IChunkLoader parIChunkLoader,
 			IChunkProvider parIChunkProvider) {
-		this.dummyChunk = new EmptyChunk(parWorldServer, 0, 0);
+		this.dummyChunk = new EmptyChunk(parWorldServer, Integer.MIN_VALUE, Integer.MIN_VALUE);
 		this.worldObj = parWorldServer;
 		this.chunkLoader = parIChunkLoader;
 		this.serverChunkGenerator = parIChunkProvider;
@@ -77,7 +77,7 @@ public class ChunkProviderServer implements IChunkProvider {
 	 * Checks to see if a chunk exists at x, z
 	 */
 	public boolean chunkExists(int i, int j) {
-		return this.id2ChunkMap.containsItem(ChunkCoordIntPair.chunkXZ2Int(i, j));
+		return this.id2ChunkMap.containsKey(ChunkCoordIntPair.chunkXZ2Int(i, j));
 	}
 
 	public List<Chunk> func_152380_a() {
@@ -87,10 +87,10 @@ public class ChunkProviderServer implements IChunkProvider {
 	public void dropChunk(int parInt1, int parInt2) {
 		if (this.worldObj.provider.canRespawnHere()) {
 			if (!this.worldObj.isSpawnChunk(parInt1, parInt2)) {
-				this.droppedChunksSet.add(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(parInt1, parInt2)));
+				this.droppedChunksSet.add(ChunkCoordIntPair.chunkXZ2Int(parInt1, parInt2));
 			}
 		} else {
-			this.droppedChunksSet.add(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(parInt1, parInt2)));
+			this.droppedChunksSet.add(ChunkCoordIntPair.chunkXZ2Int(parInt1, parInt2));
 		}
 
 	}
@@ -110,8 +110,8 @@ public class ChunkProviderServer implements IChunkProvider {
 	 */
 	public Chunk loadChunk(int i, int j) {
 		long k = ChunkCoordIntPair.chunkXZ2Int(i, j);
-		this.droppedChunksSet.remove(Long.valueOf(k));
-		Chunk chunk = (Chunk) this.id2ChunkMap.getValueByKey(k);
+		this.droppedChunksSet.removeAll(k);
+		Chunk chunk = this.id2ChunkMap.get(k);
 		if (chunk == null) {
 			chunk = this.loadChunkFromFile(i, j);
 			if (chunk == null) {
@@ -136,7 +136,7 @@ public class ChunkProviderServer implements IChunkProvider {
 				++EaglerMinecraftServer.counterChunkRead;
 			}
 
-			this.id2ChunkMap.add(k, chunk);
+			this.id2ChunkMap.put(k, chunk);
 			this.loadedChunks.add(chunk);
 			chunk.onChunkLoad();
 			chunk.populateChunk(this, this, i, j);
@@ -151,7 +151,7 @@ public class ChunkProviderServer implements IChunkProvider {
 	 * chunk from the map seed and chunk seed
 	 */
 	public Chunk provideChunk(int i, int j) {
-		Chunk chunk = (Chunk) this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(i, j));
+		Chunk chunk = this.id2ChunkMap.get(ChunkCoordIntPair.chunkXZ2Int(i, j));
 		return chunk == null ? (!this.worldObj.isFindingSpawnPoint() && !this.chunkLoadOverride ? this.dummyChunk
 				: this.loadChunk(i, j)) : chunk;
 	}
@@ -276,17 +276,17 @@ public class ChunkProviderServer implements IChunkProvider {
 		if (!this.worldObj.disableLevelSaving) {
 			for (int i = 0; i < 100; ++i) {
 				if (!this.droppedChunksSet.isEmpty()) {
-					Long olong = (Long) this.droppedChunksSet.iterator().next();
-					Chunk chunk = (Chunk) this.id2ChunkMap.getValueByKey(olong.longValue());
+					long olong = this.droppedChunksSet.iterator().next().value;
+					Chunk chunk = this.id2ChunkMap.get(olong);
 					if (chunk != null) {
 						chunk.onChunkUnload();
 						this.saveChunkData(chunk);
 						this.saveChunkExtraData(chunk);
-						this.id2ChunkMap.remove(olong.longValue());
+						this.id2ChunkMap.remove(olong);
 						this.loadedChunks.remove(chunk);
 					}
 
-					this.droppedChunksSet.remove(olong);
+					this.droppedChunksSet.removeAll(olong);
 				}
 			}
 
@@ -309,7 +309,7 @@ public class ChunkProviderServer implements IChunkProvider {
 	 * Converts the instance data to a readable string.
 	 */
 	public String makeString() {
-		return "ServerChunkCache: " + this.id2ChunkMap.getNumHashElements() + " Drop: " + this.droppedChunksSet.size();
+		return "ServerChunkCache: " + this.id2ChunkMap.size() + " Drop: " + this.droppedChunksSet.size();
 	}
 
 	public List<BiomeGenBase.SpawnListEntry> getPossibleCreatures(EnumCreatureType enumcreaturetype,
@@ -322,7 +322,7 @@ public class ChunkProviderServer implements IChunkProvider {
 	}
 
 	public int getLoadedChunkCount() {
-		return this.id2ChunkMap.getNumHashElements();
+		return this.id2ChunkMap.size();
 	}
 
 	public void recreateStructures(Chunk var1, int var2, int var3) {

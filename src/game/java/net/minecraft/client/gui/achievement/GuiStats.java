@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.PointerInputAbstraction;
@@ -36,7 +37,7 @@ import net.minecraft.util.ResourceLocation;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -665,7 +666,8 @@ public class GuiStats extends GuiScreen implements IProgressMeter {
 					GuiStats.this.fontRendererObj.FONT_HEIGHT * 4);
 			this.setShowSelectionBox(false);
 
-			for (EntityList.EntityEggInfo entitylist$entityegginfo : EntityList.entityEggs.values()) {
+			for (ObjectCursor<EntityList.EntityEggInfo> entitylist$entityegginfo_ : EntityList.entityEggs.values()) {
+				EntityList.EntityEggInfo entitylist$entityegginfo = entitylist$entityegginfo_.value;
 				if (GuiStats.this.field_146546_t.readStat(entitylist$entityegginfo.field_151512_d) > 0
 						|| GuiStats.this.field_146546_t.readStat(entitylist$entityegginfo.field_151513_e) > 0) {
 					this.field_148222_l.add(entitylist$entityegginfo);

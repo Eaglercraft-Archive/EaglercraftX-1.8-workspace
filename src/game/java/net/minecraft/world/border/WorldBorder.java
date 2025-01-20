@@ -16,7 +16,7 @@ import net.minecraft.world.ChunkCoordIntPair;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -61,6 +61,13 @@ public class WorldBorder {
 	public boolean contains(ChunkCoordIntPair range) {
 		return (double) range.getXEnd() > this.minX() && (double) range.getXStart() < this.maxX()
 				&& (double) range.getZEnd() > this.minZ() && (double) range.getZStart() < this.maxZ();
+	}
+
+	public boolean contains(long range) {
+		int chunkXPos = (int) (range & 4294967295L);
+		int chunkZPos = (int) (range >>> 32);
+		return (double) ((chunkXPos << 4) + 15) > this.minX() && (double) (chunkXPos << 4) < this.maxX()
+				&& (double) ((chunkZPos << 4) + 15) > this.minZ() && (double) (chunkZPos << 4) < this.maxZ();
 	}
 
 	public boolean contains(AxisAlignedBB bb) {

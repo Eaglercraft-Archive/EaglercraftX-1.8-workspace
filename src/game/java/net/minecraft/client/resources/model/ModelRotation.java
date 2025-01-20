@@ -1,8 +1,7 @@
 package net.minecraft.client.resources.model;
 
-import java.util.Map;
-
-import com.google.common.collect.Maps;
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 
 import net.lax1dude.eaglercraft.v1_8.vector.Matrix4f;
 import net.lax1dude.eaglercraft.v1_8.vector.Vector3f;
@@ -15,7 +14,7 @@ import net.minecraft.util.MathHelper;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -34,7 +33,7 @@ public enum ModelRotation {
 	X90_Y270(90, 270), X180_Y0(180, 0), X180_Y90(180, 90), X180_Y180(180, 180), X180_Y270(180, 270), X270_Y0(270, 0),
 	X270_Y90(270, 90), X270_Y180(270, 180), X270_Y270(270, 270);
 
-	private static final Map<Integer, ModelRotation> mapRotations = Maps.newHashMap();
+	private static final IntObjectMap<ModelRotation> mapRotations = new IntObjectHashMap<>();
 	private final int combinedXY;
 	private final Matrix4f matrix4d;
 	private final int quartersX;
@@ -98,14 +97,14 @@ public enum ModelRotation {
 	}
 
 	public static ModelRotation getModelRotation(int parInt1, int parInt2) {
-		return (ModelRotation) mapRotations.get(Integer
-				.valueOf(combineXY(MathHelper.normalizeAngle(parInt1, 360), MathHelper.normalizeAngle(parInt2, 360))));
+		return mapRotations
+				.get(combineXY(MathHelper.normalizeAngle(parInt1, 360), MathHelper.normalizeAngle(parInt2, 360)));
 	}
 
 	static {
 		ModelRotation[] lst = values();
 		for (int i = 0; i < lst.length; ++i) {
-			mapRotations.put(Integer.valueOf(lst[i].combinedXY), lst[i]);
+			mapRotations.put(lst[i].combinedXY, lst[i]);
 		}
 
 	}

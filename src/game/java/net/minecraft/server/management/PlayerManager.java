@@ -1,7 +1,10 @@
 package net.minecraft.server.management;
 
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongObjectHashMap;
+import com.carrotsearch.hppc.LongObjectMap;
+import com.carrotsearch.hppc.LongSet;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
@@ -10,7 +13,6 @@ import net.minecraft.network.play.server.S22PacketMultiBlockChange;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.LongHashMap;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldProvider;
@@ -25,7 +27,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -49,7 +51,7 @@ public class PlayerManager {
 	/**+
 	 * the hash of all playerInstances created
 	 */
-	private final LongHashMap<PlayerManager.PlayerInstance> playerInstances = new LongHashMap();
+	private final LongObjectMap<PlayerManager.PlayerInstance> playerInstances = new LongObjectHashMap<>();
 	/**+
 	 * the playerInstances(chunks) that need to be updated
 	 */
@@ -112,7 +114,7 @@ public class PlayerManager {
 
 	public boolean hasPlayerInstance(int chunkX, int chunkZ) {
 		long i = (long) chunkX + 2147483647L | (long) chunkZ + 2147483647L << 32;
-		return this.playerInstances.getValueByKey(i) != null;
+		return this.playerInstances.get(i) != null;
 	}
 
 	/**+
@@ -121,11 +123,10 @@ public class PlayerManager {
 	 */
 	private PlayerManager.PlayerInstance getPlayerInstance(int chunkX, int chunkZ, boolean createIfAbsent) {
 		long i = (long) chunkX + 2147483647L | (long) chunkZ + 2147483647L << 32;
-		PlayerManager.PlayerInstance playermanager$playerinstance = (PlayerManager.PlayerInstance) this.playerInstances
-				.getValueByKey(i);
+		PlayerManager.PlayerInstance playermanager$playerinstance = this.playerInstances.get(i);
 		if (playermanager$playerinstance == null && createIfAbsent) {
 			playermanager$playerinstance = new PlayerManager.PlayerInstance(chunkX, chunkZ);
-			this.playerInstances.add(i, playermanager$playerinstance);
+			this.playerInstances.put(i, playermanager$playerinstance);
 			this.playerInstanceList.add(playermanager$playerinstance);
 		}
 
@@ -167,14 +168,14 @@ public class PlayerManager {
 	 * that are not in viewing range of the player.
 	 */
 	public void filterChunkLoadQueue(EntityPlayerMP player) {
-		ArrayList arraylist = Lists.newArrayList(player.loadedChunks);
+		LongSet arraylist = new LongHashSet(player.loadedChunks);
 		int i = 0;
 		int j = this.playerViewRadius;
 		int k = (int) player.posX >> 4;
 		int l = (int) player.posZ >> 4;
 		int i1 = 0;
 		int j1 = 0;
-		ChunkCoordIntPair chunkcoordintpair = this.getPlayerInstance(k, l, true).chunkCoords;
+		long chunkcoordintpair = this.getPlayerInstance(k, l, true).chunkCoordsHash;
 		player.loadedChunks.clear();
 		if (arraylist.contains(chunkcoordintpair)) {
 			player.loadedChunks.add(chunkcoordintpair);
@@ -187,7 +188,7 @@ public class PlayerManager {
 				for (int i2 = 0; i2 < k1; ++i2) {
 					i1 += aint[0];
 					j1 += aint[1];
-					chunkcoordintpair = this.getPlayerInstance(k + i1, l + j1, true).chunkCoords;
+					chunkcoordintpair = this.getPlayerInstance(k + i1, l + j1, true).chunkCoordsHash;
 					if (arraylist.contains(chunkcoordintpair)) {
 						player.loadedChunks.add(chunkcoordintpair);
 					}
@@ -200,7 +201,7 @@ public class PlayerManager {
 		for (int j2 = 0; j2 < j * 2; ++j2) {
 			i1 += this.xzDirectionsConst[i][0];
 			j1 += this.xzDirectionsConst[i][1];
-			chunkcoordintpair = this.getPlayerInstance(k + i1, l + j1, true).chunkCoords;
+			chunkcoordintpair = this.getPlayerInstance(k + i1, l + j1, true).chunkCoordsHash;
 			if (arraylist.contains(chunkcoordintpair)) {
 				player.loadedChunks.add(chunkcoordintpair);
 			}
@@ -282,7 +283,7 @@ public class PlayerManager {
 		PlayerManager.PlayerInstance playermanager$playerinstance = this.getPlayerInstance(chunkX, chunkZ, false);
 		return playermanager$playerinstance != null
 				&& playermanager$playerinstance.playersWatchingChunk.contains(player)
-				&& !player.loadedChunks.contains(playermanager$playerinstance.chunkCoords);
+				&& !player.loadedChunks.contains(playermanager$playerinstance.chunkCoordsHash);
 	}
 
 	public void setPlayerViewRadius(int radius) {
@@ -330,6 +331,7 @@ public class PlayerManager {
 	class PlayerInstance {
 		private final List<EntityPlayerMP> playersWatchingChunk = Lists.newArrayList();
 		private final ChunkCoordIntPair chunkCoords;
+		private final long chunkCoordsHash;
 		private short[] locationOfBlockChange = new short[64];
 		private int numBlocksToUpdate;
 		private int flagsYAreasToUpdate;
@@ -337,6 +339,7 @@ public class PlayerManager {
 
 		public PlayerInstance(int chunkX, int chunkZ) {
 			this.chunkCoords = new ChunkCoordIntPair(chunkX, chunkZ);
+			this.chunkCoordsHash = ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ);
 			PlayerManager.this.getWorldServer().theChunkProviderServer.loadChunk(chunkX, chunkZ);
 		}
 
@@ -355,7 +358,7 @@ public class PlayerManager {
 				}
 
 				this.playersWatchingChunk.add(player);
-				player.loadedChunks.add(this.chunkCoords);
+				player.loadedChunks.add(this.chunkCoordsHash);
 			}
 		}
 
@@ -371,7 +374,7 @@ public class PlayerManager {
 				}
 
 				this.playersWatchingChunk.remove(player);
-				player.loadedChunks.remove(this.chunkCoords);
+				player.loadedChunks.removeAll(this.chunkCoordsHash);
 				if (this.playersWatchingChunk.isEmpty()) {
 					long i = (long) this.chunkCoords.chunkXPos + 2147483647L
 							| (long) this.chunkCoords.chunkZPos + 2147483647L << 32;
@@ -423,7 +426,7 @@ public class PlayerManager {
 		public void sendToAllPlayersWatchingChunk(Packet thePacket) {
 			for (int i = 0; i < this.playersWatchingChunk.size(); ++i) {
 				EntityPlayerMP entityplayermp = (EntityPlayerMP) this.playersWatchingChunk.get(i);
-				if (!entityplayermp.loadedChunks.contains(this.chunkCoords)) {
+				if (!entityplayermp.loadedChunks.contains(this.chunkCoordsHash)) {
 					entityplayermp.playerNetServerHandler.sendPacket(thePacket);
 				}
 			}

@@ -1,6 +1,8 @@
 package net.minecraft.world.gen.layer;
 
 import java.util.concurrent.Callable;
+
+import net.lax1dude.eaglercraft.v1_8.sp.server.GenLayerEaglerRivers;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.ReportedException;
@@ -14,7 +16,7 @@ import net.minecraft.world.gen.ChunkProviderSettings;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -29,7 +31,7 @@ import net.minecraft.world.gen.ChunkProviderSettings;
  * 
  */
 public abstract class GenLayer {
-	private long worldGenSeed;
+	protected long worldGenSeed;
 	protected GenLayer parent;
 	private long chunkSeed;
 	protected long baseSeed;
@@ -76,8 +78,9 @@ public abstract class GenLayer {
 		GenLayer genlayerhills = new GenLayerHills(1000L, genlayerbiomeedge, genlayer1);
 		GenLayer genlayer3 = GenLayerZoom.magnify(1000L, genlayerriverinit, 2);
 		genlayer3 = GenLayerZoom.magnify(1000L, genlayer3, j);
-		GenLayerRiver genlayerriver = new GenLayerRiver(1L, genlayer3);
-		GenLayerSmooth genlayersmooth = new GenLayerSmooth(1000L, genlayerriver);
+		GenLayer genlayerriver = new GenLayerRiver(1L, genlayer3);
+		genlayerriver = new GenLayerSmooth(1000L, genlayerriver);
+		genlayerriver = new GenLayerEaglerRivers(69L, genlayerriver);
 		genlayerhills = new GenLayerRareBiome(1001L, genlayerhills);
 
 		for (int k = 0; k < i; ++k) {
@@ -92,7 +95,7 @@ public abstract class GenLayer {
 		}
 
 		GenLayerSmooth genlayersmooth1 = new GenLayerSmooth(1000L, genlayerhills);
-		GenLayerRiverMix genlayerrivermix = new GenLayerRiverMix(100L, genlayersmooth1, genlayersmooth);
+		GenLayerRiverMix genlayerrivermix = new GenLayerRiverMix(100L, genlayersmooth1, genlayerriver);
 		GenLayerVoronoiZoom genlayervoronoizoom = new GenLayerVoronoiZoom(10L, genlayerrivermix);
 		genlayerrivermix.initWorldGenSeed(seed);
 		genlayervoronoizoom.initWorldGenSeed(seed);

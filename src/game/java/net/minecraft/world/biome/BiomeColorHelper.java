@@ -9,7 +9,7 @@ import net.minecraft.world.IBlockAccess;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,6 +24,7 @@ import net.minecraft.world.IBlockAccess;
  * 
  */
 public class BiomeColorHelper {
+
 	private static final BiomeColorHelper.ColorResolver field_180291_a = new BiomeColorHelper.ColorResolver() {
 		public int getColorAtPos(BiomeGenBase blockPosition, BlockPos parBlockPos) {
 			return blockPosition.getGrassColorAtPos(parBlockPos);
@@ -59,15 +60,25 @@ public class BiomeColorHelper {
 	}
 
 	public static int getGrassColorAtPos(IBlockAccess parIBlockAccess, BlockPos parBlockPos) {
-		return func_180285_a(parIBlockAccess, parBlockPos, field_180291_a);
+		return parIBlockAccess.getBiomeColorForCoords(parBlockPos, 0);
 	}
 
 	public static int getFoliageColorAtPos(IBlockAccess parIBlockAccess, BlockPos parBlockPos) {
-		return func_180285_a(parIBlockAccess, parBlockPos, field_180289_b);
+		return parIBlockAccess.getBiomeColorForCoords(parBlockPos, 1);
 	}
 
 	public static int getWaterColorAtPos(IBlockAccess parIBlockAccess, BlockPos parBlockPos) {
-		return func_180285_a(parIBlockAccess, parBlockPos, field_180290_c);
+		return parIBlockAccess.getBiomeColorForCoords(parBlockPos, 2);
+	}
+
+	public static int getBiomeColorForCoordsOld(IBlockAccess parIBlockAccess, BlockPos parBlockPos, int index) {
+		if (index == 0) {
+			return func_180285_a(parIBlockAccess, parBlockPos, field_180291_a);
+		} else if (index == 1) {
+			return func_180285_a(parIBlockAccess, parBlockPos, field_180289_b);
+		} else {
+			return func_180285_a(parIBlockAccess, parBlockPos, field_180290_c);
+		}
 	}
 
 	interface ColorResolver {

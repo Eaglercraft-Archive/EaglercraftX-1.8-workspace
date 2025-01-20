@@ -4,6 +4,9 @@ import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongSet;
+import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
@@ -25,7 +28,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
@@ -42,7 +44,7 @@ import net.minecraft.world.storage.WorldInfo;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -72,7 +74,7 @@ public class WorldClient extends World {
 	 */
 	private final Set<Entity> entitySpawnQueue = Sets.newHashSet();
 	private final Minecraft mc = Minecraft.getMinecraft();
-	private final Set<ChunkCoordIntPair> previousActiveChunkSet = Sets.newHashSet();
+	private final LongSet previousActiveChunkSet = new LongHashSet();
 
 	public WorldClient(NetHandlerPlayClient parNetHandlerPlayClient, WorldSettings parWorldSettings, int parInt1,
 			EnumDifficulty parEnumDifficulty) {
@@ -130,20 +132,23 @@ public class WorldClient extends World {
 
 	protected void updateBlocks() {
 		super.updateBlocks();
-		this.previousActiveChunkSet.retainAll(this.activeChunkSet);
+		this.previousActiveChunkSet.retainAll(this.activeChunkSet::contains);
 		if (this.previousActiveChunkSet.size() == this.activeChunkSet.size()) {
 			this.previousActiveChunkSet.clear();
 		}
 
 		int i = 0;
 
-		for (ChunkCoordIntPair chunkcoordintpair : this.activeChunkSet) {
-			if (!this.previousActiveChunkSet.contains(chunkcoordintpair)) {
-				int j = chunkcoordintpair.chunkXPos * 16;
-				int k = chunkcoordintpair.chunkZPos * 16;
-				Chunk chunk = this.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
+		for (LongCursor chunkcoordintpair : this.activeChunkSet) {
+			long l = chunkcoordintpair.value;
+			if (!this.previousActiveChunkSet.contains(l)) {
+				int chunkXPos = (int) (l & 4294967295L);
+				int chunkZPos = (int) (l >>> 32);
+				int j = chunkXPos * 16;
+				int k = chunkZPos * 16;
+				Chunk chunk = this.getChunkFromChunkCoords(chunkXPos, chunkZPos);
 				this.playMoodSoundAndCheckLight(j, k, chunk);
-				this.previousActiveChunkSet.add(chunkcoordintpair);
+				this.previousActiveChunkSet.add(l);
 				++i;
 				if (i >= 10) {
 					return;
@@ -229,7 +234,7 @@ public class WorldClient extends World {
 			this.entitySpawnQueue.add(parEntity);
 		}
 
-		this.entitiesById.addKey(parInt1, parEntity);
+		this.entitiesById.put(parInt1, parEntity);
 	}
 
 	/**+
@@ -237,11 +242,11 @@ public class WorldClient extends World {
 	 * exist in this World.
 	 */
 	public Entity getEntityByID(int i) {
-		return (Entity) (i == this.mc.thePlayer.getEntityId() ? this.mc.thePlayer : super.getEntityByID(i));
+		return i == this.mc.thePlayer.getEntityId() ? this.mc.thePlayer : super.getEntityByID(i);
 	}
 
 	public Entity removeEntityFromWorld(int parInt1) {
-		Entity entity = (Entity) this.entitiesById.removeObject(parInt1);
+		Entity entity = this.entitiesById.remove(parInt1);
 		if (entity != null) {
 			this.entityList.remove(entity);
 			this.removeEntity(entity);

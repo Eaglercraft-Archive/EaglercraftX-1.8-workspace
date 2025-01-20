@@ -1,13 +1,14 @@
 package net.minecraft.entity;
 
+import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.ObjectContainer;
+import com.carrotsearch.hppc.cursors.IntObjectCursor;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Maps;
-
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 import net.minecraft.block.Block;
@@ -59,7 +60,7 @@ import net.minecraft.world.WorldServer;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -80,7 +81,7 @@ public abstract class EntityLivingBase extends Entity {
 			sprintingSpeedBoostModifierUUID, "Sprinting speed boost", 0.30000001192092896D, 2)).setSaved(false);
 	private BaseAttributeMap attributeMap;
 	private final CombatTracker _combatTracker = new CombatTracker(this);
-	private final Map<Integer, PotionEffect> activePotionsMap = Maps.newHashMap();
+	private final IntObjectMap<PotionEffect> activePotionsMap = new IntObjectHashMap<>();
 	/**+
 	 * The equipment this mob was previously wearing, used for
 	 * syncing.
@@ -448,8 +449,8 @@ public abstract class EntityLivingBase extends Entity {
 		if (!this.activePotionsMap.isEmpty()) {
 			NBTTagList nbttaglist = new NBTTagList();
 
-			for (PotionEffect potioneffect : this.activePotionsMap.values()) {
-				nbttaglist.appendTag(potioneffect.writeCustomPotionEffectToNBT(new NBTTagCompound()));
+			for (ObjectCursor<PotionEffect> potioneffect : this.activePotionsMap.values()) {
+				nbttaglist.appendTag(potioneffect.value.writeCustomPotionEffectToNBT(new NBTTagCompound()));
 			}
 
 			nbttagcompound.setTag("ActiveEffects", nbttaglist);
@@ -474,7 +475,7 @@ public abstract class EntityLivingBase extends Entity {
 				NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
 				PotionEffect potioneffect = PotionEffect.readCustomPotionEffectFromNBT(nbttagcompound1);
 				if (potioneffect != null) {
-					this.activePotionsMap.put(Integer.valueOf(potioneffect.getPotionID()), potioneffect);
+					this.activePotionsMap.put(potioneffect.getPotionID(), potioneffect);
 				}
 			}
 		}
@@ -498,19 +499,25 @@ public abstract class EntityLivingBase extends Entity {
 	}
 
 	protected void updatePotionEffects() {
-		Iterator iterator = this.activePotionsMap.keySet().iterator();
+		IntArrayList deadPotionEffects = null;
 
-		while (iterator.hasNext()) {
-			Integer integer = (Integer) iterator.next();
-			PotionEffect potioneffect = (PotionEffect) this.activePotionsMap.get(integer);
+		for (IntObjectCursor<PotionEffect> cur : this.activePotionsMap) {
+			int integer = cur.key;
+			PotionEffect potioneffect = cur.value;
 			if (!potioneffect.onUpdate(this)) {
 				if (!this.worldObj.isRemote) {
-					iterator.remove();
+					if (deadPotionEffects == null)
+						deadPotionEffects = new IntArrayList(4);
+					deadPotionEffects.add(integer);
 					this.onFinishedPotionEffect(potioneffect);
 				}
 			} else if (potioneffect.getDuration() % 600 == 0) {
 				this.onChangedPotionEffect(potioneffect, false);
 			}
+		}
+
+		if (deadPotionEffects != null) {
+			this.activePotionsMap.removeAll(deadPotionEffects);
 		}
 
 		if (this.potionsNeedUpdate) {
@@ -558,9 +565,9 @@ public abstract class EntityLivingBase extends Entity {
 			this.resetPotionEffectMetadata();
 			this.setInvisible(false);
 		} else {
-			int i = PotionHelper.calcPotionLiquidColor(this.activePotionsMap.values());
-			this.dataWatcher.updateObject(8,
-					Byte.valueOf((byte) (PotionHelper.getAreAmbient(this.activePotionsMap.values()) ? 1 : 0)));
+			ObjectContainer<PotionEffect> cc = this.activePotionsMap.values();
+			int i = PotionHelper.calcPotionLiquidColor(cc);
+			this.dataWatcher.updateObject(8, Byte.valueOf((byte) (PotionHelper.getAreAmbient(cc) ? 1 : 0)));
 			this.dataWatcher.updateObject(7, Integer.valueOf(i));
 			this.setInvisible(this.isPotionActive(Potion.invisibility.id));
 		}
@@ -576,29 +583,28 @@ public abstract class EntityLivingBase extends Entity {
 	}
 
 	public void clearActivePotions() {
-		Iterator iterator = this.activePotionsMap.keySet().iterator();
-
-		while (iterator.hasNext()) {
-			Integer integer = (Integer) iterator.next();
-			PotionEffect potioneffect = (PotionEffect) this.activePotionsMap.get(integer);
+		for (ObjectCursor<PotionEffect> cur : activePotionsMap.values()) {
+			PotionEffect potioneffect = cur.value;
 			if (!this.worldObj.isRemote) {
-				iterator.remove();
 				this.onFinishedPotionEffect(potioneffect);
 			}
 		}
 
+		if (!this.worldObj.isRemote) {
+			activePotionsMap.clear();
+		}
 	}
 
-	public Collection<PotionEffect> getActivePotionEffects() {
+	public ObjectContainer<PotionEffect> getActivePotionEffects() {
 		return this.activePotionsMap.values();
 	}
 
 	public boolean isPotionActive(int potionId) {
-		return this.activePotionsMap.containsKey(Integer.valueOf(potionId));
+		return this.activePotionsMap.containsKey(potionId);
 	}
 
 	public boolean isPotionActive(Potion potionIn) {
-		return this.activePotionsMap.containsKey(Integer.valueOf(potionIn.id));
+		return this.activePotionsMap.containsKey(potionIn.id);
 	}
 
 	/**+
@@ -606,7 +612,7 @@ public abstract class EntityLivingBase extends Entity {
 	 * active, null otherwise.
 	 */
 	public PotionEffect getActivePotionEffect(Potion potionIn) {
-		return (PotionEffect) this.activePotionsMap.get(Integer.valueOf(potionIn.id));
+		return this.activePotionsMap.get(potionIn.id);
 	}
 
 	/**+
@@ -614,13 +620,11 @@ public abstract class EntityLivingBase extends Entity {
 	 */
 	public void addPotionEffect(PotionEffect potioneffectIn) {
 		if (this.isPotionApplicable(potioneffectIn)) {
-			if (this.activePotionsMap.containsKey(Integer.valueOf(potioneffectIn.getPotionID()))) {
-				((PotionEffect) this.activePotionsMap.get(Integer.valueOf(potioneffectIn.getPotionID())))
-						.combine(potioneffectIn);
-				this.onChangedPotionEffect(
-						(PotionEffect) this.activePotionsMap.get(Integer.valueOf(potioneffectIn.getPotionID())), true);
+			if (this.activePotionsMap.containsKey(potioneffectIn.getPotionID())) {
+				this.activePotionsMap.get(potioneffectIn.getPotionID()).combine(potioneffectIn);
+				this.onChangedPotionEffect(this.activePotionsMap.get(potioneffectIn.getPotionID()), true);
 			} else {
-				this.activePotionsMap.put(Integer.valueOf(potioneffectIn.getPotionID()), potioneffectIn);
+				this.activePotionsMap.put(potioneffectIn.getPotionID(), potioneffectIn);
 				this.onNewPotionEffect(potioneffectIn);
 			}
 
@@ -649,14 +653,14 @@ public abstract class EntityLivingBase extends Entity {
 	 * Remove the speified potion effect from this entity.
 	 */
 	public void removePotionEffectClient(int potionId) {
-		this.activePotionsMap.remove(Integer.valueOf(potionId));
+		this.activePotionsMap.remove(potionId);
 	}
 
 	/**+
 	 * Remove the specified potion effect from this entity.
 	 */
 	public void removePotionEffect(int potionId) {
-		PotionEffect potioneffect = (PotionEffect) this.activePotionsMap.remove(Integer.valueOf(potionId));
+		PotionEffect potioneffect = this.activePotionsMap.remove(potionId);
 		if (potioneffect != null) {
 			this.onFinishedPotionEffect(potioneffect);
 		}

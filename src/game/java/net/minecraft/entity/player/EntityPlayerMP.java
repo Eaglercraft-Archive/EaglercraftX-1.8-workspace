@@ -1,5 +1,11 @@
 package net.minecraft.entity.player;
 
+import com.carrotsearch.hppc.IntArrayDeque;
+import com.carrotsearch.hppc.IntDeque;
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongSet;
+import com.carrotsearch.hppc.cursors.IntCursor;
+import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
@@ -87,7 +93,6 @@ import net.minecraft.util.JsonSerializableSet;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.village.MerchantRecipeList;
-import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.WorldServer;
@@ -105,7 +110,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -131,11 +136,11 @@ public class EntityPlayerMP extends EntityPlayer implements ICrafting {
 	/**+
 	 * LinkedList that holds the loaded chunks.
 	 */
-	public final List<ChunkCoordIntPair> loadedChunks = Lists.newLinkedList();
+	public final LongSet loadedChunks = new LongHashSet();
 	/**+
 	 * entities added to this list will be packet29'd to the player
 	 */
-	private final List<Integer> destroyedItemsNetCache = Lists.newLinkedList();
+	private final IntDeque destroyedItemsNetCache = new IntArrayDeque();
 	private final StatisticsFile statsFile;
 	/**+
 	 * the total health of the player, includes actual health and
@@ -287,56 +292,49 @@ public class EntityPlayerMP extends EntityPlayer implements ICrafting {
 		while (!this.destroyedItemsNetCache.isEmpty()) {
 			int i = Math.min(this.destroyedItemsNetCache.size(), Integer.MAX_VALUE);
 			int[] aint = new int[i];
-			Iterator iterator = this.destroyedItemsNetCache.iterator();
 			int j = 0;
 
-			while (iterator.hasNext() && j < i) {
-				aint[j++] = ((Integer) iterator.next()).intValue();
-				iterator.remove();
+			while (!destroyedItemsNetCache.isEmpty() && j < i) {
+				aint[j++] = destroyedItemsNetCache.removeFirst();
 			}
 
 			this.playerNetServerHandler.sendPacket(new S13PacketDestroyEntities(aint));
 		}
 
 		if (!this.loadedChunks.isEmpty()) {
-			ArrayList arraylist = Lists.newArrayList();
-			Iterator iterator1 = this.loadedChunks.iterator();
-			ArrayList arraylist1 = Lists.newArrayList();
+			ArrayList<Chunk> arraylist = Lists.newArrayList();
+			Iterator<LongCursor> iterator1 = this.loadedChunks.iterator();
+			ArrayList<TileEntity> arraylist1 = Lists.newArrayList();
 
 			while (iterator1.hasNext() && arraylist.size() < 10) {
-				ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator1.next();
-				if (chunkcoordintpair != null) {
-					if (this.worldObj.isBlockLoaded(
-							new BlockPos(chunkcoordintpair.chunkXPos << 4, 0, chunkcoordintpair.chunkZPos << 4))) {
-						Chunk chunk = this.worldObj.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos,
-								chunkcoordintpair.chunkZPos);
-						if (chunk.isPopulated()) {
-							arraylist.add(chunk);
-							arraylist1.addAll(((WorldServer) this.worldObj).getTileEntitiesIn(
-									chunkcoordintpair.chunkXPos * 16, 0, chunkcoordintpair.chunkZPos * 16,
-									chunkcoordintpair.chunkXPos * 16 + 16, 256, chunkcoordintpair.chunkZPos * 16 + 16));
-							iterator1.remove();
-						}
+				long l = iterator1.next().value;
+				int chunkXPos = (int) (l & 4294967295L);
+				int chunkZPos = (int) (l >>> 32);
+				if (this.worldObj.isBlockLoaded(new BlockPos(chunkXPos << 4, 0, chunkZPos << 4))) {
+					Chunk chunk = this.worldObj.getChunkFromChunkCoords(chunkXPos, chunkZPos);
+					if (chunk.isPopulated()) {
+						arraylist.add(chunk);
+						arraylist1.addAll(((WorldServer) this.worldObj).getTileEntitiesIn(chunkXPos * 16, 0,
+								chunkZPos * 16, chunkXPos * 16 + 16, 256, chunkZPos * 16 + 16));
 					}
-				} else {
-					iterator1.remove();
 				}
 			}
 
 			if (!arraylist.isEmpty()) {
 				if (arraylist.size() == 1) {
-					this.playerNetServerHandler
-							.sendPacket(new S21PacketChunkData((Chunk) arraylist.get(0), true, '\uffff'));
+					this.playerNetServerHandler.sendPacket(new S21PacketChunkData(arraylist.get(0), true, '\uffff'));
 				} else {
 					this.playerNetServerHandler.sendPacket(new S26PacketMapChunkBulk(arraylist));
 				}
 
 				for (int i = 0, l = arraylist1.size(); i < l; ++i) {
-					this.sendTileEntityUpdate((TileEntity) arraylist1.get(i));
+					this.sendTileEntityUpdate(arraylist1.get(i));
 				}
 
 				for (int i = 0, l = arraylist.size(); i < l; ++i) {
-					this.getServerForPlayer().getEntityTracker().func_85172_a(this, (Chunk) arraylist.get(i));
+					Chunk c = arraylist.get(i);
+					this.getServerForPlayer().getEntityTracker().func_85172_a(this, c);
+					this.loadedChunks.removeAll(c.getChunkCoordLong());
 				}
 			}
 		}
@@ -940,7 +938,9 @@ public class EntityPlayerMP extends EntityPlayer implements ICrafting {
 		this.lastExperience = -1;
 		this.lastHealth = -1.0F;
 		this.lastFoodLevel = -1;
-		this.destroyedItemsNetCache.addAll(((EntityPlayerMP) oldPlayer).destroyedItemsNetCache);
+		for (IntCursor cur : ((EntityPlayerMP) oldPlayer).destroyedItemsNetCache) {
+			destroyedItemsNetCache.addLast(cur.value);
+		}
 	}
 
 	protected void onNewPotionEffect(PotionEffect id) {
@@ -1086,7 +1086,7 @@ public class EntityPlayerMP extends EntityPlayer implements ICrafting {
 		if (parEntity instanceof EntityPlayer) {
 			this.playerNetServerHandler.sendPacket(new S13PacketDestroyEntities(new int[] { parEntity.getEntityId() }));
 		} else {
-			this.destroyedItemsNetCache.add(Integer.valueOf(parEntity.getEntityId()));
+			this.destroyedItemsNetCache.addLast(parEntity.getEntityId());
 		}
 
 	}

@@ -1,9 +1,9 @@
 package net.minecraft.block;
 
-import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 
-import com.google.common.collect.Maps;
+import com.carrotsearch.hppc.ObjectIntIdentityHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
 
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -28,7 +28,7 @@ import net.minecraft.world.WorldProviderEnd;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -51,8 +51,8 @@ public class BlockFire extends Block {
 	public static final PropertyBool SOUTH = PropertyBool.create("south");
 	public static final PropertyBool WEST = PropertyBool.create("west");
 	public static final PropertyInteger UPPER = PropertyInteger.create("upper", 0, 2);
-	private final Map<Block, Integer> encouragements = Maps.newIdentityHashMap();
-	private final Map<Block, Integer> flammabilities = Maps.newIdentityHashMap();
+	private final ObjectIntMap<Block> encouragements = new ObjectIntIdentityHashMap<>();
+	private final ObjectIntMap<Block> flammabilities = new ObjectIntIdentityHashMap<>();
 
 	/**+
 	 * Get the actual Block state of this Block at the given
@@ -132,8 +132,8 @@ public class BlockFire extends Block {
 	}
 
 	public void setFireInfo(Block blockIn, int encouragement, int flammability) {
-		this.encouragements.put(blockIn, Integer.valueOf(encouragement));
-		this.flammabilities.put(blockIn, Integer.valueOf(flammability));
+		this.encouragements.put(blockIn, encouragement);
+		this.flammabilities.put(blockIn, flammability);
 	}
 
 	public AxisAlignedBB getCollisionBoundingBox(World var1, BlockPos var2, IBlockState var3) {
@@ -226,6 +226,8 @@ public class BlockFire extends Block {
 								}
 
 								BlockPos blockpos1 = blockpos.add(j, l, k);
+								if (!world.isBlockLoaded(blockpos1))
+									continue;
 								int j1 = this.getNeighborEncouragement(world, blockpos1);
 								if (j1 > 0) {
 									int k1 = (j1 + 40 + world.getDifficulty().getDifficultyId() * 7) / (i + 30);
@@ -264,19 +266,20 @@ public class BlockFire extends Block {
 	}
 
 	private int getFlammability(Block blockIn) {
-		Integer integer = (Integer) this.flammabilities.get(blockIn);
-		return integer == null ? 0 : integer.intValue();
+		return this.flammabilities.getOrDefault(blockIn, 0);
 	}
 
 	private int getEncouragement(Block blockIn) {
-		Integer integer = (Integer) this.encouragements.get(blockIn);
-		return integer == null ? 0 : integer.intValue();
+		return this.encouragements.getOrDefault(blockIn, 0);
 	}
 
 	private void catchOnFire(World worldIn, BlockPos pos, int chance, EaglercraftRandom random, int age) {
-		int i = this.getFlammability(worldIn.getBlockState(pos).getBlock());
+		IBlockState iblockstate = worldIn.getBlockStateIfLoaded(pos);
+		if (iblockstate == null) {
+			return;
+		}
+		int i = this.getFlammability(iblockstate.getBlock());
 		if (random.nextInt(chance) < i) {
-			IBlockState iblockstate = worldIn.getBlockState(pos);
 			if (random.nextInt(age + 10) < 5 && !worldIn.canLightningStrike(pos)) {
 				int j = age + random.nextInt(5) / 4;
 				if (j > 15) {
@@ -315,8 +318,12 @@ public class BlockFire extends Block {
 			int i = 0;
 
 			EnumFacing[] facings = EnumFacing._VALUES;
+			BlockPos tmp = new BlockPos(0, 0, 0);
 			for (int j = 0; j < facings.length; ++j) {
-				i = Math.max(this.getEncouragement(worldIn.getBlockState(pos.offset(facings[j])).getBlock()), i);
+				IBlockState type = worldIn.getBlockStateIfLoaded(pos.offsetEvenFaster(facings[j], tmp));
+				if (type != null) {
+					i = Math.max(this.getEncouragement(type.getBlock()), i);
+				}
 			}
 
 			return i;

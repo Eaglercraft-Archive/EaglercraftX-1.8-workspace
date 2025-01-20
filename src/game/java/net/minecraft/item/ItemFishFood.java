@@ -1,9 +1,9 @@
 package net.minecraft.item;
 
 import java.util.List;
-import java.util.Map;
 
-import com.google.common.collect.Maps;
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,7 +18,7 @@ import net.minecraft.world.World;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -99,7 +99,7 @@ public class ItemFishFood extends ItemFood {
 		COD(0, "cod", 2, 0.1F, 5, 0.6F), SALMON(1, "salmon", 2, 0.1F, 6, 0.8F), CLOWNFISH(2, "clownfish", 1, 0.1F),
 		PUFFERFISH(3, "pufferfish", 1, 0.1F);
 
-		private static final Map<Integer, ItemFishFood.FishType> META_LOOKUP = Maps.newHashMap();
+		private static final IntObjectMap<ItemFishFood.FishType> META_LOOKUP = new IntObjectHashMap<>();
 		private final int meta;
 		private final String unlocalizedName;
 		private final int uncookedHealAmount;
@@ -163,8 +163,7 @@ public class ItemFishFood extends ItemFood {
 		}
 
 		public static ItemFishFood.FishType byMetadata(int meta) {
-			ItemFishFood.FishType itemfishfood$fishtype = (ItemFishFood.FishType) META_LOOKUP
-					.get(Integer.valueOf(meta));
+			ItemFishFood.FishType itemfishfood$fishtype = META_LOOKUP.get(meta);
 			return itemfishfood$fishtype == null ? COD : itemfishfood$fishtype;
 		}
 
@@ -175,7 +174,7 @@ public class ItemFishFood extends ItemFood {
 		static {
 			ItemFishFood.FishType[] types = values();
 			for (int i = 0; i < types.length; ++i) {
-				META_LOOKUP.put(Integer.valueOf(types[i].getMetadata()), types[i]);
+				META_LOOKUP.put(types[i].getMetadata(), types[i]);
 			}
 
 		}

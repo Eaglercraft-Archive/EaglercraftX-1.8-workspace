@@ -1,5 +1,9 @@
 package net.minecraft.world;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongSet;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -9,9 +13,9 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-import java.util.Set;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 import net.lax1dude.eaglercraft.v1_8.HString;
 
@@ -42,12 +46,12 @@ import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.IntHashMap;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
 import net.minecraft.village.VillageCollection;
+import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.border.WorldBorder;
@@ -64,7 +68,7 @@ import net.minecraft.world.storage.WorldInfo;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -89,8 +93,8 @@ public abstract class World implements IBlockAccess {
 	/**+
 	 * A list of the loaded tile entities in the world
 	 */
-	public final List<TileEntity> loadedTileEntityList = Lists.newArrayList();
-	public final List<TileEntity> tickableTileEntities = Lists.newArrayList();
+	public final Set<TileEntity> loadedTileEntityList = Sets.newIdentityHashSet();
+	public final Set<TileEntity> tickableTileEntities = Sets.newIdentityHashSet();
 	private final List<TileEntity> addedTileEntityList = Lists.newArrayList();
 	private final List<TileEntity> tileEntitiesToBeRemoved = Lists.newArrayList();
 	/**+
@@ -101,7 +105,7 @@ public abstract class World implements IBlockAccess {
 	 * a list of all the lightning entities
 	 */
 	public final List<Entity> weatherEffects = Lists.newArrayList();
-	protected final IntHashMap<Entity> entitiesById = new IntHashMap();
+	protected final IntObjectMap<Entity> entitiesById = new IntObjectHashMap<>();
 	private long cloudColour = 16777215L;
 	private int skylightSubtracted;
 	/**+
@@ -138,7 +142,7 @@ public abstract class World implements IBlockAccess {
 	/**+
 	 * populated by chunks that are within 9 chunks of any player
 	 */
-	protected Set<ChunkCoordIntPair> activeChunkSet = Sets.newHashSet();
+	protected LongSet activeChunkSet = new LongHashSet();
 	private int ambientTickCountdown;
 	protected boolean spawnHostileMobs;
 	protected boolean spawnPeacefulMobs;
@@ -183,6 +187,10 @@ public abstract class World implements IBlockAccess {
 		} else {
 			return this.provider.getWorldChunkManager().getBiomeGenerator(pos, BiomeGenBase.plains);
 		}
+	}
+
+	public int getBiomeColorForCoords(BlockPos var1, int index) {
+		return BiomeColorHelper.getBiomeColorForCoordsOld(this, var1, index);
 	}
 
 	public WorldChunkManager getWorldChunkManager() {
@@ -232,11 +240,11 @@ public abstract class World implements IBlockAccess {
 	}
 
 	public boolean isBlockLoaded(BlockPos pos) {
-		return this.isBlockLoaded(pos, true);
+		return !this.isValid(pos) ? false : this.isChunkLoaded(pos.x >> 4, pos.z >> 4, true);
 	}
 
 	public boolean isBlockLoaded(BlockPos pos, boolean allowEmpty) {
-		return !this.isValid(pos) ? false : this.isChunkLoaded(pos.getX() >> 4, pos.getZ() >> 4, allowEmpty);
+		return !this.isValid(pos) ? false : this.isChunkLoaded(pos.x >> 4, pos.z >> 4, allowEmpty);
 	}
 
 	public boolean isAreaLoaded(BlockPos center, int radius) {
@@ -290,7 +298,13 @@ public abstract class World implements IBlockAccess {
 	}
 
 	public Chunk getChunkFromBlockCoords(BlockPos pos) {
-		return this.getChunkFromChunkCoords(pos.getX() >> 4, pos.getZ() >> 4);
+		return this.chunkProvider.provideChunk(pos.x >> 4, pos.z >> 4);
+	}
+
+	public Chunk getChunkFromBlockCoordsIfLoaded(BlockPos pos) {
+		int x = pos.x >> 4;
+		int z = pos.z >> 4;
+		return this.chunkProvider.chunkExists(x, z) ? this.chunkProvider.provideChunk(x, z) : null;
 	}
 
 	/**+
@@ -299,6 +313,10 @@ public abstract class World implements IBlockAccess {
 	 */
 	public Chunk getChunkFromChunkCoords(int chunkX, int chunkZ) {
 		return this.chunkProvider.provideChunk(chunkX, chunkZ);
+	}
+
+	public Chunk getChunkFromChunkCoordsIfLoaded(int chunkX, int chunkZ) {
+		return this.chunkProvider.chunkExists(chunkX, chunkZ) ? this.chunkProvider.provideChunk(chunkX, chunkZ) : null;
 	}
 
 	/**+
@@ -701,6 +719,15 @@ public abstract class World implements IBlockAccess {
 		}
 	}
 
+	public IBlockState getBlockStateIfLoaded(BlockPos pos) {
+		if (!this.isValid(pos)) {
+			return Blocks.air.getDefaultState();
+		} else {
+			Chunk chunk = this.getChunkFromBlockCoordsIfLoaded(pos);
+			return chunk != null ? chunk.getBlockState(pos) : null;
+		}
+	}
+
 	/**+
 	 * Checks whether its daytime by seeing if the light subtracted
 	 * from the skylight is less than 4
@@ -737,7 +764,9 @@ public abstract class World implements IBlockAccess {
 				int i1 = MathHelper.floor_double(vec31.yCoord);
 				int j1 = MathHelper.floor_double(vec31.zCoord);
 				BlockPos blockpos = new BlockPos(l, i1, j1);
-				IBlockState iblockstate = this.getBlockState(blockpos);
+				IBlockState iblockstate = this.getBlockStateIfLoaded(blockpos);
+				if (iblockstate == null)
+					return null;
 				Block block = iblockstate.getBlock();
 				if ((!ignoreBlockWithoutBoundingBox
 						|| block.getCollisionBoundingBox(this, blockpos, iblockstate) != null)
@@ -836,7 +865,9 @@ public abstract class World implements IBlockAccess {
 					i1 = MathHelper.floor_double(vec31.yCoord) - (enumfacing == EnumFacing.UP ? 1 : 0);
 					j1 = MathHelper.floor_double(vec31.zCoord) - (enumfacing == EnumFacing.SOUTH ? 1 : 0);
 					blockpos = new BlockPos(l, i1, j1);
-					IBlockState iblockstate1 = this.getBlockState(blockpos);
+					IBlockState iblockstate1 = this.getBlockStateIfLoaded(blockpos);
+					if (iblockstate1 == null)
+						return null;
 					Block block1 = iblockstate1.getBlock();
 					if (!ignoreBlockWithoutBoundingBox
 							|| block1.getCollisionBoundingBox(this, blockpos, iblockstate1) != null) {
@@ -2122,11 +2153,13 @@ public abstract class World implements IBlockAccess {
 			EntityPlayer entityplayer = (EntityPlayer) this.playerEntities.get(i);
 			int j = MathHelper.floor_double(entityplayer.posX / 16.0D);
 			int k = MathHelper.floor_double(entityplayer.posZ / 16.0D);
-			int l = this.getRenderDistanceChunks();
+			int l = this.getRenderDistanceChunks() - 1;
+			if (l < 1)
+				l = 1;
 
 			for (int i1 = -l; i1 <= l; ++i1) {
 				for (int j1 = -l; j1 <= l; ++j1) {
-					this.activeChunkSet.add(new ChunkCoordIntPair(i1 + j, j1 + k));
+					this.activeChunkSet.add(ChunkCoordIntPair.chunkXZ2Int(i1 + j, j1 + k));
 				}
 			}
 		}
@@ -2452,9 +2485,9 @@ public abstract class World implements IBlockAccess {
 
 		for (int i1 = i; i1 <= j; ++i1) {
 			for (int j1 = k; j1 <= l; ++j1) {
-				if (this.isChunkLoaded(i1, j1, true)) {
-					this.getChunkFromChunkCoords(i1, j1).getEntitiesWithinAABBForEntity(entityIn, boundingBox,
-							arraylist, predicate);
+				Chunk chunk = this.getChunkFromChunkCoordsIfLoaded(i1, j1);
+				if (chunk != null) {
+					chunk.getEntitiesWithinAABBForEntity(entityIn, boundingBox, arraylist, predicate);
 				}
 			}
 		}
@@ -2536,7 +2569,7 @@ public abstract class World implements IBlockAccess {
 	 * exist in this World.
 	 */
 	public Entity getEntityByID(int id) {
-		return (Entity) this.entitiesById.lookup(id);
+		return this.entitiesById.get(id);
 	}
 
 	/**+

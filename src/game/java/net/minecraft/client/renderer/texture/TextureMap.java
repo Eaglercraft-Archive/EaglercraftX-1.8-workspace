@@ -5,12 +5,13 @@ import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
+import com.carrotsearch.hppc.IntIndexedContainer;
+import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -44,7 +45,7 @@ import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -234,7 +235,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 					TextureMetadataSection texturemetadatasection = (TextureMetadataSection) iresource
 							.getMetadata("texture");
 					if (texturemetadatasection != null) {
-						List list = texturemetadatasection.getListMipmaps();
+						IntIndexedContainer list = texturemetadatasection.getListMipmaps();
 						if (!list.isEmpty()) {
 							int l = abufferedimageColor[0].width;
 							int i1 = abufferedimageColor[0].height;
@@ -243,11 +244,8 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 										"Unable to load extra miplevels, source-texture is not power of two");
 							}
 						}
-
-						Iterator iterator = list.iterator();
-
-						while (iterator.hasNext()) {
-							int i2 = ((Integer) iterator.next()).intValue();
+						for (IntCursor cur : list) {
+							int i2 = cur.value;
 							if (i2 > 0 && i2 < abufferedimageColor.length - 1 && abufferedimageColor[i2] == null) {
 								ResourceLocation resourcelocation2 = this.completeResourceLocation(resourcelocation,
 										i2);
@@ -319,7 +317,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 				TextureMetadataSection texturemetadatasection = (TextureMetadataSection) iresource
 						.getMetadata("texture");
 				if (texturemetadatasection != null) {
-					List list = texturemetadatasection.getListMipmaps();
+					IntIndexedContainer list = texturemetadatasection.getListMipmaps();
 					if (!list.isEmpty()) {
 						int l = abufferedimage[0].width;
 						int i1 = abufferedimage[0].height;
@@ -329,10 +327,8 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
 						}
 					}
 
-					Iterator iterator = list.iterator();
-
-					while (iterator.hasNext()) {
-						int i2 = ((Integer) iterator.next()).intValue();
+					for (IntCursor cur : list) {
+						int i2 = cur.value;
 						if (i2 > 0 && i2 < abufferedimage.length - 1 && abufferedimage[i2] == null) {
 							ResourceLocation resourcelocation2 = this.completeResourceLocation(resourcelocation, i2);
 

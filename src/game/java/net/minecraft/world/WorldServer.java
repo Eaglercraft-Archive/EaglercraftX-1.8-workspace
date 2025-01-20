@@ -1,5 +1,6 @@
 package net.minecraft.world;
 
+import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -75,7 +76,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -319,19 +320,22 @@ public class WorldServer extends World implements IThreadListener {
 	protected void updateBlocks() {
 		super.updateBlocks();
 		if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) {
-			for (ChunkCoordIntPair chunkcoordintpair1 : this.activeChunkSet) {
-				this.getChunkFromChunkCoords(chunkcoordintpair1.chunkXPos, chunkcoordintpair1.chunkZPos)
-						.func_150804_b(false);
+			for (LongCursor chunkcoordintpair1 : this.activeChunkSet) {
+				long l = chunkcoordintpair1.value;
+				this.getChunkFromChunkCoords((int) (l & 4294967295L), (int) (l >>> 32)).func_150804_b(false);
 			}
 
 		} else {
 			int i = 0;
 			int j = 0;
 
-			for (ChunkCoordIntPair chunkcoordintpair : this.activeChunkSet) {
-				int k = chunkcoordintpair.chunkXPos * 16;
-				int l = chunkcoordintpair.chunkZPos * 16;
-				Chunk chunk = this.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
+			for (LongCursor chunkcoordintpair : this.activeChunkSet) {
+				long ll = chunkcoordintpair.value;
+				int chunkXPos = (int) (ll & 4294967295L);
+				int chunkZPos = (int) (ll >>> 32);
+				int k = chunkXPos * 16;
+				int l = chunkZPos * 16;
+				Chunk chunk = this.getChunkFromChunkCoords(chunkXPos, chunkZPos);
 				this.playMoodSoundAndCheckLight(k, l, chunk);
 				chunk.func_150804_b(false);
 				if (this.rand.nextInt(100000) == 0 && this.isRaining() && this.isThundering()) {
@@ -635,14 +639,22 @@ public class WorldServer extends World implements IThreadListener {
 	 * coordinates
 	 */
 	public List<TileEntity> getTileEntitiesIn(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-		ArrayList arraylist = Lists.newArrayList();
+		ArrayList<TileEntity> arraylist = Lists.newArrayList();
 
-		for (int i = 0; i < this.loadedTileEntityList.size(); ++i) {
-			TileEntity tileentity = (TileEntity) this.loadedTileEntityList.get(i);
-			BlockPos blockpos = tileentity.getPos();
-			if (blockpos.getX() >= minX && blockpos.getY() >= minY && blockpos.getZ() >= minZ && blockpos.getX() < maxX
-					&& blockpos.getY() < maxY && blockpos.getZ() < maxZ) {
-				arraylist.add(tileentity);
+		for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
+			for (int chunkZ = (minZ >> 4); chunkZ <= ((maxZ - 1) >> 4); chunkZ++) {
+				Chunk chunk = getChunkFromChunkCoords(chunkX, chunkZ);
+				if (chunk == null) {
+					continue;
+				}
+
+				for (TileEntity tileentity : chunk.getTileEntityMap().values()) {
+					BlockPos pos = tileentity.getPos();
+					if ((pos.x >= minX) && (pos.y >= minY) && (pos.z >= minZ) && (pos.x < maxX) && (pos.y < maxY)
+							&& (pos.z < maxZ)) {
+						arraylist.add(tileentity);
+					}
+				}
 			}
 		}
 
@@ -819,12 +831,12 @@ public class WorldServer extends World implements IThreadListener {
 
 	protected void onEntityAdded(Entity entity) {
 		super.onEntityAdded(entity);
-		this.entitiesById.addKey(entity.getEntityId(), entity);
+		this.entitiesById.put(entity.getEntityId(), entity);
 		this.entitiesByUuid.put(entity.getUniqueID(), entity);
 		Entity[] aentity = entity.getParts();
 		if (aentity != null) {
 			for (int i = 0; i < aentity.length; ++i) {
-				this.entitiesById.addKey(aentity[i].getEntityId(), aentity[i]);
+				this.entitiesById.put(aentity[i].getEntityId(), aentity[i]);
 			}
 		}
 
@@ -832,12 +844,12 @@ public class WorldServer extends World implements IThreadListener {
 
 	protected void onEntityRemoved(Entity entity) {
 		super.onEntityRemoved(entity);
-		this.entitiesById.removeObject(entity.getEntityId());
+		this.entitiesById.remove(entity.getEntityId());
 		this.entitiesByUuid.remove(entity.getUniqueID());
 		Entity[] aentity = entity.getParts();
 		if (aentity != null) {
 			for (int i = 0; i < aentity.length; ++i) {
-				this.entitiesById.removeObject(aentity[i].getEntityId());
+				this.entitiesById.remove(aentity[i].getEntityId());
 			}
 		}
 

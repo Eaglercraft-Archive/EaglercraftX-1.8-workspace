@@ -54,7 +54,7 @@ import net.minecraft.util.ResourceLocation;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -421,17 +421,17 @@ public class ModelBakery {
 					if (deferred) {
 						ModelBlock currentBlockModel = modelblock;
 						ResourceLocation currentResourceLocation = modelblockdefinition$variant.getModelLocation();
-						Integer blockId = null;
+						int blockId = -1;
 						do {
-							blockId = BlockVertexIDs.modelToID.get(currentResourceLocation.toString());
-							if (blockId != null) {
+							blockId = BlockVertexIDs.modelToID.getOrDefault(currentResourceLocation.toString(), -1);
+							if (blockId != -1) {
 								break;
 							}
 							currentResourceLocation = currentBlockModel.getParentLocation();
 							currentBlockModel = models.get(currentResourceLocation);
 						} while (currentBlockModel != null);
-						if (blockId != null) {
-							VertexMarkerState.markId = blockId.intValue();
+						if (blockId != -1) {
+							VertexMarkerState.markId = blockId;
 							try {
 								weightedbakedmodel$builder.add(
 										this.bakeModel(modelblock, modelblockdefinition$variant.getRotation(),

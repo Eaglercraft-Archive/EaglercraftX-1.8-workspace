@@ -8,15 +8,11 @@ import java.util.List;
 import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 
-import java.util.concurrent.Callable;
-
 import net.lax1dude.eaglercraft.v1_8.sp.server.EaglerMinecraftServer;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
@@ -25,7 +21,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.ReportedException;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -42,7 +37,7 @@ import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -80,6 +75,7 @@ public class Chunk {
 	private long inhabitedTime;
 	private int queuedLightChecks;
 	private List<BlockPos> tileEntityPosQueue;
+	private final ChunkCoordIntPair coordsCache;
 
 	public Chunk(World worldIn, int x, int z) {
 		this.storageArrays = new ExtendedBlockStorage[16];
@@ -94,6 +90,7 @@ public class Chunk {
 		this.xPosition = x;
 		this.zPosition = z;
 		this.heightMap = new int[256];
+		this.coordsCache = new ChunkCoordIntPair(x, z);
 
 		for (int i = 0; i < this.entityLists.length; ++i) {
 			this.entityLists[i] = new ClassInheritanceMultiMap(Entity.class);
@@ -135,7 +132,7 @@ public class Chunk {
 	}
 
 	public int getHeight(BlockPos pos) {
-		return this.getHeightValue(pos.getX() & 15, pos.getZ() & 15);
+		return this.getHeightValue(pos.x & 15, pos.z & 15);
 	}
 
 	/**+
@@ -179,7 +176,7 @@ public class Chunk {
 				this.precipitationHeightMap[j + (k << 4)] = -999;
 
 				for (int l = i + 16; l > 0; --l) {
-					Block block = this.getBlock0(j, l - 1, k);
+					Block block = this.getBlock(j, l - 1, k);
 					if (block.getLightOpacity() != 0) {
 						this.heightMap[k << 4 | j] = l;
 						if (l < this.heightMapMinimum) {
@@ -422,112 +419,46 @@ public class Chunk {
 	}
 
 	private int getBlockLightOpacity(int x, int y, int z) {
-		return this.getBlock0(x, y, z).getLightOpacity();
+		return this.getBlock(x, y, z).getLightOpacity();
 	}
 
-	/**+
-	 * Returns the block corresponding to the given coordinates
-	 * inside a chunk.
-	 */
-	private Block getBlock0(int x, int y, int z) {
-		Block block = Blocks.air;
+	public Block getBlock(int x, int y, int z) {
 		if (y >= 0 && y >> 4 < this.storageArrays.length) {
 			ExtendedBlockStorage extendedblockstorage = this.storageArrays[y >> 4];
 			if (extendedblockstorage != null) {
-				try {
-					block = extendedblockstorage.getBlockByExtId(x, y & 15, z);
-				} catch (Throwable throwable) {
-					CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting block");
-					throw new ReportedException(crashreport);
-				}
+				return extendedblockstorage.getBlockByExtId(x, y & 15, z);
 			}
 		}
 
-		return block;
+		return Blocks.air;
 	}
 
-	public Block getBlock(final int x, final int y, final int z) {
-		try {
-			return this.getBlock0(x & 15, y, z & 15);
-		} catch (ReportedException reportedexception) {
-			CrashReportCategory crashreportcategory = reportedexception.getCrashReport()
-					.makeCategory("Block being got");
-			crashreportcategory.addCrashSectionCallable("Location", new Callable<String>() {
-				public String call() throws Exception {
-					return CrashReportCategory.getCoordinateInfo(
-							new BlockPos(Chunk.this.xPosition * 16 + x, y, Chunk.this.zPosition * 16 + z));
-				}
-			});
-			throw reportedexception;
+	public Block getBlock(final BlockPos pos) {
+		if (pos.y >= 0 && pos.y >> 4 < this.storageArrays.length) {
+			ExtendedBlockStorage extendedblockstorage = this.storageArrays[pos.y >> 4];
+			if (extendedblockstorage != null) {
+				int j = pos.x & 15;
+				int k = pos.y & 15;
+				int i = pos.z & 15;
+				return extendedblockstorage.getBlockByExtId(j, k, i);
+			}
 		}
-	}
 
-	public Block getBlock(final BlockPos blockpos) {
-		try {
-			return this.getBlock0(blockpos.getX() & 15, blockpos.getY(), blockpos.getZ() & 15);
-		} catch (ReportedException reportedexception) {
-			CrashReportCategory crashreportcategory = reportedexception.getCrashReport()
-					.makeCategory("Block being got");
-			crashreportcategory.addCrashSectionCallable("Location", new Callable<String>() {
-				public String call() throws Exception {
-					return CrashReportCategory.getCoordinateInfo(blockpos);
-				}
-			});
-			throw reportedexception;
-		}
+		return Blocks.air;
 	}
 
 	public IBlockState getBlockState(final BlockPos pos) {
-		try {
-			if (pos.getY() >= 0 && pos.getY() >> 4 < this.storageArrays.length) {
-				ExtendedBlockStorage extendedblockstorage = this.storageArrays[pos.getY() >> 4];
-				if (extendedblockstorage != null) {
-					int j = pos.getX() & 15;
-					int k = pos.getY() & 15;
-					int i = pos.getZ() & 15;
-					return extendedblockstorage.get(j, k, i);
-				}
+		if (pos.y >= 0 && pos.y >> 4 < this.storageArrays.length) {
+			ExtendedBlockStorage extendedblockstorage = this.storageArrays[pos.y >> 4];
+			if (extendedblockstorage != null) {
+				int j = pos.x & 15;
+				int k = pos.y & 15;
+				int i = pos.z & 15;
+				return extendedblockstorage.get(j, k, i);
 			}
-
-			return Blocks.air.getDefaultState();
-		} catch (Throwable throwable) {
-			CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting block state");
-			CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being got");
-			crashreportcategory.addCrashSectionCallable("Location", new Callable<String>() {
-				public String call() throws Exception {
-					return CrashReportCategory.getCoordinateInfo(pos);
-				}
-			});
-			throw new ReportedException(crashreport);
 		}
-	}
 
-	/**
-	 * only use with a regular "net.minecraft.util.BlockPos"!
-	 */
-	public IBlockState getBlockStateFaster(final BlockPos pos) {
-		try {
-			if (pos.y >= 0 && pos.y >> 4 < this.storageArrays.length) {
-				ExtendedBlockStorage extendedblockstorage = this.storageArrays[pos.getY() >> 4];
-				if (extendedblockstorage != null) {
-					int j = pos.x & 15;
-					int k = pos.y & 15;
-					int i = pos.z & 15;
-					return extendedblockstorage.get(j, k, i);
-				}
-			}
-
-			return Blocks.air.getDefaultState();
-		} catch (Throwable throwable) {
-			CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting block state");
-			CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being got");
-			crashreportcategory.addCrashSectionCallable("Location", new Callable<String>() {
-				public String call() throws Exception {
-					return CrashReportCategory.getCoordinateInfo(pos);
-				}
-			});
-			throw new ReportedException(crashreport);
-		}
+		return Blocks.air.getDefaultState();
 	}
 
 	/**+
@@ -552,9 +483,9 @@ public class Chunk {
 	}
 
 	public IBlockState setBlockState(BlockPos pos, IBlockState state) {
-		int i = pos.getX() & 15;
-		int j = pos.getY();
-		int k = pos.getZ() & 15;
+		int i = pos.x & 15;
+		int j = pos.y;
+		int k = pos.z & 15;
 		int l = k << 4 | i;
 		if (j >= this.precipitationHeightMap[l] - 1) {
 			this.precipitationHeightMap[l] = -999;
@@ -641,9 +572,9 @@ public class Chunk {
 	}
 
 	public int getLightFor(EnumSkyBlock enumskyblock, BlockPos blockpos) {
-		int i = blockpos.getX() & 15;
-		int j = blockpos.getY();
-		int k = blockpos.getZ() & 15;
+		int i = blockpos.x & 15;
+		int j = blockpos.y;
+		int k = blockpos.z & 15;
 		ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
 		return extendedblockstorage == null
 				? (this.canSeeSky(blockpos) ? enumskyblock.defaultLightValue : getNoSkyLightValue())
@@ -655,9 +586,9 @@ public class Chunk {
 	}
 
 	public void setLightFor(EnumSkyBlock enumskyblock, BlockPos blockpos, int i) {
-		int j = blockpos.getX() & 15;
-		int k = blockpos.getY();
-		int l = blockpos.getZ() & 15;
+		int j = blockpos.x & 15;
+		int k = blockpos.y;
+		int l = blockpos.z & 15;
 		ExtendedBlockStorage extendedblockstorage = this.storageArrays[k >> 4];
 		if (extendedblockstorage == null) {
 			extendedblockstorage = this.storageArrays[k >> 4] = new ExtendedBlockStorage(k >> 4 << 4,
@@ -677,9 +608,9 @@ public class Chunk {
 	}
 
 	public int getLightSubtracted(BlockPos blockpos, int i) {
-		int j = blockpos.getX() & 15;
-		int k = blockpos.getY();
-		int l = blockpos.getZ() & 15;
+		int j = blockpos.x & 15;
+		int k = blockpos.y;
+		int l = blockpos.z & 15;
 		ExtendedBlockStorage extendedblockstorage = this.storageArrays[k >> 4];
 		if (extendedblockstorage == null) {
 			return !this.worldObj.provider.getHasNoSky() && i < EnumSkyBlock.SKY.defaultLightValue
@@ -754,9 +685,9 @@ public class Chunk {
 	}
 
 	public boolean canSeeSky(BlockPos blockpos) {
-		int i = blockpos.getX() & 15;
-		int j = blockpos.getY();
-		int k = blockpos.getZ() & 15;
+		int i = blockpos.x & 15;
+		int j = blockpos.y;
+		int k = blockpos.z & 15;
 		return j >= this.heightMap[k << 4 | i];
 	}
 
@@ -1038,7 +969,11 @@ public class Chunk {
 	 * Gets a ChunkCoordIntPair representing the Chunk's position.
 	 */
 	public ChunkCoordIntPair getChunkCoordIntPair() {
-		return new ChunkCoordIntPair(this.xPosition, this.zPosition);
+		return coordsCache;
+	}
+
+	public long getChunkCoordLong() {
+		return ChunkCoordIntPair.chunkXZ2Int(this.xPosition, this.zPosition);
 	}
 
 	/**+

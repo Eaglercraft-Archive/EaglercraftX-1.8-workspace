@@ -1,5 +1,7 @@
 package net.minecraft.stats;
 
+import com.carrotsearch.hppc.ObjectIntHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.HashMap;
@@ -27,7 +29,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -187,12 +189,12 @@ public class StatisticsFile extends StatFileWriter {
 
 	public void func_150876_a(EntityPlayerMP parEntityPlayerMP) {
 		int i = this.mcServer.getTickCounter();
-		HashMap hashmap = Maps.newHashMap();
+		ObjectIntMap<StatBase> hashmap = new ObjectIntHashMap<>();
 		if (this.field_150886_g || i - this.field_150885_f > 300) {
 			this.field_150885_f = i;
 
 			for (StatBase statbase : this.func_150878_c()) {
-				hashmap.put(statbase, Integer.valueOf(this.readStat(statbase)));
+				hashmap.put(statbase, this.readStat(statbase));
 			}
 		}
 
@@ -200,12 +202,12 @@ public class StatisticsFile extends StatFileWriter {
 	}
 
 	public void sendAchievements(EntityPlayerMP player) {
-		HashMap hashmap = Maps.newHashMap();
+		ObjectIntMap<StatBase> hashmap = new ObjectIntHashMap<>();
 
 		for (int i = 0, l = AchievementList.achievementList.size(); i < l; ++i) {
 			Achievement achievement = AchievementList.achievementList.get(i);
 			if (this.hasAchievementUnlocked(achievement)) {
-				hashmap.put(achievement, Integer.valueOf(this.readStat(achievement)));
+				hashmap.put(achievement, this.readStat(achievement));
 				this.field_150888_e.remove(achievement);
 			}
 		}

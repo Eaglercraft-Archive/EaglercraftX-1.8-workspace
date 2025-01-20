@@ -1,5 +1,7 @@
 package net.minecraft.network;
 
+import com.carrotsearch.hppc.IntShortHashMap;
+import com.carrotsearch.hppc.IntShortMap;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
@@ -88,7 +90,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.IntHashMap;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.WorldServer;
 import net.lax1dude.eaglercraft.v1_8.sp.server.socket.IntegratedServerPlayerNetworkManager;
@@ -105,7 +106,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -134,7 +135,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 	private long lastSentPingPacket;
 	private int chatSpamThresholdCount;
 	private int itemDropThreshold;
-	private IntHashMap<Short> field_147372_n = new IntHashMap();
+	private IntShortMap field_147372_n = new IntShortHashMap();
 	private double lastPosX;
 	private double lastPosY;
 	private double lastPosZ;
@@ -928,8 +929,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 					this.playerEntity.updateHeldItem();
 					this.playerEntity.isChangingQuantityOnly = false;
 				} else {
-					this.field_147372_n.addKey(this.playerEntity.openContainer.windowId,
-							Short.valueOf(c0epacketclickwindow.getActionNumber()));
+					this.field_147372_n.put(this.playerEntity.openContainer.windowId,
+							c0epacketclickwindow.getActionNumber());
 					this.playerEntity.playerNetServerHandler.sendPacket(new S32PacketConfirmTransaction(
 							c0epacketclickwindow.getWindowId(), c0epacketclickwindow.getActionNumber(), false));
 					this.playerEntity.openContainer.setCanCraft(this.playerEntity, false);
@@ -1019,14 +1020,14 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 	 * player's ability to manipulate the container contents
 	 */
 	public void processConfirmTransaction(C0FPacketConfirmTransaction c0fpacketconfirmtransaction) {
-		Short oshort = (Short) this.field_147372_n.lookup(this.playerEntity.openContainer.windowId);
-		if (oshort != null && c0fpacketconfirmtransaction.getUid() == oshort.shortValue()
-				&& this.playerEntity.openContainer.windowId == c0fpacketconfirmtransaction.getWindowId()
+		int windowId = this.playerEntity.openContainer.windowId;
+		if (this.field_147372_n.containsKey(windowId)
+				&& c0fpacketconfirmtransaction.getUid() == this.field_147372_n.get(windowId)
+				&& windowId == c0fpacketconfirmtransaction.getWindowId()
 				&& !this.playerEntity.openContainer.getCanCraft(this.playerEntity)
 				&& !this.playerEntity.isSpectator()) {
 			this.playerEntity.openContainer.setCanCraft(this.playerEntity, true);
 		}
-
 	}
 
 	public void processUpdateSign(C12PacketUpdateSign c12packetupdatesign) {

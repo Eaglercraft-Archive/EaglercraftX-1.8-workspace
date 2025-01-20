@@ -1,12 +1,12 @@
 package net.minecraft.world;
 
-import com.google.common.collect.Sets;
-
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongSet;
+import com.carrotsearch.hppc.cursors.LongCursor;
 import java.util.List;
 
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
-import java.util.Set;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -27,7 +27,7 @@ import net.minecraft.world.chunk.Chunk;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -46,7 +46,7 @@ public final class SpawnerAnimals {
 	/**+
 	 * The 17x17 area around the player where mobs can spawn
 	 */
-	private final Set<ChunkCoordIntPair> eligibleChunksForSpawning = Sets.newHashSet();
+	private final LongSet eligibleChunksForSpawning = new LongHashSet();
 
 	/**+
 	 * adds all chunks within the spawn radius of the players to
@@ -67,15 +67,16 @@ public final class SpawnerAnimals {
 				if (!entityplayer.isSpectator()) {
 					int j = MathHelper.floor_double(entityplayer.posX / 16.0D);
 					int k = MathHelper.floor_double(entityplayer.posZ / 16.0D);
-					byte b0 = 8;
+					byte b0 = (byte) spawnHostileMobs.getMinecraftServer().getConfigurationManager().getViewDistance();
 
 					for (int l = -b0; l <= b0; ++l) {
 						for (int i1 = -b0; i1 <= b0; ++i1) {
 							boolean flag = l == -b0 || l == b0 || i1 == -b0 || i1 == b0;
-							ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(l + j, i1 + k);
+							int cx = l + j;
+							int cz = i1 + k;
+							long chunkcoordintpair = ChunkCoordIntPair.chunkXZ2Int(cx, cz);
 							if (!this.eligibleChunksForSpawning.contains(chunkcoordintpair)
-									&& spawnHostileMobs.theChunkProviderServer.chunkExists(chunkcoordintpair.chunkXPos,
-											chunkcoordintpair.chunkZPos)) {
+									&& spawnHostileMobs.theChunkProviderServer.chunkExists(cx, cz)) {
 								++i;
 								if (!flag && spawnHostileMobs.getWorldBorder().contains(chunkcoordintpair)) {
 									this.eligibleChunksForSpawning.add(chunkcoordintpair);
@@ -98,9 +99,11 @@ public final class SpawnerAnimals {
 					int l3 = spawnHostileMobs.countEntities(enumcreaturetype.getCreatureClass());
 					int i4 = enumcreaturetype.getMaxNumberOfCreature() * i / MOB_COUNT_DIV;
 					if (l3 <= i4) {
-						label374: for (ChunkCoordIntPair chunkcoordintpair1 : this.eligibleChunksForSpawning) {
-							BlockPos blockpos = getRandomChunkPosition(spawnHostileMobs, chunkcoordintpair1.chunkXPos,
-									chunkcoordintpair1.chunkZPos);
+						label374: for (LongCursor chunkcoordintpair1 : this.eligibleChunksForSpawning) {
+							long chunkcoordintpair1l = chunkcoordintpair1.value;
+							int chunkXPos = (int) (chunkcoordintpair1l & 4294967295L);
+							int chunkZPos = (int) (chunkcoordintpair1l >>> 32);
+							BlockPos blockpos = getRandomChunkPosition(spawnHostileMobs, chunkXPos, chunkZPos);
 							int j1 = blockpos.getX();
 							int k1 = blockpos.getY();
 							int l1 = blockpos.getZ();

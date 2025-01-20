@@ -1,6 +1,9 @@
 package net.minecraft.item;
 
 import java.util.List;
+
+import com.carrotsearch.hppc.cursors.ObjectCursor;
+
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
@@ -29,7 +32,7 @@ import net.minecraft.world.World;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -195,8 +198,8 @@ public class ItemMonsterPlacer extends Item {
 	 * (eg: dye returns 16 items)
 	 */
 	public void getSubItems(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (EntityList.EntityEggInfo entitylist$entityegginfo : EntityList.entityEggs.values()) {
-			list.add(new ItemStack(item, 1, entitylist$entityegginfo.spawnedID));
+		for (ObjectCursor<EntityList.EntityEggInfo> entitylist$entityegginfo : EntityList.entityEggs.values()) {
+			list.add(new ItemStack(item, 1, entitylist$entityegginfo.value.spawnedID));
 		}
 
 	}

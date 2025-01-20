@@ -1,10 +1,11 @@
 package net.minecraft.world.gen.structure;
 
-import com.google.common.collect.Maps;
+import com.carrotsearch.hppc.LongObjectHashMap;
+import com.carrotsearch.hppc.LongObjectMap;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.HString;
 
@@ -26,7 +27,7 @@ import net.minecraft.world.gen.MapGenBase;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -42,7 +43,13 @@ import net.minecraft.world.gen.MapGenBase;
  */
 public abstract class MapGenStructure extends MapGenBase {
 	private MapGenStructureData structureData;
-	protected Map<Long, StructureStart> structureMap = Maps.newHashMap();
+	/**+
+	 * Used to store a list of all structures that have been
+	 * recursively generated. Used so that during recursive
+	 * generation, the structure generator can avoid generating
+	 * structures that intersect ones that have already been placed.
+	 */
+	protected LongObjectMap<StructureStart> structureMap = new LongObjectHashMap<>();
 
 	public abstract String getStructureName();
 
@@ -60,13 +67,13 @@ public abstract class MapGenStructure extends MapGenBase {
 	protected final void recursiveGenerate(World world, final int i, final int j, int var4, int var5,
 			ChunkPrimer var6) {
 		this.func_143027_a(world);
-		if (!this.structureMap.containsKey(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)))) {
+		if (!this.structureMap.containsKey(ChunkCoordIntPair.chunkXZ2Int(i, j))) {
 			this.rand.nextInt();
 
 			try {
 				if (this.canSpawnStructureAtCoords(i, j)) {
 					StructureStart structurestart = this.getStructureStart(i, j);
-					this.structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), structurestart);
+					this.structureMap.put(ChunkCoordIntPair.chunkXZ2Int(i, j), structurestart);
 					this.func_143026_a(i, j, structurestart);
 				}
 
@@ -102,7 +109,8 @@ public abstract class MapGenStructure extends MapGenBase {
 		int j = (chunkCoord.chunkZPos << 4) + 8;
 		boolean flag = false;
 
-		for (StructureStart structurestart : this.structureMap.values()) {
+		for (ObjectCursor<StructureStart> structurestart_ : this.structureMap.values()) {
+			StructureStart structurestart = structurestart_.value;
 			if (structurestart.isSizeableStructure() && structurestart.func_175788_a(chunkCoord)
 					&& structurestart.getBoundingBox().intersectsWith(i, j, i + 15, j + 15)) {
 				structurestart.generateStructure(worldIn, randomIn, new StructureBoundingBox(i, j, i + 15, j + 15));
@@ -121,7 +129,8 @@ public abstract class MapGenStructure extends MapGenBase {
 	}
 
 	protected StructureStart func_175797_c(BlockPos pos) {
-		label24: for (StructureStart structurestart : this.structureMap.values()) {
+		label24: for (ObjectCursor<StructureStart> structurestart_ : this.structureMap.values()) {
+			StructureStart structurestart = structurestart_.value;
 			if (structurestart.isSizeableStructure() && structurestart.getBoundingBox().isVecInside(pos)) {
 				Iterator iterator = structurestart.getComponents().iterator();
 
@@ -146,7 +155,8 @@ public abstract class MapGenStructure extends MapGenBase {
 	public boolean func_175796_a(World worldIn, BlockPos pos) {
 		this.func_143027_a(worldIn);
 
-		for (StructureStart structurestart : this.structureMap.values()) {
+		for (ObjectCursor<StructureStart> structurestart_ : this.structureMap.values()) {
+			StructureStart structurestart = structurestart_.value;
 			if (structurestart.isSizeableStructure() && structurestart.getBoundingBox().isVecInside(pos)) {
 				return true;
 			}
@@ -168,7 +178,8 @@ public abstract class MapGenStructure extends MapGenBase {
 		double d0 = Double.MAX_VALUE;
 		BlockPos blockpos = null;
 
-		for (StructureStart structurestart : this.structureMap.values()) {
+		for (ObjectCursor<StructureStart> structurestart_ : this.structureMap.values()) {
+			StructureStart structurestart = structurestart_.value;
 			if (structurestart.isSizeableStructure()) {
 				StructureComponent structurecomponent = (StructureComponent) structurestart.getComponents().get(0);
 				BlockPos blockpos1 = structurecomponent.getBoundingBoxCenter();
@@ -232,8 +243,7 @@ public abstract class MapGenStructure extends MapGenBase {
 							StructureStart structurestart = MapGenStructureIO.getStructureStart(nbttagcompound1,
 									worldIn);
 							if (structurestart != null) {
-								this.structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)),
-										structurestart);
+								this.structureMap.put(ChunkCoordIntPair.chunkXZ2Int(i, j), structurestart);
 							}
 						}
 					}

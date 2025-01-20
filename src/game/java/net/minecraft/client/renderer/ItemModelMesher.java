@@ -1,8 +1,9 @@
 package net.minecraft.client.renderer;
 
 import java.util.Map;
-import java.util.Map.Entry;
-
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.google.common.collect.Maps;
 
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerTextureAtlasSprite;
@@ -18,7 +19,7 @@ import net.minecraft.item.ItemStack;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -33,8 +34,8 @@ import net.minecraft.item.ItemStack;
  * 
  */
 public class ItemModelMesher {
-	private final Map<Integer, ModelResourceLocation> simpleShapes = Maps.newHashMap();
-	private final Map<Integer, IBakedModel> simpleShapesCache = Maps.newHashMap();
+	private final IntObjectMap<ModelResourceLocation> simpleShapes = new IntObjectHashMap<>();
+	private final IntObjectMap<IBakedModel> simpleShapesCache = new IntObjectHashMap<>();
 	private final Map<Item, ItemMeshDefinition> shapers = Maps.newHashMap();
 	private final ModelManager modelManager;
 
@@ -54,7 +55,7 @@ public class ItemModelMesher {
 		Item item = stack.getItem();
 		IBakedModel ibakedmodel = this.getItemModel(item, this.getMetadata(stack));
 		if (ibakedmodel == null) {
-			ItemMeshDefinition itemmeshdefinition = (ItemMeshDefinition) this.shapers.get(item);
+			ItemMeshDefinition itemmeshdefinition = this.shapers.get(item);
 			if (itemmeshdefinition != null) {
 				ibakedmodel = this.modelManager.getModel(itemmeshdefinition.getModelLocation(stack));
 			}
@@ -72,7 +73,7 @@ public class ItemModelMesher {
 	}
 
 	protected IBakedModel getItemModel(Item item, int meta) {
-		return (IBakedModel) this.simpleShapesCache.get(Integer.valueOf(this.getIndex(item, meta)));
+		return this.simpleShapesCache.get(this.getIndex(item, meta));
 	}
 
 	private int getIndex(Item item, int meta) {
@@ -80,8 +81,8 @@ public class ItemModelMesher {
 	}
 
 	public void register(Item item, int meta, ModelResourceLocation location) {
-		this.simpleShapes.put(Integer.valueOf(this.getIndex(item, meta)), location);
-		this.simpleShapesCache.put(Integer.valueOf(this.getIndex(item, meta)), this.modelManager.getModel(location));
+		this.simpleShapes.put(this.getIndex(item, meta), location);
+		this.simpleShapesCache.put(this.getIndex(item, meta), this.modelManager.getModel(location));
 	}
 
 	public void register(Item item, ItemMeshDefinition definition) {
@@ -95,10 +96,8 @@ public class ItemModelMesher {
 	public void rebuildCache() {
 		this.simpleShapesCache.clear();
 
-		for (Entry entry : this.simpleShapes.entrySet()) {
-			this.simpleShapesCache.put((Integer) entry.getKey(),
-					this.modelManager.getModel((ModelResourceLocation) entry.getValue()));
+		for (IntObjectCursor<ModelResourceLocation> entry : this.simpleShapes) {
+			this.simpleShapesCache.put(entry.key, this.modelManager.getModel(entry.value));
 		}
-
 	}
 }

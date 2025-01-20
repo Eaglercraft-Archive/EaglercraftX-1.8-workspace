@@ -3,8 +3,8 @@ package net.minecraft.client.gui.inventory;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
+import com.carrotsearch.hppc.IntIntMap;
 import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
@@ -43,7 +43,7 @@ import net.minecraft.util.ResourceLocation;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -564,10 +564,9 @@ public class GuiContainerCreative extends InventoryEffectRenderer {
 					this.mc.gameSettings.advancedItemTooltips);
 			CreativeTabs creativetabs = itemstack.getItem().getCreativeTab();
 			if (creativetabs == null && itemstack.getItem() == Items.enchanted_book) {
-				Map map = EnchantmentHelper.getEnchantments(itemstack);
+				IntIntMap map = EnchantmentHelper.getEnchantments(itemstack);
 				if (map.size() == 1) {
-					Enchantment enchantment = Enchantment
-							.getEnchantmentById(((Integer) map.keySet().iterator().next()).intValue());
+					Enchantment enchantment = Enchantment.getEnchantmentById(map.keys().iterator().next().value);
 
 					for (int m = 0; m < CreativeTabs.creativeTabArray.length; ++m) {
 						CreativeTabs creativetabs1 = CreativeTabs.creativeTabArray[m];

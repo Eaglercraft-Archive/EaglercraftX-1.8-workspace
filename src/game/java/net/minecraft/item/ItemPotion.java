@@ -1,15 +1,18 @@
 package net.minecraft.item;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.ObjectIntHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
+import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -33,7 +36,7 @@ import net.minecraft.world.World;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -48,8 +51,13 @@ import net.minecraft.world.World;
  * 
  */
 public class ItemPotion extends Item {
-	private Map<Integer, List<PotionEffect>> effectCache = Maps.newHashMap();
-	private static final Map<List<PotionEffect>, Integer> SUB_ITEMS_CACHE = Maps.newLinkedHashMap();
+	/**+
+	 * Contains a map from integers to the list of potion effects
+	 * that potions with that damage value confer (to prevent
+	 * recalculating it).
+	 */
+	private IntObjectMap<List<PotionEffect>> effectCache = new IntObjectHashMap<>();
+	private static final ObjectIntMap<List<PotionEffect>> SUB_ITEMS_CACHE = new ObjectIntHashMap<>();
 
 	public ItemPotion() {
 		this.setMaxStackSize(1);
@@ -77,10 +85,10 @@ public class ItemPotion extends Item {
 
 			return arraylist;
 		} else {
-			List list = (List) this.effectCache.get(Integer.valueOf(stack.getMetadata()));
+			List<PotionEffect> list = this.effectCache.get(stack.getMetadata());
 			if (list == null) {
 				list = PotionHelper.getPotionEffects(stack.getMetadata(), false);
-				this.effectCache.put(Integer.valueOf(stack.getMetadata()), list);
+				this.effectCache.put(stack.getMetadata(), list);
 			}
 
 			return list;
@@ -92,10 +100,10 @@ public class ItemPotion extends Item {
 	 * value.
 	 */
 	public List<PotionEffect> getEffects(int meta) {
-		List list = (List) this.effectCache.get(Integer.valueOf(meta));
+		List<PotionEffect> list = this.effectCache.get(meta);
 		if (list == null) {
 			list = PotionHelper.getPotionEffects(meta, false);
-			this.effectCache.put(Integer.valueOf(meta), list);
+			this.effectCache.put(meta, list);
 		}
 
 		return list;
@@ -332,18 +340,15 @@ public class ItemPotion extends Item {
 
 						List list = PotionHelper.getPotionEffects(i1, false);
 						if (list != null && !list.isEmpty()) {
-							SUB_ITEMS_CACHE.put(list, Integer.valueOf(i1));
+							SUB_ITEMS_CACHE.put(list, i1);
 						}
 					}
 				}
 			}
 		}
 
-		Iterator iterator = SUB_ITEMS_CACHE.values().iterator();
-
-		while (iterator.hasNext()) {
-			int j1 = ((Integer) iterator.next()).intValue();
-			subItems.add(new ItemStack(itemIn, 1, j1));
+		for (IntCursor cur : SUB_ITEMS_CACHE.values()) {
+			subItems.add(new ItemStack(itemIn, 1, cur.value));
 		}
 
 	}

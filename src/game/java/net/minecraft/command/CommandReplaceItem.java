@@ -1,8 +1,10 @@
 package net.minecraft.command;
 
-import com.google.common.collect.Maps;
 import java.util.List;
-import java.util.Map;
+
+import com.carrotsearch.hppc.ObjectIntHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,7 +25,7 @@ import net.minecraft.world.World;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -39,7 +41,7 @@ import net.minecraft.world.World;
  */
 public class CommandReplaceItem extends CommandBase {
 
-	private static final Map<String, Integer> SHORTCUTS = Maps.newHashMap();
+	private static final ObjectIntMap<String> SHORTCUTS = new ObjectIntHashMap<>();
 
 	/**+
 	 * Gets the name of the command
@@ -169,7 +171,7 @@ public class CommandReplaceItem extends CommandBase {
 		if (!SHORTCUTS.containsKey(shortcut)) {
 			throw new CommandException("commands.generic.parameter.invalid", new Object[] { shortcut });
 		} else {
-			return ((Integer) SHORTCUTS.get(shortcut)).intValue();
+			return SHORTCUTS.get(shortcut);
 		}
 	}
 
@@ -189,7 +191,7 @@ public class CommandReplaceItem extends CommandBase {
 																? null
 																: getListOfStringsMatchingLastWord(astring,
 																		Item.itemRegistry.getKeys()))
-												: getListOfStringsMatchingLastWord(astring, SHORTCUTS.keySet()))));
+												: getListOfStringsMatchingLastWord(astring, SHORTCUTS.keys()))));
 	}
 
 	protected String[] getUsernames() {
@@ -206,36 +208,36 @@ public class CommandReplaceItem extends CommandBase {
 
 	static {
 		for (int i = 0; i < 54; ++i) {
-			SHORTCUTS.put("slot.container." + i, Integer.valueOf(i));
+			SHORTCUTS.put("slot.container." + i, i);
 		}
 
 		for (int j = 0; j < 9; ++j) {
-			SHORTCUTS.put("slot.hotbar." + j, Integer.valueOf(j));
+			SHORTCUTS.put("slot.hotbar." + j, j);
 		}
 
 		for (int k = 0; k < 27; ++k) {
-			SHORTCUTS.put("slot.inventory." + k, Integer.valueOf(9 + k));
+			SHORTCUTS.put("slot.inventory." + k, 9 + k);
 		}
 
 		for (int l = 0; l < 27; ++l) {
-			SHORTCUTS.put("slot.enderchest." + l, Integer.valueOf(200 + l));
+			SHORTCUTS.put("slot.enderchest." + l, 200 + l);
 		}
 
 		for (int i1 = 0; i1 < 8; ++i1) {
-			SHORTCUTS.put("slot.villager." + i1, Integer.valueOf(300 + i1));
+			SHORTCUTS.put("slot.villager." + i1, 300 + i1);
 		}
 
 		for (int j1 = 0; j1 < 15; ++j1) {
-			SHORTCUTS.put("slot.horse." + j1, Integer.valueOf(500 + j1));
+			SHORTCUTS.put("slot.horse." + j1, 500 + j1);
 		}
 
-		SHORTCUTS.put("slot.weapon", Integer.valueOf(99));
-		SHORTCUTS.put("slot.armor.head", Integer.valueOf(103));
-		SHORTCUTS.put("slot.armor.chest", Integer.valueOf(102));
-		SHORTCUTS.put("slot.armor.legs", Integer.valueOf(101));
-		SHORTCUTS.put("slot.armor.feet", Integer.valueOf(100));
-		SHORTCUTS.put("slot.horse.saddle", Integer.valueOf(400));
-		SHORTCUTS.put("slot.horse.armor", Integer.valueOf(401));
-		SHORTCUTS.put("slot.horse.chest", Integer.valueOf(499));
+		SHORTCUTS.put("slot.weapon", 99);
+		SHORTCUTS.put("slot.armor.head", 103);
+		SHORTCUTS.put("slot.armor.chest", 102);
+		SHORTCUTS.put("slot.armor.legs", 101);
+		SHORTCUTS.put("slot.armor.feet", 100);
+		SHORTCUTS.put("slot.horse.saddle", 400);
+		SHORTCUTS.put("slot.horse.armor", 401);
+		SHORTCUTS.put("slot.horse.chest", 499);
 	}
 }

@@ -5,6 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
@@ -18,7 +19,7 @@ import net.minecraft.world.World;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,6 +41,8 @@ public abstract class PathNavigate {
 	private final IAttributeInstance pathSearchRange;
 	private int totalTicks;
 	private int ticksAtLastPos;
+	private int lastFailure = 0;
+	private int pathfindFailures = 0;
 	/**+
 	 * Coordinates of the entity's position last time a check was
 	 * done (part of monitoring getting 'stuck')
@@ -134,8 +137,23 @@ public abstract class PathNavigate {
 	 * successful. Args : entity, speed
 	 */
 	public boolean tryMoveToEntityLiving(Entity entityIn, double speedIn) {
+		int i = -1;
+		if (this.pathfindFailures > 10 && this.currentPath == null
+				&& (i = (int) (MinecraftServer.getCurrentTimeMillis() / 50l)) < this.lastFailure + 40) {
+			return false;
+		}
+
 		PathEntity pathentity = this.getPathToEntityLiving(entityIn);
-		return pathentity != null ? this.setPath(pathentity, speedIn) : false;
+
+		if (pathentity != null && this.setPath(pathentity, speedIn)) {
+			this.lastFailure = 0;
+			this.pathfindFailures = 0;
+			return true;
+		} else {
+			this.pathfindFailures++;
+			this.lastFailure = i == -1 ? (int) (MinecraftServer.getCurrentTimeMillis() / 50l) : i;
+			return false;
+		}
 	}
 
 	/**+
@@ -273,6 +291,8 @@ public abstract class PathNavigate {
 	 * sets active PathEntity to null
 	 */
 	public void clearPathEntity() {
+		this.pathfindFailures = 0;
+		this.lastFailure = 0;
 		this.currentPath = null;
 	}
 

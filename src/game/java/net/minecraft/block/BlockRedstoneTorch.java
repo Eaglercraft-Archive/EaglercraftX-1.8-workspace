@@ -23,7 +23,7 @@ import net.minecraft.world.World;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -119,11 +119,16 @@ public class BlockRedstoneTorch extends BlockTorch {
 
 	public void updateTick(World world, BlockPos blockpos, IBlockState iblockstate, EaglercraftRandom random) {
 		boolean flag = this.shouldBeOff(world, blockpos, iblockstate);
-		List list = (List) toggles.get(world);
+		List<BlockRedstoneTorch.Toggle> list = toggles.get(world);
 
-		while (list != null && !list.isEmpty()
-				&& world.getTotalWorldTime() - ((BlockRedstoneTorch.Toggle) list.get(0)).time > 60L) {
-			list.remove(0);
+		if (list != null) {
+			int index = 0;
+			while (index < list.size() && world.getTotalWorldTime() - list.get(index).time > 60L) {
+				index++;
+			}
+			if (index > 0) {
+				list.subList(0, index).clear();
+			}
 		}
 
 		if (this.isOn) {

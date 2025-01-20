@@ -1,10 +1,8 @@
 package net.minecraft.client.resources.data;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import com.google.common.collect.Sets;
+import com.carrotsearch.hppc.IntHashSet;
+import com.carrotsearch.hppc.IntSet;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -12,7 +10,7 @@ import com.google.common.collect.Sets;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -79,11 +77,11 @@ public class AnimationMetadataSection implements IMetadataSection {
 		return ((AnimationFrame) this.animationFrames.get(parInt1)).getFrameIndex();
 	}
 
-	public Set<Integer> getFrameIndexSet() {
-		HashSet hashset = Sets.newHashSet();
+	public IntSet getFrameIndexSet() {
+		IntHashSet hashset = new IntHashSet();
 
 		for (int i = 0, l = this.animationFrames.size(); i < l; ++i) {
-			hashset.add(Integer.valueOf(this.animationFrames.get(i).getFrameIndex()));
+			hashset.add(this.animationFrames.get(i).getFrameIndex());
 		}
 
 		return hashset;

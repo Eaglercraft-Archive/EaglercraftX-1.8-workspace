@@ -1,9 +1,9 @@
 package net.minecraft.util;
 
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import com.carrotsearch.hppc.ObjectIntIdentityHashMap;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -29,11 +29,11 @@ import com.google.common.collect.Lists;
  * 
  */
 public class ObjectIntIdentityMap<T> implements IObjectIntIterable<T> {
-	private final IdentityHashMap<T, Integer> identityMap = new IdentityHashMap(512);
+	private final ObjectIntIdentityHashMap<T> identityMap = new ObjectIntIdentityHashMap<>(512);
 	private final List<T> objectList = Lists.newArrayList();
 
 	public void put(T key, int value) {
-		this.identityMap.put(key, Integer.valueOf(value));
+		this.identityMap.put(key, value);
 
 		while (this.objectList.size() <= value) {
 			this.objectList.add((T) null);
@@ -43,8 +43,7 @@ public class ObjectIntIdentityMap<T> implements IObjectIntIterable<T> {
 	}
 
 	public int get(T key) {
-		Integer integer = (Integer) this.identityMap.get(key);
-		return integer == null ? -1 : integer.intValue();
+		return this.identityMap.getOrDefault(key, -1);
 	}
 
 	public final T getByValue(int value) {

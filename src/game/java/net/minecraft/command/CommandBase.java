@@ -1,5 +1,7 @@
 package net.minecraft.command;
 
+import com.carrotsearch.hppc.ObjectContainer;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -27,7 +29,7 @@ import net.minecraft.util.ResourceLocation;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -590,6 +592,27 @@ public abstract class CommandBase implements ICommand {
 							&& doesStringStartWith(s, ((ResourceLocation) object).getResourcePath())) {
 						arraylist.add(String.valueOf(object));
 					}
+				}
+			}
+		}
+
+		return arraylist;
+	}
+
+	/**+
+	 * Returns a List of strings (chosen from the given strings)
+	 * which the last word in the given string array is a
+	 * beginning-match for. (Tab completion).
+	 */
+	public static List<String> getListOfStringsMatchingLastWord(String[] parArrayOfString,
+			ObjectContainer<String> parCollection) {
+		String s = parArrayOfString[parArrayOfString.length - 1];
+		ArrayList arraylist = Lists.newArrayList();
+		if (!parCollection.isEmpty()) {
+			for (ObjectCursor<String> s1_ : parCollection) {
+				String s1 = s1_.value;
+				if (doesStringStartWith(s, s1)) {
+					arraylist.add(s1);
 				}
 			}
 		}

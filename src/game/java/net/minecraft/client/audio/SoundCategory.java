@@ -2,6 +2,8 @@ package net.minecraft.client.audio;
 
 import java.util.Map;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.google.common.collect.Maps;
 
 /**+
@@ -10,7 +12,7 @@ import com.google.common.collect.Maps;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -31,7 +33,7 @@ public enum SoundCategory {
 	public static final SoundCategory[] _VALUES = values();
 
 	private static final Map<String, SoundCategory> NAME_CATEGORY_MAP = Maps.newHashMap();
-	private static final Map<Integer, SoundCategory> ID_CATEGORY_MAP = Maps.newHashMap();
+	private static final IntObjectMap<SoundCategory> ID_CATEGORY_MAP = new IntObjectHashMap<>();
 	private final String categoryName;
 	private final int categoryId;
 
@@ -57,12 +59,12 @@ public enum SoundCategory {
 		for (int i = 0; i < categories.length; ++i) {
 			SoundCategory soundcategory = categories[i];
 			if (NAME_CATEGORY_MAP.containsKey(soundcategory.getCategoryName())
-					|| ID_CATEGORY_MAP.containsKey(Integer.valueOf(soundcategory.getCategoryId()))) {
+					|| ID_CATEGORY_MAP.containsKey(soundcategory.getCategoryId())) {
 				throw new Error("Clash in Sound Category ID & Name pools! Cannot insert " + soundcategory);
 			}
 
 			NAME_CATEGORY_MAP.put(soundcategory.getCategoryName(), soundcategory);
-			ID_CATEGORY_MAP.put(Integer.valueOf(soundcategory.getCategoryId()), soundcategory);
+			ID_CATEGORY_MAP.put(soundcategory.getCategoryId(), soundcategory);
 		}
 
 	}

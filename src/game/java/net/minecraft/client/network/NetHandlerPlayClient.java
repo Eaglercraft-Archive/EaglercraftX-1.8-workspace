@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import net.lax1dude.eaglercraft.v1_8.ClientUUIDLoadingCache;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 
+import com.carrotsearch.hppc.cursors.ObjectIntCursor;
 import com.google.common.collect.Maps;
 
 import net.lax1dude.eaglercraft.v1_8.netty.Unpooled;
@@ -225,7 +225,7 @@ import net.minecraft.world.storage.MapData;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -1350,9 +1350,9 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	public void handleStatistics(S37PacketStatistics packetIn) {
 		boolean flag = false;
 
-		for (Entry entry : packetIn.func_148974_c().entrySet()) {
-			StatBase statbase = (StatBase) entry.getKey();
-			int i = ((Integer) entry.getValue()).intValue();
+		for (ObjectIntCursor<StatBase> entry : packetIn.func_148974_c()) {
+			StatBase statbase = entry.key;
+			int i = entry.value;
 			if (statbase.isAchievement() && i > 0) {
 				if (this.field_147308_k && this.gameController.thePlayer.getStatFileWriter().readStat(statbase) == 0) {
 					Achievement achievement = (Achievement) statbase;

@@ -4,16 +4,15 @@ import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.minecraft.AcceleratedEffectRenderer;
 import net.lax1dude.eaglercraft.v1_8.minecraft.IAcceleratedParticleEngine;
 
 import java.util.concurrent.Callable;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
@@ -44,7 +43,7 @@ import net.minecraft.world.World;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -70,7 +69,7 @@ public class EffectRenderer {
 	 * RNG.
 	 */
 	private EaglercraftRandom rand = new EaglercraftRandom();
-	private Map<Integer, IParticleFactory> particleTypes = Maps.newHashMap();
+	private IntObjectMap<IParticleFactory> particleTypes = new IntObjectHashMap<>();
 
 	public static final AcceleratedEffectRenderer vanillaAcceleratedParticleRenderer = new AcceleratedEffectRenderer();
 	public IAcceleratedParticleEngine acceleratedParticleRenderer = null;
@@ -142,7 +141,7 @@ public class EffectRenderer {
 	}
 
 	public void registerParticle(int id, IParticleFactory particleFactory) {
-		this.particleTypes.put(Integer.valueOf(id), particleFactory);
+		this.particleTypes.put(id, particleFactory);
 	}
 
 	public void emitParticleAtEntity(Entity entityIn, EnumParticleTypes particleTypes) {
@@ -154,7 +153,7 @@ public class EffectRenderer {
 	 */
 	public EntityFX spawnEffectParticle(int particleId, double parDouble1, double parDouble2, double parDouble3,
 			double parDouble4, double parDouble5, double parDouble6, int... parArrayOfInt) {
-		IParticleFactory iparticlefactory = (IParticleFactory) this.particleTypes.get(Integer.valueOf(particleId));
+		IParticleFactory iparticlefactory = this.particleTypes.get(particleId);
 		if (iparticlefactory != null) {
 			EntityFX entityfx = iparticlefactory.getEntityFX(particleId, this.worldObj, parDouble1, parDouble2,
 					parDouble3, parDouble4, parDouble5, parDouble6, parArrayOfInt);

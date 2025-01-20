@@ -1,10 +1,10 @@
 package net.minecraft.network.play.server;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import com.google.common.collect.Maps;
+import com.carrotsearch.hppc.ObjectIntHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
+import com.carrotsearch.hppc.cursors.ObjectIntCursor;
 
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
@@ -18,7 +18,7 @@ import net.minecraft.stats.StatList;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -33,12 +33,12 @@ import net.minecraft.stats.StatList;
  * 
  */
 public class S37PacketStatistics implements Packet<INetHandlerPlayClient> {
-	private Map<StatBase, Integer> field_148976_a;
+	private ObjectIntMap<StatBase> field_148976_a;
 
 	public S37PacketStatistics() {
 	}
 
-	public S37PacketStatistics(Map<StatBase, Integer> parMap) {
+	public S37PacketStatistics(ObjectIntMap<StatBase> parMap) {
 		this.field_148976_a = parMap;
 	}
 
@@ -54,13 +54,13 @@ public class S37PacketStatistics implements Packet<INetHandlerPlayClient> {
 	 */
 	public void readPacketData(PacketBuffer parPacketBuffer) throws IOException {
 		int i = parPacketBuffer.readVarIntFromBuffer();
-		this.field_148976_a = Maps.newHashMap();
+		this.field_148976_a = new ObjectIntHashMap<>();
 
 		for (int j = 0; j < i; ++j) {
 			StatBase statbase = StatList.getOneShotStat(parPacketBuffer.readStringFromBuffer(32767));
 			int k = parPacketBuffer.readVarIntFromBuffer();
 			if (statbase != null) {
-				this.field_148976_a.put(statbase, Integer.valueOf(k));
+				this.field_148976_a.put(statbase, k);
 			}
 		}
 
@@ -72,14 +72,14 @@ public class S37PacketStatistics implements Packet<INetHandlerPlayClient> {
 	public void writePacketData(PacketBuffer parPacketBuffer) throws IOException {
 		parPacketBuffer.writeVarIntToBuffer(this.field_148976_a.size());
 
-		for (Entry entry : this.field_148976_a.entrySet()) {
-			parPacketBuffer.writeString(((StatBase) entry.getKey()).statId);
-			parPacketBuffer.writeVarIntToBuffer(((Integer) entry.getValue()).intValue());
+		for (ObjectIntCursor<StatBase> entry : this.field_148976_a) {
+			parPacketBuffer.writeString(entry.key.statId);
+			parPacketBuffer.writeVarIntToBuffer(entry.value);
 		}
 
 	}
 
-	public Map<StatBase, Integer> func_148974_c() {
+	public ObjectIntMap<StatBase> func_148974_c() {
 		return this.field_148976_a;
 	}
 }

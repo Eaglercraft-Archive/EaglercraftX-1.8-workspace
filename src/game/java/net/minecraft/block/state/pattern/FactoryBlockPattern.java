@@ -2,16 +2,16 @@ package net.minecraft.block.state.pattern;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.carrotsearch.hppc.CharObjectHashMap;
+import com.carrotsearch.hppc.CharObjectMap;
+import com.carrotsearch.hppc.cursors.CharObjectCursor;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.minecraft.block.state.BlockWorldState;
 
@@ -21,7 +21,7 @@ import net.minecraft.block.state.BlockWorldState;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,12 +38,12 @@ import net.minecraft.block.state.BlockWorldState;
 public class FactoryBlockPattern {
 	private static final Joiner COMMA_JOIN = Joiner.on(",");
 	private final List<String[]> depth = Lists.newArrayList();
-	private final Map<Character, Predicate<BlockWorldState>> symbolMap = Maps.newHashMap();
+	private final CharObjectMap<Predicate<BlockWorldState>> symbolMap = new CharObjectHashMap<>();
 	private int aisleHeight;
 	private int rowWidth;
 
 	private FactoryBlockPattern() {
-		this.symbolMap.put(Character.valueOf(' '), Predicates.alwaysTrue());
+		this.symbolMap.put(' ', Predicates.alwaysTrue());
 	}
 
 	public FactoryBlockPattern aisle(String... aisle) {
@@ -68,8 +68,8 @@ public class FactoryBlockPattern {
 					char[] achar = s.toCharArray();
 					for (int j = 0; j < achar.length; ++j) {
 						char c0 = achar[j];
-						if (!this.symbolMap.containsKey(Character.valueOf(c0))) {
-							this.symbolMap.put(Character.valueOf(c0), null);
+						if (!this.symbolMap.containsKey(c0)) {
+							this.symbolMap.put(c0, null);
 						}
 					}
 				}
@@ -87,7 +87,7 @@ public class FactoryBlockPattern {
 	}
 
 	public FactoryBlockPattern where(char symbol, Predicate<BlockWorldState> blockMatcher) {
-		this.symbolMap.put(Character.valueOf(symbol), blockMatcher);
+		this.symbolMap.put(symbol, blockMatcher);
 		return this;
 	}
 
@@ -102,8 +102,7 @@ public class FactoryBlockPattern {
 		for (int i = 0; i < this.depth.size(); ++i) {
 			for (int j = 0; j < this.aisleHeight; ++j) {
 				for (int k = 0; k < this.rowWidth; ++k) {
-					apredicate[i][j][k] = (Predicate) this.symbolMap
-							.get(Character.valueOf(((String[]) this.depth.get(i))[j].charAt(k)));
+					apredicate[i][j][k] = this.symbolMap.get(((String[]) this.depth.get(i))[j].charAt(k));
 				}
 			}
 		}
@@ -114,9 +113,9 @@ public class FactoryBlockPattern {
 	private void checkMissingPredicates() {
 		ArrayList arraylist = Lists.newArrayList();
 
-		for (Entry entry : this.symbolMap.entrySet()) {
-			if (entry.getValue() == null) {
-				arraylist.add(entry.getKey());
+		for (CharObjectCursor<Predicate<BlockWorldState>> entry : this.symbolMap) {
+			if (entry.value == null) {
+				arraylist.add(entry.key);
 			}
 		}
 

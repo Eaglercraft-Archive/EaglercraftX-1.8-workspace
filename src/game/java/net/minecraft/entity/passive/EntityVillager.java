@@ -57,7 +57,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.Tuple;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.village.Village;
@@ -70,7 +69,7 @@ import net.minecraft.world.World;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -1109,16 +1108,25 @@ public class EntityVillager extends EntityAgeable implements IMerchant, INpc {
 		}
 	}
 
-	static class PriceInfo extends Tuple<Integer, Integer> {
+	static class PriceInfo {
+		private int a;
+		private int b;
+
 		public PriceInfo(int parInt1, int parInt2) {
-			super(Integer.valueOf(parInt1), Integer.valueOf(parInt2));
+			this.a = parInt1;
+			this.b = parInt2;
+		}
+
+		public int getFirst() {
+			return this.a;
+		}
+
+		public int getSecond() {
+			return this.b;
 		}
 
 		public int getPrice(EaglercraftRandom rand) {
-			return ((Integer) this.getFirst()).intValue() >= ((Integer) this.getSecond()).intValue()
-					? ((Integer) this.getFirst()).intValue()
-					: ((Integer) this.getFirst()).intValue() + rand.nextInt(
-							((Integer) this.getSecond()).intValue() - ((Integer) this.getFirst()).intValue() + 1);
+			return (a >= b) ? a : a + rand.nextInt(b - a + 1);
 		}
 	}
 }

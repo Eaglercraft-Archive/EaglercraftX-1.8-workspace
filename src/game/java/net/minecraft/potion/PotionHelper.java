@@ -3,12 +3,14 @@ package net.minecraft.potion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
+import com.carrotsearch.hppc.IntIntHashMap;
+import com.carrotsearch.hppc.IntIntMap;
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.ObjectContainer;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import net.minecraft.util.IntegerCache;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -16,7 +18,7 @@ import net.minecraft.util.IntegerCache;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -45,9 +47,9 @@ public class PotionHelper {
 	public static final String goldenCarrotEffect = "-0+1+2-3+13&4-4";
 	public static final String pufferfishEffect = "+0-1+2+3+13&4-4";
 	public static final String rabbitFootEffect = "+0+1-2+3&4-4+13";
-	private static final Map<Integer, String> potionRequirements = Maps.newHashMap();
-	private static final Map<Integer, String> potionAmplifiers = Maps.newHashMap();
-	private static final Map<Integer, Integer> DATAVALUE_COLORS = Maps.newHashMap();
+	private static final IntObjectMap<String> potionRequirements = new IntObjectHashMap<>();
+	private static final IntObjectMap<String> potionAmplifiers = new IntObjectHashMap<>();
+	private static final IntIntMap DATAVALUE_COLORS = new IntIntHashMap();
 	/**+
 	 * An array of possible potion prefix names, as translation IDs.
 	 */
@@ -134,6 +136,45 @@ public class PotionHelper {
 	}
 
 	/**+
+	 * Given a {@link Collection}<{@link PotionEffect}> will return
+	 * an Integer color.
+	 */
+	public static int calcPotionLiquidColor(ObjectContainer<PotionEffect> parCollection) {
+		int i = 3694022;
+		if (parCollection != null && !parCollection.isEmpty()) {
+			float f = 0.0F;
+			float f1 = 0.0F;
+			float f2 = 0.0F;
+			float f3 = 0.0F;
+
+			for (ObjectCursor<PotionEffect> potioneffect_ : parCollection) {
+				PotionEffect potioneffect = potioneffect_.value;
+				if (potioneffect.getIsShowParticles()) {
+					int j = Potion.potionTypes[potioneffect.getPotionID()].getLiquidColor();
+
+					for (int k = 0; k <= potioneffect.getAmplifier(); ++k) {
+						f += (float) (j >> 16 & 255) / 255.0F;
+						f1 += (float) (j >> 8 & 255) / 255.0F;
+						f2 += (float) (j >> 0 & 255) / 255.0F;
+						++f3;
+					}
+				}
+			}
+
+			if (f3 == 0.0F) {
+				return 0;
+			} else {
+				f = f / f3 * 255.0F;
+				f1 = f1 / f3 * 255.0F;
+				f2 = f2 / f3 * 255.0F;
+				return (int) f << 16 | (int) f1 << 8 | (int) f2;
+			}
+		} else {
+			return i;
+		}
+	}
+
+	/**+
 	 * Check whether a {@link Collection}<{@link PotionEffect}> are
 	 * all ambient.
 	 */
@@ -148,17 +189,31 @@ public class PotionHelper {
 	}
 
 	/**+
+	 * Check whether a {@link Collection}<{@link PotionEffect}> are
+	 * all ambient.
+	 */
+	public static boolean getAreAmbient(ObjectContainer<PotionEffect> potionEffects) {
+		for (ObjectCursor<PotionEffect> potioneffect : potionEffects) {
+			if (!potioneffect.value.getIsAmbient()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**+
 	 * Given a potion data value, get the associated liquid color
 	 * (optionally bypassing the cache)
 	 */
 	public static int getLiquidColor(int dataValue, boolean bypassCache) {
-		Integer integer = IntegerCache.func_181756_a(dataValue);
 		if (!bypassCache) {
-			if (DATAVALUE_COLORS.containsKey(integer)) {
-				return ((Integer) DATAVALUE_COLORS.get(integer)).intValue();
+			int i = DATAVALUE_COLORS.getOrDefault(dataValue, -1);
+			if (i != -1) {
+				return i;
 			} else {
-				int i = calcPotionLiquidColor(getPotionEffects(integer.intValue(), false));
-				DATAVALUE_COLORS.put(integer, Integer.valueOf(i));
+				i = calcPotionLiquidColor(getPotionEffects(dataValue, false));
+				DATAVALUE_COLORS.put(dataValue, i);
 				return i;
 			}
 		} else {
@@ -166,7 +221,7 @@ public class PotionHelper {
 			 * Given a {@link Collection}<{@link PotionEffect}> will return
 			 * an Integer color.
 			 */
-			return calcPotionLiquidColor(getPotionEffects(integer.intValue(), true));
+			return calcPotionLiquidColor(getPotionEffects(dataValue, true));
 		}
 	}
 
@@ -349,12 +404,12 @@ public class PotionHelper {
 		for (int k = 0; k < Potion.potionTypes.length; ++k) {
 			Potion potion = Potion.potionTypes[k];
 			if (potion != null && (!potion.isUsable() || parFlag)) {
-				String s = (String) potionRequirements.get(Integer.valueOf(potion.getId()));
+				String s = potionRequirements.get(potion.getId());
 				if (s != null) {
 					int i = parsePotionEffects(s, 0, s.length(), parInt1);
 					if (i > 0) {
 						int j = 0;
-						String s1 = (String) potionAmplifiers.get(Integer.valueOf(potion.getId()));
+						String s1 = potionAmplifiers.get(potion.getId());
 						if (s1 != null) {
 							j = parsePotionEffects(s1, 0, s1.length(), parInt1);
 							if (j < 0) {

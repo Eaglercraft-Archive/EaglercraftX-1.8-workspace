@@ -45,7 +45,7 @@ import net.minecraft.world.World;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -511,7 +511,10 @@ public class EntityEnderman extends EntityMob {
 			int j = MathHelper.floor_double(this.enderman.posY + random.nextDouble() * 2.0D);
 			int k = MathHelper.floor_double(this.enderman.posZ - 1.0D + random.nextDouble() * 2.0D);
 			BlockPos blockpos = new BlockPos(i, j, k);
-			Block block = world.getBlockState(blockpos).getBlock();
+			IBlockState iblockstate = world.getBlockState(blockpos);
+			if (iblockstate == null)
+				return;
+			Block block = iblockstate.getBlock();
 			Block block1 = world.getBlockState(blockpos.down()).getBlock();
 			if (this.func_179474_a(world, blockpos, this.enderman.getHeldBlockState().getBlock(), block, block1)) {
 				world.setBlockState(blockpos, this.enderman.getHeldBlockState(), 3);
@@ -548,7 +551,9 @@ public class EntityEnderman extends EntityMob {
 			int j = MathHelper.floor_double(this.enderman.posY + random.nextDouble() * 3.0D);
 			int k = MathHelper.floor_double(this.enderman.posZ - 2.0D + random.nextDouble() * 4.0D);
 			BlockPos blockpos = new BlockPos(i, j, k);
-			IBlockState iblockstate = world.getBlockState(blockpos);
+			IBlockState iblockstate = world.getBlockStateIfLoaded(blockpos);
+			if (iblockstate == null)
+				return;
 			Block block = iblockstate.getBlock();
 			if (EntityEnderman.carriableBlocks.contains(block)) {
 				this.enderman.setHeldBlockState(iblockstate);

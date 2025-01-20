@@ -5,7 +5,6 @@ import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -14,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.TimeZone;
 
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
@@ -50,7 +50,7 @@ import net.minecraft.world.chunk.Chunk;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -169,28 +169,25 @@ public class GuiOverlayDebug extends Gui {
 		this.fontRenderer.drawStringWithShadow(line, x - lw, y - i, 0xFFFFFF);
 		i += 11;
 
-		Iterator<PotionEffect> potions = mc.thePlayer.getActivePotionEffects().iterator();
-		if (potions.hasNext()) {
-			while (potions.hasNext()) {
-				i += 11;
-				PotionEffect e = potions.next();
-				int t = e.getDuration() / 20;
-				int m = t / 60;
-				int s = t % 60;
-				int j = e.getAmplifier();
-				if (j > 0) {
-					line = I18n.format(e.getEffectName())
-							+ (j > 0 ? (" " + EnumChatFormatting.YELLOW + EnumChatFormatting.BOLD
-									+ I18n.format("potion.potency." + j) + EnumChatFormatting.RESET) : "")
-							+ " [" + EnumChatFormatting.YELLOW + HString.format("%02d:%02d", m, s)
-							+ EnumChatFormatting.RESET + "]";
-				} else {
-					line = I18n.format(e.getEffectName()) + " [" + EnumChatFormatting.YELLOW
-							+ HString.format("%02d:%02d", m, s) + EnumChatFormatting.RESET + "]";
-				}
-				lw = fontRenderer.getStringWidth(line);
-				this.fontRenderer.drawStringWithShadow(line, x - lw, y - i, 0xFFFFFF);
+		for (ObjectCursor<PotionEffect> ee : mc.thePlayer.getActivePotionEffects()) {
+			i += 11;
+			PotionEffect e = ee.value;
+			int t = e.getDuration() / 20;
+			int m = t / 60;
+			int s = t % 60;
+			int j = e.getAmplifier();
+			if (j > 0) {
+				line = I18n.format(e.getEffectName())
+						+ (j > 0 ? (" " + EnumChatFormatting.YELLOW + EnumChatFormatting.BOLD
+								+ I18n.format("potion.potency." + j) + EnumChatFormatting.RESET) : "")
+						+ " [" + EnumChatFormatting.YELLOW + HString.format("%02d:%02d", m, s)
+						+ EnumChatFormatting.RESET + "]";
+			} else {
+				line = I18n.format(e.getEffectName()) + " [" + EnumChatFormatting.YELLOW
+						+ HString.format("%02d:%02d", m, s) + EnumChatFormatting.RESET + "]";
 			}
+			lw = fontRenderer.getStringWidth(line);
+			this.fontRenderer.drawStringWithShadow(line, x - lw, y - i, 0xFFFFFF);
 		}
 
 	}
@@ -435,7 +432,7 @@ public class GuiOverlayDebug extends Gui {
 			long j = EagRuntime.totalMemory();
 			long k = EagRuntime.freeMemory();
 			long l = j - k;
-			arraylist = Lists.newArrayList(new String[] {
+			arraylist = Lists.newArrayList(new String[] { "Platform: Desktop",
 					HString.format("Java: %s %dbit",
 							new Object[] { System.getProperty("java.version"),
 									Integer.valueOf(this.mc.isJava64bit() ? 64 : 32) }),
@@ -450,12 +447,12 @@ public class GuiOverlayDebug extends Gui {
 									EaglercraftGPU.glGetString(7936) }),
 					EaglercraftGPU.glGetString(7937), EaglercraftGPU.glGetString(7938) });
 		} else {
-			arraylist = Lists.newArrayList(
-					new String[] { "Java: TeaVM", "", HString.format("CPU: %s", new Object[] { "eaglercraft" }), "",
-							HString.format("Display: %dx%d (%s)",
-									new Object[] { Integer.valueOf(Display.getWidth()),
-											Integer.valueOf(Display.getHeight()), EaglercraftGPU.glGetString(7936) }),
-							EaglercraftGPU.glGetString(7937), EaglercraftGPU.glGetString(7938) });
+			arraylist = Lists.newArrayList(new String[] { "Platform: " + EagRuntime.getPlatformType().getName(),
+					"Java: TeaVM", "", HString.format("CPU: %s", new Object[] { "eaglercraft" }), "",
+					HString.format("Display: %dx%d (%s)",
+							new Object[] { Integer.valueOf(Display.getWidth()), Integer.valueOf(Display.getHeight()),
+									EaglercraftGPU.glGetString(7936) }),
+					EaglercraftGPU.glGetString(7937), EaglercraftGPU.glGetString(7938) });
 		}
 		if (this.isReducedDebug()) {
 			return arraylist;

@@ -1,9 +1,7 @@
 package net.minecraft.client.player.inventory;
 
-import java.util.Map;
-
-import com.google.common.collect.Maps;
-
+import com.carrotsearch.hppc.IntIntHashMap;
+import com.carrotsearch.hppc.IntIntMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -18,7 +16,7 @@ import net.minecraft.world.LockCode;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -34,7 +32,7 @@ import net.minecraft.world.LockCode;
  */
 public class ContainerLocalMenu extends InventoryBasic implements ILockableContainer {
 	private String guiID;
-	private Map<Integer, Integer> field_174895_b = Maps.newHashMap();
+	private IntIntMap field_174895_b = new IntIntHashMap();
 
 	public ContainerLocalMenu(String id, IChatComponent title, int slotCount) {
 		super(title, slotCount);
@@ -42,13 +40,11 @@ public class ContainerLocalMenu extends InventoryBasic implements ILockableConta
 	}
 
 	public int getField(int i) {
-		return this.field_174895_b.containsKey(Integer.valueOf(i))
-				? ((Integer) this.field_174895_b.get(Integer.valueOf(i))).intValue()
-				: 0;
+		return this.field_174895_b.getOrDefault(i, 0);
 	}
 
 	public void setField(int i, int j) {
-		this.field_174895_b.put(Integer.valueOf(i), Integer.valueOf(j));
+		this.field_174895_b.put(i, j);
 	}
 
 	public int getFieldCount() {

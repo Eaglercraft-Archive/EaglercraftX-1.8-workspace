@@ -3,11 +3,12 @@ package net.minecraft.client.settings;
 import java.util.List;
 import java.util.Set;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.IntHashMap;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -15,7 +16,7 @@ import net.minecraft.util.IntHashMap;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -31,7 +32,7 @@ import net.minecraft.util.IntHashMap;
  */
 public class KeyBinding implements Comparable<KeyBinding> {
 	private static final List<KeyBinding> keybindArray = Lists.newArrayList();
-	private static final IntHashMap<KeyBinding> hash = new IntHashMap();
+	private static final IntObjectMap<KeyBinding> hash = new IntObjectHashMap<>();
 	private static final Set<String> keybindSet = Sets.newHashSet();
 	private final String keyDescription;
 	private final int keyCodeDefault;
@@ -42,7 +43,7 @@ public class KeyBinding implements Comparable<KeyBinding> {
 
 	public static void onTick(int keyCode) {
 		if (keyCode != 0) {
-			KeyBinding keybinding = (KeyBinding) hash.lookup(keyCode);
+			KeyBinding keybinding = hash.get(keyCode);
 			if (keybinding != null) {
 				++keybinding.pressTime;
 			}
@@ -52,7 +53,7 @@ public class KeyBinding implements Comparable<KeyBinding> {
 
 	public static void setKeyBindState(int keyCode, boolean pressed) {
 		if (keyCode != 0) {
-			KeyBinding keybinding = (KeyBinding) hash.lookup(keyCode);
+			KeyBinding keybinding = hash.get(keyCode);
 			if (keybinding != null) {
 				keybinding.pressed = pressed;
 			}
@@ -68,11 +69,11 @@ public class KeyBinding implements Comparable<KeyBinding> {
 	}
 
 	public static void resetKeyBindingArrayAndHash() {
-		hash.clearMap();
+		hash.clear();
 
 		for (int i = 0, l = keybindArray.size(); i < l; ++i) {
 			KeyBinding keybinding = keybindArray.get(i);
-			hash.addKey(keybinding.keyCode, keybinding);
+			hash.put(keybinding.keyCode, keybinding);
 		}
 
 	}
@@ -87,7 +88,7 @@ public class KeyBinding implements Comparable<KeyBinding> {
 		this.keyCodeDefault = keyCode;
 		this.keyCategory = category;
 		keybindArray.add(this);
-		hash.addKey(keyCode, this);
+		hash.put(keyCode, this);
 		keybindSet.add(category);
 	}
 

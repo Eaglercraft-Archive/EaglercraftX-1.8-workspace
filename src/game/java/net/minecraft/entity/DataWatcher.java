@@ -3,12 +3,15 @@ package net.minecraft.entity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.ObjectIntHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -24,7 +27,7 @@ import net.minecraft.util.Rotations;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -45,8 +48,8 @@ public class DataWatcher {
 	 * objects
 	 */
 	private boolean isBlank = true;
-	private static final Map<Class<?>, Integer> dataTypes = Maps.newHashMap();
-	private final Map<Integer, DataWatcher.WatchableObject> watchedObjects = Maps.newHashMap();
+	private static final ObjectIntMap<Class<?>> dataTypes = new ObjectIntHashMap<>();
+	private final IntObjectMap<DataWatcher.WatchableObject> watchedObjects = new IntObjectHashMap<>();
 	private boolean objectChanged;
 
 	public DataWatcher(Entity owner) {
@@ -54,17 +57,17 @@ public class DataWatcher {
 	}
 
 	public <T> void addObject(int id, T object) {
-		Integer integer = (Integer) dataTypes.get(object.getClass());
-		if (integer == null) {
+		int integer = dataTypes.getOrDefault(object.getClass(), -1);
+		if (integer == -1) {
 			throw new IllegalArgumentException("Unknown data type: " + object.getClass());
 		} else if (id > 31) {
 			throw new IllegalArgumentException("Data value id is too big with " + id + "! (Max is " + 31 + ")");
-		} else if (this.watchedObjects.containsKey(Integer.valueOf(id))) {
+		} else if (this.watchedObjects.containsKey(id)) {
 			throw new IllegalArgumentException("Duplicate id value for " + id + "!");
 		} else {
-			DataWatcher.WatchableObject datawatcher$watchableobject = new DataWatcher.WatchableObject(
-					integer.intValue(), id, object);
-			this.watchedObjects.put(Integer.valueOf(id), datawatcher$watchableobject);
+			DataWatcher.WatchableObject datawatcher$watchableobject = new DataWatcher.WatchableObject(integer, id,
+					object);
+			this.watchedObjects.put(id, datawatcher$watchableobject);
 			this.isBlank = false;
 		}
 	}
@@ -76,7 +79,7 @@ public class DataWatcher {
 	public void addObjectByDataType(int id, int type) {
 		DataWatcher.WatchableObject datawatcher$watchableobject = new DataWatcher.WatchableObject(type, id,
 				(Object) null);
-		this.watchedObjects.put(Integer.valueOf(id), datawatcher$watchableobject);
+		this.watchedObjects.put(id, datawatcher$watchableobject);
 		this.isBlank = false;
 	}
 
@@ -122,7 +125,7 @@ public class DataWatcher {
 	private DataWatcher.WatchableObject getWatchedObject(int id) {
 		DataWatcher.WatchableObject datawatcher$watchableobject;
 		try {
-			datawatcher$watchableobject = (DataWatcher.WatchableObject) this.watchedObjects.get(Integer.valueOf(id));
+			datawatcher$watchableobject = (DataWatcher.WatchableObject) this.watchedObjects.get(id);
 		} catch (Throwable throwable) {
 			CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting synched entity data");
 			CrashReportCategory crashreportcategory = crashreport.makeCategory("Synched entity data");
@@ -178,7 +181,9 @@ public class DataWatcher {
 	public List<DataWatcher.WatchableObject> getChanged() {
 		ArrayList arraylist = null;
 		if (this.objectChanged) {
-			for (DataWatcher.WatchableObject datawatcher$watchableobject : this.watchedObjects.values()) {
+			for (ObjectCursor<DataWatcher.WatchableObject> datawatcher$watchableobject_ : this.watchedObjects
+					.values()) {
+				DataWatcher.WatchableObject datawatcher$watchableobject = datawatcher$watchableobject_.value;
 				if (datawatcher$watchableobject.isWatched()) {
 					datawatcher$watchableobject.setWatched(false);
 					if (arraylist == null) {
@@ -195,8 +200,8 @@ public class DataWatcher {
 	}
 
 	public void writeTo(PacketBuffer buffer) throws IOException {
-		for (DataWatcher.WatchableObject datawatcher$watchableobject : this.watchedObjects.values()) {
-			writeWatchableObjectToPacketBuffer(buffer, datawatcher$watchableobject);
+		for (ObjectCursor<DataWatcher.WatchableObject> datawatcher$watchableobject : this.watchedObjects.values()) {
+			writeWatchableObjectToPacketBuffer(buffer, datawatcher$watchableobject.value);
 		}
 		buffer.writeByte(127);
 	}
@@ -204,12 +209,12 @@ public class DataWatcher {
 	public List<DataWatcher.WatchableObject> getAllWatched() {
 		ArrayList arraylist = null;
 
-		for (DataWatcher.WatchableObject datawatcher$watchableobject : this.watchedObjects.values()) {
+		for (ObjectCursor<DataWatcher.WatchableObject> datawatcher$watchableobject : this.watchedObjects.values()) {
 			if (arraylist == null) {
 				arraylist = Lists.newArrayList();
 			}
 
-			arraylist.add(datawatcher$watchableobject);
+			arraylist.add(datawatcher$watchableobject.value);
 		}
 
 		return arraylist;
@@ -319,7 +324,7 @@ public class DataWatcher {
 		for (int i = 0, l = parList.size(); i < l; ++i) {
 			DataWatcher.WatchableObject datawatcher$watchableobject = parList.get(i);
 			DataWatcher.WatchableObject datawatcher$watchableobject1 = (DataWatcher.WatchableObject) this.watchedObjects
-					.get(Integer.valueOf(datawatcher$watchableobject.getDataValueId()));
+					.get(datawatcher$watchableobject.getDataValueId());
 			if (datawatcher$watchableobject1 != null) {
 				datawatcher$watchableobject1.setObject(datawatcher$watchableobject.getObject());
 				this.owner.onDataWatcherUpdate(datawatcher$watchableobject.getDataValueId());
@@ -338,14 +343,14 @@ public class DataWatcher {
 	}
 
 	static {
-		dataTypes.put(Byte.class, Integer.valueOf(0));
-		dataTypes.put(Short.class, Integer.valueOf(1));
-		dataTypes.put(Integer.class, Integer.valueOf(2));
-		dataTypes.put(Float.class, Integer.valueOf(3));
-		dataTypes.put(String.class, Integer.valueOf(4));
-		dataTypes.put(ItemStack.class, Integer.valueOf(5));
-		dataTypes.put(BlockPos.class, Integer.valueOf(6));
-		dataTypes.put(Rotations.class, Integer.valueOf(7));
+		dataTypes.put(Byte.class, 0);
+		dataTypes.put(Short.class, 1);
+		dataTypes.put(Integer.class, 2);
+		dataTypes.put(Float.class, 3);
+		dataTypes.put(String.class, 4);
+		dataTypes.put(ItemStack.class, 5);
+		dataTypes.put(BlockPos.class, 6);
+		dataTypes.put(Rotations.class, 7);
 	}
 
 	public static class WatchableObject {

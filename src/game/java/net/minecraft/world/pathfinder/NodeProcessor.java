@@ -1,8 +1,10 @@
 package net.minecraft.world.pathfinder;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.pathfinding.PathPoint;
-import net.minecraft.util.IntHashMap;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 
@@ -12,7 +14,7 @@ import net.minecraft.world.IBlockAccess;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,14 +30,14 @@ import net.minecraft.world.IBlockAccess;
  */
 public abstract class NodeProcessor {
 	protected IBlockAccess blockaccess;
-	protected IntHashMap<PathPoint> pointMap = new IntHashMap();
+	protected IntObjectMap<PathPoint> pointMap = new IntObjectHashMap<>();
 	protected int entitySizeX;
 	protected int entitySizeY;
 	protected int entitySizeZ;
 
 	public void initProcessor(IBlockAccess iblockaccessIn, Entity entityIn) {
 		this.blockaccess = iblockaccessIn;
-		this.pointMap.clearMap();
+		this.pointMap.clear();
 		this.entitySizeX = MathHelper.floor_float(entityIn.width + 1.0F);
 		this.entitySizeY = MathHelper.floor_float(entityIn.height + 1.0F);
 		this.entitySizeZ = MathHelper.floor_float(entityIn.width + 1.0F);
@@ -57,10 +59,10 @@ public abstract class NodeProcessor {
 	 */
 	protected PathPoint openPoint(int x, int y, int z) {
 		int i = PathPoint.makeHash(x, y, z);
-		PathPoint pathpoint = (PathPoint) this.pointMap.lookup(i);
+		PathPoint pathpoint = this.pointMap.get(i);
 		if (pathpoint == null) {
 			pathpoint = new PathPoint(x, y, z);
-			this.pointMap.addKey(i, pathpoint);
+			this.pointMap.put(i, pathpoint);
 		}
 
 		return pathpoint;

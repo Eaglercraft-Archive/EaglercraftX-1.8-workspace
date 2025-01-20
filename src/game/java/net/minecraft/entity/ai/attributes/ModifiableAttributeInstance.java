@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -17,7 +19,7 @@ import com.google.common.collect.Sets;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -34,7 +36,7 @@ import com.google.common.collect.Sets;
 public class ModifiableAttributeInstance implements IAttributeInstance {
 	private final BaseAttributeMap attributeMap;
 	private final IAttribute genericAttribute;
-	private final Map<Integer, Set<AttributeModifier>> mapByOperation = Maps.newHashMap();
+	private final IntObjectMap<Set<AttributeModifier>> mapByOperation = new IntObjectHashMap<>();
 	private final Map<String, Set<AttributeModifier>> mapByName = Maps.newHashMap();
 	private final Map<EaglercraftUUID, AttributeModifier> mapByUUID = Maps.newHashMap();
 	private double baseValue;
@@ -47,7 +49,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
 		this.baseValue = genericAttributeIn.getDefaultValue();
 
 		for (int i = 0; i < 3; ++i) {
-			this.mapByOperation.put(Integer.valueOf(i), Sets.newHashSet());
+			this.mapByOperation.put(i, Sets.newHashSet());
 		}
 
 	}
@@ -71,7 +73,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
 	}
 
 	public Collection<AttributeModifier> getModifiersByOperation(int i) {
-		return (Collection) this.mapByOperation.get(Integer.valueOf(i));
+		return this.mapByOperation.get(i);
 	}
 
 	public Collection<AttributeModifier> func_111122_c() {
@@ -105,7 +107,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
 				this.mapByName.put(attributemodifier.getName(), object);
 			}
 
-			((Set) this.mapByOperation.get(Integer.valueOf(attributemodifier.getOperation()))).add(attributemodifier);
+			((Set) this.mapByOperation.get(attributemodifier.getOperation())).add(attributemodifier);
 			((Set) object).add(attributemodifier);
 			this.mapByUUID.put(attributemodifier.getID(), attributemodifier);
 			this.flagForUpdate();
@@ -119,7 +121,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
 
 	public void removeModifier(AttributeModifier attributemodifier) {
 		for (int i = 0; i < 3; ++i) {
-			Set set = (Set) this.mapByOperation.get(Integer.valueOf(i));
+			Set set = (Set) this.mapByOperation.get(i);
 			set.remove(attributemodifier);
 		}
 

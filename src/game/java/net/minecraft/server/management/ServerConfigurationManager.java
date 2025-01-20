@@ -1,5 +1,6 @@
 package net.minecraft.server.management;
 
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -77,7 +78,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -175,8 +176,8 @@ public abstract class ServerConfigurationManager {
 			playerIn.loadResourcePack(this.mcServer.getResourcePackUrl(), this.mcServer.getResourcePackHash());
 		}
 
-		for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
-			nethandlerplayserver.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect));
+		for (ObjectCursor<PotionEffect> potioneffect : playerIn.getActivePotionEffects()) {
+			nethandlerplayserver.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect.value));
 		}
 
 		playerIn.addSelfToInternalCraftingInventory();
@@ -513,8 +514,9 @@ public abstract class ServerConfigurationManager {
 		this.updateTimeAndWeatherForPlayer(playerIn, worldserver1);
 		this.syncPlayerInventory(playerIn);
 
-		for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
-			playerIn.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect));
+		for (ObjectCursor<PotionEffect> potioneffect : playerIn.getActivePotionEffects()) {
+			playerIn.playerNetServerHandler
+					.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect.value));
 		}
 
 	}
@@ -890,12 +892,14 @@ public abstract class ServerConfigurationManager {
 
 	public void setViewDistance(int distance) {
 		this.viewDistance = distance;
+		int entityViewDist = getEntityViewDistance();
 		if (this.mcServer.worldServers != null) {
 			WorldServer[] srv = this.mcServer.worldServers;
 			for (int i = 0; i < srv.length; ++i) {
 				WorldServer worldserver = srv[i];
 				if (worldserver != null) {
 					worldserver.getPlayerManager().setPlayerViewRadius(distance);
+					worldserver.getEntityTracker().updateMaxTrackingThreshold(entityViewDist);
 				}
 			}
 		}

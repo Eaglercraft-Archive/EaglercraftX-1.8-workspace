@@ -1,12 +1,10 @@
 package net.minecraft.client.resources.data;
 
-import java.util.ArrayList;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.common.collect.Lists;
+import com.carrotsearch.hppc.IntArrayList;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -14,7 +12,7 @@ import com.google.common.collect.Lists;
  * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
  * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
  * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * EaglercraftX 1.8 patch files (c) 2022-2025 lax1dude, ayunami2000. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -32,7 +30,7 @@ public class TextureMetadataSectionSerializer extends BaseMetadataSectionSeriali
 	public TextureMetadataSection deserialize(JSONObject jsonobject) throws JSONException {
 		boolean flag = jsonobject.optBoolean("blur", false);
 		boolean flag1 = jsonobject.optBoolean("clamp", false);
-		ArrayList arraylist = Lists.newArrayList();
+		IntArrayList arraylist = new IntArrayList();
 		if (jsonobject.has("mipmaps")) {
 			try {
 				JSONArray jsonarray = jsonobject.getJSONArray("mipmaps");
