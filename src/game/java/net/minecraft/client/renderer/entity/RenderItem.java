@@ -66,6 +66,8 @@ import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3i;
+import net.optifine.Config;
+import net.optifine.CustomItems;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -94,6 +96,7 @@ public class RenderItem implements IResourceManagerReloadListener {
 	public float zLevel;
 	private final ItemModelMesher itemModelMesher;
 	private final TextureManager textureManager;
+	private ModelResourceLocation modelLocation = null;
 
 	public RenderItem(TextureManager textureManager, ModelManager modelManager) {
 		this.textureManager = textureManager;
@@ -129,7 +132,7 @@ public class RenderItem implements IResourceManagerReloadListener {
 		this.renderModel(model, -1, stack);
 	}
 
-	private void renderModel(IBakedModel model, int color) {
+	public void renderModel(IBakedModel model, int color) {
 		this.renderModel(model, color, (ItemStack) null);
 	}
 
@@ -152,11 +155,11 @@ public class RenderItem implements IResourceManagerReloadListener {
 	public static float renderPosY = 0.0f;
 	public static float renderPosZ = 0.0f;
 
-	public void renderItem(ItemStack stack, IBakedModel model) {
+	public void renderItem(ItemStack stack, IBakedModel model_) {
 		if (stack != null) {
 			GlStateManager.pushMatrix();
 			GlStateManager.scale(0.5F, 0.5F, 0.5F);
-			if (model.isBuiltInRenderer()) {
+			if (model_.isBuiltInRenderer()) {
 				GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
 				GlStateManager.translate(-0.5F, -0.5F, -0.5F);
 				GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -164,6 +167,11 @@ public class RenderItem implements IResourceManagerReloadListener {
 				TileEntityItemStackRenderer.instance.renderByItem(stack);
 			} else {
 				GlStateManager.translate(-0.5F, -0.5F, -0.5F);
+				if (Config.isCustomItems()) {
+					model_ = CustomItems.getCustomItemModel(stack, model_, this.modelLocation, false);
+				}
+				final IBakedModel model = model_;
+
 				if (DeferredStateManager.isInDeferredPass() && isTransparentItem(stack)) {
 					if (DeferredStateManager.forwardCallbackHandler != null) {
 						final Matrix4f mat = new Matrix4f(GlStateManager.getModelViewReference());
@@ -188,7 +196,7 @@ public class RenderItem implements IResourceManagerReloadListener {
 									DeferredStateManager.setRoughnessConstant(0.05f);
 									DeferredStateManager.setMetalnessConstant(0.01f);
 									GlStateManager.blendFunc(GL_SRC_COLOR, GL_ONE);
-									renderEffect(model);
+									renderEffect(model, stack);
 									DeferredStateManager.setHDRTranslucentPassBlendFunc();
 								}
 								GlStateManager.popMatrix();
@@ -221,7 +229,7 @@ public class RenderItem implements IResourceManagerReloadListener {
 										GlStateManager.loadMatrix(mat);
 										GlStateManager.texCoords2DDirect(1, lx, ly);
 										GlStateManager.tryBlendFuncSeparate(GL_ONE, GL_ONE, GL_ZERO, GL_ONE);
-										renderEffect(model);
+										renderEffect(model, stack);
 										DeferredStateManager.setHDRTranslucentPassBlendFunc();
 										GlStateManager.popMatrix();
 										EntityRenderer.disableLightmapStatic();
@@ -231,7 +239,7 @@ public class RenderItem implements IResourceManagerReloadListener {
 							}
 						} else {
 							GlStateManager.blendFunc(GL_SRC_COLOR, GL_ONE);
-							this.renderEffect(model);
+							this.renderEffect(model, stack);
 						}
 					}
 				}
@@ -247,7 +255,9 @@ public class RenderItem implements IResourceManagerReloadListener {
 				&& ((ItemBlock) itm).getBlock().getBlockLayer() == EnumWorldBlockLayer.TRANSLUCENT;
 	}
 
-	private void renderEffect(IBakedModel model) {
+	private void renderEffect(IBakedModel model, ItemStack stack) {
+		if (Config.isCustomItems() && (CustomItems.renderCustomEffect(this, stack, model) || !CustomItems.isUseGlint()))
+			return;
 		GlStateManager.depthMask(false);
 		GlStateManager.depthFunc(GL_EQUAL);
 		GlStateManager.disableLighting();
@@ -355,10 +365,12 @@ public class RenderItem implements IResourceManagerReloadListener {
 
 				if (modelresourcelocation != null) {
 					ibakedmodel = this.itemModelMesher.getModelManager().getModel(modelresourcelocation);
+					this.modelLocation = modelresourcelocation;
 				}
 			}
 
 			this.renderItemModelTransform(stack, ibakedmodel, cameraTransformType);
+			this.modelLocation = null;
 		}
 	}
 

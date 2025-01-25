@@ -177,17 +177,7 @@ public class ModelRenderer {
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(this.rotationPointX * parFloat1, this.rotationPointY * parFloat1,
 							this.rotationPointZ * parFloat1);
-					if (this.rotateAngleZ != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleZ * 57.295776F, 0.0F, 0.0F, 1.0F);
-					}
-
-					if (this.rotateAngleY != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleY * 57.295776F, 0.0F, 1.0F, 0.0F);
-					}
-
-					if (this.rotateAngleX != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleX * 57.295776F, 1.0F, 0.0F, 0.0F);
-					}
+					GlStateManager.rotateZYXRad(this.rotateAngleX, this.rotateAngleY, this.rotateAngleZ);
 
 					GlStateManager.callList(this.displayList);
 					if (this.childModels != null) {
@@ -214,17 +204,9 @@ public class ModelRenderer {
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(this.rotationPointX * parFloat1, this.rotationPointY * parFloat1,
 						this.rotationPointZ * parFloat1);
-				if (this.rotateAngleY != 0.0F) {
-					GlStateManager.rotate(this.rotateAngleY * 57.295776F, 0.0F, 1.0F, 0.0F);
-				}
 
-				if (this.rotateAngleX != 0.0F) {
-					GlStateManager.rotate(this.rotateAngleX * 57.295776F, 1.0F, 0.0F, 0.0F);
-				}
-
-				if (this.rotateAngleZ != 0.0F) {
-					GlStateManager.rotate(this.rotateAngleZ * 57.295776F, 0.0F, 0.0F, 1.0F);
-				}
+				// note: vanilla order for this function is YXZ not ZYX for some reason
+				GlStateManager.rotateZYXRad(this.rotateAngleX, this.rotateAngleY, this.rotateAngleZ);
 
 				GlStateManager.callList(this.displayList);
 				GlStateManager.popMatrix();
@@ -250,17 +232,7 @@ public class ModelRenderer {
 				} else {
 					GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale,
 							this.rotationPointZ * scale);
-					if (this.rotateAngleZ != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleZ * 57.295776F, 0.0F, 0.0F, 1.0F);
-					}
-
-					if (this.rotateAngleY != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleY * 57.295776F, 0.0F, 1.0F, 0.0F);
-					}
-
-					if (this.rotateAngleX != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleX * 57.295776F, 1.0F, 0.0F, 0.0F);
-					}
+					GlStateManager.rotateZYXRad(this.rotateAngleX, this.rotateAngleY, this.rotateAngleZ);
 				}
 
 			}

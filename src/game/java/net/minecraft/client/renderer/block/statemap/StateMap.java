@@ -61,7 +61,7 @@ public class StateMap extends StateMapperBase {
 			linkedhashmap.remove(iproperty);
 		}
 
-		return new ModelResourceLocation(s, this.getPropertyString(linkedhashmap));
+		return new ModelResourceLocation(s, getPropertyString(linkedhashmap));
 	}
 
 	public static class Builder {

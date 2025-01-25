@@ -200,6 +200,7 @@ public class WorldServer extends World implements IThreadListener {
 		}
 
 		this.chunkProvider.unloadQueuedChunks();
+		alfheim$getLightingEngine().processLightUpdates();
 		int j = this.calculateSkylightSubtracted(1.0F);
 		if (j != this.getSkylightSubtracted()) {
 			this.setSkylightSubtracted(j);

@@ -1,6 +1,7 @@
 package net.minecraft.block;
 
 import java.util.List;
+
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 
 import net.minecraft.block.material.MapColor;
@@ -30,6 +31,7 @@ import net.minecraft.util.RegistryNamespacedDefaultedByKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -1659,5 +1661,43 @@ public class Block {
 
 	public boolean eaglerShadersShouldRenderGlassHighlights() {
 		return false;
+	}
+
+	public int alfheim$getLightFor(final IBlockState blockState, final IBlockAccess blockAccess,
+			final EnumSkyBlock lightType, final BlockPos blockPos) {
+		int lightLevel = blockAccess.getLightFor(lightType, blockPos);
+
+		if (lightLevel == 15)
+			return lightLevel;
+
+		if (!getUseNeighborBrightness())
+			return lightLevel;
+
+		BlockPos tmp = new BlockPos();
+		EnumFacing[] facings = EnumFacing._VALUES;
+		for (int i = 0, l = facings.length; i < l; ++i) {
+			EnumFacing facing = facings[i];
+			if (alfheim$useNeighborBrightness(blockState, facing, blockAccess, blockPos)) {
+				int opacity = 0;
+				final int neighborLightLevel = blockAccess.getLightFor(lightType,
+						blockPos.offsetEvenFaster(facing, tmp));
+
+				if (opacity == 0
+						&& (lightType != EnumSkyBlock.SKY || neighborLightLevel != EnumSkyBlock.SKY.defaultLightValue))
+					opacity = 1;
+
+				lightLevel = Math.max(lightLevel, neighborLightLevel - opacity);
+
+				if (lightLevel == 15)
+					return lightLevel;
+			}
+		}
+
+		return lightLevel;
+	}
+
+	public boolean alfheim$useNeighborBrightness(final IBlockState blockState, final EnumFacing facing,
+			final IBlockAccess blockAccess, final BlockPos blockPos) {
+		return facing == EnumFacing.UP;
 	}
 }

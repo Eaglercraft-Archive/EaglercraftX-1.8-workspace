@@ -12,6 +12,7 @@ import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
+import net.lax1dude.eaglercraft.v1_8.minecraft.ResourceIndex;
 import net.lax1dude.eaglercraft.v1_8.opengl.ImageData;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.data.IMetadataSection;
@@ -41,6 +42,7 @@ import net.minecraft.util.ResourceLocation;
 public abstract class AbstractResourcePack implements IResourcePack {
 	private static final Logger resourceLog = LogManager.getLogger();
 	protected final String resourcePackFile;
+	protected ResourceIndex resourceIndex;
 
 	public AbstractResourcePack(String resourcePackFileIn) {
 		this.resourcePackFile = resourcePackFileIn;
@@ -83,7 +85,6 @@ public abstract class AbstractResourcePack implements IResourcePack {
 	static <T extends IMetadataSection> T readMetadata(IMetadataSerializer parIMetadataSerializer,
 			InputStream parInputStream, String parString1) {
 		JSONObject jsonobject = null;
-
 		try {
 			jsonobject = new JSONObject(IOUtils.inputStreamToString(parInputStream, StandardCharsets.UTF_8));
 		} catch (RuntimeException | IOException runtimeexception) {
@@ -101,5 +102,9 @@ public abstract class AbstractResourcePack implements IResourcePack {
 
 	public String getPackName() {
 		return this.resourcePackFile;
+	}
+
+	public ResourceIndex getEaglerFileIndex() {
+		return this.resourceIndex;
 	}
 }

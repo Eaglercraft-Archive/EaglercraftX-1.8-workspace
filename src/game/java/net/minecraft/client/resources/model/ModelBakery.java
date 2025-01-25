@@ -27,6 +27,8 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerTextureAtlasSprite;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.BlockVertexIDs;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.VertexMarkerState;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -36,6 +38,8 @@ import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.block.model.ItemModelGenerator;
 import net.minecraft.client.renderer.block.model.ModelBlock;
 import net.minecraft.client.renderer.block.model.ModelBlockDefinition;
+import net.minecraft.client.renderer.block.statemap.IStateMapper;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.client.renderer.texture.IIconCreator;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.IResource;
@@ -47,6 +51,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IRegistry;
 import net.minecraft.util.RegistrySimple;
 import net.minecraft.util.ResourceLocation;
+import net.optifine.CustomItems;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -257,8 +262,9 @@ public class ModelBakery {
 	}
 
 	private ResourceLocation getModelLocation(ResourceLocation parResourceLocation) {
+		String path = parResourceLocation.getResourcePath();
 		return new ResourceLocation(parResourceLocation.getResourceDomain(),
-				"models/" + parResourceLocation.getResourcePath() + ".json");
+				((path.startsWith("mcpatcher/") || path.startsWith("optifine/")) ? "" : "models/") + path + ".json");
 	}
 
 	private void loadItemModels() {
@@ -281,6 +287,22 @@ public class ModelBakery {
 			}
 		}
 
+	}
+
+	public void loadItemModel(String p_loadItemModel_1_, ResourceLocation p_loadItemModel_2_,
+			ResourceLocation p_loadItemModel_3_) {
+		this.itemLocations.put(p_loadItemModel_1_, p_loadItemModel_2_);
+
+		if (this.models.get(p_loadItemModel_2_) == null) {
+			try {
+				ModelBlock modelblock = this.loadModel(p_loadItemModel_2_);
+				this.models.put(p_loadItemModel_2_, modelblock);
+			} catch (Exception exception) {
+				LOGGER.warn("Unable to load item model: \'{}\' for item: \'{}\'",
+						new Object[] { p_loadItemModel_2_, p_loadItemModel_3_ });
+				LOGGER.warn(exception.getClass().getName() + ": " + exception.getMessage());
+			}
+		}
 	}
 
 	private void registerVariantNames() {
@@ -390,6 +412,8 @@ public class ModelBakery {
 		this.variantNames.put(Item.getItemFromBlock(Blocks.oak_fence),
 				Lists.newArrayList(new String[] { "oak_fence" }));
 		this.variantNames.put(Items.oak_door, Lists.newArrayList(new String[] { "oak_door" }));
+		CustomItems.update();
+		CustomItems.loadModels(this);
 	}
 
 	private List<String> getVariantNames(Item parItem) {
@@ -721,6 +745,37 @@ public class ModelBakery {
 
 	private ModelBlock makeItemModel(ModelBlock parModelBlock) {
 		return this.itemModelGenerator.makeItemModel(this.textureMap, parModelBlock);
+	}
+
+	// eagler hack
+	public String getBaseTextureForBlockPre(int blockId, int metadata) {
+		Block block = Block.blockRegistry.getObjectById(blockId);
+		if (block != null) {
+			IBlockState state = block.getStateFromMeta(metadata);
+			if (state != null) {
+				IStateMapper mapper = blockModelShapes.getBlockStateMapper().blockStateMap.get(block);
+				ModelResourceLocation loc = null;
+				if (mapper != null) {
+					loc = mapper.putStateModelLocations(block).get(state);
+				}
+				if (loc == null) {
+					loc = new ModelResourceLocation(Block.blockRegistry.getNameForObject(block),
+							StateMapperBase.getPropertyString(state.getProperties()));
+				}
+				ModelBlockDefinition.Variants v = variants.get(loc);
+				if (v != null && v.getVariants().size() > 0) {
+					ModelBlockDefinition.Variant vv = v.getVariants().get(0);
+					ModelBlock model = this.models.get(vv.getModelLocation());
+					if (model != null) {
+						String name = model.resolveTextureName("particle");
+						if (name != null) {
+							return name;
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	static {

@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
@@ -38,6 +39,7 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
  */
 public abstract class AnvilChunkLoader implements IChunkLoader {
 	private static final Logger logger = LogManager.getLogger("AnvilChunkLoader");
+	private static final String NEIGHBOR_LIGHT_CHECKS_KEY = "NeighborLightChecks";
 
 	/**+
 	 * Wraps readChunkFromNBT. Checks the coordinates and several
@@ -73,6 +75,8 @@ public abstract class AnvilChunkLoader implements IChunkLoader {
 	 * last update time.
 	 */
 	protected void writeChunkToNBT(Chunk chunkIn, World worldIn, NBTTagCompound parNBTTagCompound) {
+		alfheim$writeNeighborLightChecksToNBT(chunkIn, parNBTTagCompound);
+		parNBTTagCompound.setBoolean("LightPopulated", chunkIn.alfheim$isLightInitialized());
 		parNBTTagCompound.setByte("V", (byte) 1);
 		parNBTTagCompound.setInteger("xPos", chunkIn.xPosition);
 		parNBTTagCompound.setInteger("zPos", chunkIn.zPosition);
@@ -285,6 +289,53 @@ public abstract class AnvilChunkLoader implements IChunkLoader {
 			}
 		}
 
+		alfheim$readNeighborLightChecksFromNBT(chunk, parNBTTagCompound);
+		chunk.alfheim$setLightInitialized(parNBTTagCompound.getBoolean("LightPopulated"));
+
 		return chunk;
+	}
+
+	private static void alfheim$readNeighborLightChecksFromNBT(final Chunk chunk, final NBTTagCompound compound) {
+		if (!compound.hasKey(NEIGHBOR_LIGHT_CHECKS_KEY, 9)) {
+			return;
+		}
+
+		final NBTTagList tagList = compound.getTagList(NEIGHBOR_LIGHT_CHECKS_KEY, 2);
+
+		if (tagList.tagCount() != 32) {
+			return;
+		}
+
+		chunk.alfheim$initNeighborLightChecks();
+
+		final short[] neighborLightChecks = chunk.alfheim$neighborLightChecks;
+
+		for (int i = 0; i < 32; ++i) {
+			neighborLightChecks[i] = ((NBTTagShort) tagList.get(i)).getShort();
+		}
+	}
+
+	private static void alfheim$writeNeighborLightChecksToNBT(final Chunk chunk, final NBTTagCompound compound) {
+		final short[] neighborLightChecks = chunk.alfheim$neighborLightChecks;
+
+		if (neighborLightChecks == null) {
+			return;
+		}
+
+		boolean empty = true;
+
+		final NBTTagList list = new NBTTagList();
+
+		for (final short flags : neighborLightChecks) {
+			list.appendTag(new NBTTagShort(flags));
+
+			if (flags != 0) {
+				empty = false;
+			}
+		}
+
+		if (!empty) {
+			compound.setTag(NEIGHBOR_LIGHT_CHECKS_KEY, list);
+		}
 	}
 }

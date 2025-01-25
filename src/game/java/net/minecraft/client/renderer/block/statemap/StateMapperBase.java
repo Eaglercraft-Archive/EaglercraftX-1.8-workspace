@@ -33,7 +33,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 public abstract class StateMapperBase implements IStateMapper {
 	protected Map<IBlockState, ModelResourceLocation> mapStateModelLocations = Maps.newLinkedHashMap();
 
-	public String getPropertyString(Map<IProperty, Comparable> parMap) {
+	public static String getPropertyString(Map<IProperty, Comparable> parMap) {
 		StringBuilder stringbuilder = new StringBuilder();
 
 		for (Entry entry : parMap.entrySet()) {

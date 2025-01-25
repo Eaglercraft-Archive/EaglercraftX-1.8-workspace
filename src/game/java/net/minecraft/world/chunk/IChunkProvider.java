@@ -92,4 +92,6 @@ public interface IChunkProvider {
 	 * unimplemented.
 	 */
 	void saveExtraData();
+
+	Chunk getLoadedChunk(int var1, int var2);
 }

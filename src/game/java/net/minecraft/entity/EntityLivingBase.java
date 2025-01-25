@@ -8,6 +8,9 @@ import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftRandom;
 import net.lax1dude.eaglercraft.v1_8.EaglercraftUUID;
@@ -597,6 +600,19 @@ public abstract class EntityLivingBase extends Entity {
 
 	public ObjectContainer<PotionEffect> getActivePotionEffects() {
 		return this.activePotionsMap.values();
+	}
+
+	public List<PotionEffect> getActivePotionEffectsList() {
+		if (activePotionsMap.isEmpty()) {
+			return Collections.emptyList();
+		}
+		PotionEffect[] arr = this.activePotionsMap.values().toArray(PotionEffect.class);
+		if (arr.length > 1) {
+			Arrays.sort(arr, (p1, p2) -> {
+				return p1.getPotionID() - p2.getPotionID();
+			});
+		}
+		return Arrays.asList(arr);
 	}
 
 	public boolean isPotionActive(int potionId) {

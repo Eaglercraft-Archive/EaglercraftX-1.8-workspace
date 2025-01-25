@@ -2,8 +2,10 @@ package net.minecraft.client.resources;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Set;
 
+import net.lax1dude.eaglercraft.v1_8.minecraft.ResourceIndex;
 import net.lax1dude.eaglercraft.v1_8.opengl.ImageData;
 import net.minecraft.client.resources.data.IMetadataSection;
 import net.minecraft.client.resources.data.IMetadataSerializer;
@@ -41,4 +43,6 @@ public interface IResourcePack {
 	ImageData getPackImage() throws IOException;
 
 	String getPackName();
+
+	ResourceIndex getEaglerFileIndex();
 }

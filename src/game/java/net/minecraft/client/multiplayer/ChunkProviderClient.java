@@ -187,4 +187,8 @@ public class ChunkProviderClient implements IChunkProvider {
 	public Chunk provideChunk(BlockPos blockpos) {
 		return this.provideChunk(blockpos.getX() >> 4, blockpos.getZ() >> 4);
 	}
+
+	public Chunk getLoadedChunk(int var1, int var2) {
+		return this.chunkMapping.get(ChunkCoordIntPair.chunkXZ2Int(var1, var2));
+	}
 }

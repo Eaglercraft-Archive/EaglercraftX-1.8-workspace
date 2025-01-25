@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import dev.redstudio.alfheim.utils.DeduplicatedLongQueue;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
 import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.lax1dude.eaglercraft.v1_8.minecraft.ChunkUpdateManager;
@@ -97,6 +98,7 @@ import net.minecraft.util.Vector3d;
 import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
+import net.optifine.CustomSky;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -185,6 +187,8 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 	private double prevRenderSortY;
 	private double prevRenderSortZ;
 	private boolean displayListEntitiesDirty = true;
+
+	private final DeduplicatedLongQueue alfheim$lightUpdatesQueue = new DeduplicatedLongQueue(8192);
 
 	public RenderGlobal(Minecraft mcIn) {
 		this.mc = mcIn;
@@ -1212,7 +1216,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 		if (this.cloudTickCounter % 20 == 0) {
 			this.cleanupDamagedBlocks(this.damagedBlocks.values().iterator());
 		}
-
+		alfheim$processLightUpdates();
 	}
 
 	private void renderSkyEnd() {
@@ -1284,6 +1288,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 			Tessellator tessellator = Tessellator.getInstance();
 			WorldRenderer worldrenderer = tessellator.getWorldRenderer();
 			GlStateManager.depthMask(false);
+			GlStateManager.disableDepth();
 			GlStateManager.enableFog();
 			GlStateManager.color(f, f1, f2);
 			GlStateManager.callList(this.glSkyList);
@@ -1340,6 +1345,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 			float f16 = 1.0F - this.theWorld.getRainStrength(partialTicks);
 			GlStateManager.color(1.0F, 1.0F, 1.0F, f16);
 			GlStateManager.rotate(-90.0F, 0.0F, 1.0F, 0.0F);
+			CustomSky.renderSky(this.theWorld, this.renderEngine, partialTicks);
 			GlStateManager.rotate(this.theWorld.getCelestialAngle(partialTicks) * 360.0F, 1.0F, 0.0F, 0.0F);
 			float f17 = 30.0F;
 			this.renderEngine.bindTexture(locationSunPng);
@@ -1366,7 +1372,8 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 			tessellator.draw();
 			GlStateManager.disableTexture2D();
 			float f15 = this.theWorld.getStarBrightness(partialTicks) * f16;
-			if (f15 > 0.0F) {
+			boolean b = !CustomSky.hasSkyLayers(this.theWorld);
+			if (f15 > 0.0F && b) {
 				GlStateManager.color(f15, f15, f15, f15);
 				GlStateManager.callList(this.starGLCallList);
 			}
@@ -1379,7 +1386,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 			GlStateManager.disableTexture2D();
 			GlStateManager.color(0.0F, 0.0F, 0.0F);
 			double d0 = this.mc.thePlayer.getPositionEyes(partialTicks).yCoord - this.theWorld.getHorizon();
-			if (d0 < 0.0D) {
+			if (d0 < 0.0D && b) {
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0.0F, 12.0F, 0.0F);
 				GlStateManager.callList(this.glSkyList2);
@@ -1418,12 +1425,16 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 				GlStateManager.color(f, f1, f2);
 			}
 
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(0.0F, -((float) (d0 - 16.0D)), 0.0F);
-			GlStateManager.callList(this.glSkyList2);
-			GlStateManager.popMatrix();
+			if (b) {
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0.0F, -((float) (d0 - 16.0D)), 0.0F);
+				GlStateManager.callList(this.glSkyList2);
+				GlStateManager.popMatrix();
+			}
+
 			GlStateManager.enableTexture2D();
 			GlStateManager.depthMask(true);
+			GlStateManager.enableDepth();
 		}
 	}
 
@@ -2100,10 +2111,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 	}
 
 	public void notifyLightSet(BlockPos blockpos) {
-		int i = blockpos.getX();
-		int j = blockpos.getY();
-		int k = blockpos.getZ();
-		this.markBlocksForUpdate(i - 1, j - 1, k - 1, i + 1, j + 1, k + 1);
+		this.alfheim$lightUpdatesQueue.enqueue(blockpos.toLong());
 	}
 
 	/**+
@@ -2505,5 +2513,20 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 
 		return "" + Minecraft.getDebugFPS() + "fps | C: " + j + "/" + i + ", E: " + this.countEntitiesRendered + "+" + k
 				+ ", " + renderDispatcher.getDebugInfo();
+	}
+
+	public void alfheim$processLightUpdates() {
+		if (alfheim$lightUpdatesQueue.isEmpty())
+			return;
+
+		do {
+			final long longPos = alfheim$lightUpdatesQueue.dequeue();
+			final int x = (int) (longPos << 64 - BlockPos.X_SHIFT - BlockPos.NUM_X_BITS >> 64 - BlockPos.NUM_X_BITS);
+			final int y = (int) (longPos << 64 - BlockPos.Y_SHIFT - BlockPos.NUM_Y_BITS >> 64 - BlockPos.NUM_Y_BITS);
+			final int z = (int) (longPos << 64 - BlockPos.NUM_Z_BITS >> 64 - BlockPos.NUM_Z_BITS);
+			markBlocksForUpdate(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
+		} while (!alfheim$lightUpdatesQueue.isEmpty());
+
+		alfheim$lightUpdatesQueue.newDeduplicationSet();
 	}
 }

@@ -33,7 +33,7 @@ public class TextureClock extends EaglerTextureAtlasSprite {
 		super(iconName);
 	}
 
-	public void updateAnimation(IFramebufferGL[] copyColorFramebuffer) {
+	public void updateAnimation() {
 		if (!this.framesTextureData.isEmpty()) {
 			Minecraft minecraft = Minecraft.getMinecraft();
 			double d0 = 0.0D;
@@ -67,10 +67,17 @@ public class TextureClock extends EaglerTextureAtlasSprite {
 
 			if (i != this.frameCounter) {
 				this.frameCounter = i;
-				animationCache.copyFrameLevelsToTex2D(this.frameCounter, this.originX, this.originY, this.width,
-						this.height, copyColorFramebuffer);
+				currentAnimUpdater = (mapWidth, mapHeight, mapLevel) -> {
+					animationCache.copyFrameToTex2D(this.frameCounter, mapLevel, this.originX >> mapLevel,
+							this.originY >> mapLevel, this.width >> mapLevel, this.height >> mapLevel, mapWidth,
+							mapHeight);
+				};
+			} else {
+				currentAnimUpdater = null;
 			}
 
+		} else {
+			currentAnimUpdater = null;
 		}
 	}
 

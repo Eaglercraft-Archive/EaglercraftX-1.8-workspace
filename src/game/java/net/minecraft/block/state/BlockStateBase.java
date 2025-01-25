@@ -10,6 +10,7 @@ import com.google.common.collect.Iterables;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.util.ResourceLocation;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -76,5 +77,34 @@ public abstract class BlockStateBase implements IBlockState {
 		}
 
 		return stringbuilder.toString();
+	}
+
+	private int blockId = -1;
+	private int blockStateId = -1;
+	private int metadata = -1;
+	private ResourceLocation blockLocation = null;
+
+	public int getBlockId() {
+		if (this.blockId < 0) {
+			this.blockId = Block.getIdFromBlock(this.getBlock());
+		}
+
+		return this.blockId;
+	}
+
+	public int getBlockStateId() {
+		if (this.blockStateId < 0) {
+			this.blockStateId = Block.getStateId(this);
+		}
+
+		return this.blockStateId;
+	}
+
+	public int getMetadata() {
+		if (this.metadata < 0) {
+			this.metadata = this.getBlock().getMetaFromState(this);
+		}
+
+		return this.metadata;
 	}
 }

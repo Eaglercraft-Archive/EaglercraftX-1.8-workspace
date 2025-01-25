@@ -704,4 +704,10 @@ public class BlockStairs extends Block {
 			return this.name;
 		}
 	}
+
+	public boolean alfheim$useNeighborBrightness(final IBlockState blockState, final EnumFacing facing,
+			final IBlockAccess blockAccess, final BlockPos blockPos) {
+		return facing == (blockState.getValue(HALF) == EnumHalf.TOP ? EnumFacing.DOWN : EnumFacing.UP)
+				|| facing == blockState.getValue(FACING).getOpposite();
+	}
 }

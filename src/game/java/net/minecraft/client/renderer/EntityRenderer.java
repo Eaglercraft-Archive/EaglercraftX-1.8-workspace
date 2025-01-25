@@ -90,6 +90,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.util.Vec3i;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.optifine.Config;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -179,6 +180,8 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 	private float eagPartialTicks = 0.0f;
 
 	public float currentProjMatrixFOV = 0.0f;
+
+	private boolean initializedOF = false;
 
 	public EntityRenderer(Minecraft mcIn, IResourceManager resourceManagerIn) {
 		this.useShader = false;
@@ -584,7 +587,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 	 * sets up projection, view effects, camera position/rotation
 	 */
 	private void setupCameraTransform(float partialTicks, int pass) {
-		this.farPlaneDistance = (float) (this.mc.gameSettings.renderDistanceChunks * 16);
+		this.farPlaneDistance = (float) (this.mc.gameSettings.renderDistanceChunks * 16 + 16);
 		GlStateManager.matrixMode(GL_PROJECTION);
 		GlStateManager.loadIdentity();
 		float f = 0.07F;
@@ -874,6 +877,10 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 	}
 
 	public void func_181560_a(float parFloat1, long parLong1) {
+		if (!initializedOF) {
+			Config.frameInitHook();
+			initializedOF = true;
+		}
 		boolean flag = Display.isActive() || mc.gameSettings.touchscreen;
 		if (!flag && this.mc.gameSettings.pauseOnLostFocus
 				&& (!this.mc.gameSettings.touchscreen || !PointerInputAbstraction.getVCursorButtonDown(1))) {

@@ -199,6 +199,7 @@ import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.ISaveFormat;
+import net.optifine.Config;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -407,6 +408,7 @@ public class Minecraft implements IThreadListener {
 	 */
 	private void startGame() throws IOException {
 		this.gameSettings = new GameSettings(this);
+		Config.setGameObj(this);
 		this.defaultResourcePacks.add(this.mcDefaultResourcePack);
 		if (this.gameSettings.overrideHeight > 0 && this.gameSettings.overrideWidth > 0) {
 			this.displayWidth = this.gameSettings.overrideWidth;
@@ -2466,4 +2468,7 @@ public class Minecraft implements IThreadListener {
 		return EagRuntime.getConfiguration().isForceProfanityFilter() || gameSettings.enableProfanityFilter;
 	}
 
+	public DefaultResourcePack getDefaultResourcePack() {
+		return mcDefaultResourcePack;
+	}
 }

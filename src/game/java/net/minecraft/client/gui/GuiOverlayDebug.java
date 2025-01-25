@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.TimeZone;
 
-import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
@@ -169,9 +168,8 @@ public class GuiOverlayDebug extends Gui {
 		this.fontRenderer.drawStringWithShadow(line, x - lw, y - i, 0xFFFFFF);
 		i += 11;
 
-		for (ObjectCursor<PotionEffect> ee : mc.thePlayer.getActivePotionEffects()) {
+		for (PotionEffect e : mc.thePlayer.getActivePotionEffectsList()) {
 			i += 11;
-			PotionEffect e = ee.value;
 			int t = e.getDuration() / 20;
 			int m = t / 60;
 			int s = t % 60;

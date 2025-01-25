@@ -2,6 +2,11 @@ package net.minecraft.world.chunk;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
+
+import dev.redstudio.alfheim.lighting.LightingEngine;
+import dev.redstudio.alfheim.utils.EnumBoundaryFacing;
+import dev.redstudio.alfheim.utils.WorldChunkSlice;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,6 +82,10 @@ public class Chunk {
 	private List<BlockPos> tileEntityPosQueue;
 	private final ChunkCoordIntPair coordsCache;
 
+	private LightingEngine alfheim$lightingEngine;
+	private boolean alfheim$isLightInitialized;
+	public short[] alfheim$neighborLightChecks;
+
 	public Chunk(World worldIn, int x, int z) {
 		this.storageArrays = new ExtendedBlockStorage[16];
 		this.blockBiomeArray = new byte[256];
@@ -98,6 +107,8 @@ public class Chunk {
 
 		Arrays.fill(this.precipitationHeightMap, -999);
 		Arrays.fill(this.blockBiomeArray, (byte) -1);
+
+		alfheim$lightingEngine = worldIn != null ? worldIn.alfheim$getLightingEngine() : null;
 	}
 
 	public Chunk(World worldIn, ChunkPrimer primer, int x, int z) {
@@ -248,53 +259,28 @@ public class Chunk {
 		this.isModified = true;
 	}
 
-	/**+
-	 * Propagates a given sky-visible block's light value downward
-	 * and upward to neighboring blocks as necessary.
-	 */
-	private void propagateSkylightOcclusion(int x, int z) {
-		this.updateSkylightColumns[x + z * 16] = true;
-		this.isGapLightingUpdated = true;
-	}
-
 	private void recheckGaps(boolean parFlag) {
+		if (!worldObj.isAreaLoaded(new BlockPos((xPosition << 4) + 8, 0, (zPosition << 4) + 8), 16)) {
+			return;
+		}
+
 		if (!this.worldObj.isRemote) {
 			++EaglerMinecraftServer.counterLightUpdate;
 		}
-		if (this.worldObj.isAreaLoaded(new BlockPos(this.xPosition * 16 + 8, 0, this.zPosition * 16 + 8), 16)) {
-			for (int i = 0; i < 16; ++i) {
-				for (int j = 0; j < 16; ++j) {
-					if (this.updateSkylightColumns[i + j * 16]) {
-						this.updateSkylightColumns[i + j * 16] = false;
-						int k = this.getHeightValue(i, j);
-						int l = this.xPosition * 16 + i;
-						int i1 = this.zPosition * 16 + j;
-						int j1 = Integer.MAX_VALUE;
 
-						EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
-						for (int m = 0; m < facings.length; ++m) {
-							EnumFacing enumfacing = facings[m];
-							j1 = Math.min(j1, this.worldObj.getChunksLowestHorizon(l + enumfacing.getFrontOffsetX(),
-									i1 + enumfacing.getFrontOffsetZ()));
-						}
+		final WorldChunkSlice slice = new WorldChunkSlice(worldObj.getChunkProvider(), xPosition, zPosition);
 
-						this.checkSkylightNeighborHeight(l, i1, j1);
+		for (int x = 0; x < 16; ++x) {
+			for (int z = 0; z < 16; ++z) {
+				if (!alfheim$recheckGapsForColumn(slice, x, z))
+					continue;
 
-						for (int m = 0; m < facings.length; ++m) {
-							EnumFacing enumfacing1 = facings[m];
-							this.checkSkylightNeighborHeight(l + enumfacing1.getFrontOffsetX(),
-									i1 + enumfacing1.getFrontOffsetZ(), k);
-						}
-
-						if (parFlag) {
-							return;
-						}
-					}
-				}
+				if (parFlag)
+					return;
 			}
-
-			this.isGapLightingUpdated = false;
 		}
+
+		isGapLightingUpdated = false;
 	}
 
 	/**+
@@ -327,90 +313,28 @@ public class Chunk {
 	 * sky-light for a given block inside a chunk.
 	 */
 	private void relightBlock(int x, int y, int z) {
-		int i = this.heightMap[z << 4 | x] & 255;
-		int j = i;
-		if (y > i) {
-			j = y;
+		int heightMapY = heightMap[z << 4 | x] & 255;
+		int newHeightMapY = Math.max(y, heightMapY);
+
+		while (newHeightMapY > 0 && getBlockLightOpacity(x, newHeightMapY - 1, z) == 0)
+			--newHeightMapY;
+
+		if (newHeightMapY == heightMapY)
+			return;
+
+		if (!this.worldObj.isRemote) {
+			++EaglerMinecraftServer.counterLightUpdate;
 		}
 
-		while (j > 0 && this.getBlockLightOpacity(x, j - 1, z) == 0) {
-			--j;
-		}
+		heightMap[z << 4 | x] = newHeightMapY;
 
-		if (j != i) {
-			this.worldObj.markBlocksDirtyVertical(x + this.xPosition * 16, z + this.zPosition * 16, j, i);
-			this.heightMap[z << 4 | x] = j;
-			int k = this.xPosition * 16 + x;
-			int l = this.zPosition * 16 + z;
-			if (!this.worldObj.provider.getHasNoSky()) {
-				if (j < i) {
-					for (int j1 = j; j1 < i; ++j1) {
-						ExtendedBlockStorage extendedblockstorage2 = this.storageArrays[j1 >> 4];
-						if (extendedblockstorage2 != null) {
-							extendedblockstorage2.setExtSkylightValue(x, j1 & 15, z, 15);
-							this.worldObj.notifyLightSet(
-									new BlockPos((this.xPosition << 4) + x, j1, (this.zPosition << 4) + z));
-						}
-					}
-				} else {
-					for (int i1 = i; i1 < j; ++i1) {
-						ExtendedBlockStorage extendedblockstorage = this.storageArrays[i1 >> 4];
-						if (extendedblockstorage != null) {
-							extendedblockstorage.setExtSkylightValue(x, i1 & 15, z, 0);
-							this.worldObj.notifyLightSet(
-									new BlockPos((this.xPosition << 4) + x, i1, (this.zPosition << 4) + z));
-						}
-					}
-				}
+		if (!worldObj.provider.getHasNoSky())
+			alfheim$relightSkylightColumn(x, z, heightMapY, newHeightMapY);
 
-				int k1 = 15;
+		final int heightMapY1 = heightMap[z << 4 | x];
 
-				while (j > 0 && k1 > 0) {
-					--j;
-					int i2 = this.getBlockLightOpacity(x, j, z);
-					if (i2 == 0) {
-						i2 = 1;
-					}
-
-					k1 -= i2;
-					if (k1 < 0) {
-						k1 = 0;
-					}
-
-					ExtendedBlockStorage extendedblockstorage1 = this.storageArrays[j >> 4];
-					if (extendedblockstorage1 != null) {
-						extendedblockstorage1.setExtSkylightValue(x, j & 15, z, k1);
-					}
-				}
-			}
-
-			int l1 = this.heightMap[z << 4 | x];
-			int j2 = i;
-			int k2 = l1;
-			if (l1 < i) {
-				j2 = l1;
-				k2 = i;
-			}
-
-			if (l1 < this.heightMapMinimum) {
-				this.heightMapMinimum = l1;
-			}
-
-			if (!this.worldObj.provider.getHasNoSky()) {
-				EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
-				for (int m = 0; m < facings.length; ++m) {
-					EnumFacing enumfacing = facings[m];
-					this.updateSkylightNeighborHeight(k + enumfacing.getFrontOffsetX(),
-							l + enumfacing.getFrontOffsetZ(), j2, k2);
-				}
-
-				this.updateSkylightNeighborHeight(k, l, j2, k2);
-			}
-
-			if (!this.worldObj.isRemote) {
-				++EaglerMinecraftServer.counterLightUpdate;
-			}
-			this.isModified = true;
+		if (heightMapY1 < heightMapMinimum) {
+			heightMapMinimum = heightMapY1;
 		}
 	}
 
@@ -507,7 +431,8 @@ public class Chunk {
 
 				extendedblockstorage = this.storageArrays[j >> 4] = new ExtendedBlockStorage(j >> 4 << 4,
 						!this.worldObj.provider.getHasNoSky());
-				flag = j >= i1;
+				alfheim$initSkylightForSection(extendedblockstorage);
+				// flag = j >= i1;
 			}
 
 			extendedblockstorage.set(i, j & 15, k, state);
@@ -526,7 +451,7 @@ public class Chunk {
 					this.generateSkylightMap();
 				} else {
 					int j1 = block.getLightOpacity();
-					int k1 = block1.getLightOpacity();
+					// int k1 = block1.getLightOpacity();
 					if (j1 > 0) {
 						if (j >= i1) {
 							this.relightBlock(i, j + 1, k);
@@ -535,10 +460,10 @@ public class Chunk {
 						this.relightBlock(i, j, k);
 					}
 
-					if (j1 != k1 && (j1 < k1 || this.getLightFor(EnumSkyBlock.SKY, pos) > 0
-							|| this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
-						this.propagateSkylightOcclusion(i, k);
-					}
+//					if (j1 != k1 && (j1 < k1 || this.getLightFor(EnumSkyBlock.SKY, pos) > 0
+//							|| this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
+//						this.propagateSkylightOcclusion(i, k);
+//					}
 				}
 
 				if (block1 instanceof ITileEntityProvider) {
@@ -572,17 +497,8 @@ public class Chunk {
 	}
 
 	public int getLightFor(EnumSkyBlock enumskyblock, BlockPos blockpos) {
-		int i = blockpos.x & 15;
-		int j = blockpos.y;
-		int k = blockpos.z & 15;
-		ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
-		return extendedblockstorage == null
-				? (this.canSeeSky(blockpos) ? enumskyblock.defaultLightValue : getNoSkyLightValue())
-				: (enumskyblock == EnumSkyBlock.SKY
-						? (this.worldObj.provider.getHasNoSky() ? getNoSkyLightValue()
-								: extendedblockstorage.getExtSkylightValue(i, j & 15, k))
-						: (enumskyblock == EnumSkyBlock.BLOCK ? extendedblockstorage.getExtBlocklightValue(i, j & 15, k)
-								: enumskyblock.defaultLightValue));
+		alfheim$lightingEngine.processLightUpdatesForType(enumskyblock);
+		return alfheim$getCachedLightFor(enumskyblock, blockpos);
 	}
 
 	public void setLightFor(EnumSkyBlock enumskyblock, BlockPos blockpos, int i) {
@@ -593,7 +509,7 @@ public class Chunk {
 		if (extendedblockstorage == null) {
 			extendedblockstorage = this.storageArrays[k >> 4] = new ExtendedBlockStorage(k >> 4 << 4,
 					!this.worldObj.provider.getHasNoSky());
-			this.generateSkylightMap();
+			alfheim$initSkylightForSection(storageArrays[k >> 4]);
 		}
 
 		this.isModified = true;
@@ -608,6 +524,7 @@ public class Chunk {
 	}
 
 	public int getLightSubtracted(BlockPos blockpos, int i) {
+		alfheim$lightingEngine.processLightUpdates();
 		int j = blockpos.x & 15;
 		int k = blockpos.y;
 		int l = blockpos.z & 15;
@@ -762,6 +679,44 @@ public class Chunk {
 			this.worldObj.loadEntities(this.entityLists[i]);
 		}
 
+		for (final EnumFacing facing : EnumFacing.HORIZONTALS) {
+			final int xOffset = facing.getFrontOffsetX();
+			final int zOffset = facing.getFrontOffsetZ();
+
+			final Chunk nChunk = worldObj.getChunkProvider().getLoadedChunk(xPosition + xOffset, zPosition + zOffset);
+
+			if (nChunk == null)
+				continue;
+
+			EnumSkyBlock[] lightTypes = EnumSkyBlock._VALUES;
+			EnumFacing.AxisDirection[] axisDirections = EnumFacing.AxisDirection._VALUES;
+			for (int ii = 0, ll = lightTypes.length; ii < ll; ++ii) {
+				final EnumSkyBlock lightType = lightTypes[ii];
+				for (int jj = 0, mm = axisDirections.length; jj < mm; ++jj) {
+					final EnumFacing.AxisDirection axisDir = axisDirections[jj];
+					// Merge flags upon loading of a chunk. This ensures that all flags are always
+					// already on the IN boundary below
+					alfheim$mergeFlags(lightType, this, nChunk, facing, axisDir);
+					alfheim$mergeFlags(lightType, nChunk, this, facing.getOpposite(), axisDir);
+
+					// Check everything that might have been canceled due to this chunk not being
+					// loaded.
+					// Also, pass in chunks if already known
+					// The boundary to the neighbor chunk (both ways)
+					alfheim$scheduleRelightChecksForBoundary(this, nChunk, null, lightType, xOffset, zOffset, axisDir);
+					alfheim$scheduleRelightChecksForBoundary(nChunk, this, null, lightType, -xOffset, -zOffset,
+							axisDir);
+					// The boundary to the diagonal neighbor (since the checks in that chunk were
+					// aborted if this chunk wasn't loaded, see
+					// alfheim$scheduleRelightChecksForBoundary)
+					alfheim$scheduleRelightChecksForBoundary(nChunk, null, this, lightType,
+							(zOffset != 0 ? axisDir.getOffset() : 0), (xOffset != 0 ? axisDir.getOffset() : 0),
+							facing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE
+									? EnumFacing.AxisDirection.NEGATIVE
+									: EnumFacing.AxisDirection.POSITIVE);
+				}
+			}
+		}
 	}
 
 	/**+
@@ -1163,36 +1118,23 @@ public class Chunk {
 
 	public void func_150809_p() {
 		this.isTerrainPopulated = true;
-		this.isLightPopulated = true;
-		BlockPos blockpos = new BlockPos(this.xPosition << 4, 0, this.zPosition << 4);
-		if (!this.worldObj.provider.getHasNoSky()) {
-			if (this.worldObj.isAreaLoaded(blockpos.add(-1, 0, -1),
-					blockpos.add(16, this.worldObj.func_181545_F(), 16))) {
-				label92: for (int i = 0; i < 16; ++i) {
-					for (int j = 0; j < 16; ++j) {
-						if (!this.func_150811_f(i, j)) {
-							this.isLightPopulated = false;
-							break label92;
-						}
-					}
-				}
 
-				if (this.isLightPopulated) {
-					EnumFacing[] facings = EnumFacing.Plane.HORIZONTAL.facingsArray;
-					for (int i = 0; i < facings.length; ++i) {
-						EnumFacing enumfacing = facings[i];
-						int k = enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? 16 : 1;
-						this.worldObj.getChunkFromBlockCoords(blockpos.offset(enumfacing, k))
-								.func_180700_a(enumfacing.getOpposite());
-					}
+		if (!alfheim$isLightInitialized)
+			alfheim$initChunkLighting(this, worldObj);
 
-					this.func_177441_y();
-				}
-			} else {
-				this.isLightPopulated = false;
+		for (int x = -1; x <= 1; x++) {
+			for (int z = -1; z <= 1; z++) {
+				if (x == 0 && z == 0)
+					continue;
+
+				final Chunk nChunk = worldObj.getChunkProvider().getLoadedChunk(xPosition + x, zPosition + z);
+
+				if (nChunk == null || !nChunk.alfheim$isLightInitialized())
+					return;
 			}
 		}
 
+		setLightPopulated(true);
 	}
 
 	private void func_177441_y() {
@@ -1201,59 +1143,6 @@ public class Chunk {
 		}
 
 		this.recheckGaps(false);
-	}
-
-	private void func_180700_a(EnumFacing parEnumFacing) {
-		if (this.isTerrainPopulated) {
-			if (parEnumFacing == EnumFacing.EAST) {
-				for (int i = 0; i < 16; ++i) {
-					this.func_150811_f(15, i);
-				}
-			} else if (parEnumFacing == EnumFacing.WEST) {
-				for (int j = 0; j < 16; ++j) {
-					this.func_150811_f(0, j);
-				}
-			} else if (parEnumFacing == EnumFacing.SOUTH) {
-				for (int k = 0; k < 16; ++k) {
-					this.func_150811_f(k, 15);
-				}
-			} else if (parEnumFacing == EnumFacing.NORTH) {
-				for (int l = 0; l < 16; ++l) {
-					this.func_150811_f(l, 0);
-				}
-			}
-
-		}
-	}
-
-	private boolean func_150811_f(int x, int z) {
-		int i = this.getTopFilledSegment();
-		boolean flag = false;
-		boolean flag1 = false;
-		BlockPos blockpos$mutableblockpos = new BlockPos((this.xPosition << 4) + x, 0, (this.zPosition << 4) + z);
-
-		for (int j = i + 16 - 1; j > this.worldObj.func_181545_F() || j > 0 && !flag1; --j) {
-			blockpos$mutableblockpos.func_181079_c(blockpos$mutableblockpos.getX(), j, blockpos$mutableblockpos.getZ());
-			int k = this.getBlockLightOpacity(blockpos$mutableblockpos);
-			if (k == 255 && blockpos$mutableblockpos.getY() < this.worldObj.func_181545_F()) {
-				flag1 = true;
-			}
-
-			if (!flag && k > 0) {
-				flag = true;
-			} else if (flag && k == 0 && !this.worldObj.checkLight(blockpos$mutableblockpos)) {
-				return false;
-			}
-		}
-
-		for (int l = blockpos$mutableblockpos.getY(); l > 0; --l) {
-			blockpos$mutableblockpos.func_181079_c(blockpos$mutableblockpos.getX(), l, blockpos$mutableblockpos.getZ());
-			if (this.getBlock(blockpos$mutableblockpos).getLightValue() > 0) {
-				this.worldObj.checkLight(blockpos$mutableblockpos);
-			}
-		}
-
-		return true;
 	}
 
 	public boolean isLoaded() {
@@ -1334,5 +1223,339 @@ public class Chunk {
 
 	public static enum EnumCreateEntityType {
 		IMMEDIATE, QUEUED, CHECK;
+	}
+
+	private boolean alfheim$recheckGapsForColumn(final WorldChunkSlice slice, final int x, final int z) {
+		final int i = x + (z << 4);
+
+		if (updateSkylightColumns[i]) {
+			updateSkylightColumns[i] = false;
+
+			final int x1 = (this.xPosition << 4) + x;
+			final int z1 = (this.zPosition << 4) + z;
+
+			alfheim$recheckGapsSkylightNeighborHeight(slice, x1, z1, getHeightValue(x, z),
+					alfheim$recheckGapsGetLowestHeight(slice, x1, z1));
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private int alfheim$recheckGapsGetLowestHeight(final WorldChunkSlice slice, final int x, final int z) {
+		int max = Integer.MAX_VALUE;
+
+		Chunk chunk = slice.getChunkFromWorldCoords(x + 1, z);
+
+		if (chunk != null)
+			max = Math.min(max, chunk.getLowestHeight());
+
+		chunk = slice.getChunkFromWorldCoords(x, z + 1);
+
+		if (chunk != null)
+			max = Math.min(max, chunk.getLowestHeight());
+
+		chunk = slice.getChunkFromWorldCoords(x - 1, z);
+
+		if (chunk != null)
+			max = Math.min(max, chunk.getLowestHeight());
+
+		chunk = slice.getChunkFromWorldCoords(x, z - 1);
+
+		if (chunk != null)
+			max = Math.min(max, chunk.getLowestHeight());
+
+		return max;
+	}
+
+	private void alfheim$recheckGapsSkylightNeighborHeight(final WorldChunkSlice slice, final int x, final int z,
+			final int height, final int max) {
+		alfheim$checkSkylightNeighborHeight(slice, x, z, max);
+		alfheim$checkSkylightNeighborHeight(slice, x + 1, z, height);
+		alfheim$checkSkylightNeighborHeight(slice, x, z + 1, height);
+		alfheim$checkSkylightNeighborHeight(slice, x - 1, z, height);
+		alfheim$checkSkylightNeighborHeight(slice, x, z - 1, height);
+	}
+
+	private void alfheim$checkSkylightNeighborHeight(final WorldChunkSlice slice, final int x, final int z,
+			final int maxValue) {
+		Chunk c = slice.getChunkFromWorldCoords(x, z);
+		if (c == null)
+			return;
+
+		final int y = c.getHeightValue(x & 15, z & 15);
+
+		if (y > maxValue)
+			alfheim$updateSkylightNeighborHeight(slice, x, z, maxValue, y + 1);
+		else if (y < maxValue)
+			alfheim$updateSkylightNeighborHeight(slice, x, z, y, maxValue + 1);
+	}
+
+	private void alfheim$updateSkylightNeighborHeight(final WorldChunkSlice slice, final int x, final int z,
+			final int startY, final int endY) {
+		if (endY < startY)
+			return;
+
+		if (!slice.isLoaded(x, z, 16))
+			return;
+
+		for (int y = startY; y < endY; ++y)
+			worldObj.checkLightFor(EnumSkyBlock.SKY, new BlockPos(x, y, z));
+
+		isModified = true;
+	}
+
+	private static void alfheim$mergeFlags(final EnumSkyBlock lightType, final Chunk inChunk, final Chunk outChunk,
+			final EnumFacing dir, final EnumFacing.AxisDirection axisDirection) {
+		if (outChunk.alfheim$neighborLightChecks == null)
+			return;
+
+		inChunk.alfheim$initNeighborLightChecks();
+
+		final int inIndex = alfheim$getFlagIndex(lightType, dir, axisDirection, EnumBoundaryFacing.IN);
+		final int outIndex = alfheim$getFlagIndex(lightType, dir.getOpposite(), axisDirection, EnumBoundaryFacing.OUT);
+
+		inChunk.alfheim$neighborLightChecks[inIndex] |= outChunk.alfheim$neighborLightChecks[outIndex];
+		// No need to call Chunk.setModified() since checks are not deleted from
+		// outChunk
+	}
+
+	private void alfheim$scheduleRelightChecksForBoundary(final Chunk chunk, Chunk nChunk, Chunk sChunk,
+			final EnumSkyBlock lightType, final int xOffset, final int zOffset,
+			final EnumFacing.AxisDirection axisDirection) {
+		if (chunk.alfheim$neighborLightChecks == null)
+			return;
+
+		final int flagIndex = alfheim$getFlagIndex(lightType, xOffset, zOffset, axisDirection, EnumBoundaryFacing.IN); // OUT
+																														// checks
+																														// from
+																														// neighbor
+																														// are
+																														// already
+																														// merged
+
+		final int flags = chunk.alfheim$neighborLightChecks[flagIndex];
+
+		if (flags == 0)
+			return;
+
+		if (nChunk == null) {
+			nChunk = worldObj.getChunkProvider().getLoadedChunk(chunk.xPosition + xOffset, chunk.zPosition + zOffset);
+
+			if (nChunk == null)
+				return;
+		}
+
+		if (sChunk == null) {
+			sChunk = worldObj.getChunkProvider().getLoadedChunk(
+					chunk.xPosition + (zOffset != 0 ? axisDirection.getOffset() : 0),
+					chunk.zPosition + (xOffset != 0 ? axisDirection.getOffset() : 0));
+
+			if (sChunk == null)
+				return; // Cancel, since the checks in the corner columns require the corner column of
+						// sChunk
+		}
+
+		final int reverseIndex = alfheim$getFlagIndex(lightType, -xOffset, -zOffset, axisDirection,
+				EnumBoundaryFacing.OUT);
+
+		chunk.alfheim$neighborLightChecks[flagIndex] = 0;
+
+		if (alfheim$neighborLightChecks != null)
+			nChunk.alfheim$neighborLightChecks[reverseIndex] = 0; // Clear only now that it's clear that the checks
+																	// are processed
+
+		chunk.setChunkModified();
+		nChunk.setChunkModified();
+
+		// Get the area to check
+		// Start in the corner...
+		int xMin = chunk.xPosition << 4;
+		int zMin = chunk.zPosition << 4;
+
+		// Move to other side of chunk if the direction is positive
+		if ((xOffset | zOffset) > 0) {
+			xMin += 15 * xOffset;
+			zMin += 15 * zOffset;
+		}
+
+		// Shift to other half if necessary (shift perpendicular to dir)
+		if (axisDirection == EnumFacing.AxisDirection.POSITIVE) {
+			xMin += 8 * (zOffset & 1); // x & 1 is same as abs(x) for x=-1,0,1
+			zMin += 8 * (xOffset & 1);
+		}
+
+		// Get maximal values (shift perpendicular to dir)
+		final int xMax = xMin + 7 * (zOffset & 1);
+		final int zMax = zMin + 7 * (xOffset & 1);
+
+		for (int y = 0; y < 16; ++y)
+			if ((flags & (1 << y)) != 0)
+				for (int x = xMin; x <= xMax; ++x)
+					for (int z = zMin; z <= zMax; ++z)
+						alfheim$scheduleRelightChecksForColumn(lightType, x, z, y << 4, (y << 4) + 15);
+	}
+
+	private void alfheim$initSkylightForSection(final ExtendedBlockStorage extendedBlockStorage) {
+		if (worldObj.provider.getHasNoSky())
+			return;
+
+		for (int x = 0; x < 16; ++x) {
+			for (int z = 0; z < 16; ++z) {
+				if (getHeightValue(x, z) > extendedBlockStorage.getYLocation())
+					continue;
+
+				for (int y = 0; y < 16; ++y)
+					extendedBlockStorage.setExtSkylightValue(x, y, z, EnumSkyBlock.SKY.defaultLightValue);
+			}
+		}
+	}
+
+	private void alfheim$scheduleRelightChecksForColumn(final EnumSkyBlock lightType, final int x, final int z,
+			final int yMin, final int yMax) {
+		final BlockPos mutableBlockPos = new BlockPos();
+
+		for (int y = yMin; y <= yMax; ++y)
+			worldObj.checkLightFor(lightType, mutableBlockPos.func_181079_c(x, y, z));
+	}
+
+	private static int alfheim$getFlagIndex(final EnumSkyBlock lightType, final int xOffset, final int zOffset,
+			final EnumFacing.AxisDirection axisDirection, final EnumBoundaryFacing boundaryFacing) {
+		return (lightType == EnumSkyBlock.BLOCK ? 0 : 16) | ((xOffset + 1) << 2) | ((zOffset + 1) << 1)
+				| (axisDirection.getOffset() + 1) | boundaryFacing.ordinal();
+	}
+
+	private static int alfheim$getFlagIndex(final EnumSkyBlock lightType, final EnumFacing facing,
+			final EnumFacing.AxisDirection axisDirection, final EnumBoundaryFacing boundaryFacing) {
+		return alfheim$getFlagIndex(lightType, facing.getFrontOffsetX(), facing.getFrontOffsetZ(), axisDirection,
+				boundaryFacing);
+	}
+
+	private static void alfheim$initChunkLighting(final Chunk chunk, final World world) {
+		final int xBase = chunk.xPosition << 4;
+		final int zBase = chunk.zPosition << 4;
+
+		final BlockPos mutableBlockPos = new BlockPos(xBase, 0, zBase);
+
+		if (world.isAreaLoaded(mutableBlockPos.add(-16, 0, -16), mutableBlockPos.add(31, 255, 31), false)) {
+			final ExtendedBlockStorage[] extendedBlockStorage = chunk.getBlockStorageArray();
+
+			for (int i = 0; i < extendedBlockStorage.length; ++i) {
+				final ExtendedBlockStorage storage = extendedBlockStorage[i];
+
+				if (storage == null)
+					continue;
+
+				int yBase = i * 16;
+
+				for (int y = 0; y < 16; y++) {
+					for (int z = 0; z < 16; z++) {
+						for (int x = 0; x < 16; x++) {
+							if (storage.getBlockByExtId(x, y, z).getLightValue() > 0) {
+								mutableBlockPos.func_181079_c(xBase + x, yBase + y, zBase + z);
+								world.checkLightFor(EnumSkyBlock.BLOCK, mutableBlockPos);
+							}
+						}
+					}
+				}
+			}
+
+			if (!world.provider.getHasNoSky())
+				chunk.alfheim$setSkylightUpdatedPublic();
+
+			chunk.alfheim$setLightInitialized(true);
+		}
+	}
+
+	private void alfheim$relightSkylightColumn(final int x, final int z, final int height1, final int height2) {
+		final int yMin = Math.min(height1, height2);
+		final int yMax = Math.max(height1, height2) - 1;
+
+		final ExtendedBlockStorage[] sections = getBlockStorageArray();
+
+		final int xBase = (xPosition << 4) + x;
+		final int zBase = (zPosition << 4) + z;
+
+		alfheim$scheduleRelightChecksForColumn(EnumSkyBlock.SKY, xBase, zBase, yMin, yMax);
+
+		if (sections[yMin >> 4] == null && yMin > 0) {
+			worldObj.checkLightFor(EnumSkyBlock.SKY, new BlockPos(xBase, yMin - 1, zBase));
+		}
+
+		short emptySections = 0;
+
+		for (int sec = yMax >> 4; sec >= yMin >> 4; --sec) {
+			if (sections[sec] == null) {
+				emptySections |= (short) (1 << sec);
+			}
+		}
+
+		if (emptySections != 0) {
+			for (final EnumFacing facing : EnumFacing.HORIZONTALS) {
+				final int xOffset = facing.getFrontOffsetX();
+				final int zOffset = facing.getFrontOffsetZ();
+
+				final boolean neighborColumnExists = (((x + xOffset) | (z + zOffset)) & 16) == 0
+						// Checks whether the position is at the specified border (the 16 bit is set for
+						// both 15+1 and 0-1)
+						|| worldObj.getChunkProvider().getLoadedChunk(xPosition + xOffset, zPosition + zOffset) != null;
+
+				if (neighborColumnExists) {
+					for (int sec = yMax >> 4; sec >= yMin >> 4; --sec) {
+						if ((emptySections & (1 << sec)) != 0)
+							alfheim$scheduleRelightChecksForColumn(EnumSkyBlock.SKY, xBase + xOffset, zBase + zOffset,
+									sec << 4, (sec << 4) + 15);
+					}
+				} else {
+					alfheim$initNeighborLightChecks();
+
+					final EnumFacing.AxisDirection axisDirection = ((facing.getAxis() == EnumFacing.Axis.X ? z : x)
+							& 15) < 8 ? EnumFacing.AxisDirection.NEGATIVE : EnumFacing.AxisDirection.POSITIVE;
+					alfheim$neighborLightChecks[alfheim$getFlagIndex(EnumSkyBlock.SKY, facing, axisDirection,
+							EnumBoundaryFacing.OUT)] |= emptySections;
+
+					setChunkModified();
+				}
+			}
+		}
+	}
+
+	public LightingEngine alfheim$getLightingEngine() {
+		return alfheim$lightingEngine;
+	}
+
+	public boolean alfheim$isLightInitialized() {
+		return alfheim$isLightInitialized;
+	}
+
+	public void alfheim$setLightInitialized(final boolean lightInitialized) {
+		alfheim$isLightInitialized = lightInitialized;
+	}
+
+	public void alfheim$setSkylightUpdatedPublic() {
+		func_177441_y();
+	}
+
+	public void alfheim$initNeighborLightChecks() {
+		if (alfheim$neighborLightChecks == null) {
+			alfheim$neighborLightChecks = new short[32];
+		}
+	}
+
+	public byte alfheim$getCachedLightFor(final EnumSkyBlock lightType, final BlockPos blockPos) {
+		final int x = blockPos.x & 15;
+		final int y = blockPos.y;
+		final int z = blockPos.z & 15;
+
+		final ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
+
+		if (extendedblockstorage == null)
+			return canSeeSky(blockPos) ? (byte) lightType.defaultLightValue : 0;
+		else if (lightType == EnumSkyBlock.SKY)
+			return !worldObj.provider.getHasNoSky() ? (byte) extendedblockstorage.getExtSkylightValue(x, y & 15, z) : 0;
+		else
+			return lightType == EnumSkyBlock.BLOCK ? (byte) extendedblockstorage.getExtBlocklightValue(x, y & 15, z)
+					: (byte) lightType.defaultLightValue;
 	}
 }

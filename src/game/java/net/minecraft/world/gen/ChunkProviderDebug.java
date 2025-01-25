@@ -185,4 +185,13 @@ public class ChunkProviderDebug implements IChunkProvider {
 		field_177462_b = MathHelper.ceiling_float_int(MathHelper.sqrt_float((float) field_177464_a.size()));
 		field_181039_c = MathHelper.ceiling_float_int((float) field_177464_a.size() / (float) field_177462_b);
 	}
+
+	public Chunk getLoadedChunk(int var1, int var2) {
+		/**+
+		 * Will return back a chunk, if it doesn't exist and its not a
+		 * MP client it will generates all the blocks for the specified
+		 * chunk from the map seed and chunk seed
+		 */
+		return provideChunk(var1, var2);
+	}
 }

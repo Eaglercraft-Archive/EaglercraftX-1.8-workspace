@@ -44,6 +44,7 @@ public class S21PacketChunkData implements Packet<INetHandlerPlayClient> {
 		this.chunkX = chunkIn.xPosition;
 		this.chunkZ = chunkIn.zPosition;
 		this.field_149279_g = parFlag;
+		chunkIn.alfheim$getLightingEngine().processLightUpdates();
 		this.extractedData = func_179756_a(chunkIn, parFlag, !chunkIn.getWorld().provider.getHasNoSky(), parInt1);
 	}
 

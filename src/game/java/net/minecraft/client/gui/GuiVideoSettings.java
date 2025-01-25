@@ -49,9 +49,12 @@ public class GuiVideoSettings extends GuiScreen {
 			GameSettings.Options.RENDER_CLOUDS, GameSettings.Options.PARTICLES, GameSettings.Options.FXAA,
 			GameSettings.Options.MIPMAP_LEVELS, GameSettings.Options.BLOCK_ALTERNATIVES,
 			GameSettings.Options.ENTITY_SHADOWS, GameSettings.Options.FOG, GameSettings.Options.EAGLER_DYNAMIC_LIGHTS,
-			GameSettings.Options.FULLSCREEN, GameSettings.Options.FNAW_SKINS, GameSettings.Options.HUD_FPS,
-			GameSettings.Options.HUD_COORDS, GameSettings.Options.HUD_PLAYER, GameSettings.Options.HUD_STATS,
-			GameSettings.Options.HUD_WORLD, GameSettings.Options.HUD_24H, GameSettings.Options.CHUNK_FIX };
+			GameSettings.Options.FULLSCREEN, GameSettings.Options.OF_CONNECTED_TEXTURES,
+			GameSettings.Options.OF_BETTER_GRASS, GameSettings.Options.OF_CUSTOM_SKIES,
+			GameSettings.Options.OF_SMART_LEAVES, GameSettings.Options.OF_CUSTOM_ITEMS, GameSettings.Options.FNAW_SKINS,
+			GameSettings.Options.HUD_FPS, GameSettings.Options.HUD_COORDS, GameSettings.Options.HUD_PLAYER,
+			GameSettings.Options.HUD_STATS, GameSettings.Options.HUD_WORLD, GameSettings.Options.HUD_24H,
+			GameSettings.Options.CHUNK_FIX };
 
 	public GuiVideoSettings(GuiScreen parentScreenIn, GameSettings gameSettingsIn) {
 		this.parentGuiScreen = parentScreenIn;

@@ -53,4 +53,6 @@ public interface IBlockAccess {
 	int getStrongPower(BlockPos var1, EnumFacing var2);
 
 	WorldType getWorldType();
+
+	int getLightFor(final EnumSkyBlock lightType, final BlockPos blockPos);
 }

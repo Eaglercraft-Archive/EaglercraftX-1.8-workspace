@@ -19,6 +19,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.optifine.Config;
+import net.optifine.CustomItems;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -84,7 +86,12 @@ public abstract class LayerArmorBase<T extends ModelBase> implements LayerRender
 			modelbase.setLivingAnimations(entitylivingbaseIn, armorSlot, parFloat2, parFloat3);
 			this.func_177179_a((T) modelbase, parInt1);
 			boolean flag = this.isSlotForLeggings(parInt1);
-			this.renderer.bindTexture(this.getArmorResource(itemarmor, flag));
+
+			if (!Config.isCustomItems()
+					|| !CustomItems.bindCustomArmorTexture(itemstack, flag ? 2 : 1, (String) null)) {
+				this.renderer.bindTexture(this.getArmorResource(itemarmor, flag));
+			}
+
 			DeferredStateManager.setDefaultMaterialConstants();
 			switch (itemarmor.getArmorMaterial()) {
 			case CHAIN:
@@ -111,7 +118,10 @@ public abstract class LayerArmorBase<T extends ModelBase> implements LayerRender
 				float f2 = (float) (i & 255) / 255.0F;
 				GlStateManager.color(this.colorR * f, this.colorG * f1, this.colorB * f2, this.alpha);
 				modelbase.render(entitylivingbaseIn, armorSlot, parFloat2, parFloat4, parFloat5, parFloat6, parFloat7);
-				this.renderer.bindTexture(this.getArmorResource(itemarmor, flag, "overlay"));
+				if (!Config.isCustomItems()
+						|| !CustomItems.bindCustomArmorTexture(itemstack, flag ? 2 : 1, "overlay")) {
+					this.renderer.bindTexture(this.getArmorResource(itemarmor, flag, "overlay"));
+				}
 			case CHAIN:
 			case IRON:
 			case GOLD:
@@ -148,7 +158,8 @@ public abstract class LayerArmorBase<T extends ModelBase> implements LayerRender
 									modelbase.setLivingAnimations(entitylivingbaseIn, armorSlot, parFloat2, parFloat3);
 									LayerArmorBase.this.func_177179_a((T) modelbase, parInt1);
 									LayerArmorBase.this.func_177183_a(entitylivingbaseIn, (T) modelbase, armorSlot,
-											parFloat2, parFloat3, parFloat4, parFloat5, parFloat6, parFloat7);
+											parFloat2, parFloat3, parFloat4, parFloat5, parFloat6, parFloat7,
+											itemstack);
 									DeferredStateManager.setHDRTranslucentPassBlendFunc();
 									GlStateManager.enableBlend();
 									GlStateManager.popMatrix();
@@ -160,7 +171,7 @@ public abstract class LayerArmorBase<T extends ModelBase> implements LayerRender
 						break;
 					}
 					this.func_177183_a(entitylivingbaseIn, (T) modelbase, armorSlot, parFloat2, parFloat3, parFloat4,
-							parFloat5, parFloat6, parFloat7);
+							parFloat5, parFloat6, parFloat7, itemstack);
 				}
 
 			}
@@ -180,7 +191,11 @@ public abstract class LayerArmorBase<T extends ModelBase> implements LayerRender
 	}
 
 	private void func_177183_a(EntityLivingBase entitylivingbaseIn, T modelbaseIn, float parFloat1, float parFloat2,
-			float parFloat3, float parFloat4, float parFloat5, float parFloat6, float parFloat7) {
+			float parFloat3, float parFloat4, float parFloat5, float parFloat6, float parFloat7, ItemStack itemstack) {
+		if (Config.isCustomItems() && CustomItems.renderCustomArmorEffect(entitylivingbaseIn, itemstack, modelbaseIn,
+				parFloat1, parFloat2, parFloat3, parFloat4, parFloat5, parFloat6, parFloat7)) {
+			return;
+		}
 		float f = (float) entitylivingbaseIn.ticksExisted + parFloat3;
 		this.renderer.bindTexture(ENCHANTED_ITEM_GLINT_RES);
 		GlStateManager.enableBlend();

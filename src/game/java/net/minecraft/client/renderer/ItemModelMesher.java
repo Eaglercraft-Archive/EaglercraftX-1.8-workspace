@@ -12,6 +12,9 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import net.optifine.Config;
+import net.optifine.CustomItems;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -63,6 +66,10 @@ public class ItemModelMesher {
 
 		if (ibakedmodel == null) {
 			ibakedmodel = this.modelManager.getMissingModel();
+		}
+
+		if (Config.isCustomItems()) {
+			ibakedmodel = CustomItems.getCustomItemModel(stack, ibakedmodel, (ResourceLocation) null, true);
 		}
 
 		return ibakedmodel;

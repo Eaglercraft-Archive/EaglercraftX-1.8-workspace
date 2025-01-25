@@ -1,5 +1,6 @@
 package net.minecraft.world;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -76,8 +77,10 @@ public class ChunkCache implements IBlockAccess {
 	}
 
 	public int getCombinedLight(BlockPos blockpos, int i) {
-		int j = this.getLightForExt(EnumSkyBlock.SKY, blockpos);
-		int k = this.getLightForExt(EnumSkyBlock.BLOCK, blockpos);
+		IBlockState state = getBlockState(blockpos);
+		Block b = state.getBlock();
+		int j = b.alfheim$getLightFor(state, this, EnumSkyBlock.SKY, blockpos);
+		int k = b.alfheim$getLightFor(state, this, EnumSkyBlock.BLOCK, blockpos);
 		if (k < i) {
 			k = i;
 		}
@@ -106,37 +109,6 @@ public class ChunkCache implements IBlockAccess {
 
 	public int getBiomeColorForCoords(BlockPos var1, int index) {
 		return this.worldObj.getBiomeColorForCoords(var1, index);
-	}
-
-	private int getLightForExt(EnumSkyBlock pos, BlockPos parBlockPos) {
-		if (pos == EnumSkyBlock.SKY && this.worldObj.provider.getHasNoSky()) {
-			return Chunk.getNoSkyLightValue();
-		} else if (parBlockPos.getY() >= 0 && parBlockPos.getY() < 256) {
-			if (this.getBlockState(parBlockPos).getBlock().getUseNeighborBrightness()) {
-				int l = 0;
-
-				EnumFacing[] facings = EnumFacing._VALUES;
-				BlockPos tmp = new BlockPos(0, 0, 0);
-				for (int i = 0; i < facings.length; ++i) {
-					int k = this.getLightFor(pos, parBlockPos.offsetEvenFaster(facings[i], tmp));
-					if (k > l) {
-						l = k;
-					}
-
-					if (l >= 15) {
-						return l;
-					}
-				}
-
-				return l;
-			} else {
-				int i = (parBlockPos.getX() >> 4) - this.chunkX;
-				int j = (parBlockPos.getZ() >> 4) - this.chunkZ;
-				return this.chunkArray[i][j].getLightFor(pos, parBlockPos);
-			}
-		} else {
-			return pos.defaultLightValue;
-		}
 	}
 
 	/**+

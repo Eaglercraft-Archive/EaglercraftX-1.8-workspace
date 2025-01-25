@@ -3,11 +3,15 @@ package net.minecraft.client.resources;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
+import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
+import net.lax1dude.eaglercraft.v1_8.minecraft.ResourceIndex;
 import net.lax1dude.eaglercraft.v1_8.opengl.ImageData;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.data.IMetadataSection;
@@ -34,8 +38,22 @@ import net.minecraft.util.ResourceLocation;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-public class DefaultResourcePack implements IResourcePack {
+public class DefaultResourcePack extends ResourceIndex implements IResourcePack {
 	public static final Set<String> defaultResourceDomains = ImmutableSet.of("minecraft", "eagler");
+
+	private final Collection<String> propertyFilesIndex;
+
+	public DefaultResourcePack() {
+		String str = EagRuntime.getResourceString("/assets/minecraft/optifine/_property_files_index.json");
+		if (str != null) {
+			Collection<String> lst = EaglerFolderResourcePack.loadPropertyFileList(str);
+			if (lst != null) {
+				propertyFilesIndex = lst;
+				return;
+			}
+		}
+		propertyFilesIndex = Collections.emptyList();
+	}
 
 	public InputStream getInputStream(ResourceLocation parResourceLocation) throws IOException {
 		InputStream inputstream = this.getResourceStream(parResourceLocation);
@@ -85,5 +103,20 @@ public class DefaultResourcePack implements IResourcePack {
 
 	public String getPackName() {
 		return "Default";
+	}
+
+	@Override
+	public ResourceIndex getEaglerFileIndex() {
+		return this;
+	}
+
+	@Override
+	protected Collection<String> getPropertiesFiles0() {
+		return propertyFilesIndex;
+	}
+
+	@Override
+	protected Collection<String> getCITPotionsFiles0() {
+		return Collections.emptyList();
 	}
 }

@@ -545,4 +545,13 @@ public class ChunkProviderGenerate implements IChunkProvider {
 	public Chunk provideChunk(BlockPos blockpos) {
 		return this.provideChunk(blockpos.getX() >> 4, blockpos.getZ() >> 4);
 	}
+
+	public Chunk getLoadedChunk(int var1, int var2) {
+		/**+
+		 * Will return back a chunk, if it doesn't exist and its not a
+		 * MP client it will generates all the blocks for the specified
+		 * chunk from the map seed and chunk seed
+		 */
+		return provideChunk(var1, var2);
+	}
 }

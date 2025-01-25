@@ -32,16 +32,22 @@ public class ModelManager implements IResourceManagerReloadListener {
 	private final BlockModelShapes modelProvider;
 	private IBakedModel defaultModel;
 
+	public ModelBakery modelbakerytmp; // eagler hack
+
 	public ModelManager(TextureMap textures) {
 		this.texMap = textures;
 		this.modelProvider = new BlockModelShapes(this);
 	}
 
 	public void onResourceManagerReload(IResourceManager iresourcemanager) {
-		ModelBakery modelbakery = new ModelBakery(iresourcemanager, this.texMap, this.modelProvider);
-		this.modelRegistry = modelbakery.setupModelRegistry();
-		this.defaultModel = (IBakedModel) this.modelRegistry.getObject(ModelBakery.MODEL_MISSING);
-		this.modelProvider.reloadModels();
+		modelbakerytmp = new ModelBakery(iresourcemanager, this.texMap, this.modelProvider);
+		try {
+			this.modelRegistry = modelbakerytmp.setupModelRegistry();
+			this.defaultModel = (IBakedModel) this.modelRegistry.getObject(ModelBakery.MODEL_MISSING);
+			this.modelProvider.reloadModels();
+		} finally {
+			modelbakerytmp = null;
+		}
 	}
 
 	public IBakedModel getModel(ModelResourceLocation modelLocation) {

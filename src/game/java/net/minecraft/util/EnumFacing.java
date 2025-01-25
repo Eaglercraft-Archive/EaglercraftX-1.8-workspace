@@ -52,7 +52,7 @@ public enum EnumFacing implements IStringSerializable {
 	/**+
 	 * All Facings with horizontal axis in order S-W-N-E
 	 */
-	private static final EnumFacing[] HORIZONTALS = new EnumFacing[4];
+	public static final EnumFacing[] HORIZONTALS = new EnumFacing[4];
 	private static final Map<String, EnumFacing> NAME_LOOKUP = Maps.newHashMap();
 
 	private EnumFacing(int indexIn, int oppositeIn, int horizontalIndexIn, String nameIn,

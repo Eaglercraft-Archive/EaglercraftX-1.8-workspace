@@ -830,6 +830,12 @@ eaglercraft.options.vsyncReEnabled.2=Using the WASM-GC version of EaglercraftX w
 eaglercraft.options.vsyncReEnabled.3=VSync enabled causes bad input lag, sorry!
 eaglercraft.options.vsyncReEnabled.continue=Continue
 
+eaglercraft.options.connectedTexturesOF=Connected Textures
+eaglercraft.options.betterGrassOF=Better Grass/Snow
+eaglercraft.options.customSkiesOF=Custom Skies
+eaglercraft.options.smartLeavesOF=Smart Leaves
+eaglercraft.options.customItemsOF=Custom Items
+
 selectServer.title=Select Server
 selectServer.empty=empty
 selectServer.select=Join Server
