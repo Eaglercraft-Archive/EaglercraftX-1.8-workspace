@@ -26,7 +26,6 @@ import net.lax1dude.eaglercraft.v1_8.opengl.WorldVertexBufferUploader;
  */
 public class Tessellator {
 	private WorldRenderer worldRenderer;
-	private WorldVertexBufferUploader vboUploader = new WorldVertexBufferUploader();
 
 	public static final int GL_TRIANGLES = RealOpenGLEnums.GL_TRIANGLES;
 	public static final int GL_TRIANGLE_STRIP = RealOpenGLEnums.GL_TRIANGLE_STRIP;
@@ -55,7 +54,7 @@ public class Tessellator {
 	 */
 	public void draw() {
 		this.worldRenderer.finishDrawing();
-		this.vboUploader.func_181679_a(this.worldRenderer);
+		WorldVertexBufferUploader.func_181679_a(this.worldRenderer);
 	}
 
 	public WorldRenderer getWorldRenderer() {

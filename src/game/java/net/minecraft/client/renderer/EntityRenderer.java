@@ -115,6 +115,8 @@ import net.optifine.Config;
 public class EntityRenderer implements IResourceManagerReloadListener {
 	private static final Logger logger = LogManager.getLogger();
 	private static final ResourceLocation locationRainPng = new ResourceLocation("textures/environment/rain.png");
+	private static final ResourceLocation locationRainDeferredPng = new ResourceLocation(
+			"eagler:glsl/deferred/rain.png");
 	private static final ResourceLocation locationSnowPng = new ResourceLocation("textures/environment/snow.png");
 	public static boolean anaglyphEnable;
 	public static int anaglyphField;
@@ -178,9 +180,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 	private int frameCount;
 	private GameOverlayFramebuffer overlayFramebuffer;
 	private float eagPartialTicks = 0.0f;
-
 	public float currentProjMatrixFOV = 0.0f;
-
 	private boolean initializedOF = false;
 
 	public EntityRenderer(Minecraft mcIn, IResourceManager resourceManagerIn) {
@@ -1370,7 +1370,8 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 			GlStateManager.matrixMode(GL_MODELVIEW);
 			GlStateManager.pushMatrix();
 			this.setupFog(0, partialTicks);
-			renderGlobalIn.renderClouds(partialTicks, pass);
+			// renderGlobalIn.renderClouds(partialTicks, pass);
+			renderGlobalIn.cloudRenderer.renderClouds(partialTicks, pass);
 			GlStateManager.disableFog();
 			GlStateManager.popMatrix();
 			GlStateManager.matrixMode(GL_PROJECTION);
@@ -1542,8 +1543,7 @@ public class EntityRenderer implements IResourceManagerReloadListener {
 
 									b1 = 0;
 									this.mc.getTextureManager()
-											.bindTexture(df ? new ResourceLocation("eagler:glsl/deferred/rain.png")
-													: locationRainPng);
+											.bindTexture(df ? locationRainDeferredPng : locationRainPng);
 									if (df) {
 										DeferredStateManager.setRoughnessConstant(0.5f);
 										DeferredStateManager.setMetalnessConstant(0.05f);

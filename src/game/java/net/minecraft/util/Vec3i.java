@@ -66,21 +66,21 @@ public class Vec3i implements Comparable<Vec3i> {
 	/**+
 	 * Get the X coordinate
 	 */
-	public int getX() {
+	public final int getX() {
 		return this.x;
 	}
 
 	/**+
 	 * Get the Y coordinate
 	 */
-	public int getY() {
+	public final int getY() {
 		return this.y;
 	}
 
 	/**+
 	 * Get the Z coordinate
 	 */
-	public int getZ() {
+	public final int getZ() {
 		return this.z;
 	}
 

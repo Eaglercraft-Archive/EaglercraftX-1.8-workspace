@@ -2,7 +2,6 @@ package net.minecraft.client.resources;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Set;
 
 import net.lax1dude.eaglercraft.v1_8.minecraft.ResourceIndex;

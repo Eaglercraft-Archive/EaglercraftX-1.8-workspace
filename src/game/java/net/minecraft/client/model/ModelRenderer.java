@@ -205,7 +205,7 @@ public class ModelRenderer {
 				GlStateManager.translate(this.rotationPointX * parFloat1, this.rotationPointY * parFloat1,
 						this.rotationPointZ * parFloat1);
 
-				// note: vanilla order for this function is YXZ not ZYX for some reason
+				// note: vanilla order for this transformation was YXZ not ZYX for some reason
 				GlStateManager.rotateZYXRad(this.rotateAngleX, this.rotateAngleY, this.rotateAngleZ);
 
 				GlStateManager.callList(this.displayList);

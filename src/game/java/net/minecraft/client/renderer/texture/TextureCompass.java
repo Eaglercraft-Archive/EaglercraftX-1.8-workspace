@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.texture;
 
-import net.lax1dude.eaglercraft.v1_8.internal.IFramebufferGL;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerTextureAtlasSprite;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
