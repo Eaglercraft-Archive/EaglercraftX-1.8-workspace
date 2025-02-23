@@ -77,7 +77,7 @@ import net.minecraft.world.WorldServer;
  */
 public abstract class Entity implements ICommandSender {
 	private static final AxisAlignedBB ZERO_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
-	private static int nextEntityID;
+	private static int nextEntityID = 1;
 	private int entityId;
 	public double renderDistanceWeight;
 	public boolean preventEntitySpawning;
@@ -2151,12 +2151,12 @@ public abstract class Entity implements ICommandSender {
 				return Entity.this.getName();
 			}
 		});
-		category.addCrashSection("Entity\'s Exact location", String.format("%.2f, %.2f, %.2f",
+		category.addCrashSection("Entity\'s Exact location", HString.format("%.2f, %.2f, %.2f",
 				new Object[] { Double.valueOf(this.posX), Double.valueOf(this.posY), Double.valueOf(this.posZ) }));
 		category.addCrashSection("Entity\'s Block location",
 				CrashReportCategory.getCoordinateInfo((double) MathHelper.floor_double(this.posX),
 						(double) MathHelper.floor_double(this.posY), (double) MathHelper.floor_double(this.posZ)));
-		category.addCrashSection("Entity\'s Momentum", String.format("%.2f, %.2f, %.2f", new Object[] {
+		category.addCrashSection("Entity\'s Momentum", HString.format("%.2f, %.2f, %.2f", new Object[] {
 				Double.valueOf(this.motionX), Double.valueOf(this.motionY), Double.valueOf(this.motionZ) }));
 		category.addCrashSectionCallable("Entity\'s Rider", new Callable<String>() {
 			public String call() throws Exception {

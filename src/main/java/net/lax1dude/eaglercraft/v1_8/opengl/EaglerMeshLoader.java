@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2024 lax1dude. All Rights Reserved.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+
 package net.lax1dude.eaglercraft.v1_8.opengl;
 
 import java.io.DataInputStream;
@@ -20,21 +36,6 @@ import net.minecraft.util.ResourceLocation;
 import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
 
-/**
- * Copyright (c) 2024 lax1dude. All Rights Reserved.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * 
- */
 public class EaglerMeshLoader implements IResourceManagerReloadListener {
 
 	private static final Logger logger = LogManager.getLogger("EaglerMeshLoader");
@@ -105,13 +106,13 @@ public class EaglerMeshLoader implements IResourceManagerReloadListener {
 			}
 
 			if(meshStruct.vertexArray == null) {
-				meshStruct.vertexArray = EaglercraftGPU.createGLBufferArray();
+				meshStruct.vertexArray = EaglercraftGPU.createGLVertexArray();
 			}
 			if(meshStruct.vertexBuffer == null) {
-				meshStruct.vertexBuffer = _wglGenBuffers();
+				meshStruct.vertexBuffer = EaglercraftGPU.createGLArrayBuffer();
 			}
 			if(meshStruct.indexBuffer == null) {
-				meshStruct.indexBuffer = _wglGenBuffers();
+				meshStruct.indexBuffer = EaglercraftGPU.createGLElementArrayBuffer();
 			}
 			
 			up1.position(0).limit(intsOfVertex);
@@ -119,7 +120,7 @@ public class EaglerMeshLoader implements IResourceManagerReloadListener {
 			EaglercraftGPU.bindVAOGLArrayBufferNow(meshStruct.vertexBuffer);
 			_wglBufferData(GL_ARRAY_BUFFER, up1, GL_STATIC_DRAW);
 			
-			EaglercraftGPU.bindGLBufferArray(meshStruct.vertexArray);
+			EaglercraftGPU.bindGLVertexArray(meshStruct.vertexArray);
 			
 			up1.position(intsOfVertex).limit(intsTotal);
 			
@@ -138,15 +139,15 @@ public class EaglerMeshLoader implements IResourceManagerReloadListener {
 			EaglercraftGPU.vertexAttribPointer(meshStruct.hasTexture ? 2 : 1, 4, GL_BYTE, true, stride, 12);
 		}catch(Throwable ex) {
 			if(meshStruct.vertexArray != null) {
-				EaglercraftGPU.destroyGLBufferArray(meshStruct.vertexArray);
+				EaglercraftGPU.destroyGLVertexArray(meshStruct.vertexArray);
 				meshStruct.vertexArray = null;
 			}
 			if(meshStruct.vertexBuffer != null) {
-				_wglDeleteBuffers(meshStruct.vertexBuffer);
+				EaglercraftGPU.destroyGLArrayBuffer(meshStruct.vertexBuffer);
 				meshStruct.vertexBuffer = null;
 			}
 			if(meshStruct.indexBuffer != null) {
-				_wglDeleteBuffers(meshStruct.indexBuffer);
+				EaglercraftGPU.destroyGLElementArrayBuffer(meshStruct.indexBuffer);
 				meshStruct.indexBuffer = null;
 			}
 			

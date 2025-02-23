@@ -1,9 +1,5 @@
-package net.lax1dude.eaglercraft.v1_8.opengl;
-
-import net.lax1dude.eaglercraft.v1_8.opengl.SoftGLBufferArray.Attrib;
-
-/**
- * Copyright (c) 2024 lax1dude. All Rights Reserved.
+/*
+ * Copyright (c) 2022 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -17,15 +13,9 @@ import net.lax1dude.eaglercraft.v1_8.opengl.SoftGLBufferArray.Attrib;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-class SoftGLBufferState {
 
-	final Attrib[] attribs = new Attrib[24];
-	int[] attribDivisors = new int[24];
-	int hasAttribDivisorMask = 0;
-	int oldEnabled = 0;
-	int oldEnabledCnt = -1;
+package net.lax1dude.eaglercraft.v1_8.internal;
 
-	SoftGLBufferState() {
-	}
+public interface IVertexArrayGL extends IObjectGL {
 
 }

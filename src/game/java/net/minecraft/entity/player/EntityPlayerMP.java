@@ -482,7 +482,7 @@ public class EntityPlayerMP extends EntityPlayer implements ICrafting {
 		EntityLivingBase entitylivingbase = this.func_94060_bK();
 		if (entitylivingbase != null) {
 			EntityList.EntityEggInfo entitylist$entityegginfo = (EntityList.EntityEggInfo) EntityList.entityEggs
-					.get(Integer.valueOf(EntityList.getEntityID(entitylivingbase)));
+					.get(EntityList.getEntityID(entitylivingbase));
 			if (entitylist$entityegginfo != null) {
 				this.triggerAchievement(entitylist$entityegginfo.field_151513_e);
 			}

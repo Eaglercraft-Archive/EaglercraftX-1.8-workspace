@@ -1,6 +1,8 @@
 package net.minecraft.item;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,9 +10,6 @@ import java.util.Set;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
-import com.carrotsearch.hppc.ObjectIntHashMap;
-import com.carrotsearch.hppc.ObjectIntMap;
-import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 
@@ -57,7 +56,7 @@ public class ItemPotion extends Item {
 	 * recalculating it).
 	 */
 	private IntObjectMap<List<PotionEffect>> effectCache = new IntObjectHashMap<>();
-	private static final ObjectIntMap<List<PotionEffect>> SUB_ITEMS_CACHE = new ObjectIntHashMap<>();
+	private static final Map<List<PotionEffect>, Integer> SUB_ITEMS_CACHE = new HashMap<>();
 
 	public ItemPotion() {
 		this.setMaxStackSize(1);
@@ -340,15 +339,18 @@ public class ItemPotion extends Item {
 
 						List list = PotionHelper.getPotionEffects(i1, false);
 						if (list != null && !list.isEmpty()) {
-							SUB_ITEMS_CACHE.put(list, i1);
+							SUB_ITEMS_CACHE.put(list, Integer.valueOf(i1));
 						}
 					}
 				}
 			}
 		}
 
-		for (IntCursor cur : SUB_ITEMS_CACHE.values()) {
-			subItems.add(new ItemStack(itemIn, 1, cur.value));
+		Iterator iterator = SUB_ITEMS_CACHE.values().iterator();
+
+		while (iterator.hasNext()) {
+			int j1 = ((Integer) iterator.next()).intValue();
+			subItems.add(new ItemStack(itemIn, 1, j1));
 		}
 
 	}

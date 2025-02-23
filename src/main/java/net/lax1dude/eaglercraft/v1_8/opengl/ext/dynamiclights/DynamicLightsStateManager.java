@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2024 lax1dude. All Rights Reserved.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+
 package net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights;
 
 import java.util.ArrayList;
@@ -14,21 +30,6 @@ import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.MathHelper;
 
-/**
- * Copyright (c) 2024 lax1dude. All Rights Reserved.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * 
- */
 public class DynamicLightsStateManager {
 
 	static final DynamicLightsPipelineCompiler deferredExtPipeline = new DynamicLightsPipelineCompiler();
@@ -43,7 +44,7 @@ public class DynamicLightsStateManager {
 	static int lastTotal = 0;
 	private static long lastTick = 0l;
 
-	public static final void enableDynamicLightsRender() {
+	public static void enableDynamicLightsRender() {
 		if(bucketLoader == null) {
 			bucketLoader = new DynamicLightBucketLoader();
 			bucketLoader.initialize();
@@ -59,11 +60,11 @@ public class DynamicLightsStateManager {
 		maxListLengthTracker = 0;
 	}
 
-	public static final void bindAcceleratedEffectRenderer(EffectRenderer renderer) {
+	public static void bindAcceleratedEffectRenderer(EffectRenderer renderer) {
 		renderer.acceleratedParticleRenderer = accelParticleRenderer;
 	}
 
-	public static final void disableDynamicLightsRender(boolean unloadPipeline) {
+	public static void disableDynamicLightsRender(boolean unloadPipeline) {
 		if(bucketLoader != null) {
 			bucketLoader.destroy();
 			bucketLoader = null;
@@ -81,21 +82,21 @@ public class DynamicLightsStateManager {
 		maxListLengthTracker = 0;
 	}
 
-	public static final boolean isDynamicLightsRender() {
+	public static boolean isDynamicLightsRender() {
 		return bucketLoader != null;
 	}
 
-	public static final boolean isInDynamicLightsPass() {
+	public static boolean isInDynamicLightsPass() {
 		return GlStateManager.isExtensionPipeline() && bucketLoader != null;
 	}
 
-	public static final void reportForwardRenderObjectPosition(int centerX, int centerY, int centerZ) {
+	public static void reportForwardRenderObjectPosition(int centerX, int centerY, int centerZ) {
 		if(bucketLoader != null) {
 			bucketLoader.bindLightSourceBucket(centerX, centerY, centerZ, 0);
 		}
 	}
 
-	public static final void reportForwardRenderObjectPosition2(float x, float y, float z) {
+	public static void reportForwardRenderObjectPosition2(float x, float y, float z) {
 		if(bucketLoader != null) {
 			float posX = (float)((x + TileEntityRendererDispatcher.staticPlayerX) - (MathHelper.floor_double(TileEntityRendererDispatcher.staticPlayerX / 16.0) << 4));
 			float posY = (float)((y + TileEntityRendererDispatcher.staticPlayerY) - (MathHelper.floor_double(TileEntityRendererDispatcher.staticPlayerY / 16.0) << 4));
@@ -104,7 +105,7 @@ public class DynamicLightsStateManager {
 		}
 	}
 
-	public static final void renderDynamicLight(String lightName, double posX, double posY, double posZ, float radius) {
+	public static void renderDynamicLight(String lightName, double posX, double posY, double posZ, float radius) {
 		if(bucketLoader != null) {
 			DynamicLightInstance dl;
 			if(instancePoolIndex < lightInstancePool.size()) {
@@ -118,7 +119,7 @@ public class DynamicLightsStateManager {
 		}
 	}
 
-	public static final void clearRenderList() {
+	public static void clearRenderList() {
 		if(instancePoolIndex > maxListLengthTracker) {
 			maxListLengthTracker = instancePoolIndex;
 		}
@@ -126,7 +127,7 @@ public class DynamicLightsStateManager {
 		instancePoolIndex = 0;
 	}
 
-	public static final void commitLightSourceBuckets(double renderPosX, double renderPosY, double renderPosZ) {
+	public static void commitLightSourceBuckets(double renderPosX, double renderPosY, double renderPosZ) {
 		lastTotal = lightRenderList.size();
 		if(bucketLoader != null) {
 			bucketLoader.clearBuckets();
@@ -148,12 +149,12 @@ public class DynamicLightsStateManager {
 		clearRenderList();
 	}
 
-	public static final void setupInverseViewMatrix() {
+	public static void setupInverseViewMatrix() {
 		Matrix4f.invert(GlStateManager.getModelViewReference(), inverseViewMatrix);
 		inverseViewMatrixSerial = GlStateManager.getModelViewSerial();
 	}
 
-	private static final void updateTimers() {
+	private static void updateTimers() {
 		long millis = EagRuntime.steadyTimeMillis();
 		if(millis - lastTick > 5000l) {
 			lastTick = millis;
@@ -168,7 +169,7 @@ public class DynamicLightsStateManager {
 		}
 	}
 
-	public static final void destroyAll() {
+	public static void destroyAll() {
 		lightInstancePool = new ArrayList<>();
 	}
 

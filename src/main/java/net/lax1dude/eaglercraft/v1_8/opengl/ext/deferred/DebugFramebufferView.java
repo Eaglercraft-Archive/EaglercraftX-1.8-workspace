@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 lax1dude. All Rights Reserved.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+
 package net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred;
 
 import java.util.Arrays;
@@ -15,21 +31,6 @@ import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
 import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 import static net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.ExtGLEnums.*;
 
-/**
- * Copyright (c) 2023 lax1dude. All Rights Reserved.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * 
- */
 public class DebugFramebufferView {
 
 	public static boolean debugViewShown = false;
@@ -82,7 +83,7 @@ public class DebugFramebufferView {
 			(new DebugFramebufferView("Sun Shadow Depth: LOD 1", (pipeline) -> {
 				if(pipeline.config.is_rendering_shadowsSun_clamped < 1) throw new NoDataException();
 				PipelineShaderGBufferDebugView dbv = pipeline.useDebugViewShader(5);
-				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / pipeline.config.is_rendering_shadowsSun_clamped, 0.0f);
+				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / Math.min(pipeline.config.is_rendering_shadowsSun_clamped, 3), 0.0f);
 				GlStateManager.setActiveTexture(GL_TEXTURE0);
 				GlStateManager.bindTexture(pipeline.sunShadowDepthBuffer);
 				_wglTexParameteri(GL_TEXTURE_2D, _GL_TEXTURE_COMPARE_MODE, GL_NONE);
@@ -92,7 +93,7 @@ public class DebugFramebufferView {
 			(new DebugFramebufferView("Sun Shadow Color: LOD 1", (pipeline) -> {
 				if(pipeline.config.is_rendering_shadowsSun_clamped < 1 || !pipeline.config.is_rendering_shadowsColored) throw new NoDataException();
 				PipelineShaderGBufferDebugView dbv = pipeline.useDebugViewShader(10);
-				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / pipeline.config.is_rendering_shadowsSun_clamped, 0.0f);
+				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / Math.min(pipeline.config.is_rendering_shadowsSun_clamped, 3), 0.0f);
 				GlStateManager.setActiveTexture(GL_TEXTURE1);
 				GlStateManager.bindTexture(pipeline.sunShadowColorBuffer);
 				GlStateManager.setActiveTexture(GL_TEXTURE0);
@@ -104,7 +105,7 @@ public class DebugFramebufferView {
 			(new DebugFramebufferView("Sun Shadow Depth: LOD 2", (pipeline) -> {
 				if(pipeline.config.is_rendering_shadowsSun_clamped < 2) throw new NoDataException();
 				PipelineShaderGBufferDebugView dbv = pipeline.useDebugViewShader(5);
-				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / pipeline.config.is_rendering_shadowsSun_clamped, 1.0f);
+				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / Math.min(pipeline.config.is_rendering_shadowsSun_clamped, 3), 1.0f);
 				GlStateManager.setActiveTexture(GL_TEXTURE0);
 				GlStateManager.bindTexture(pipeline.sunShadowDepthBuffer);
 				_wglTexParameteri(GL_TEXTURE_2D, _GL_TEXTURE_COMPARE_MODE, GL_NONE);
@@ -114,7 +115,7 @@ public class DebugFramebufferView {
 			(new DebugFramebufferView("Sun Shadow Color: LOD 2", (pipeline) -> {
 				if(pipeline.config.is_rendering_shadowsSun_clamped < 2 || !pipeline.config.is_rendering_shadowsColored) throw new NoDataException();
 				PipelineShaderGBufferDebugView dbv = pipeline.useDebugViewShader(10);
-				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / pipeline.config.is_rendering_shadowsSun_clamped, 1.0f);
+				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / Math.min(pipeline.config.is_rendering_shadowsSun_clamped, 3), 1.0f);
 				GlStateManager.setActiveTexture(GL_TEXTURE1);
 				GlStateManager.bindTexture(pipeline.sunShadowColorBuffer);
 				GlStateManager.setActiveTexture(GL_TEXTURE0);
@@ -126,7 +127,7 @@ public class DebugFramebufferView {
 			(new DebugFramebufferView("Sun Shadow Depth: LOD 3", (pipeline) -> {
 				if(pipeline.config.is_rendering_shadowsSun_clamped < 3) throw new NoDataException();
 				PipelineShaderGBufferDebugView dbv = pipeline.useDebugViewShader(5);
-				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / pipeline.config.is_rendering_shadowsSun_clamped, 2.0f);
+				_wglUniform2f(dbv.uniforms.u_depthSliceStartEnd2f, 1.0f / Math.min(pipeline.config.is_rendering_shadowsSun_clamped, 3), 2.0f);
 				GlStateManager.setActiveTexture(GL_TEXTURE0);
 				GlStateManager.bindTexture(pipeline.sunShadowDepthBuffer);
 				_wglTexParameteri(GL_TEXTURE_2D, _GL_TEXTURE_COMPARE_MODE, GL_NONE);
@@ -142,6 +143,13 @@ public class DebugFramebufferView {
 				}
 				GlStateManager.setActiveTexture(GL_TEXTURE0);
 				GlStateManager.bindTexture(pipeline.sunLightingShadowTexture);
+				DrawUtils.drawStandardQuad2D();
+			})),
+			(new DebugFramebufferView("GBuffer Subsurface Scattering", (pipeline) -> {
+				if(!pipeline.config.is_rendering_subsurfaceScattering || Minecraft.getMinecraft().theWorld.provider.getDimensionId() != 0) throw new NoDataException();
+				pipeline.useDebugViewShader(6);
+				GlStateManager.setActiveTexture(GL_TEXTURE0);
+				GlStateManager.bindTexture(pipeline.subsurfaceScatteringTexture);
 				DrawUtils.drawStandardQuad2D();
 			})),
 			(new DebugFramebufferView("Light Shafts Buffer", (pipeline) -> {

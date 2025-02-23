@@ -1,10 +1,4 @@
-package net.lax1dude.eaglercraft.v1_8.opengl;
-
-import net.lax1dude.eaglercraft.v1_8.internal.IBufferArrayGL;
-import net.lax1dude.eaglercraft.v1_8.internal.IBufferGL;
-import net.lax1dude.eaglercraft.v1_8.opengl.FixedFunctionShader.FixedFunctionState;
-
-/**
+/*
  * Copyright (c) 2024 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -19,9 +13,16 @@ import net.lax1dude.eaglercraft.v1_8.opengl.FixedFunctionShader.FixedFunctionSta
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
+package net.lax1dude.eaglercraft.v1_8.opengl;
+
+import net.lax1dude.eaglercraft.v1_8.internal.IVertexArrayGL;
+import net.lax1dude.eaglercraft.v1_8.internal.IBufferGL;
+import net.lax1dude.eaglercraft.v1_8.opengl.FixedFunctionShader.FixedFunctionState;
+
 public class HighPolyMesh {
 
-	IBufferArrayGL vertexArray;
+	IVertexArrayGL vertexArray;
 	IBufferGL vertexBuffer;
 	IBufferGL indexBuffer;
 
@@ -30,7 +31,7 @@ public class HighPolyMesh {
 
 	boolean hasTexture;
 
-	public HighPolyMesh(IBufferArrayGL vertexArray, IBufferGL vertexBuffer, IBufferGL indexBuffer, int vertexCount,
+	public HighPolyMesh(IVertexArrayGL vertexArray, IBufferGL vertexBuffer, IBufferGL indexBuffer, int vertexCount,
 			int indexCount, boolean hasTexture) {
 		this.vertexArray = vertexArray;
 		this.vertexBuffer = vertexBuffer;

@@ -1,10 +1,4 @@
-package net.lax1dude.eaglercraft.v1_8.sp.ipc;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
-/**
+/*
  * Copyright (c) 2023-2024 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -19,6 +13,14 @@ import java.io.IOException;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
+package net.lax1dude.eaglercraft.v1_8.sp.ipc;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 public class IPCPacket15Crashed implements IPCPacketBase {
 	
 	public static final int ID = 0x15;
@@ -34,12 +36,17 @@ public class IPCPacket15Crashed implements IPCPacketBase {
 
 	@Override
 	public void deserialize(DataInput bin) throws IOException {
-		crashReport = bin.readUTF();
+		int len = bin.readInt();
+		byte[] bytes = new byte[len];
+		bin.readFully(bytes);
+		crashReport = new String(bytes, StandardCharsets.UTF_8);
 	}
 
 	@Override
 	public void serialize(DataOutput bin) throws IOException {
-		bin.writeUTF(crashReport);
+		byte[] bytes = crashReport.getBytes(StandardCharsets.UTF_8);
+		bin.writeInt(bytes.length);
+		bin.write(bytes);
 	}
 
 	@Override
@@ -49,7 +56,7 @@ public class IPCPacket15Crashed implements IPCPacketBase {
 
 	@Override
 	public int size() {
-		return IPCPacketBase.strLen(crashReport);
+		return IPCPacketBase.strLen(crashReport) + 2;
 	}
 
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022-2024 lax1dude. All Rights Reserved.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+
 package net.lax1dude.eaglercraft.v1_8.internal;
 
 import java.io.IOException;
@@ -27,9 +43,11 @@ import com.jcraft.jzlib.Inflater;
 import com.jcraft.jzlib.InflaterInputStream;
 
 import net.lax1dude.eaglercraft.v1_8.Filesystem;
+import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.internal.buffer.ByteBuffer;
 import net.lax1dude.eaglercraft.v1_8.internal.buffer.FloatBuffer;
 import net.lax1dude.eaglercraft.v1_8.internal.buffer.IntBuffer;
+import net.lax1dude.eaglercraft.v1_8.internal.buffer.MemoryStack;
 import net.lax1dude.eaglercraft.v1_8.internal.buffer.WASMGCBufferAllocator;
 import net.lax1dude.eaglercraft.v1_8.internal.buffer.WASMGCDirectArrayConverter;
 import net.lax1dude.eaglercraft.v1_8.internal.vfs2.VFile2;
@@ -42,21 +60,6 @@ import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
 import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerFolderResourcePack;
 import net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums;
 
-/**
- * Copyright (c) 2022-2024 lax1dude. All Rights Reserved.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * 
- */
 public class PlatformRuntime {
 
 	static final Logger logger = LogManager.getLogger("RuntimeWASMGC");
@@ -74,6 +77,7 @@ public class PlatformRuntime {
 		root = getRootElement();
 		parent = getParentElement();
 		canvas = getCanvasElement();
+		printMemoryStackAddrWASMGC();
 		PlatformApplication.setMCServerWindowGlobal(null);
 		PlatformOpenGL.initContext();
 		PlatformInput.initContext(win, parent, canvas);
@@ -83,29 +87,27 @@ public class PlatformRuntime {
 
 		WebGLBackBuffer.initBackBuffer(PlatformInput.getWindowWidth(), PlatformInput.getWindowHeight());
 
-		HTMLElement el = parent.querySelector("._eaglercraftX_early_splash_element");
-		if(el != null) {
-			el.delete();
-		}
-
-		EarlyLoadScreen.extractingAssetsScreen();
-		sleep(20);
-
 		PlatformAssets.readAssetsTeaVM();
 
 		byte[] finalLoadScreen = PlatformAssets.getResourceBytes("/assets/eagler/eagtek.png");
 
 		if(finalLoadScreen != null) {
+			EarlyLoadScreen.initialize();
 			EarlyLoadScreen.loadFinal(finalLoadScreen);
 			EarlyLoadScreen.paintFinal(false);
+			EarlyLoadScreen.destroy();
 		}else {
 			PlatformOpenGL._wglClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 			PlatformOpenGL._wglClear(RealOpenGLEnums.GL_COLOR_BUFFER_BIT);
 			PlatformInput.update();
 		}
-		sleep(20);
 
-		EarlyLoadScreen.destroy();
+		HTMLElement el = parent.querySelector("._eaglercraftX_early_splash_element");
+		if(el != null) {
+			el.delete();
+		}
+
+		sleep(20);
 
 		logger.info("Initializing filesystem...");
 
@@ -534,6 +536,11 @@ public class PlatformRuntime {
 
 	public static InputStream newGZIPInputStream(InputStream is) throws IOException {
 		return new GZIPInputStream(is);
+	}
+
+	public static void printMemoryStackAddrWASMGC() {
+		logger.info("MemoryStack base: 0x{}, limit: 0x{}", HString.format("%08x", MemoryStack.stackBase.toInt()),
+				HString.format("%08x", MemoryStack.stackMax.toInt()));
 	}
 
 }

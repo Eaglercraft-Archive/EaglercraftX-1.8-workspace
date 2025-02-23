@@ -140,6 +140,10 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 	private List<RenderGlobal.ContainerLocalRenderInformation> renderInfos = Lists.newArrayListWithCapacity(69696);
 	private final Set<TileEntity> field_181024_n = Sets.newHashSet();
 	private ViewFrustum viewFrustum;
+	private int glSunList = -1;
+	private int moonPhase = -1;
+	private int glMoonList = -1;
+	private int glHorizonList = -1;
 	/**+
 	 * The star GL Call list
 	 */
@@ -204,6 +208,8 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 		this.renderContainer = new RenderList();
 		this.renderChunkFactory = new ListChunkFactory();
 		this.cloudRenderer = new EaglerCloudRenderer(mcIn);
+		this.generateSun();
+		this.generateHorizon();
 		this.generateStars();
 		this.generateSky();
 		this.generateSky2();
@@ -236,6 +242,92 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 
 	protected boolean isRenderEntityOutlines() {
 		return false;
+	}
+
+	private void generateSun() {
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+
+		if (this.glSunList >= 0) {
+			GLAllocation.deleteDisplayLists(this.glSunList);
+			this.glSunList = -1;
+		}
+
+		this.glSunList = GLAllocation.generateDisplayLists();
+		EaglercraftGPU.glNewList(this.glSunList, GL_COMPILE);
+		float f17 = 30.0F;
+		worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+		worldrenderer.pos((double) (-f17), 100.0D, (double) (-f17)).tex(0.0D, 0.0D).endVertex();
+		worldrenderer.pos((double) f17, 100.0D, (double) (-f17)).tex(1.0D, 0.0D).endVertex();
+		worldrenderer.pos((double) f17, 100.0D, (double) f17).tex(1.0D, 1.0D).endVertex();
+		worldrenderer.pos((double) (-f17), 100.0D, (double) f17).tex(0.0D, 1.0D).endVertex();
+		tessellator.draw();
+		EaglercraftGPU.glEndList();
+	}
+
+	private int getMoonList(int phase) {
+		if (phase != moonPhase) {
+			Tessellator tessellator = Tessellator.getInstance();
+			WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+
+			if (glMoonList == -1) {
+				glMoonList = GLAllocation.generateDisplayLists();
+			}
+
+			EaglercraftGPU.glNewList(this.glMoonList, GL_COMPILE);
+			float f17 = 20.0F;
+			int j = phase % 4;
+			int l = phase / 4 % 2;
+			float f22 = (float) (j + 0) / 4.0F;
+			float f23 = (float) (l + 0) / 2.0F;
+			float f24 = (float) (j + 1) / 4.0F;
+			float f14 = (float) (l + 1) / 2.0F;
+			worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+			worldrenderer.pos((double) (-f17), -100.0D, (double) f17).tex((double) f24, (double) f14).endVertex();
+			worldrenderer.pos((double) f17, -100.0D, (double) f17).tex((double) f22, (double) f14).endVertex();
+			worldrenderer.pos((double) f17, -100.0D, (double) (-f17)).tex((double) f22, (double) f23).endVertex();
+			worldrenderer.pos((double) (-f17), -100.0D, (double) (-f17)).tex((double) f24, (double) f23).endVertex();
+			tessellator.draw();
+			EaglercraftGPU.glEndList();
+			moonPhase = phase;
+		}
+		return glMoonList;
+	}
+
+	private void generateHorizon() {
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+
+		if (this.glHorizonList >= 0) {
+			GLAllocation.deleteDisplayLists(this.glHorizonList);
+			this.glHorizonList = -1;
+		}
+
+		this.glHorizonList = GLAllocation.generateDisplayLists();
+		EaglercraftGPU.glNewList(this.glHorizonList, GL_COMPILE);
+		worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+		worldrenderer.pos(-1.0D, 0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, 0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(-1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(-1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, 0.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(-1.0D, 0.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, 0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, 0.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(-1.0D, 0.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(-1.0D, 0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(-1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(-1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(-1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(-1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+		worldrenderer.pos(1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
+		tessellator.draw();
+		EaglercraftGPU.glEndList();
 	}
 
 	private void generateSky2() {
@@ -411,6 +503,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 				if (theWorld.provider.getHasNoSky()) {
 					dfc.is_rendering_shadowsSun_clamped = 0;
 					dfc.is_rendering_lightShafts = false;
+					dfc.is_rendering_subsurfaceScattering = false;
 				} else {
 					int maxDist = renderDistanceChunks << 4;
 					int ss = dfc.is_rendering_shadowsSun;
@@ -418,7 +511,9 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 						--ss;
 					}
 					dfc.is_rendering_shadowsSun_clamped = ss;
-					dfc.is_rendering_lightShafts = dfc.lightShafts;
+					dfc.is_rendering_lightShafts = ss > 0 && dfc.lightShafts && dfc.shaderPackInfo.LIGHT_SHAFTS;
+					dfc.is_rendering_subsurfaceScattering = ss > 0 && dfc.subsurfaceScattering
+							&& dfc.shaderPackInfo.SUBSURFACE_SCATTERING;
 				}
 				boolean flag = false;
 				if (EaglerDeferredPipeline.instance == null) {
@@ -1334,29 +1429,10 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 			GlStateManager.rotate(-90.0F, 0.0F, 1.0F, 0.0F);
 			CustomSky.renderSky(this.theWorld, this.renderEngine, partialTicks);
 			GlStateManager.rotate(this.theWorld.getCelestialAngle(partialTicks) * 360.0F, 1.0F, 0.0F, 0.0F);
-			float f17 = 30.0F;
 			this.renderEngine.bindTexture(locationSunPng);
-			worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
-			worldrenderer.pos((double) (-f17), 100.0D, (double) (-f17)).tex(0.0D, 0.0D).endVertex();
-			worldrenderer.pos((double) f17, 100.0D, (double) (-f17)).tex(1.0D, 0.0D).endVertex();
-			worldrenderer.pos((double) f17, 100.0D, (double) f17).tex(1.0D, 1.0D).endVertex();
-			worldrenderer.pos((double) (-f17), 100.0D, (double) f17).tex(0.0D, 1.0D).endVertex();
-			tessellator.draw();
-			f17 = 20.0F;
+			GlStateManager.callList(glSunList);
 			this.renderEngine.bindTexture(locationMoonPhasesPng);
-			int i = this.theWorld.getMoonPhase();
-			int j = i % 4;
-			int l = i / 4 % 2;
-			float f22 = (float) (j + 0) / 4.0F;
-			float f23 = (float) (l + 0) / 2.0F;
-			float f24 = (float) (j + 1) / 4.0F;
-			float f14 = (float) (l + 1) / 2.0F;
-			worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
-			worldrenderer.pos((double) (-f17), -100.0D, (double) f17).tex((double) f24, (double) f14).endVertex();
-			worldrenderer.pos((double) f17, -100.0D, (double) f17).tex((double) f22, (double) f14).endVertex();
-			worldrenderer.pos((double) f17, -100.0D, (double) (-f17)).tex((double) f22, (double) f23).endVertex();
-			worldrenderer.pos((double) (-f17), -100.0D, (double) (-f17)).tex((double) f24, (double) f23).endVertex();
-			tessellator.draw();
+			GlStateManager.callList(getMoonList(this.theWorld.getMoonPhase()));
 			GlStateManager.disableTexture2D();
 			float f15 = this.theWorld.getStarBrightness(partialTicks) * f16;
 			boolean b = !CustomSky.hasSkyLayers(this.theWorld);
@@ -1379,31 +1455,13 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 				GlStateManager.callList(this.glSkyList2);
 
 				GlStateManager.popMatrix();
-				float f18 = 1.0F;
 				float f19 = -((float) (d0 + 65.0D));
-				float f20 = -1.0F;
-				worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-				worldrenderer.pos(-1.0D, (double) f19, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, (double) f19, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(-1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(-1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, (double) f19, -1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(-1.0D, (double) f19, -1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, (double) f19, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, (double) f19, -1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(-1.0D, (double) f19, -1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(-1.0D, (double) f19, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(-1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(-1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(-1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(-1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, -1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
-				worldrenderer.pos(1.0D, -1.0D, -1.0D).color(0, 0, 0, 255).endVertex();
-				tessellator.draw();
+
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0.0F, f19, 0.0F);
+				GlStateManager.scale(1.0f, 1.0f - f19, 1.0f);
+				GlStateManager.callList(this.glHorizonList);
+				GlStateManager.popMatrix();
 			}
 
 			if (this.theWorld.provider.isSkyColored()) {

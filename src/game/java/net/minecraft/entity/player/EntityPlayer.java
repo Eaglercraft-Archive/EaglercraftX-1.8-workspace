@@ -1636,7 +1636,7 @@ public abstract class EntityPlayer extends EntityLivingBase implements ICommandS
 		}
 
 		EntityList.EntityEggInfo entitylist$entityegginfo = (EntityList.EntityEggInfo) EntityList.entityEggs
-				.get(Integer.valueOf(EntityList.getEntityID(entitylivingbase)));
+				.get(EntityList.getEntityID(entitylivingbase));
 		if (entitylist$entityegginfo != null) {
 			this.triggerAchievement(entitylist$entityegginfo.field_151512_d);
 		}

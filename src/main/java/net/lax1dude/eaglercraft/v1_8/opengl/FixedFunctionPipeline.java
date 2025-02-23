@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022-2023 lax1dude. All Rights Reserved.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+
 package net.lax1dude.eaglercraft.v1_8.opengl;
 
 import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
@@ -10,7 +26,7 @@ import net.lax1dude.eaglercraft.v1_8.internal.buffer.ByteBuffer;
 import net.lax1dude.eaglercraft.v1_8.internal.buffer.FloatBuffer;
 
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
-import net.lax1dude.eaglercraft.v1_8.internal.IBufferArrayGL;
+import net.lax1dude.eaglercraft.v1_8.internal.IVertexArrayGL;
 import net.lax1dude.eaglercraft.v1_8.internal.IProgramGL;
 import net.lax1dude.eaglercraft.v1_8.internal.IShaderGL;
 import net.lax1dude.eaglercraft.v1_8.internal.IUniformGL;
@@ -27,26 +43,11 @@ import net.minecraft.util.MathHelper;
 import static net.lax1dude.eaglercraft.v1_8.opengl.FixedFunctionShader.FixedFunctionState.*;
 import static net.lax1dude.eaglercraft.v1_8.opengl.FixedFunctionShader.FixedFunctionConstants.*;
 
-/**
- * Copyright (c) 2022-2023 lax1dude. All Rights Reserved.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * 
- */
 public class FixedFunctionPipeline {
 	
 	private static final Logger LOGGER = LogManager.getLogger("FixedFunctionPipeline");
 
-	static final int getFragmentState() {
+	static int getFragmentState() {
 		return (GlStateManager.stateTexture[0] ? STATE_ENABLE_TEXTURE2D : 0) |
 				(GlStateManager.stateTexture[1] ? STATE_ENABLE_LIGHTMAP : 0) |
 				(GlStateManager.stateAlphaTest ? STATE_ENABLE_ALPHA_TEST : 0) |
@@ -76,7 +77,7 @@ public class FixedFunctionPipeline {
 		StreamBufferInstance sb = self.streamBuffer.getBuffer(buffer.remaining());
 		self.currentVertexArray = sb;
 		
-		EaglercraftGPU.bindGLBufferArray(sb.getVertexArray());
+		EaglercraftGPU.bindGLVertexArray(sb.getVertexArray());
 		EaglercraftGPU.bindGLArrayBuffer(sb.getVertexBuffer());
 		
 		_wglBufferSubData(GL_ARRAY_BUFFER, 0, buffer);
@@ -97,7 +98,7 @@ public class FixedFunctionPipeline {
 			self = getPipelineInstanceCore(baseState);
 		}
 		
-		EaglercraftGPU.bindGLBufferArray(list.vertexArray);
+		EaglercraftGPU.bindGLVertexArray(list.vertexArray);
 		EaglercraftGPU.bindVAOGLArrayBuffer(list.vertexBuffer);
 		
 		EaglercraftGPU.enableVertexAttribArray(0);
@@ -145,7 +146,7 @@ public class FixedFunctionPipeline {
 	
 	void drawArrays(int mode, int offset, int count) {
 		EaglercraftGPU.bindGLShaderProgram(shaderProgram);
-		EaglercraftGPU.doDrawArrays(mode, offset, count);
+		EaglercraftGPU.drawArrays(mode, offset, count);
 	}
 	
 	void drawDirectArrays(int mode, int offset, int count) {
@@ -160,7 +161,7 @@ public class FixedFunctionPipeline {
 				}else {
 					EaglercraftGPU.attachQuad32EmulationBuffer(count, false);
 				}
-				EaglercraftGPU.doDrawElements(GL_TRIANGLES, count + (count >> 1),
+				EaglercraftGPU.drawElements(GL_TRIANGLES, count + (count >> 1),
 						GL_UNSIGNED_INT, 0);
 			}else {
 				if(!sb.bindQuad16) {
@@ -170,17 +171,17 @@ public class FixedFunctionPipeline {
 				}else {
 					EaglercraftGPU.attachQuad16EmulationBuffer(count, false);
 				}
-				EaglercraftGPU.doDrawElements(GL_TRIANGLES, count + (count >> 1),
+				EaglercraftGPU.drawElements(GL_TRIANGLES, count + (count >> 1),
 						GL_UNSIGNED_SHORT, 0);
 			}
 		}else {
-			EaglercraftGPU.doDrawArrays(mode, offset, count);
+			EaglercraftGPU.drawArrays(mode, offset, count);
 		}
 	}
 	
 	void drawElements(int mode, int count, int type, int offset) {
 		EaglercraftGPU.bindGLShaderProgram(shaderProgram);
-		EaglercraftGPU.doDrawElements(mode, count, type, offset);
+		EaglercraftGPU.drawElements(mode, count, type, offset);
 	}
 	
 	private static IExtPipelineCompiler extensionProvider;
@@ -575,7 +576,7 @@ public class FixedFunctionPipeline {
 		
 		streamBuffer = new StreamBuffer(FixedFunctionShader.initialSize, FixedFunctionShader.initialCount,
 				FixedFunctionShader.maxCount, (vertexArray, vertexBuffer) -> {
-					EaglercraftGPU.bindGLBufferArray(vertexArray);
+					EaglercraftGPU.bindGLVertexArray(vertexArray);
 					EaglercraftGPU.bindVAOGLArrayBuffer(vertexBuffer);
 
 					EaglercraftGPU.enableVertexAttribArray(0);
@@ -1102,7 +1103,7 @@ public class FixedFunctionPipeline {
 		streamBuffer.destroy();
 	}
 	
-	public IBufferArrayGL getDirectModeBufferArray() {
+	public IVertexArrayGL getDirectModeVertexArray() {
 		return currentVertexArray.vertexArray;
 	}
 }

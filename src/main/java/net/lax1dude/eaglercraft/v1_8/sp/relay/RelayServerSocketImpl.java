@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+
 package net.lax1dude.eaglercraft.v1_8.sp.relay;
 
 import java.io.DataInputStream;
@@ -16,21 +32,6 @@ import net.lax1dude.eaglercraft.v1_8.sp.relay.pkt.RelayPacket;
 import net.lax1dude.eaglercraft.v1_8.sp.relay.pkt.RelayPacket70SpecialUpdate;
 import net.lax1dude.eaglercraft.v1_8.update.UpdateService;
 
-/**
- * Copyright (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * 
- */
 public class RelayServerSocketImpl implements RelayServerSocket {
 
 	private static final Logger logger = LogManager.getLogger("RelayServerSocket");
@@ -50,6 +51,7 @@ public class RelayServerSocketImpl implements RelayServerSocket {
 		IWebSocketClient s;
 		try {
 			s = PlatformNetworking.openWebSocketUnsafe(uri);
+			s.setEnableStringFrames(false);
 		}catch(Throwable t) {
 			exceptions.add(t);
 			sock = null;
@@ -62,10 +64,6 @@ public class RelayServerSocketImpl implements RelayServerSocket {
 	@Override
 	public void update() {
 		if(sock == null) return;
-		if(sock.availableStringFrames() > 0) {
-			logger.warn("[{}] discarding {} string frames recieved on a binary connection", uri, sock.availableStringFrames());
-			sock.clearStringFrames();
-		}
 		List<IWebSocketFrame> frames = sock.getNextBinaryFrames();
 		if(frames != null) {
 			for(int i = 0, l = frames.size(); i < l; ++i) {

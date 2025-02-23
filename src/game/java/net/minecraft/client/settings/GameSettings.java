@@ -1364,7 +1364,7 @@ public class GameSettings {
 			}
 
 			this.mc.thePlayer.sendQueue.addToSendQueue(new C15PacketClientSettings(this.language,
-					Math.max(this.renderDistanceChunks, 2), this.chatVisibility, this.chatColours, i));
+					Math.max(this.renderDistanceChunks, 3), this.chatVisibility, this.chatColours, i));
 		}
 
 	}

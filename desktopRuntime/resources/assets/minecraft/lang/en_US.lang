@@ -247,6 +247,13 @@ eaglercraft.shaders.gui.option.POST_FXAA.desc.2=This is the preferred antialiasi
 eaglercraft.shaders.gui.option.POST_FXAA.desc.4=ON: enable fxaa (slower)
 eaglercraft.shaders.gui.option.POST_FXAA.desc.5=OFF: disable fxaa (faster)
 
+eaglercraft.shaders.gui.option.SUBSURFACE_SCATTERING.label=S.S. Scattering
+
+eaglercraft.shaders.gui.option.SUBSURFACE_SCATTERING.desc.0=Applies subsurface scattering to sunlight calculations, requires shadows to be enabled!
+eaglercraft.shaders.gui.option.SUBSURFACE_SCATTERING.desc.2=This effect is mainly used on grass and leaf blocks to make them look more realistic in sunlight, however it is not a perfect model of reality
+eaglercraft.shaders.gui.option.SUBSURFACE_SCATTERING.desc.4=ON: enable subsurf scattering (slower)
+eaglercraft.shaders.gui.option.SUBSURFACE_SCATTERING.desc.5=OFF: disable subsurf scattering (faster)
+
 eaglercraft.shaders.gui.unsupported.title=Shaders are unavailable on this device!
 eaglercraft.shaders.gui.unsupported.reason.hdrFramebuffer=Reason: No HDR render target support
 eaglercraft.shaders.gui.unsupported.reason.oldOpenGLVersion=Reason: OpenGL ES 3.0 (WebGL 2.0) is not supported!

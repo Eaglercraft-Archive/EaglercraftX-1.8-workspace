@@ -1,11 +1,4 @@
-package net.lax1dude.eaglercraft.v1_8.opengl;
-
-import net.lax1dude.eaglercraft.v1_8.internal.IBufferArrayGL;
-import net.lax1dude.eaglercraft.v1_8.internal.IBufferGL;
-
-import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
-
-/**
+/*
  * Copyright (c) 2024 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -20,7 +13,15 @@ import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-class SoftGLBufferArray implements IBufferArrayGL {
+
+package net.lax1dude.eaglercraft.v1_8.opengl;
+
+import net.lax1dude.eaglercraft.v1_8.internal.IVertexArrayGL;
+import net.lax1dude.eaglercraft.v1_8.internal.IBufferGL;
+
+import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
+
+class SoftGLVertexArray implements IVertexArrayGL {
 
 	Attrib[] attribs = new Attrib[4];
 	int[] attribDivisors = null;
@@ -29,7 +30,7 @@ class SoftGLBufferArray implements IBufferArrayGL {
 	int enabledCnt = -1;
 	IBufferGL indexBuffer = null;
 
-	SoftGLBufferArray() {
+	SoftGLVertexArray() {
 	}
 
 	void setAttrib(IBufferGL buffer, int index, int size, int format, boolean normalized, int stride, int offset) {
@@ -86,7 +87,7 @@ class SoftGLBufferArray implements IBufferArrayGL {
 		indexBuffer = buffer;
 	}
 
-	void transitionToState(SoftGLBufferState previousState, boolean elements) {
+	void transitionToState(SoftGLVertexState previousState, boolean elements) {
 		int oldEnabled = previousState.oldEnabled;
 		int oldEnabledCnt = previousState.oldEnabledCnt;
 		int[] oldAttribDivisors = previousState.attribDivisors;

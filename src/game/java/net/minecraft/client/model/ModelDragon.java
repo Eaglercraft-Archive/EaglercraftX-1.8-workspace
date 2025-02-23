@@ -3,7 +3,6 @@ package net.minecraft.client.model;
 import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
-import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragon;
@@ -187,7 +186,7 @@ public class ModelDragon extends ModelBase {
 		this.body.rotateAngleZ = 0.0F;
 		this.body.render(f);
 
-		boolean flag = DeferredStateManager.isEnableShadowRender();
+		// boolean flag = DeferredStateManager.isEnableShadowRender();
 		for (int j = 0; j < 2; ++j) {
 			GlStateManager.enableCull();
 			float f12 = f1 * 3.1415927F * 2.0F;
@@ -206,12 +205,14 @@ public class ModelDragon extends ModelBase {
 			this.rearLeg.render(f);
 			GlStateManager.scale(-1.0F, 1.0F, 1.0F);
 			if (j == 0) {
-				GlStateManager.cullFace(flag ? GL_BACK : GL_FRONT);
+				// GlStateManager.cullFace(flag ? GL_BACK : GL_FRONT);
+				GlStateManager.cullFace(GL_FRONT);
 			}
 		}
 
 		GlStateManager.popMatrix();
-		GlStateManager.cullFace(flag ? GL_FRONT : GL_BACK);
+		// GlStateManager.cullFace(flag ? GL_FRONT : GL_BACK);
+		GlStateManager.cullFace(GL_BACK);
 		GlStateManager.disableCull();
 		float f11 = -((float) Math.sin((double) (f1 * 3.1415927F * 2.0F))) * 0.0F;
 		f9 = f1 * 3.1415927F * 2.0F;

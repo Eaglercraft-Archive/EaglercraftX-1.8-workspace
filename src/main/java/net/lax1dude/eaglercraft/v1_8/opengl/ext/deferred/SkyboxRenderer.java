@@ -1,24 +1,4 @@
-package net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred;
-
-import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
-import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
-import static net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.ExtGLEnums.*;
-
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
-import net.lax1dude.eaglercraft.v1_8.EagRuntime;
-import net.lax1dude.eaglercraft.v1_8.internal.IBufferArrayGL;
-import net.lax1dude.eaglercraft.v1_8.internal.IBufferGL;
-import net.lax1dude.eaglercraft.v1_8.internal.buffer.ByteBuffer;
-import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
-import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-
-/**
+/*
  * Copyright (c) 2023 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -33,13 +13,34 @@ import net.minecraft.util.ResourceLocation;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
+package net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred;
+
+import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
+import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
+import static net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.ExtGLEnums.*;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+import net.lax1dude.eaglercraft.v1_8.EagRuntime;
+import net.lax1dude.eaglercraft.v1_8.internal.IVertexArrayGL;
+import net.lax1dude.eaglercraft.v1_8.internal.IBufferGL;
+import net.lax1dude.eaglercraft.v1_8.internal.buffer.ByteBuffer;
+import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
+import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
+
 public class SkyboxRenderer {
 
 	public final ResourceLocation skyboxLocation;
 
 	private IBufferGL skyboxVBO = null;
 	private IBufferGL skyboxIBO = null;
-	private IBufferArrayGL skyboxVAO = null;
+	private IVertexArrayGL skyboxVAO = null;
 	private int normalsLUT = -1;
 	private int atmosphereLUTWidth = -1;
 	private int atmosphereLUTHeight = -1;
@@ -135,7 +136,7 @@ public class SkyboxRenderer {
 			buf.flip();
 			
 			skyboxVAO = _wglGenVertexArrays();
-			EaglercraftGPU.bindGLBufferArray(skyboxVAO);
+			EaglercraftGPU.bindGLVertexArray(skyboxVAO);
 			
 			skyboxIBO = _wglGenBuffers();
 			_wglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxIBO);
@@ -165,17 +166,17 @@ public class SkyboxRenderer {
 	}
 
 	public void drawTop() {
-		EaglercraftGPU.bindGLBufferArray(skyboxVAO);
+		EaglercraftGPU.bindGLVertexArray(skyboxVAO);
 		_wglDrawElements(GL_TRIANGLES, skyboxTopIndexCount, skyboxIndexType, skyboxTopIndexOffset * skyboxIndexStride);
 	}
 
 	public void drawBottom() {
-		EaglercraftGPU.bindGLBufferArray(skyboxVAO);
+		EaglercraftGPU.bindGLVertexArray(skyboxVAO);
 		_wglDrawElements(GL_TRIANGLES, skyboxBottomIndexCount, skyboxIndexType, skyboxBottomIndexOffset * skyboxIndexStride);
 	}
 
 	public void drawFull() {
-		EaglercraftGPU.bindGLBufferArray(skyboxVAO);
+		EaglercraftGPU.bindGLVertexArray(skyboxVAO);
 		_wglDrawElements(GL_TRIANGLES, skyboxIndexCount, skyboxIndexType, 0);
 	}
 

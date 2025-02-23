@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 lax1dude. All Rights Reserved.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+
 package net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred;
 
 import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
@@ -18,21 +34,6 @@ import net.lax1dude.eaglercraft.v1_8.vector.Vector4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GLAllocation;
 
-/**
- * Copyright (c) 2023 lax1dude. All Rights Reserved.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * 
- */
 public class GBufferPipelineCompiler implements IExtPipelineCompiler {
 
 	private static final Logger logger = LogManager.getLogger("DeferredGBufferPipelineCompiler");
@@ -127,6 +128,9 @@ public class GBufferPipelineCompiler implements IExtPipelineCompiler {
 				if(conf.is_rendering_useEnvMap) {
 					macros.append("#define COMPILE_PARABOLOID_ENV_MAP\n");
 				}
+				if(conf.is_rendering_subsurfaceScattering) {
+					macros.append("#define COMPILE_SUBSURFACE_SCATTERING\n");
+				}
 			}
 			if(conf.is_rendering_dynamicLights) {
 				macros.append("#define COMPILE_DYNAMIC_LIGHTS\n");
@@ -164,6 +168,9 @@ public class GBufferPipelineCompiler implements IExtPipelineCompiler {
 			}
 			if((stateExtBits & STATE_WAVING_BLOCKS) != 0) {
 				macros.append("#define COMPILE_STATE_WAVING_BLOCKS\n");
+			}
+			if(conf.is_rendering_subsurfaceScattering) {
+				macros.append("#define COMPILE_SUBSURFACE_SCATTERING\n");
 			}
 
 			logger.info("Compiling program for core state: {}, ext state: {}", visualizeBits(stateCoreBits), visualizeBits(stateExtBits));
@@ -231,12 +238,24 @@ public class GBufferPipelineCompiler implements IExtPipelineCompiler {
 				float roughness = 1.0f - DeferredStateManager.materialConstantsRoughness;
 				float metalness = DeferredStateManager.materialConstantsMetalness;
 				float emission = DeferredStateManager.materialConstantsEmission;
-				if(uniforms.materialConstantsRoughness != roughness || uniforms.materialConstantsMetalness != metalness
-						|| uniforms.materialConstantsEmission != emission) {
-					uniforms.materialConstantsRoughness = roughness;
-					uniforms.materialConstantsMetalness = metalness;
-					uniforms.materialConstantsEmission = emission;
-					_wglUniform3f(uniforms.u_materialConstants3f, roughness, metalness, emission);
+				if(uniforms.u_materialConstants4f != null) {
+					float subsurfScattering = 1.0f - DeferredStateManager.materialConstantsSubsurfScatting;
+					if(uniforms.materialConstantsRoughness != roughness || uniforms.materialConstantsMetalness != metalness
+							|| uniforms.materialConstantsEmission != emission || uniforms.materialConstantsSubsurfScattering != subsurfScattering) {
+						uniforms.materialConstantsRoughness = roughness;
+						uniforms.materialConstantsMetalness = metalness;
+						uniforms.materialConstantsEmission = emission;
+						uniforms.materialConstantsSubsurfScattering = subsurfScattering;
+						_wglUniform4f(uniforms.u_materialConstants4f, roughness, metalness, emission, subsurfScattering);
+					}
+				}else {
+					if(uniforms.materialConstantsRoughness != roughness || uniforms.materialConstantsMetalness != metalness
+							|| uniforms.materialConstantsEmission != emission) {
+						uniforms.materialConstantsRoughness = roughness;
+						uniforms.materialConstantsMetalness = metalness;
+						uniforms.materialConstantsEmission = emission;
+						_wglUniform3f(uniforms.u_materialConstants3f, roughness, metalness, emission);
+					}
 				}
 			}
 		}

@@ -164,6 +164,8 @@ public class GuiConnecting extends GuiScreen {
 						if (ConnectionHandshake.attemptHandshake(this.mc, webSocket, this, previousGuiScreen,
 								currentPassword, allowPlaintext, allowCookies, cookieData)) {
 							logger.info("Handshake Success");
+							webSocket.setEnableStringFrames(false);
+							webSocket.clearStringFrames();
 							this.networkManager = new WebSocketNetworkManager(webSocket);
 							this.networkManager.setPluginInfo(ConnectionHandshake.pluginBrand,
 									ConnectionHandshake.pluginVersion);

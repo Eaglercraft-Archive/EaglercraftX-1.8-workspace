@@ -1,11 +1,4 @@
-package net.lax1dude.eaglercraft.v1_8.internal;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
-/**
+/*
  * Copyright (c) 2024 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -20,12 +13,22 @@ import java.util.List;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
+package net.lax1dude.eaglercraft.v1_8.internal;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 public abstract class AbstractWebSocketClient implements IWebSocketClient {
 
 	protected volatile int availableStringFrames = 0;
 	protected volatile int availableBinaryFrames = 0;
 	protected final List<IWebSocketFrame> recievedPacketBuffer = new LinkedList<>();
 	protected String currentURI;
+	private boolean strEnable = true;
+	private boolean binEnable = true;
 
 	protected AbstractWebSocketClient(String currentURI) {
 		this.currentURI = currentURI;
@@ -33,6 +36,13 @@ public abstract class AbstractWebSocketClient implements IWebSocketClient {
 
 	protected void addRecievedFrame(IWebSocketFrame frame) {
 		boolean str = frame.isString();
+		if(str) {
+			if(!strEnable)
+				return;
+		}else {
+			if(!binEnable)
+				return;
+		}
 		synchronized(recievedPacketBuffer) {
 			recievedPacketBuffer.add(frame);
 			if(str) {
@@ -222,6 +232,16 @@ public abstract class AbstractWebSocketClient implements IWebSocketClient {
 	@Override
 	public String getCurrentURI() {
 		return currentURI;
+	}
+
+	@Override
+	public void setEnableStringFrames(boolean enable) {
+		strEnable = enable;
+	}
+
+	@Override
+	public void setEnableBinaryFrames(boolean enable) {
+		binEnable = enable;
 	}
 
 }

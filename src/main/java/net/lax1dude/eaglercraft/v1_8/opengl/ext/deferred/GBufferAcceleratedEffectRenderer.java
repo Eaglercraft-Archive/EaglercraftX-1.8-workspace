@@ -1,23 +1,4 @@
-package net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred;
-
-import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
-import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
-
-import net.lax1dude.eaglercraft.v1_8.EagRuntime;
-import net.lax1dude.eaglercraft.v1_8.internal.IBufferArrayGL;
-import net.lax1dude.eaglercraft.v1_8.internal.IBufferGL;
-import net.lax1dude.eaglercraft.v1_8.internal.buffer.ByteBuffer;
-import net.lax1dude.eaglercraft.v1_8.internal.buffer.FloatBuffer;
-import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
-import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
-import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
-import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.program.PipelineShaderAccelParticleGBuffer;
-import net.lax1dude.eaglercraft.v1_8.vector.Matrix4f;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.MathHelper;
-
-/**
+/*
  * Copyright (c) 2023 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -32,6 +13,26 @@ import net.minecraft.util.MathHelper;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
+package net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred;
+
+import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
+import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
+
+import net.lax1dude.eaglercraft.v1_8.EagRuntime;
+import net.lax1dude.eaglercraft.v1_8.internal.IVertexArrayGL;
+import net.lax1dude.eaglercraft.v1_8.internal.IBufferGL;
+import net.lax1dude.eaglercraft.v1_8.internal.buffer.ByteBuffer;
+import net.lax1dude.eaglercraft.v1_8.internal.buffer.FloatBuffer;
+import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
+import net.lax1dude.eaglercraft.v1_8.log4j.Logger;
+import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
+import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.program.PipelineShaderAccelParticleGBuffer;
+import net.lax1dude.eaglercraft.v1_8.vector.Matrix4f;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.MathHelper;
+
 public class GBufferAcceleratedEffectRenderer extends AbstractAcceleratedEffectRenderer {
 
 	private static final Logger logger = LogManager.getLogger("GBufferAcceleratedEffectRenderer");
@@ -45,7 +46,7 @@ public class GBufferAcceleratedEffectRenderer extends AbstractAcceleratedEffectR
 
 	private PipelineShaderAccelParticleGBuffer shaderProgram = null;
 
-	private IBufferArrayGL vertexArray = null;
+	private IVertexArrayGL vertexArray = null;
 	private IBufferGL vertexBuffer = null;
 
 	private IBufferGL instancesBuffer = null;
@@ -79,7 +80,7 @@ public class GBufferAcceleratedEffectRenderer extends AbstractAcceleratedEffectR
 		});
 		verts.flip();
 
-		EaglercraftGPU.bindGLBufferArray(vertexArray);
+		EaglercraftGPU.bindGLVertexArray(vertexArray);
 
 		EaglercraftGPU.bindGLArrayBuffer(vertexBuffer);
 		_wglBufferData(GL_ARRAY_BUFFER, verts, GL_STATIC_DRAW);
@@ -141,7 +142,7 @@ public class GBufferAcceleratedEffectRenderer extends AbstractAcceleratedEffectR
 		EaglerDeferredPipeline.uniformMatrixHelper(shaderProgram.uniforms.u_matrixTransform, tmpMatrix);
 
 		EaglercraftGPU.bindGLArrayBuffer(instancesBuffer);
-		EaglercraftGPU.bindGLBufferArray(vertexArray);
+		EaglercraftGPU.bindGLVertexArray(vertexArray);
 
 		int p = particleBuffer.position();
 		int l = particleBuffer.limit();

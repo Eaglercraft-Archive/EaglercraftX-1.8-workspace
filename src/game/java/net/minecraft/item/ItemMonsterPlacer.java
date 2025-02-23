@@ -2,6 +2,8 @@ package net.minecraft.item;
 
 import java.util.List;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.SortedIterationIntObjectHashMap;
 import com.carrotsearch.hppc.cursors.ObjectCursor;
 
 import net.minecraft.block.BlockFence;
@@ -64,7 +66,7 @@ public class ItemMonsterPlacer extends Item {
 
 	public int getColorFromItemStack(ItemStack itemstack, int i) {
 		EntityList.EntityEggInfo entitylist$entityegginfo = (EntityList.EntityEggInfo) EntityList.entityEggs
-				.get(Integer.valueOf(itemstack.getMetadata()));
+				.get(itemstack.getMetadata());
 		return entitylist$entityegginfo != null
 				? (i == 0 ? entitylist$entityegginfo.primaryColor : entitylist$entityegginfo.secondaryColor)
 				: 16777215;
@@ -169,7 +171,7 @@ public class ItemMonsterPlacer extends Item {
 	 * world, entityID, x, y, z.
 	 */
 	public static Entity spawnCreature(World worldIn, int entityID, double x, double y, double z) {
-		if (!EntityList.entityEggs.containsKey(Integer.valueOf(entityID))) {
+		if (!EntityList.entityEggs.containsKey(entityID)) {
 			return null;
 		} else {
 			Entity entity = null;
@@ -198,7 +200,8 @@ public class ItemMonsterPlacer extends Item {
 	 * (eg: dye returns 16 items)
 	 */
 	public void getSubItems(Item item, CreativeTabs var2, List<ItemStack> list) {
-		for (ObjectCursor<EntityList.EntityEggInfo> entitylist$entityegginfo : EntityList.entityEggs.values()) {
+		for (ObjectCursor<EntityList.EntityEggInfo> entitylist$entityegginfo : new SortedIterationIntObjectHashMap<>(
+				(IntObjectHashMap<EntityList.EntityEggInfo>) EntityList.entityEggs, (a, b) -> a - b).values()) {
 			list.add(new ItemStack(item, 1, entitylist$entityegginfo.value.spawnedID));
 		}
 

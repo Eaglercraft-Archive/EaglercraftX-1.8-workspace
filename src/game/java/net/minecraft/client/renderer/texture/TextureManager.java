@@ -132,7 +132,7 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
 		}
 	}
 
-	public ResourceLocation getDynamicTextureLocation(String name, DynamicTexture texture) {
+	public ResourceLocation getDynamicTextureLocation(String name, ITextureObject texture) {
 		int integer = this.mapTextureCounters.getOrDefault(name, 0) + 1;
 		this.mapTextureCounters.put(name, integer);
 		ResourceLocation resourcelocation = new ResourceLocation(

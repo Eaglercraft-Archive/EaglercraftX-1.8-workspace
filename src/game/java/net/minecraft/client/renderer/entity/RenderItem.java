@@ -386,13 +386,15 @@ public class RenderItem implements IResourceManagerReloadListener {
 		GlStateManager.pushMatrix();
 		ItemCameraTransforms itemcameratransforms = model.getItemCameraTransforms();
 		itemcameratransforms.applyTransform(cameraTransformType);
-		boolean flag = DeferredStateManager.isEnableShadowRender();
+		// boolean flag = DeferredStateManager.isEnableShadowRender();
 		if (this.func_183005_a(itemcameratransforms.getTransform(cameraTransformType))) {
-			GlStateManager.cullFace(flag ? GL_BACK : GL_FRONT);
+			// GlStateManager.cullFace(flag ? GL_BACK : GL_FRONT);
+			GlStateManager.cullFace(GL_FRONT);
 		}
 
 		this.renderItem(stack, model);
-		GlStateManager.cullFace(flag ? GL_FRONT : GL_BACK);
+		// GlStateManager.cullFace(flag ? GL_FRONT : GL_BACK);
+		GlStateManager.cullFace(GL_BACK);
 		GlStateManager.popMatrix();
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableBlend();

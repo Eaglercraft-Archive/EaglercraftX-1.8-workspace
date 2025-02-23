@@ -1,6 +1,4 @@
-package net.lax1dude.eaglercraft.v1_8.internal;
-
-/**
+/*
  * Copyright (c) 2022-2023 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -15,6 +13,9 @@ package net.lax1dude.eaglercraft.v1_8.internal;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
+package net.lax1dude.eaglercraft.v1_8.internal;
+
 class OpenGLObjects {
 
 	static class BufferGL implements IBufferGL {
@@ -36,11 +37,11 @@ class OpenGLObjects {
 		
 	}
 
-	static class BufferArrayGL implements IBufferArrayGL {
+	static class VertexArrayGL implements IVertexArrayGL {
 		
 		final int ptr;
 		
-		BufferArrayGL(int ptr) {
+		VertexArrayGL(int ptr) {
 			this.ptr = ptr;
 		}
 

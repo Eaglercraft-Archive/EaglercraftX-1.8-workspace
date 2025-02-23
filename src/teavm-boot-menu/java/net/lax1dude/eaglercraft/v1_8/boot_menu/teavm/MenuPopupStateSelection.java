@@ -1,14 +1,4 @@
-package net.lax1dude.eaglercraft.v1_8.boot_menu.teavm;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
-import org.teavm.jso.dom.html.HTMLElement;
-
-import com.google.common.collect.Collections2;
-
-/**
+/*
  * Copyright (c) 2024 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -23,6 +13,14 @@ import com.google.common.collect.Collections2;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
+package net.lax1dude.eaglercraft.v1_8.boot_menu.teavm;
+
+import java.util.List;
+import java.util.function.Consumer;
+
+import org.teavm.jso.dom.html.HTMLElement;
+
 public abstract class MenuPopupStateSelection<T> extends MenuState {
 
 	public static class SelectionItem<E> implements SelectionListController.ListItem {
@@ -63,8 +61,7 @@ public abstract class MenuPopupStateSelection<T> extends MenuState {
 	}
 
 	public static <T> MenuPopupStateSelection<T> createHelper(String title, List<T> items, Consumer<T> selectCallback) {
-		return new MenuPopupStateSelection<T>(title,
-				new ArrayList<SelectionItem<T>>(Collections2.transform(items, SelectionItem<T>::new))) {
+		return new MenuPopupStateSelection<T>(title, items.stream().map(SelectionItem<T>::new).toList()) {
 			@Override
 			protected void itemSelected(T item) {
 				selectCallback.accept(item);

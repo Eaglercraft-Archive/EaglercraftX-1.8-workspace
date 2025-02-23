@@ -1,16 +1,4 @@
-package net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.program;
-
-import net.lax1dude.eaglercraft.v1_8.internal.IProgramGL;
-import net.lax1dude.eaglercraft.v1_8.internal.IShaderGL;
-import net.lax1dude.eaglercraft.v1_8.internal.IUniformGL;
-
-import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
-import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-/**
+/*
  * Copyright (c) 2023 lax1dude. All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -25,6 +13,19 @@ import java.util.List;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
+package net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.program;
+
+import net.lax1dude.eaglercraft.v1_8.internal.IProgramGL;
+import net.lax1dude.eaglercraft.v1_8.internal.IShaderGL;
+import net.lax1dude.eaglercraft.v1_8.internal.IUniformGL;
+
+import static net.lax1dude.eaglercraft.v1_8.internal.PlatformOpenGL.*;
+import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class PipelineShaderSkyboxRender extends ShaderProgram<PipelineShaderSkyboxRender.Uniforms> {
 
 	public static PipelineShaderSkyboxRender compile(boolean paraboloid, boolean clouds) throws ShaderException {
@@ -83,6 +84,7 @@ public class PipelineShaderSkyboxRender extends ShaderProgram<PipelineShaderSkyb
 			_wglUniform1i(_wglGetUniformLocation(prog, "u_renderedAtmosphere"), 0);
 			_wglUniform1i(_wglGetUniformLocation(prog, "u_cloudsTexture"), 1);
 			_wglUniform1i(_wglGetUniformLocation(prog, "u_sunOcclusion"), 2);
+			_wglUniform1i(_wglGetUniformLocation(prog, "u_gbufferDepthTexture"), 3);
 		}
 		
 	}
