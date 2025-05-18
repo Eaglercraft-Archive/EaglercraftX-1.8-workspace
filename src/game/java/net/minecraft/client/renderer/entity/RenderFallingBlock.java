@@ -67,10 +67,9 @@ public class RenderFallingBlock extends Render<EntityFallingBlock> {
 					GlStateManager.disableLighting();
 					Tessellator tessellator = Tessellator.getInstance();
 					WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-					worldrenderer.begin(7,
-							(DeferredStateManager.isDeferredRenderer()
-									|| DynamicLightsStateManager.isDynamicLightsRender()) ? VertexFormat.BLOCK_SHADERS
-											: DefaultVertexFormats.BLOCK);
+					worldrenderer.begin(7, (DeferredStateManager.isDeferredRenderer()
+					/* || DynamicLightsStateManager.isDynamicLightsRender() */) ? VertexFormat.BLOCK_SHADERS
+							: DefaultVertexFormats.BLOCK);
 					int i = blockpos.getX();
 					int j = blockpos.getY();
 					int k = blockpos.getZ();

@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
-import net.lax1dude.eaglercraft.v1_8.EaglerXBungeeVersion;
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
 import net.lax1dude.eaglercraft.v1_8.Mouse;
 import net.lax1dude.eaglercraft.v1_8.PauseMenuCustomizeState;
@@ -424,13 +423,6 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback {
 					 * GuiTwitchUserMode(this.mc.getTwitchStream(), chatuserinfo)); } else { }
 					 */
 					LOGGER.error("Tried to handle twitch user but couldn\'t find them!");
-				} else if (clickevent.getAction() == ClickEvent.Action.EAGLER_PLUGIN_DOWNLOAD) {
-					if (EaglerXBungeeVersion.pluginFileEPK.equals(clickevent.getValue())) {
-						EaglerXBungeeVersion.startPluginDownload();
-					} else {
-						LOGGER.error("Invalid plugin download from EPK was blocked: {}",
-								EaglerXBungeeVersion.pluginFileEPK);
-					}
 				} else {
 					LOGGER.error("Don\'t know how to handle " + clickevent);
 				}

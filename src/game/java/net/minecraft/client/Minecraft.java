@@ -16,7 +16,6 @@ import net.lax1dude.eaglercraft.v1_8.ClientUUIDLoadingCache;
 import net.lax1dude.eaglercraft.v1_8.Display;
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
 import net.lax1dude.eaglercraft.v1_8.EagUtils;
-import net.lax1dude.eaglercraft.v1_8.EaglerXBungeeVersion;
 import net.lax1dude.eaglercraft.v1_8.HString;
 import net.lax1dude.eaglercraft.v1_8.IOUtils;
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
@@ -34,6 +33,7 @@ import net.lax1dude.eaglercraft.v1_8.futures.Executors;
 import net.lax1dude.eaglercraft.v1_8.futures.FutureTask;
 import net.lax1dude.eaglercraft.v1_8.futures.ListenableFuture;
 import net.lax1dude.eaglercraft.v1_8.futures.ListenableFutureTask;
+import net.lax1dude.eaglercraft.v1_8.internal.ContextLostError;
 import net.lax1dude.eaglercraft.v1_8.internal.EnumPlatformType;
 import net.lax1dude.eaglercraft.v1_8.internal.PlatformRuntime;
 import net.lax1dude.eaglercraft.v1_8.internal.PlatformWebRTC;
@@ -67,6 +67,7 @@ import net.lax1dude.eaglercraft.v1_8.profile.SkinPreviewRenderer;
 import net.lax1dude.eaglercraft.v1_8.socket.AddressResolver;
 import net.lax1dude.eaglercraft.v1_8.socket.EaglercraftNetworkManager;
 import net.lax1dude.eaglercraft.v1_8.socket.RateLimitTracker;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.client.StateFlags;
 import net.lax1dude.eaglercraft.v1_8.sp.IntegratedServerState;
 import net.lax1dude.eaglercraft.v1_8.sp.SingleplayerServerController;
 import net.lax1dude.eaglercraft.v1_8.sp.SkullCommand;
@@ -182,7 +183,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.IThreadListener;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.MinecraftError;
 import net.minecraft.util.MouseHelper;
 import net.minecraft.util.MovementInputFromOptions;
 import net.minecraft.util.MovingObjectPosition;
@@ -384,9 +384,10 @@ public class Minecraft implements IThreadListener {
 				}
 
 				this.displayCrashReport(this.crashReporter);
+				return;
 			}
-		} catch (MinecraftError var12) {
-			// ??
+		} catch (ContextLostError err) {
+			throw err;
 		} catch (ReportedException reportedexception) {
 			this.addGraphicsAndWorldToCrashReport(reportedexception.getCrashReport());
 			logger.fatal("Reported exception thrown!", reportedexception);
@@ -842,6 +843,8 @@ public class Minecraft implements IThreadListener {
 			this.shutdown();
 		}
 
+		Display.checkContextLost();
+
 		PointerInputAbstraction.runGameLoop();
 		this.gameSettings.touchscreen = PointerInputAbstraction.isTouchMode();
 
@@ -872,26 +875,24 @@ public class Minecraft implements IThreadListener {
 		this.checkGLError("Pre render");
 		this.mcSoundHandler.setListener(this.thePlayer, this.timer.renderPartialTicks);
 
-		if (!Display.contextLost()) {
-			EaglercraftGPU.optimize();
-			_wglBindFramebuffer(0x8D40, null);
-			GlStateManager.viewport(0, 0, this.displayWidth, this.displayHeight);
-			GlStateManager.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			GlStateManager.pushMatrix();
-			GlStateManager.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			GlStateManager.enableTexture2D();
-			if (this.thePlayer != null && this.thePlayer.isEntityInsideOpaqueBlock()) {
-				this.gameSettings.thirdPersonView = 0;
-			}
-
-			if (!this.skipRenderWorld) {
-				this.entityRenderer.func_181560_a(this.timer.renderPartialTicks, i);
-			}
-
-			this.guiAchievement.updateAchievementWindow();
-			this.touchOverlayRenderer.render(displayWidth, displayHeight, scaledResolution);
-			GlStateManager.popMatrix();
+		EaglercraftGPU.optimize();
+		_wglBindFramebuffer(0x8D40, null);
+		GlStateManager.viewport(0, 0, this.displayWidth, this.displayHeight);
+		GlStateManager.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		GlStateManager.pushMatrix();
+		GlStateManager.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		GlStateManager.enableTexture2D();
+		if (this.thePlayer != null && this.thePlayer.isEntityInsideOpaqueBlock()) {
+			this.gameSettings.thirdPersonView = 0;
 		}
+
+		if (!this.skipRenderWorld) {
+			this.entityRenderer.func_181560_a(this.timer.renderPartialTicks, i);
+		}
+
+		this.guiAchievement.updateAchievementWindow();
+		this.touchOverlayRenderer.render(displayWidth, displayHeight, scaledResolution);
+		GlStateManager.popMatrix();
 
 		this.updateDisplay();
 		this.checkGLError("Post render");
@@ -1220,7 +1221,7 @@ public class Minecraft implements IThreadListener {
 			this.ingameGUI.updateTick();
 		}
 
-		VoiceClientController.tickVoiceClient(this);
+		VoiceClientController.tickVoiceClient();
 
 		this.entityRenderer.getMouseOver(1.0F);
 		if (!this.isGamePaused && this.theWorld != null) {
@@ -1699,29 +1700,29 @@ public class Minecraft implements IThreadListener {
 			if (bungeeOutdatedMsgTimer > 0) {
 				if (--bungeeOutdatedMsgTimer == 0 && this.thePlayer.sendQueue != null) {
 					String pluginBrand = this.thePlayer.sendQueue.getNetworkManager().getPluginBrand();
-					String pluginVersion = this.thePlayer.sendQueue.getNetworkManager().getPluginVersion();
-					if (pluginBrand != null && pluginVersion != null
-							&& EaglerXBungeeVersion.isUpdateToPluginAvailable(pluginBrand, pluginVersion)) {
+					if (pluginBrand != null && ("EaglercraftXBungee".equals(pluginBrand)
+							|| "EaglercraftXVelocity".equals(pluginBrand))) {
 						String pfx = EnumChatFormatting.GOLD + "[EagX]" + EnumChatFormatting.AQUA;
 						ingameGUI.getChatGUI().printChatMessage(
 								new ChatComponentText(pfx + " ---------------------------------------"));
+						ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(pfx + " This server is running "
+								+ EnumChatFormatting.YELLOW + pluginBrand + EnumChatFormatting.AQUA + ","));
 						ingameGUI.getChatGUI().printChatMessage(
-								new ChatComponentText(pfx + " This server appears to be using version "
-										+ EnumChatFormatting.YELLOW + pluginVersion));
+								new ChatComponentText(pfx + " which has been discontinued by lax1dude."));
+						ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(pfx));
 						ingameGUI.getChatGUI().printChatMessage(
-								new ChatComponentText(pfx + " of the EaglerXBungee plugin which is outdated"));
+								new ChatComponentText(pfx + " If you are the admin of this server, please"));
+						ingameGUI.getChatGUI().printChatMessage(
+								new ChatComponentText(pfx + " upgrade to EaglercraftXServer if you want to"));
+						ingameGUI.getChatGUI().printChatMessage(
+								new ChatComponentText(pfx + " to continue to receive support and bugfixes."));
 						ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(pfx));
 						ingameGUI.getChatGUI()
-								.printChatMessage(new ChatComponentText(pfx + " If you are the admin update to "
-										+ EnumChatFormatting.YELLOW + EaglerXBungeeVersion.getPluginVersion()
-										+ EnumChatFormatting.AQUA + " or newer"));
-						ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(pfx));
-						ingameGUI.getChatGUI().printChatMessage((new ChatComponentText(pfx + " Click: "))
-								.appendSibling((new ChatComponentText("" + EnumChatFormatting.GREEN
-										+ EnumChatFormatting.UNDERLINE + EaglerXBungeeVersion.getPluginButton()))
-												.setChatStyle((new ChatStyle()).setChatClickEvent(
-														new ClickEvent(ClickEvent.Action.EAGLER_PLUGIN_DOWNLOAD,
-																"plugin_download.zip")))));
+								.printChatMessage((new ChatComponentText(pfx + " " + EnumChatFormatting.GREEN
+										+ EnumChatFormatting.UNDERLINE + "https://lax1dude.net/eaglerxserver"))
+												.setChatStyle((new ChatStyle())
+														.setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
+																"https://lax1dude.net/eaglerxserver"))));
 						ingameGUI.getChatGUI().printChatMessage(
 								new ChatComponentText(pfx + " ---------------------------------------"));
 					}
@@ -1877,7 +1878,7 @@ public class Minecraft implements IThreadListener {
 			EaglerProfile.clearServerSkinOverride();
 			PauseMenuCustomizeState.reset();
 			ClientUUIDLoadingCache.flushRequestCache();
-			ClientUUIDLoadingCache.resetFlags();
+			StateFlags.reset();
 			WebViewOverlayController.setPacketSendCallback(null);
 
 			this.guiAchievement.clearAchievements();
@@ -2068,7 +2069,7 @@ public class Minecraft implements IThreadListener {
 					object = Items.spawn_egg;
 					i = EntityList.getEntityID(this.objectMouseOver.entityHit);
 					flag1 = true;
-					if (!EntityList.entityEggs.containsKey(Integer.valueOf(i))) {
+					if (!EntityList.entityEggs.containsKey(i)) {
 						return;
 					}
 				}

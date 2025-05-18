@@ -14,11 +14,15 @@ import com.google.common.collect.Maps;
 
 import net.lax1dude.eaglercraft.v1_8.netty.Unpooled;
 import net.lax1dude.eaglercraft.v1_8.notifications.ServerNotificationManager;
-import net.lax1dude.eaglercraft.v1_8.profile.ServerCapeCache;
-import net.lax1dude.eaglercraft.v1_8.profile.ServerSkinCache;
+import net.lax1dude.eaglercraft.v1_8.skin_cache.ServerTextureCache;
 import net.lax1dude.eaglercraft.v1_8.socket.EaglercraftNetworkManager;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.GamePluginMessageConstants;
 import net.lax1dude.eaglercraft.v1_8.socket.protocol.GamePluginMessageProtocol;
-import net.lax1dude.eaglercraft.v1_8.socket.protocol.client.GameProtocolMessageController;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.client.ClientMessageHandler;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.handshake.StandardCaps;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.message.InjectedMessageController;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.message.LegacyMessageController;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.message.MessageController;
 import net.lax1dude.eaglercraft.v1_8.socket.protocol.pkt.GameMessagePacket;
 import net.lax1dude.eaglercraft.v1_8.sp.lan.LANClientNetworkManager;
 import net.lax1dude.eaglercraft.v1_8.sp.socket.ClientIntegratedServerNetworkManager;
@@ -257,26 +261,37 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	 * particlespawn offset and velocity
 	 */
 	private final EaglercraftRandom avRandomizer = new EaglercraftRandom();
-	private final ServerSkinCache skinCache;
-	private final ServerCapeCache capeCache;
+	private final ServerTextureCache textureCache;
 	private final ServerNotificationManager notifManager;
 	public boolean currentFNAWSkinAllowedState = true;
 	public boolean currentFNAWSkinForcedState = true;
-	private GameProtocolMessageController eaglerMessageController = null;
-	public boolean hasRequestedServerInfo = false;
+	private final MessageController eaglerMessageController;
+	public byte[] cachedServerInfoHash = null;
 	public byte[] cachedServerInfoData = null;
+	public boolean allowedDisplayWebview = false;
+	public boolean allowedDisplayWebviewYes = false;
 
 	public NetHandlerPlayClient(Minecraft mcIn, GuiScreen parGuiScreen, EaglercraftNetworkManager parNetworkManager,
-			GameProfile parGameProfile) {
+			GameProfile parGameProfile, GamePluginMessageProtocol eaglerProtocol) {
 		this.gameController = mcIn;
 		this.guiScreenServer = parGuiScreen;
 		this.netManager = parNetworkManager;
+		this.netManager.setNetHandler(this);
 		this.profile = parGameProfile;
-		this.skinCache = new ServerSkinCache(this, mcIn.getTextureManager());
-		this.capeCache = new ServerCapeCache(this, mcIn.getTextureManager());
-		this.notifManager = new ServerNotificationManager();
 		this.isIntegratedServer = (parNetworkManager instanceof ClientIntegratedServerNetworkManager)
 				|| (parNetworkManager instanceof LANClientNetworkManager);
+		ClientMessageHandler handler = ClientMessageHandler.createClientHandler(eaglerProtocol.ver, this);
+		if (eaglerProtocol.ver >= 5) {
+			this.eaglerMessageController = new InjectedMessageController(eaglerProtocol, handler,
+					GamePluginMessageConstants.CLIENT_TO_SERVER, parNetworkManager::injectRawFrame);
+			parNetworkManager.setInjectedMessageController((InjectedMessageController) eaglerMessageController);
+		} else {
+			this.eaglerMessageController = new LegacyMessageController(eaglerProtocol, handler,
+					GamePluginMessageConstants.CLIENT_TO_SERVER,
+					(ch, msg) -> addToSendQueue(new C17PacketCustomPayload(ch, msg)));
+		}
+		this.textureCache = ServerTextureCache.create(this, mcIn.getTextureManager());
+		this.notifManager = new ServerNotificationManager(mcIn.getTextureManager());
 	}
 
 	/**+
@@ -285,42 +300,28 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 	 */
 	public void cleanup() {
 		this.clientWorldController = null;
-		this.skinCache.destroy();
-		this.capeCache.destroy();
+		this.textureCache.destroy();
 		this.notifManager.destroy();
 	}
 
-	public ServerSkinCache getSkinCache() {
-		return this.skinCache;
-	}
-
-	public ServerCapeCache getCapeCache() {
-		return this.capeCache;
+	public ServerTextureCache getTextureCache() {
+		return this.textureCache;
 	}
 
 	public ServerNotificationManager getNotifManager() {
 		return this.notifManager;
 	}
 
-	public GameProtocolMessageController getEaglerMessageController() {
+	public MessageController getEaglerMessageController() {
 		return eaglerMessageController;
 	}
 
-	public void setEaglerMessageController(GameProtocolMessageController eaglerMessageController) {
-		this.eaglerMessageController = eaglerMessageController;
-	}
-
 	public GamePluginMessageProtocol getEaglerMessageProtocol() {
-		return eaglerMessageController != null ? eaglerMessageController.protocol : null;
+		return eaglerMessageController != null ? eaglerMessageController.getProtocol() : null;
 	}
 
 	public void sendEaglerMessage(GameMessagePacket packet) {
-		try {
-			eaglerMessageController.sendPacket(packet);
-		} catch (IOException e) {
-			logger.error("Failed to send eaglercraft plugin message packet: " + packet);
-			logger.error(e);
-		}
+		eaglerMessageController.sendPacket(packet);
 	}
 
 	public boolean webViewSendHandler(GameMessagePacket pkt) {
@@ -331,7 +332,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 			logger.error("WebView sent message on a dead handler!");
 			return false;
 		}
-		if (eaglerMessageController.protocol.ver >= 4) {
+		if (eaglerMessageController.getProtocol().ver >= 4) {
 			sendEaglerMessage(pkt);
 			return true;
 		} else {
@@ -361,9 +362,18 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 		this.netManager.sendPacket(new C17PacketCustomPayload("MC|Brand",
 				(new PacketBuffer(Unpooled.buffer())).writeString(ClientBrandRetriever.getClientModName())));
 		if (VoiceClientController.isClientSupported()) {
-			VoiceClientController.initializeVoiceClient(this::sendEaglerMessage, eaglerMessageController.protocol.ver);
+			if (netManager.getServerCapabilities().hasCapability(StandardCaps.VOICE, 0)) {
+				VoiceClientController.initializeVoiceClient(this::sendEaglerMessage,
+						eaglerMessageController.getProtocol().ver);
+			} else {
+				VoiceClientController.initializeVoiceClient(null, -1);
+			}
 		}
-		WebViewOverlayController.setPacketSendCallback(this::webViewSendHandler);
+		if (netManager.getServerCapabilities().hasCapability(StandardCaps.WEBVIEW, 0)) {
+			WebViewOverlayController.setPacketSendCallback(this::webViewSendHandler);
+		} else {
+			WebViewOverlayController.setPacketSendCallback(null);
+		}
 	}
 
 	/**+
@@ -1466,8 +1476,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 			if (packetIn.func_179768_b() == S38PacketPlayerListItem.Action.REMOVE_PLAYER) {
 				EaglercraftUUID uuid = s38packetplayerlistitem$addplayerdata.getProfile().getId();
 				this.playerInfoMap.remove(uuid);
-				this.skinCache.evictSkin(uuid);
-				this.capeCache.evictCape(uuid);
+				this.textureCache.evictPlayer(uuid);
 				ClientUUIDLoadingCache.evict(uuid);
 			} else {
 				NetworkPlayerInfo networkplayerinfo = (NetworkPlayerInfo) this.playerInfoMap
@@ -1636,9 +1645,10 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 				this.gameController
 						.displayGuiScreen(new GuiScreenBook(this.gameController.thePlayer, itemstack, false));
 			}
-		} else {
+		} else if (eaglerMessageController instanceof LegacyMessageController) {
 			try {
-				eaglerMessageController.handlePacket(packetIn.getChannelName(), packetIn.getBufferData());
+				((LegacyMessageController) eaglerMessageController).handlePacket(packetIn.getChannelName(),
+						packetIn.getBufferData());
 			} catch (IOException e) {
 				logger.error("Couldn't read \"{}\" packet as an eaglercraft plugin message!",
 						packetIn.getChannelName());

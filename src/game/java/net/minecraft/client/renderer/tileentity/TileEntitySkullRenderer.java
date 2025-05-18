@@ -88,7 +88,7 @@ public class TileEntitySkullRenderer extends TileEntitySpecialRenderer<TileEntit
 				if (parGameProfile != null && parGameProfile.getId() != null) {
 					NetHandlerPlayClient netHandler = Minecraft.getMinecraft().getNetHandler();
 					if (netHandler != null) {
-						resourcelocation = netHandler.getSkinCache().getSkin(parGameProfile).getResourceLocation();
+						resourcelocation = netHandler.getTextureCache().getPlayerSkin(parGameProfile).getLocation();
 					}
 				}
 				this.bindTexture(resourcelocation);

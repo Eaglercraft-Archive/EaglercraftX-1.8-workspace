@@ -7,7 +7,6 @@ import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.VertexMarkerState;
-import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -229,7 +228,7 @@ public class BlockModelRenderer {
 	private void renderModelAmbientOcclusionQuads(IBlockAccess blockAccessIn, IBlockState blockStateIn,
 			BlockPos blockPosIn, WorldRenderer worldRendererIn, List<BakedQuad> listQuadsIn, RenderEnv renderenv) {
 		boolean isDeferred = DeferredStateManager.isDeferredRenderer();
-		boolean isDynamicLights = isDeferred || DynamicLightsStateManager.isDynamicLightsRender();
+		boolean isDynamicLights = isDeferred;// || DynamicLightsStateManager.isDynamicLightsRender();
 		float[] quadBounds = renderenv.getQuadBounds();
 		BitSet boundsFlags = renderenv.getBoundsFlags();
 		BlockModelRenderer.AmbientOcclusionFace aoFaceIn = renderenv.getAoFace();
@@ -368,7 +367,7 @@ public class BlockModelRenderer {
 			EnumFacing faceIn, int brightnessIn, boolean ownBrightness, WorldRenderer worldRendererIn,
 			List<BakedQuad> listQuadsIn, RenderEnv renderenv) {
 		boolean isDeferred = DeferredStateManager.isDeferredRenderer();
-		boolean isDynamicLights = isDeferred || DynamicLightsStateManager.isDynamicLightsRender();
+		boolean isDynamicLights = isDeferred;// || DynamicLightsStateManager.isDynamicLightsRender();
 		BitSet boundsFlags = renderenv.getBoundsFlags();
 		float[] quadBounds = renderenv.getQuadBounds();
 		double d0 = (double) blockPosIn.getX();

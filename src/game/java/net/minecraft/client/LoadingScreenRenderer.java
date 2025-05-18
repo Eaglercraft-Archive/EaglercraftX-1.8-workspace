@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.IProgressUpdate;
-import net.minecraft.util.MinecraftError;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -70,11 +69,7 @@ public class LoadingScreenRenderer implements IProgressUpdate {
 
 	private void displayString(String message) {
 		this.currentlyDisplayedText = message;
-		if (!this.mc.running) {
-			if (!this.field_73724_e) {
-				throw new MinecraftError();
-			}
-		} else {
+		if (this.mc.running) {
 			GlStateManager.clear(GL_DEPTH_BUFFER_BIT);
 			GlStateManager.matrixMode(GL_PROJECTION);
 			GlStateManager.loadIdentity();
@@ -91,11 +86,7 @@ public class LoadingScreenRenderer implements IProgressUpdate {
 	 * what is being done currently.
 	 */
 	public void displayLoadingString(String message) {
-		if (!this.mc.running) {
-			if (!this.field_73724_e) {
-				throw new MinecraftError();
-			}
-		} else {
+		if (this.mc.running) {
 			this.systemTime = 0L;
 			this.message = message;
 			this.setLoadingProgress(-1);
@@ -104,11 +95,7 @@ public class LoadingScreenRenderer implements IProgressUpdate {
 	}
 
 	public void eaglerShow(String line1, String line2) {
-		if (!this.mc.running) {
-			if (!this.field_73724_e) {
-				throw new MinecraftError();
-			}
-		} else {
+		if (this.mc.running) {
 			this.systemTime = 0L;
 			this.currentlyDisplayedText = line1;
 			this.message = line2;
@@ -126,11 +113,7 @@ public class LoadingScreenRenderer implements IProgressUpdate {
 	 * specified amount. Args: loadProgress
 	 */
 	public void setLoadingProgress(int progress) {
-		if (!this.mc.running) {
-			if (!this.field_73724_e) {
-				throw new MinecraftError();
-			}
-		} else {
+		if (this.mc.running) {
 			long i = Minecraft.getSystemTime();
 			if (i - this.systemTime >= 100L) {
 				this.systemTime = i;

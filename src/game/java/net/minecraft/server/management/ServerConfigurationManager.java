@@ -61,12 +61,11 @@ import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.demo.DemoWorldManager;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
-import net.lax1dude.eaglercraft.v1_8.socket.protocol.GamePluginMessageConstants;
 import net.lax1dude.eaglercraft.v1_8.socket.protocol.GamePluginMessageProtocol;
-import net.lax1dude.eaglercraft.v1_8.socket.protocol.client.GameProtocolMessageController;
 import net.lax1dude.eaglercraft.v1_8.socket.protocol.pkt.server.SPacketUpdateCertEAG;
 import net.lax1dude.eaglercraft.v1_8.sp.server.EaglerMinecraftServer;
 import net.lax1dude.eaglercraft.v1_8.sp.server.WorldsDB;
+import net.lax1dude.eaglercraft.v1_8.sp.server.skins.PlayerTextureData;
 import net.lax1dude.eaglercraft.v1_8.sp.server.socket.IntegratedServerPlayerNetworkManager;
 import net.lax1dude.eaglercraft.v1_8.sp.server.voice.IntegratedVoiceService;
 import net.lax1dude.eaglercraft.v1_8.log4j.LogManager;
@@ -120,9 +119,9 @@ public abstract class ServerConfigurationManager {
 	}
 
 	public void initializeConnectionToPlayer(IntegratedServerPlayerNetworkManager netManager, EntityPlayerMP playerIn,
-			int protocolVersion, EaglercraftUUID clientBrandUUID) {
+			GamePluginMessageProtocol protocolVersion, PlayerTextureData textureData, EaglercraftUUID clientBrandUUID) {
+		playerIn.textureData = textureData;
 		playerIn.clientBrandUUID = clientBrandUUID;
-		GameProfile gameprofile1 = playerIn.getGameProfile();
 		NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
 		playerIn.setWorld(this.mcServer.worldServerForDimension(playerIn.dimension));
 		playerIn.theItemInWorldManager.setWorld((WorldServer) playerIn.worldObj);
@@ -134,11 +133,8 @@ public abstract class ServerConfigurationManager {
 		WorldInfo worldinfo = worldserver.getWorldInfo();
 		BlockPos blockpos = worldserver.getSpawnPoint();
 		this.setPlayerGameTypeBasedOnOther(playerIn, (EntityPlayerMP) null, worldserver);
-		NetHandlerPlayServer nethandlerplayserver = new NetHandlerPlayServer(this.mcServer, netManager, playerIn);
-		nethandlerplayserver.setEaglerMessageController(new GameProtocolMessageController(
-				GamePluginMessageProtocol.getByVersion(protocolVersion), GamePluginMessageConstants.SERVER_TO_CLIENT,
-				GameProtocolMessageController.createServerHandler(protocolVersion, nethandlerplayserver),
-				(ch, msg) -> nethandlerplayserver.sendPacket(new S3FPacketCustomPayload(ch, msg))));
+		NetHandlerPlayServer nethandlerplayserver = new NetHandlerPlayServer(this.mcServer, netManager, playerIn,
+				protocolVersion);
 		nethandlerplayserver.sendPacket(new S01PacketJoinGame(playerIn.getEntityId(),
 				playerIn.theItemInWorldManager.getGameType(), worldinfo.isHardcoreModeEnabled(),
 				worldserver.provider.getDimensionId(), worldserver.getDifficulty(), this.getMaxPlayers(),
@@ -357,8 +353,6 @@ public abstract class ServerConfigurationManager {
 			this.playerStatFiles.remove(entityplayermp.getName());
 		}
 
-		((EaglerMinecraftServer) mcServer).getSkinService().unregisterPlayer(uuid);
-		((EaglerMinecraftServer) mcServer).getCapeService().unregisterPlayer(uuid);
 		IntegratedVoiceService vcs = ((EaglerMinecraftServer) mcServer).getVoiceService();
 		if (vcs != null) {
 			vcs.handlePlayerLoggedOut(playerIn);

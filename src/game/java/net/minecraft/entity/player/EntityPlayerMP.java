@@ -10,6 +10,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile;
 import net.lax1dude.eaglercraft.v1_8.netty.Unpooled;
+import net.lax1dude.eaglercraft.v1_8.sp.server.skins.PlayerTextureData;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -176,6 +178,7 @@ public class EntityPlayerMP extends EntityPlayer implements ICrafting {
 	public int ping;
 	public boolean playerConqueredTheEnd;
 	public byte[] updateCertificate = null;
+	public PlayerTextureData textureData = null;
 	public EaglercraftUUID clientBrandUUID = null;
 
 	public EntityPlayerMP(MinecraftServer server, WorldServer worldIn, GameProfile profile,

@@ -66,7 +66,6 @@ public class StringTranslate {
 			initServer(IOUtils.readLines(inputstream, StandardCharsets.UTF_8));
 			fallbackInstance = new StringTranslate();
 			fallbackInstance.replaceWith(instance.languageList);
-			SingleplayerServerController.updateLocale(dump());
 		} catch (IOException e) {
 			EagRuntime.debugPrintStackTrace(e);
 		}
@@ -107,6 +106,7 @@ public class StringTranslate {
 		instance.languageList.clear();
 		instance.languageList.putAll(parMap);
 		instance.lastUpdateTimeInMilliseconds = EagRuntime.steadyTimeMillis();
+		SingleplayerServerController.updateLocale(dump());
 	}
 
 	/**+

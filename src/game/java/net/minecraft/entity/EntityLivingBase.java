@@ -1,11 +1,10 @@
 package net.minecraft.entity;
 
-import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.ObjectContainer;
-import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.carrotsearch.hppc.cursors.ObjectCursor;
+import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
@@ -502,25 +501,22 @@ public abstract class EntityLivingBase extends Entity {
 	}
 
 	protected void updatePotionEffects() {
-		IntArrayList deadPotionEffects = null;
-
-		for (IntObjectCursor<PotionEffect> cur : this.activePotionsMap) {
-			int integer = cur.key;
-			PotionEffect potioneffect = cur.value;
-			if (!potioneffect.onUpdate(this)) {
-				if (!this.worldObj.isRemote) {
-					if (deadPotionEffects == null)
-						deadPotionEffects = new IntArrayList(4);
-					deadPotionEffects.add(integer);
+		if (!this.worldObj.isRemote) {
+			this.activePotionsMap.removeAll((integer, potioneffect) -> {
+				if (!potioneffect.onUpdate(this)) {
 					this.onFinishedPotionEffect(potioneffect);
+					return true;
+				} else if (potioneffect.getDuration() % 600 == 0) {
+					this.onChangedPotionEffect(potioneffect, false);
 				}
-			} else if (potioneffect.getDuration() % 600 == 0) {
-				this.onChangedPotionEffect(potioneffect, false);
-			}
-		}
-
-		if (deadPotionEffects != null) {
-			this.activePotionsMap.removeAll(deadPotionEffects);
+				return false;
+			});
+		} else {
+			this.activePotionsMap.forEach((IntObjectProcedure<PotionEffect>) (integer, potioneffect) -> {
+				if (potioneffect.onUpdate(this) && potioneffect.getDuration() % 600 == 0) {
+					this.onChangedPotionEffect(potioneffect, false);
+				}
+			});
 		}
 
 		if (this.potionsNeedUpdate) {

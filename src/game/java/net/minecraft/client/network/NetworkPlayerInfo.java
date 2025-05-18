@@ -85,21 +85,19 @@ public class NetworkPlayerInfo {
 	}
 
 	public String getSkinType() {
-		return Minecraft.getMinecraft().getNetHandler().getSkinCache().getSkin(this.gameProfile)
-				.getSkinModel().profileSkinType;
+		return getEaglerSkinModel().profileSkinType;
 	}
 
 	public SkinModel getEaglerSkinModel() {
-		return Minecraft.getMinecraft().getNetHandler().getSkinCache().getSkin(this.gameProfile).getSkinModel();
+		return Minecraft.getMinecraft().getNetHandler().getTextureCache().getPlayerSkin(this.gameProfile).getModel();
 	}
 
 	public ResourceLocation getLocationSkin() {
-		return Minecraft.getMinecraft().getNetHandler().getSkinCache().getSkin(this.gameProfile).getResourceLocation();
+		return Minecraft.getMinecraft().getNetHandler().getTextureCache().getPlayerSkin(this.gameProfile).getLocation();
 	}
 
 	public ResourceLocation getLocationCape() {
-		return Minecraft.getMinecraft().getNetHandler().getCapeCache().getCape(this.gameProfile.getId())
-				.getResourceLocation();
+		return Minecraft.getMinecraft().getNetHandler().getTextureCache().getPlayerCape(this.gameProfile);
 	}
 
 	public ScorePlayerTeam getPlayerTeam() {

@@ -75,8 +75,7 @@ public final class SpawnerAnimals {
 							int cx = l + j;
 							int cz = i1 + k;
 							long chunkcoordintpair = ChunkCoordIntPair.chunkXZ2Int(cx, cz);
-							if (!this.eligibleChunksForSpawning.contains(chunkcoordintpair)
-									&& spawnHostileMobs.theChunkProviderServer.chunkExists(cx, cz)) {
+							if (!this.eligibleChunksForSpawning.contains(chunkcoordintpair)) {
 								++i;
 								if (!flag && spawnHostileMobs.getWorldBorder().contains(chunkcoordintpair)) {
 									this.eligibleChunksForSpawning.add(chunkcoordintpair);

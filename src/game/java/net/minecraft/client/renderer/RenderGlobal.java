@@ -1665,9 +1665,10 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 			this.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
 			this.preRenderDamagedBlocks();
 			worldRendererIn.begin(7,
-					(DeferredStateManager.isDeferredRenderer() || DynamicLightsStateManager.isDynamicLightsRender())
-							? VertexFormat.BLOCK_SHADERS
-							: DefaultVertexFormats.BLOCK);
+					(DeferredStateManager
+							.isDeferredRenderer() /* || DynamicLightsStateManager.isDynamicLightsRender() */)
+									? VertexFormat.BLOCK_SHADERS
+									: DefaultVertexFormats.BLOCK);
 			worldRendererIn.setTranslation(-d0, -d1, -d2);
 			worldRendererIn.markDirty();
 			Iterator iterator = this.damagedBlocks.values().iterator();

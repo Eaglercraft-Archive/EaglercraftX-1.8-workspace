@@ -1,32 +1,31 @@
-### Java 17 is recommended for compiling to TeaVM
+# eaglercraft-workspace
 
-### Java 8 or greater is required for the desktop runtime
+### Java 17 or greater is required!
 
-**Most Java IDEs will allow you to import this repository as a gradle project for compiling it to JavaScript.**
+**To get started, import this entire folder into your IDE as a Gradle project, this will automatically create several different projects to build all the common classes and each runtime.**
 
-Java must be added to your PATH!
+The Gradle plugin was created by [cire3](https://github.com/cire3wastaken), and the source code is available [here](https://github.com/The-Resent-Team/open-source-projects).
 
-**To compile the web client:**
-1. Run `CompileEPK`
-2. Run `CompileJS` (or the `generateJavaScript` gradle task in your IDE)
-3. Check the "javascript" folder
+**To compile the JavaScript client:**
 
-**To compile an offline download:**
-1. Run `CompileEPK`
-2. Run `CompileJS` (or the `generateJavaScript` gradle task in your IDE)
-3. Run `MakeOfflineDownload`
-4. Check the "javascript" folder
+Run the `MakeOfflineDownload` script in the "target_teavm_javascript" folder (or the `makeMainOfflineDownload` Gradle task in your IDE) to build the JavaScript client. This will build the "classes.js" and "assets.epk" and the offline downloads, the results will be in the "javascript" folder.
 
-**To compile the WASM GC client:**
-Consult the [README](wasm_gc_teavm/README.md) in the wasm_gc_teavm folder
+**To compile the WASM-GC client:**
 
-**To use the desktop runtime:**
-1. Import the Eclipse project in "desktopRuntime/eclipseProject" into your IDE
-2. Open one of the .java files from the source folders (workaround for a bug)
-3. Run/Debug the client with the included "eaglercraftDebugRuntime" configuration
+Run the `MakeWASMClientBundle` script in the "target_teavm_wasm_gc" folder (or the `makeMainWasmClientBundle` Gradle task in your IDE) to build the WASM-GC client. This will build the "assets.epw" file which contains all the code and assets if the WASM-GC client, and also create an offline download, the results will be in the "javascript_dist" folder.
 
-**Note:** If you are trying to use the desktop runtime on Linux, make sure you add the "desktopRuntime" folder to the `LD_LIBRARY_PATH` environment variable of the Java process. This should be done automatically by the Eclipse project's default run configuration, but it might not work properly on every system, or when the Eclipse project is imported into IntelliJ.
+The WASM-GC client uses a custom fork of TeaVM, the source is available [here](https://github.com/Eaglercraft-TeaVM-Fork/eagler-teavm).
 
-**See the main 1.8 repository's README for more info**
+**To run the desktop runtime:**
 
-The source codes of EaglercraftXBungee and EaglercraftXVelocity are not included here.
+**Note:** Athough it may be tempting to release "desktop" copies of your client, the current desktop runtime was designed for debug use only and is a poor choice for distribution to end users.
+
+Run the `StartDesktopRuntime` script in the "target_lwjgl_desktop" folder (or the `eaglercraftDebugRuntime` Gradle task in your IDE) to run the desktop runtime. This will run the client using the JVM and an LWJGL3-based runtime, which can be useful for debugging crashes and to speed up testing if you don't want to wait for the JavaScript or WASM-GC client to be built.
+
+Do not use the desktop runtime as substitute for testing you client in a browser, client developers who only test their client on the desktop runtime usually end up with lots of unexpected bugs and crashes in their browser builds.
+
+**To debug the desktop runtime:**
+
+If you want to debug the desktop runtime from your IDE, one way you can do it is by enabling the debugger in the LWJGL target's `eaglercraftDebugRuntime` task, but something that will launch even faster is just creating a run configuration in your IDE directly in the LWJGL target project.
+
+You can do this by creating a run configuration specifying `net.lax1dude.eaglercraft.v1_8.internal.lwjgl.MainClass` as the main class, the `desktopRuntime` folder as the working directory, `-Xmx1G -Xms1G -Djava.library.path=.` in the JVM arguments, and if you're on Linux you'll also want to add an environment variable to append the `desktopRuntime` folder to `LD_LIBRARY_PATH` and set `__GL_THREADED_OPTIMIZATIONS` to `0` if using Nvidia drivers.

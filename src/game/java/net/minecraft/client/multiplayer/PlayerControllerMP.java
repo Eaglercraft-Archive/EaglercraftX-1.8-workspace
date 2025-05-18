@@ -313,8 +313,7 @@ public class PlayerControllerMP {
 				this.netClientHandler.getNetworkManager()
 						.closeChannel(new ChatComponentText("Exception thrown: " + ex.toString()));
 			}
-			this.netClientHandler.getSkinCache().flush();
-			this.netClientHandler.getCapeCache().flush();
+			this.netClientHandler.getTextureCache().runTick();
 			this.netClientHandler.getNotifManager().runTick();
 			ClientUUIDLoadingCache.update();
 		} else {

@@ -848,4 +848,12 @@ public class PacketBuffer extends ByteBuf {
 		return this.buf.toString();
 	}
 
+	public byte[] toBytes() {
+		int readerIndex = buf.readerIndex();
+		int writerIndex = buf.writerIndex();
+		byte[] bytes = new byte[writerIndex - readerIndex];
+		buf.getBytes(readerIndex, bytes);
+		return bytes;
+	}
+
 }

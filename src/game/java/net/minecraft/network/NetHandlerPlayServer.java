@@ -5,8 +5,12 @@ import com.carrotsearch.hppc.IntShortMap;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
+
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.GamePluginMessageConstants;
 import net.lax1dude.eaglercraft.v1_8.socket.protocol.GamePluginMessageProtocol;
-import net.lax1dude.eaglercraft.v1_8.socket.protocol.client.GameProtocolMessageController;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.message.InjectedMessageController;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.message.LegacyMessageController;
+import net.lax1dude.eaglercraft.v1_8.socket.protocol.message.MessageController;
 import net.lax1dude.eaglercraft.v1_8.socket.protocol.pkt.GameMessagePacket;
 import net.lax1dude.eaglercraft.v1_8.socket.protocol.pkt.server.SPacketUpdateCertEAG;
 
@@ -75,6 +79,7 @@ import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.network.play.server.S32PacketConfirmTransaction;
 import net.minecraft.network.play.server.S3APacketTabComplete;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.network.play.server.S40PacketDisconnect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.AchievementList;
@@ -93,6 +98,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.WorldServer;
 import net.lax1dude.eaglercraft.v1_8.sp.server.socket.IntegratedServerPlayerNetworkManager;
+import net.lax1dude.eaglercraft.v1_8.sp.server.socket.protocol.ServerMessageHandler;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -141,36 +147,41 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 	private double lastPosZ;
 	private boolean hasMoved = true;
 	private boolean hasDisconnected = false;
-	private GameProtocolMessageController eaglerMessageController = null;
+	private MessageController eaglerMessageController = null;
 
 	public NetHandlerPlayServer(MinecraftServer server, IntegratedServerPlayerNetworkManager networkManagerIn,
-			EntityPlayerMP playerIn) {
+			EntityPlayerMP playerIn, GamePluginMessageProtocol eaglerProtocol) {
 		this.serverController = server;
 		this.netManager = networkManagerIn;
 		networkManagerIn.setNetHandler(this);
 		this.playerEntity = playerIn;
 		playerIn.playerNetServerHandler = this;
+		ServerMessageHandler handler = ServerMessageHandler.createServerHandler(eaglerProtocol.ver, this);
+		if (eaglerProtocol.ver >= 5) {
+			this.eaglerMessageController = new InjectedMessageController(eaglerProtocol, handler,
+					GamePluginMessageConstants.SERVER_TO_CLIENT, networkManagerIn::injectRawFrame);
+			networkManagerIn.setInjectedMessageController((InjectedMessageController) eaglerMessageController);
+		} else {
+			this.eaglerMessageController = new LegacyMessageController(eaglerProtocol, handler,
+					GamePluginMessageConstants.SERVER_TO_CLIENT,
+					(ch, msg) -> sendPacket(new S3FPacketCustomPayload(ch, msg)));
+		}
 	}
 
-	public GameProtocolMessageController getEaglerMessageController() {
+	public MessageController getEaglerMessageController() {
 		return eaglerMessageController;
 	}
 
-	public void setEaglerMessageController(GameProtocolMessageController eaglerMessageController) {
+	public void setEaglerMessageController(MessageController eaglerMessageController) {
 		this.eaglerMessageController = eaglerMessageController;
 	}
 
 	public GamePluginMessageProtocol getEaglerMessageProtocol() {
-		return eaglerMessageController != null ? eaglerMessageController.protocol : null;
+		return eaglerMessageController != null ? eaglerMessageController.getProtocol() : null;
 	}
 
 	public void sendEaglerMessage(GameMessagePacket packet) {
-		try {
-			eaglerMessageController.sendPacket(packet);
-		} catch (IOException e) {
-			logger.error("Failed to send eaglercraft plugin message packet: " + packet);
-			logger.error(e);
-		}
+		eaglerMessageController.sendPacket(packet);
 	}
 
 	/**+
@@ -1277,10 +1288,10 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 					}
 				}
 			}
-		} else {
+		} else if (eaglerMessageController instanceof LegacyMessageController) {
 			try {
-				eaglerMessageController.handlePacket(c17packetcustompayload.getChannelName(),
-						c17packetcustompayload.getBufferData());
+				((LegacyMessageController) eaglerMessageController)
+						.handlePacket(c17packetcustompayload.getChannelName(), c17packetcustompayload.getBufferData());
 			} catch (IOException e) {
 				logger.error("Couldn't read \"{}\" packet as an eaglercraft plugin message!",
 						c17packetcustompayload.getChannelName());

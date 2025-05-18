@@ -6,7 +6,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import net.lax1dude.eaglercraft.v1_8.EagRuntime;
-import net.lax1dude.eaglercraft.v1_8.EaglerXBungeeVersion;
 import net.lax1dude.eaglercraft.v1_8.Keyboard;
 import net.lax1dude.eaglercraft.v1_8.Mouse;
 import net.lax1dude.eaglercraft.v1_8.cookie.ServerCookieDataStore;
@@ -358,7 +357,7 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback {
 		GlStateManager.scale(0.75f, 0.75f, 0.75f);
 		GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
 
-		String text = EaglerXBungeeVersion.getPluginButton();
+		String text = "Download EaglerXServer";
 		int w = mc.fontRendererObj.getStringWidth(text);
 		boolean hover = xx > width - 5 - (w + 5) * 3 / 4 && yy > 1 && xx < width - 2 && yy < 12;
 		if (hover) {
@@ -428,12 +427,12 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback {
 		relaysButton.mouseClicked(parInt1, parInt2, parInt3);
 		super.mouseClicked(parInt1, parInt2, parInt3);
 		this.serverListSelector.mouseClicked(parInt1, parInt2, parInt3);
-		String text = EaglerXBungeeVersion.getPluginButton();
+		String text = "Download EaglerXServer";
 		int w = mc.fontRendererObj.getStringWidth(text);
 		if (parInt1 > width - 5 - (w + 5) * 3 / 4 && parInt2 > 1 && parInt1 < width - 2 && parInt2 < 12) {
 			this.mc.getSoundHandler()
 					.playSound(PositionedSoundRecord.create(new ResourceLocation("gui.button.press"), 1.0F));
-			EaglerXBungeeVersion.startPluginDownload();
+			EagRuntime.openLink("https://lax1dude.net/eaglerxserver");
 		}
 	}
 

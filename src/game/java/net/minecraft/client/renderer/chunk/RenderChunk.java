@@ -10,7 +10,6 @@ import com.google.common.collect.Sets;
 import net.lax1dude.eaglercraft.v1_8.opengl.VertexFormat;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
-import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -245,7 +244,7 @@ public class RenderChunk {
 
 	private void preRenderBlocks(WorldRenderer worldRendererIn, BlockPos pos) {
 		worldRendererIn.begin(7,
-				(DeferredStateManager.isDeferredRenderer() || DynamicLightsStateManager.isDynamicLightsRender())
+				(DeferredStateManager.isDeferredRenderer() /* || DynamicLightsStateManager.isDynamicLightsRender() */)
 						? VertexFormat.BLOCK_SHADERS
 						: DefaultVertexFormats.BLOCK);
 		worldRendererIn.setTranslation((double) (-pos.getX()), (double) (-pos.getY()), (double) (-pos.getZ()));

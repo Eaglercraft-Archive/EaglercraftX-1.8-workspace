@@ -45,7 +45,7 @@ public class PlayerMenuObject implements ISpectatorMenuObject {
 
 	public void func_178663_a(float alpha, int parInt1) {
 		Minecraft.getMinecraft().getTextureManager().bindTexture(
-				Minecraft.getMinecraft().getNetHandler().getSkinCache().getSkin(profile).getResourceLocation());
+				Minecraft.getMinecraft().getNetHandler().getTextureCache().getPlayerSkin(profile).getLocation());
 		GlStateManager.color(1.0F, 1.0F, 1.0F, (float) parInt1 / 255.0F);
 		Gui.drawScaledCustomSizeModalRect(2, 2, 8.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);
 		Gui.drawScaledCustomSizeModalRect(2, 2, 40.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);

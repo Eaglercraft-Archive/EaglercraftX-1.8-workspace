@@ -4,7 +4,6 @@ import net.lax1dude.eaglercraft.v1_8.minecraft.EaglerTextureAtlasSprite;
 import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.BlockVertexIDs;
 import net.lax1dude.eaglercraft.v1_8.opengl.ext.deferred.DeferredStateManager;
-import net.lax1dude.eaglercraft.v1_8.opengl.ext.dynamiclights.DynamicLightsStateManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
@@ -56,7 +55,7 @@ public class BlockFluidRenderer {
 			WorldRenderer worldRendererIn) {
 		BlockPos tmp = new BlockPos(0, 0, 0);
 		boolean deferred = DeferredStateManager.isDeferredRenderer();
-		boolean isDynamicLights = deferred || DynamicLightsStateManager.isDynamicLightsRender();
+		boolean isDynamicLights = deferred;// || DynamicLightsStateManager.isDynamicLightsRender();
 		BlockLiquid blockliquid = (BlockLiquid) blockStateIn.getBlock();
 		boolean lava = blockliquid.getMaterial() == Material.lava;
 		boolean realistic = !lava && DeferredStateManager.isRenderingRealisticWater();
