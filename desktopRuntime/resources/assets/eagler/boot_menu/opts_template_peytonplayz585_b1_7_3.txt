@@ -1,6 +1,0 @@
-{
-	"dataBaseName": "_net_PeytonPlayz585_eaglercraft_beta_IndexedDBFilesystem_1_7_3",
-	"playerUsername": null,
-	"serverIP": null,
-	"joinServerOnLaunch": null
-}
