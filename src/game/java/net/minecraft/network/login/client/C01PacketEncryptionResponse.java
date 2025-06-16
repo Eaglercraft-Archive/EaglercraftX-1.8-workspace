@@ -42,8 +42,8 @@ public class C01PacketEncryptionResponse implements Packet<INetHandlerLoginServe
 	 * Reads the raw packet data from the data stream.
 	 */
 	public void readPacketData(PacketBuffer parPacketBuffer) throws IOException {
-		this.secretKeyEncrypted = parPacketBuffer.readByteArray();
-		this.verifyTokenEncrypted = parPacketBuffer.readByteArray();
+		this.secretKeyEncrypted = parPacketBuffer.readByteArray(1024);
+		this.verifyTokenEncrypted = parPacketBuffer.readByteArray(1024);
 	}
 
 	/**+

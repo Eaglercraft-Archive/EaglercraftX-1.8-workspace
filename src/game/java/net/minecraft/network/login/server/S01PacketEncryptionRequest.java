@@ -47,8 +47,8 @@ public class S01PacketEncryptionRequest implements Packet<INetHandlerLoginClient
 		this.hashedServerId = parPacketBuffer.readStringFromBuffer(20);
 		// this.publicKey =
 		// CryptManager.decodePublicKey(parPacketBuffer.readByteArray());
-		parPacketBuffer.readByteArray(); // skip
-		this.verifyToken = parPacketBuffer.readByteArray();
+		parPacketBuffer.readByteArray(1024); // skip
+		this.verifyToken = parPacketBuffer.readByteArray(1024);
 	}
 
 	/**+

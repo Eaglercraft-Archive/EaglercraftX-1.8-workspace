@@ -80,7 +80,7 @@ public class S34PacketMaps implements Packet<INetHandlerPlayClient> {
 			this.mapMaxY = parPacketBuffer.readUnsignedByte();
 			this.mapMinX = parPacketBuffer.readUnsignedByte();
 			this.mapMinY = parPacketBuffer.readUnsignedByte();
-			this.mapDataBytes = parPacketBuffer.readByteArray();
+			this.mapDataBytes = parPacketBuffer.readByteArray(0x400000);
 		}
 
 	}

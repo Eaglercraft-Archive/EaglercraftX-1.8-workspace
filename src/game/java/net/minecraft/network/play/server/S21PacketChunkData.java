@@ -57,7 +57,7 @@ public class S21PacketChunkData implements Packet<INetHandlerPlayClient> {
 		this.field_149279_g = parPacketBuffer.readBoolean();
 		this.extractedData = new S21PacketChunkData.Extracted();
 		this.extractedData.dataSize = parPacketBuffer.readShort();
-		this.extractedData.data = parPacketBuffer.readByteArray();
+		this.extractedData.data = parPacketBuffer.readByteArray(0x1000000);
 	}
 
 	/**+

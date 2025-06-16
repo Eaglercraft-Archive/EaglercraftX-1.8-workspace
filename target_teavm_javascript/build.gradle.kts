@@ -79,7 +79,7 @@ tasks.named<GenerateJavaScriptTask>("generateJavaScript") {
 			) + "\n" + file("$jsFolder/ES6ShimScript.txt").readText() + "\n" + dest.substring(j + 34)
 			phile.writeText(dest)
 		} catch (ex: Exception) {
-			if (teavm.js.obfuscated.get()) {
+			if (!teavm.js.obfuscated.get()) {
 				logger.info("Error occured while adding support for old browsers failed!", ex)
 				logger.info("This was probably caused by building with non-obfuscated javascript, " +
 						"you can probably safely ignore this!")

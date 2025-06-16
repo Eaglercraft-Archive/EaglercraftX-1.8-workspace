@@ -51,9 +51,9 @@ public class C00PacketLoginStart implements Packet<INetHandlerLoginServer> {
 	 */
 	public void readPacketData(PacketBuffer parPacketBuffer) throws IOException {
 		this.profile = new GameProfile((EaglercraftUUID) null, parPacketBuffer.readStringFromBuffer(16));
-		this.skin = parPacketBuffer.readByteArray();
-		this.cape = parPacketBuffer.readableBytes() > 0 ? parPacketBuffer.readByteArray() : null;
-		this.protocols = parPacketBuffer.readableBytes() > 0 ? parPacketBuffer.readByteArray() : null;
+		this.skin = parPacketBuffer.readByteArray(32768);
+		this.cape = parPacketBuffer.readableBytes() > 0 ? parPacketBuffer.readByteArray(32768) : null;
+		this.protocols = parPacketBuffer.readableBytes() > 0 ? parPacketBuffer.readByteArray(256) : null;
 		this.brandUUID = parPacketBuffer.readableBytes() > 0 ? parPacketBuffer.readUuid() : null;
 	}
 

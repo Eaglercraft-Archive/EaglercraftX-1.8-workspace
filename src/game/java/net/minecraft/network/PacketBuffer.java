@@ -71,8 +71,13 @@ public class PacketBuffer extends ByteBuf {
 		this.writeBytes(array);
 	}
 
-	public byte[] readByteArray() {
-		byte[] abyte = new byte[this.readVarIntFromBuffer()];
+	public byte[] readByteArray(int maxLen) {
+		int i = this.readVarIntFromBuffer();
+		if (i < 0 || i > maxLen) {
+			throw new DecoderException(
+					"The received array length is longer than maximum allowed (" + i + " > " + maxLen + ")");
+		}
+		byte[] abyte = new byte[i];
 		this.readBytes(abyte);
 		return abyte;
 	}
