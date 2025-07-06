@@ -880,7 +880,6 @@ public class Minecraft implements IThreadListener {
 		GlStateManager.viewport(0, 0, this.displayWidth, this.displayHeight);
 		GlStateManager.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		GlStateManager.pushMatrix();
-		GlStateManager.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		GlStateManager.enableTexture2D();
 		if (this.thePlayer != null && this.thePlayer.isEntityInsideOpaqueBlock()) {
 			this.gameSettings.thirdPersonView = 0;

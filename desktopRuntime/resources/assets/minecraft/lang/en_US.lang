@@ -219,10 +219,6 @@ eaglercraft.shaders.gui.option.SCREEN_SPACE_REFLECTIONS.desc.4=Both raymarching 
 eaglercraft.shaders.gui.option.SCREEN_SPACE_REFLECTIONS.desc.6=ON: enable raytracing (slower)
 eaglercraft.shaders.gui.option.SCREEN_SPACE_REFLECTIONS.desc.7=OFF: disable raytracing (faster)
 
-eaglercraft.shaders.gui.option.LIGHT_SHAFTS.desc.0=Render god rays (light shafts) for sunlight and moonlight shadows
-eaglercraft.shaders.gui.option.LIGHT_SHAFTS.desc.2=ON: render god rays (slower)
-eaglercraft.shaders.gui.option.LIGHT_SHAFTS.desc.3=OFF: disable god rays (faster)
-
 eaglercraft.shaders.gui.option.POST_LENS_DISTORION.label=Lens Distort
 
 eaglercraft.shaders.gui.option.POST_LENS_DISTORION.desc.0=Renders chromatic abberation and lens distorion

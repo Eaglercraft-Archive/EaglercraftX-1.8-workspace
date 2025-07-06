@@ -167,6 +167,15 @@ public class CrashReport {
 			stackTrace.append("\tat ").append(s).append('\n');
 		});
 
+		Throwable t = this.cause.getCause();
+		while (t != null) {
+			stackTrace.append("Caused by: " + t.toString()).append('\n');
+			EagRuntime.getStackTrace(t, (s) -> {
+				stackTrace.append("\tat ").append(s).append('\n');
+			});
+			t = t.getCause();
+		}
+
 		return stackTrace.toString();
 	}
 
